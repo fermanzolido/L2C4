@@ -554,11 +554,15 @@ public class Olympiad extends ListenersContainer {
 
 		if (_classBasedRegisters.containsKey(noble.getPlayerClass().getId())) {
 			final List<Player> classed = _classBasedRegisters.get(noble.getPlayerClass().getId());
-			for (Player participant : classed) {
-				if (participant.getObjectId() == noble.getObjectId()) {
-					noble.sendPacket(
-							SystemMessageId.YOU_ARE_ALREADY_ON_THE_WAITING_LIST_TO_PARTICIPATE_IN_THE_GAME_FOR_YOUR_CLASS);
-					return false;
+			if (classed != null) {
+				synchronized (classed) {
+					for (Player participant : classed) {
+						if (participant.getObjectId() == noble.getObjectId()) {
+							noble.sendPacket(
+									SystemMessageId.YOU_ARE_ALREADY_ON_THE_WAITING_LIST_TO_PARTICIPATE_IN_THE_GAME_FOR_YOUR_CLASS);
+							return false;
+						}
+					}
 				}
 			}
 		}
@@ -595,16 +599,7 @@ public class Olympiad extends ListenersContainer {
 		}
 
 		if (classBased) {
-			if (_classBasedRegisters.containsKey(noble.getPlayerClass().getId())) {
-				final List<Player> classed = _classBasedRegisters.get(noble.getPlayerClass().getId());
-				classed.add(noble);
-			} else {
-				final List<Player> classed = Collections.synchronizedList(new ArrayList<>());
-				classed.add(noble);
-
-				_classBasedRegisters.put(noble.getPlayerClass().getId(), classed);
-			}
-
+			_classBasedRegisters.computeIfAbsent(noble.getPlayerClass().getId(), k -> Collections.synchronizedList(new ArrayList<>())).add(noble);
 			noble.sendPacket(SystemMessageId.YOU_HAVE_BEEN_REGISTERED_IN_A_WAITING_LIST_OF_CLASSIFIED_GAMES);
 		} else {
 			_nonClassBasedRegisters.add(noble);
