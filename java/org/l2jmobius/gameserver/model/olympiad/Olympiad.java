@@ -1553,7 +1553,8 @@ public class Olympiad extends ListenersContainer {
 		Broadcast.toAllOnlinePlayers(
 				"Olympiad Season " + oldSeason + " has ended! Season " + _currentSeason + " begins.");
 
-		try (Connection con = DatabaseFactory.getConnection()) {
+		try (Connection con = DatabaseFactory.getConnection();
+				PreparedStatement statement = con.prepareStatement(OLYMPIAD_INSERT_HISTORY)) {
 			for (Entry<Integer, StatSet> entry : NOBLES.entrySet()) {
 				final int charId = entry.getKey();
 				final StatSet set = entry.getValue();
@@ -1565,16 +1566,14 @@ public class Olympiad extends ListenersContainer {
 				final String division = getDivision(elo);
 
 				// Archiving History
-				try (PreparedStatement statement = con.prepareStatement(OLYMPIAD_INSERT_HISTORY)) {
-					statement.setInt(1, oldSeason);
-					statement.setInt(2, charId);
-					statement.setString(3, set.getString(CHAR_NAME));
-					statement.setInt(4, set.getInt(CLASS_ID));
-					statement.setInt(5, set.getInt(POINTS));
-					statement.setInt(6, elo);
-					statement.setString(7, division);
-					statement.execute();
-				}
+				statement.setInt(1, oldSeason);
+				statement.setInt(2, charId);
+				statement.setString(3, set.getString(CHAR_NAME));
+				statement.setInt(4, set.getInt(CLASS_ID));
+				statement.setInt(5, set.getInt(POINTS));
+				statement.setInt(6, elo);
+				statement.setString(7, division);
+				statement.addBatch();
 
 				// Soft Reset Elo
 				final int initialElo = OlympiadConfig.OLYMPIAD_ELO_INITIAL_VALUE;
@@ -1592,6 +1591,8 @@ public class Olympiad extends ListenersContainer {
 				// checking online status.
 				giveSeasonReward(charId, division);
 			}
+
+			statement.executeBatch();
 		} catch (SQLException e) {
 			LOGGER.log(Level.SEVERE, "Olympiad System: Failed to archive season history: ", e);
 		}
@@ -1629,7 +1630,7 @@ public class Olympiad extends ListenersContainer {
 
 		if (rewardId > 0 && rewardCount > 0) {
 			final Player player = World.getInstance().getPlayer(charId);
-			if (player != null && player.isOnline()) {
+			if (player != null && player.isOnline() && player.getInventory().validateCapacity(1)) {
 				player.addItem(ItemProcessType.REWARD, rewardId, rewardCount, player, true);
 			} else {
 				// Offline Reward: Add to character_variables to be claimed later or just give
@@ -1643,6 +1644,10 @@ public class Olympiad extends ListenersContainer {
 					statement.setString(2, "SEASON_REWARD_" + _currentSeason);
 					statement.setString(3, rewardId + "," + rewardCount);
 					statement.execute();
+
+					if (player != null && player.isOnline()) {
+						player.sendMessage("Your Olympiad Season Reward has been stored because your inventory is full. Claim it at the Olympiad Manager.");
+					}
 				} catch (SQLException e) {
 					LOGGER.log(Level.SEVERE,
 							"Olympiad System: Failed to give offline season reward to charId " + charId, e);
