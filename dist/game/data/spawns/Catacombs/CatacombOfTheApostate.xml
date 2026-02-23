@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list enabled="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/spawns.xsd">
+	<spawn name="ssq11_2220">
+		<npc id="21152" x="83822" y="82781" z="-5128" heading="45290" respawnDelay="60" /> <!-- Purgatory Wisp -->
+		<npc id="21152" x="84661" y="81564" z="-5128" heading="20691" respawnDelay="60" /> <!-- Purgatory Wisp -->
+		<npc id="21152" x="84304" y="81354" z="-5128" heading="1355" respawnDelay="60" /> <!-- Purgatory Wisp -->
+		<npc id="21152" x="85215" y="79165" z="-5130" heading="35799" respawnDelay="60" /> <!-- Purgatory Wisp -->
+		<npc id="21152" x="85761" y="79187" z="-5130" heading="18274" respawnDelay="60" /> <!-- Purgatory Wisp -->
+		<npc id="21152" x="85363" y="79706" z="-5130" heading="46452" respawnDelay="60" /> <!-- Purgatory Wisp -->
+		<npc id="21152" x="86084" y="82138" z="-5130" heading="7498" respawnDelay="60" /> <!-- Purgatory Wisp -->
+		<npc id="21152" x="85747" y="82933" z="-5130" heading="47997" respawnDelay="60" /> <!-- Purgatory Wisp -->
+		<npc id="21152" x="88048" y="81584" z="-5151" heading="49976" respawnDelay="60" /> <!-- Purgatory Wisp -->
+		<npc id="21152" x="88562" y="81877" z="-5130" heading="30150" respawnDelay="60" /> <!-- Purgatory Wisp -->
+		<npc id="21152" x="86981" y="78595" z="-5128" heading="23314" respawnDelay="60" /> <!-- Purgatory Wisp -->
+		<npc id="21152" x="87238" y="79128" z="-5130" heading="9687" respawnDelay="60" /> <!-- Purgatory Wisp -->
+		<npc id="21152" x="86966" y="79458" z="-5128" heading="23480" respawnDelay="60" /> <!-- Purgatory Wisp -->
+		<npc id="21152" x="88368" y="78163" z="-5128" heading="16025" respawnDelay="60" /> <!-- Purgatory Wisp -->
+		<npc id="21152" x="88321" y="83222" z="-5128" heading="13775" respawnDelay="60" /> <!-- Purgatory Wisp -->
+		<npc id="21152" x="83950" y="78387" z="-5128" heading="20111" respawnDelay="60" /> <!-- Purgatory Wisp -->
+		<npc id="21153" x="83587" y="82997" z="-5128" heading="23324" respawnDelay="60" /> <!-- Purgatory Serpent -->
+		<npc id="21153" x="84415" y="81525" z="-5130" heading="15946" respawnDelay="60" /> <!-- Purgatory Serpent -->
+		<npc id="21153" x="84846" y="81282" z="-5130" heading="29174" respawnDelay="60" /> <!-- Purgatory Serpent -->
+		<npc id="21153" x="85201" y="79338" z="-5130" heading="35706" respawnDelay="60" /> <!-- Purgatory Serpent -->
+		<npc id="21153" x="85808" y="78722" z="-5130" heading="16576" respawnDelay="60" /> <!-- Purgatory Serpent -->
+		<npc id="21153" x="85440" y="79940" z="-5130" heading="14971" respawnDelay="60" /> <!-- Purgatory Serpent -->
+		<npc id="21153" x="86036" y="82384" z="-5130" heading="63890" respawnDelay="60" /> <!-- Purgatory Serpent -->
+		<npc id="21153" x="85769" y="82183" z="-5130" heading="52412" respawnDelay="60" /> <!-- Purgatory Serpent -->
+		<npc id="21153" x="87837" y="81585" z="-5130" heading="56346" respawnDelay="60" /> <!-- Purgatory Serpent -->
+		<npc id="21153" x="88017" y="81932" z="-5130" heading="32640" respawnDelay="60" /> <!-- Purgatory Serpent -->
+		<npc id="21153" x="87028" y="79831" z="-5128" heading="15151" respawnDelay="60" /> <!-- Purgatory Serpent -->
+		<npc id="21153" x="86797" y="79281" z="-5130" heading="64122" respawnDelay="60" /> <!-- Purgatory Serpent -->
+		<npc id="21153" x="87111" y="78429" z="-5130" heading="11548" respawnDelay="60" /> <!-- Purgatory Serpent -->
+		<npc id="21153" x="88161" y="78418" z="-5128" heading="22195" respawnDelay="60" /> <!-- Purgatory Serpent -->
+		<npc id="21153" x="88062" y="83016" z="-5128" heading="33108" respawnDelay="60" /> <!-- Purgatory Serpent -->
+		<npc id="21153" x="83753" y="78212" z="-5128" heading="15332" respawnDelay="60" /> <!-- Purgatory Serpent -->
+		<npc id="21154" x="83742" y="83881" z="-5128" heading="55576" respawnDelay="60" /> <!-- Hell Keeper Medusa -->
+		<npc id="21154" x="83669" y="85910" z="-5128" heading="43361" respawnDelay="60" /> <!-- Hell Keeper Medusa -->
+		<npc id="21154" x="83894" y="86302" z="-5130" heading="5637" respawnDelay="60" /> <!-- Hell Keeper Medusa -->
+		<npc id="21154" x="83917" y="88706" z="-5128" heading="31446" respawnDelay="60" /> <!-- Hell Keeper Medusa -->
+		<npc id="21154" x="86109" y="84013" z="-5128" heading="61591" respawnDelay="60" /> <!-- Hell Keeper Medusa -->
+		<npc id="21154" x="85957" y="84217" z="-5130" heading="62847" respawnDelay="60" /> <!-- Hell Keeper Medusa -->
+		<npc id="21154" x="86357" y="85265" z="-5128" heading="46737" respawnDelay="60" /> <!-- Hell Keeper Medusa -->
+		<npc id="21154" x="86407" y="86811" z="-5128" heading="7970" respawnDelay="60" /> <!-- Hell Keeper Medusa -->
+		<npc id="21154" x="86036" y="86144" z="-5130" heading="40514" respawnDelay="60" /> <!-- Hell Keeper Medusa -->
+		<npc id="21154" x="88574" y="88709" z="-5128" heading="32165" respawnDelay="60" /> <!-- Hell Keeper Medusa -->
+		<npc id="21154" x="87273" y="88399" z="-5128" heading="48914" respawnDelay="60" /> <!-- Hell Keeper Medusa -->
+		<npc id="21154" x="88509" y="86344" z="-5128" heading="55485" respawnDelay="60" /> <!-- Hell Keeper Medusa -->
+		<npc id="21154" x="88149" y="86929" z="-5130" heading="33873" respawnDelay="60" /> <!-- Hell Keeper Medusa -->
+		<npc id="21154" x="88515" y="84100" z="-5128" heading="31176" respawnDelay="60" /> <!-- Hell Keeper Medusa -->
+		<npc id="21155" x="83616" y="84059" z="-5128" heading="33966" respawnDelay="60" /> <!-- Purgatory Conjurer -->
+		<npc id="21155" x="83568" y="86580" z="-5130" heading="43653" respawnDelay="60" /> <!-- Purgatory Conjurer -->
+		<npc id="21155" x="83890" y="85963" z="-5130" heading="47831" respawnDelay="60" /> <!-- Purgatory Conjurer -->
+		<npc id="21155" x="83680" y="88869" z="-5128" heading="32475" respawnDelay="60" /> <!-- Purgatory Conjurer -->
+		<npc id="21155" x="85700" y="84184" z="-5128" heading="5762" respawnDelay="60" /> <!-- Purgatory Conjurer -->
+		<npc id="21155" x="86202" y="84208" z="-5130" heading="18608" respawnDelay="60" /> <!-- Purgatory Conjurer -->
+		<npc id="21155" x="86486" y="86041" z="-5130" heading="62391" respawnDelay="60" /> <!-- Purgatory Conjurer -->
+		<npc id="21155" x="86192" y="86605" z="-5151" heading="17292" respawnDelay="60" /> <!-- Purgatory Conjurer -->
+		<npc id="21155" x="86346" y="86448" z="-5128" heading="46893" respawnDelay="60" /> <!-- Purgatory Conjurer -->
+		<npc id="21155" x="88335" y="88869" z="-5128" heading="48015" respawnDelay="60" /> <!-- Purgatory Conjurer -->
+		<npc id="21155" x="87021" y="88667" z="-5128" heading="26057" respawnDelay="60" /> <!-- Purgatory Conjurer -->
+		<npc id="21155" x="88360" y="86548" z="-5128" heading="38418" respawnDelay="60" /> <!-- Purgatory Conjurer -->
+		<npc id="21155" x="88129" y="86564" z="-5130" heading="23031" respawnDelay="60" /> <!-- Purgatory Conjurer -->
+		<npc id="21155" x="88349" y="84272" z="-5128" heading="13600" respawnDelay="60" /> <!-- Purgatory Conjurer -->
+		<npc id="21176" x="82385" y="78419" z="-5128" heading="32025" respawnDelay="60" /> <!-- Lilim Magus -->
+		<npc id="21176" x="82961" y="83008" z="-5128" heading="1022" respawnDelay="60" /> <!-- Lilim Magus -->
+		<npc id="21176" x="81166" y="81276" z="-5130" heading="24576" respawnDelay="60" /> <!-- Lilim Magus -->
+		<npc id="21176" x="82629" y="79659" z="-5130" heading="33193" respawnDelay="60" /> <!-- Lilim Magus -->
+		<npc id="21176" x="81908" y="79897" z="-5149" heading="40922" respawnDelay="60" /> <!-- Lilim Magus -->
+		<npc id="21176" x="82277" y="80191" z="-5130" heading="16231" respawnDelay="60" /> <!-- Lilim Magus -->
+		<npc id="21176" x="79396" y="79516" z="-5128" heading="1840" respawnDelay="60" /> <!-- Lilim Magus -->
+		<npc id="21176" x="79800" y="78784" z="-5128" heading="37365" respawnDelay="60" /> <!-- Lilim Magus -->
+		<npc id="21176" x="80805" y="78859" z="-5130" heading="30835" respawnDelay="60" /> <!-- Lilim Magus -->
+		<npc id="21176" x="78965" y="82403" z="-5128" heading="36009" respawnDelay="60" /> <!-- Lilim Magus -->
+		<npc id="21176" x="79221" y="81778" z="-5130" heading="56898" respawnDelay="60" /> <!-- Lilim Magus -->
+		<npc id="21176" x="79543" y="82145" z="-5128" heading="8827" respawnDelay="60" /> <!-- Lilim Magus -->
+		<npc id="21176" x="79338" y="80767" z="-5149" heading="17941" respawnDelay="60" /> <!-- Lilim Magus -->
+		<npc id="21176" x="78072" y="83297" z="-5128" heading="16384" respawnDelay="60" /> <!-- Lilim Magus -->
+		<npc id="21176" x="81510" y="81012" z="-5130" heading="56189" respawnDelay="60" /> <!-- Lilim Magus -->
+		<npc id="21176" x="77977" y="79588" z="-5128" heading="50507" respawnDelay="60" /> <!-- Lilim Magus -->
+		<npc id="21176" x="78042" y="80444" z="-5128" heading="15658" respawnDelay="60" /> <!-- Lilim Magus -->
+		<npc id="21177" x="79565" y="84822" z="-5151" heading="32002" respawnDelay="60" /> <!-- Lilim Knight Errant -->
+		<npc id="21177" x="80110" y="87903" z="-5130" heading="51588" respawnDelay="60" /> <!-- Lilim Knight Errant -->
+		<npc id="21177" x="80375" y="88113" z="-5130" heading="61854" respawnDelay="60" /> <!-- Lilim Knight Errant -->
+		<npc id="21177" x="82366" y="87478" z="-5128" heading="31746" respawnDelay="60" /> <!-- Lilim Knight Errant -->
+		<npc id="21177" x="81891" y="87312" z="-5151" heading="30408" respawnDelay="60" /> <!-- Lilim Knight Errant -->
+		<npc id="21177" x="81238" y="84416" z="-5128" heading="15126" respawnDelay="60" /> <!-- Lilim Knight Errant -->
+		<npc id="21177" x="81393" y="84832" z="-5151" heading="13829" respawnDelay="60" /> <!-- Lilim Knight Errant -->
+		<npc id="21177" x="81022" y="85289" z="-5130" heading="23355" respawnDelay="60" /> <!-- Lilim Knight Errant -->
+		<npc id="21177" x="82499" y="84100" z="-5128" heading="59047" respawnDelay="60" /> <!-- Lilim Knight Errant -->
+		<npc id="21177" x="82457" y="88681" z="-5128" heading="31152" respawnDelay="60" /> <!-- Lilim Knight Errant -->
+		<npc id="21177" x="77887" y="88651" z="-5128" heading="52382" respawnDelay="60" /> <!-- Lilim Knight Errant -->
+		<npc id="21177" x="79062" y="87109" z="-5128" heading="32202" respawnDelay="60" /> <!-- Lilim Knight Errant -->
+		<npc id="21177" x="79709" y="85158" z="-5130" heading="39492" respawnDelay="60" /> <!-- Lilim Knight Errant -->
+		<npc id="21177" x="78749" y="87262" z="-5130" heading="22733" respawnDelay="60" /> <!-- Lilim Knight Errant -->
+		<npc id="21177" x="80101" y="84561" z="-5130" heading="14727" respawnDelay="60" /> <!-- Lilim Knight Errant -->
+		<npc id="21177" x="78069" y="84365" z="-5128" heading="16265" respawnDelay="60" /> <!-- Lilim Knight Errant -->
+		<npc id="21178" x="83768" y="83284" z="-5128" heading="16304" respawnDelay="60" /> <!-- Lilim Marauder -->
+		<npc id="21178" x="84061" y="81533" z="-5130" heading="60340" respawnDelay="60" /> <!-- Lilim Marauder -->
+		<npc id="21178" x="85787" y="78420" z="-5130" heading="8414" respawnDelay="60" /> <!-- Lilim Marauder -->
+		<npc id="21178" x="85664" y="79879" z="-5130" heading="20942" respawnDelay="60" /> <!-- Lilim Marauder -->
+		<npc id="21178" x="85555" y="79496" z="-5128" heading="56519" respawnDelay="60" /> <!-- Lilim Marauder -->
+		<npc id="21178" x="85806" y="81840" z="-5128" heading="51279" respawnDelay="60" /> <!-- Lilim Marauder -->
+		<npc id="21178" x="86046" y="82817" z="-5130" heading="47330" respawnDelay="60" /> <!-- Lilim Marauder -->
+		<npc id="21178" x="87486" y="81668" z="-5128" heading="40747" respawnDelay="60" /> <!-- Lilim Marauder -->
+		<npc id="21178" x="88357" y="81640" z="-5130" heading="25241" respawnDelay="60" /> <!-- Lilim Marauder -->
+		<npc id="21178" x="86839" y="79903" z="-5128" heading="18495" respawnDelay="60" /> <!-- Lilim Marauder -->
+		<npc id="21178" x="87238" y="79487" z="-5130" heading="57634" respawnDelay="60" /> <!-- Lilim Marauder -->
+		<npc id="21178" x="86770" y="78846" z="-5130" heading="6037" respawnDelay="60" /> <!-- Lilim Marauder -->
+		<npc id="21178" x="88377" y="78705" z="-5128" heading="15915" respawnDelay="60" /> <!-- Lilim Marauder -->
+		<npc id="21178" x="88369" y="82801" z="-5128" heading="17782" respawnDelay="60" /> <!-- Lilim Marauder -->
+		<npc id="21178" x="84453" y="81219" z="-5130" heading="48597" respawnDelay="60" /> <!-- Lilim Marauder -->
+		<npc id="21178" x="83487" y="78406" z="-5128" heading="32606" respawnDelay="60" /> <!-- Lilim Marauder -->
+		<npc id="21179" x="83613" y="86273" z="-5130" heading="50333" respawnDelay="60" /> <!-- Lilim Priest -->
+		<npc id="21179" x="83769" y="84413" z="-5128" heading="16384" respawnDelay="60" /> <!-- Lilim Priest -->
+		<npc id="21179" x="83923" y="86672" z="-5130" heading="4370" respawnDelay="60" /> <!-- Lilim Priest -->
+		<npc id="21179" x="83747" y="88469" z="-5128" heading="48735" respawnDelay="60" /> <!-- Lilim Priest -->
+		<npc id="21179" x="85426" y="84275" z="-5130" heading="57344" respawnDelay="60" /> <!-- Lilim Priest -->
+		<npc id="21179" x="86414" y="84192" z="-5128" heading="405" respawnDelay="60" /> <!-- Lilim Priest -->
+		<npc id="21179" x="86624" y="86235" z="-5130" heading="63292" respawnDelay="60" /> <!-- Lilim Priest -->
+		<npc id="21179" x="86448" y="85690" z="-5130" heading="44937" respawnDelay="60" /> <!-- Lilim Priest -->
+		<npc id="21179" x="86021" y="85896" z="-5130" heading="28075" respawnDelay="60" /> <!-- Lilim Priest -->
+		<npc id="21179" x="88347" y="88404" z="-5128" heading="48351" respawnDelay="60" /> <!-- Lilim Priest -->
+		<npc id="21179" x="87486" y="88733" z="-5128" heading="59059" respawnDelay="60" /> <!-- Lilim Priest -->
+		<npc id="21179" x="88409" y="87129" z="-5128" heading="50115" respawnDelay="60" /> <!-- Lilim Priest -->
+		<npc id="21179" x="88380" y="83796" z="-5128" heading="47236" respawnDelay="60" /> <!-- Lilim Priest -->
+		<npc id="21179" x="88453" y="86134" z="-5128" heading="50643" respawnDelay="60" /> <!-- Lilim Priest -->
+		<npc id="21197" x="82653" y="82807" z="-5149" heading="55991" respawnDelay="60" /> <!-- Nephilim Priest -->
+		<npc id="21197" x="82669" y="78194" z="-5128" heading="15658" respawnDelay="60" /> <!-- Nephilim Priest -->
+		<npc id="21197" x="80480" y="78599" z="-5130" heading="63875" respawnDelay="60" /> <!-- Nephilim Priest -->
+		<npc id="21197" x="80978" y="78827" z="-5130" heading="63090" respawnDelay="60" /> <!-- Nephilim Priest -->
+		<npc id="21197" x="77878" y="82994" z="-5128" heading="63227" respawnDelay="60" /> <!-- Nephilim Priest -->
+		<npc id="21197" x="79602" y="82785" z="-5130" heading="58997" respawnDelay="60" /> <!-- Nephilim Priest -->
+		<npc id="21197" x="79024" y="82227" z="-5130" heading="40501" respawnDelay="60" /> <!-- Nephilim Priest -->
+		<npc id="21197" x="79342" y="82475" z="-5128" heading="12601" respawnDelay="60" /> <!-- Nephilim Priest -->
+		<npc id="21197" x="79477" y="80708" z="-5130" heading="15852" respawnDelay="60" /> <!-- Nephilim Priest -->
+		<npc id="21197" x="81698" y="81017" z="-5130" heading="53066" respawnDelay="60" /> <!-- Nephilim Priest -->
+		<npc id="21197" x="80681" y="81205" z="-5128" heading="60534" respawnDelay="60" /> <!-- Nephilim Priest -->
+		<npc id="21197" x="82699" y="79872" z="-5128" heading="34788" respawnDelay="60" /> <!-- Nephilim Priest -->
+		<npc id="21197" x="82109" y="79969" z="-5128" heading="28692" respawnDelay="60" /> <!-- Nephilim Priest -->
+		<npc id="21197" x="81665" y="79760" z="-5128" heading="37881" respawnDelay="60" /> <!-- Nephilim Priest -->
+		<npc id="21197" x="79245" y="79724" z="-5128" heading="62910" respawnDelay="60" /> <!-- Nephilim Priest -->
+		<npc id="21197" x="77924" y="80536" z="-5130" heading="16232" respawnDelay="60" /> <!-- Nephilim Priest -->
+		<npc id="21197" x="78062" y="79814" z="-5128" heading="51676" respawnDelay="60" /> <!-- Nephilim Priest -->
+		<npc id="21198" x="80054" y="84168" z="-5130" heading="17010" respawnDelay="60" /> <!-- Nephilim Swordsman -->
+		<npc id="21198" x="79540" y="85156" z="-5130" heading="39648" respawnDelay="60" /> <!-- Nephilim Swordsman -->
+		<npc id="21198" x="80082" y="88276" z="-5130" heading="54639" respawnDelay="60" /> <!-- Nephilim Swordsman -->
+		<npc id="21198" x="80389" y="87906" z="-5130" heading="55891" respawnDelay="60" /> <!-- Nephilim Swordsman -->
+		<npc id="21198" x="82836" y="87288" z="-5130" heading="33070" respawnDelay="60" /> <!-- Nephilim Swordsman -->
+		<npc id="21198" x="81801" y="87502" z="-5128" heading="27015" respawnDelay="60" /> <!-- Nephilim Swordsman -->
+		<npc id="21198" x="81226" y="85179" z="-5128" heading="18355" respawnDelay="60" /> <!-- Nephilim Swordsman -->
+		<npc id="21198" x="81382" y="84193" z="-5130" heading="8070" respawnDelay="60" /> <!-- Nephilim Swordsman -->
+		<npc id="21198" x="81552" y="84720" z="-5130" heading="11458" respawnDelay="60" /> <!-- Nephilim Swordsman -->
+		<npc id="21198" x="82658" y="84303" z="-5149" heading="25028" respawnDelay="60" /> <!-- Nephilim Swordsman -->
+		<npc id="21198" x="82653" y="88556" z="-5128" heading="13870" respawnDelay="60" /> <!-- Nephilim Swordsman -->
+		<npc id="21198" x="78053" y="88444" z="-5128" heading="48225" respawnDelay="60" /> <!-- Nephilim Swordsman -->
+		<npc id="21198" x="78667" y="87066" z="-5128" heading="3168" respawnDelay="60" /> <!-- Nephilim Swordsman -->
+		<npc id="21198" x="79894" y="85347" z="-5128" heading="24751" respawnDelay="60" /> <!-- Nephilim Swordsman -->
+		<npc id="21198" x="78941" y="87298" z="-5151" heading="19966" respawnDelay="60" /> <!-- Nephilim Swordsman -->
+		<npc id="21198" x="78258" y="84132" z="-5128" heading="32592" respawnDelay="60" /> <!-- Nephilim Swordsman -->
+		<npc id="21199" x="83942" y="83013" z="-5128" heading="38795" respawnDelay="60" /> <!-- Nephilim Guard -->
+		<npc id="21199" x="83938" y="81280" z="-5130" heading="52342" respawnDelay="60" /> <!-- Nephilim Guard -->
+		<npc id="21199" x="85378" y="78738" z="-5130" heading="16666" respawnDelay="60" /> <!-- Nephilim Guard -->
+		<npc id="21199" x="85780" y="79580" z="-5130" heading="15761" respawnDelay="60" /> <!-- Nephilim Guard -->
+		<npc id="21199" x="85451" y="79133" z="-5151" heading="43872" respawnDelay="60" /> <!-- Nephilim Guard -->
+		<npc id="21199" x="85996" y="81825" z="-5128" heading="48609" respawnDelay="60" /> <!-- Nephilim Guard -->
+		<npc id="21199" x="85738" y="82676" z="-5130" heading="50894" respawnDelay="60" /> <!-- Nephilim Guard -->
+		<npc id="21199" x="87535" y="81853" z="-5151" heading="32989" respawnDelay="60" /> <!-- Nephilim Guard -->
+		<npc id="21199" x="88255" y="81936" z="-5130" heading="27537" respawnDelay="60" /> <!-- Nephilim Guard -->
+		<npc id="21199" x="86786" y="78468" z="-5130" heading="59814" respawnDelay="60" /> <!-- Nephilim Guard -->
+		<npc id="21199" x="87099" y="78779" z="-5128" heading="10023" respawnDelay="60" /> <!-- Nephilim Guard -->
+		<npc id="21199" x="86998" y="79239" z="-5128" heading="18318" respawnDelay="60" /> <!-- Nephilim Guard -->
+		<npc id="21199" x="88571" y="78454" z="-5128" heading="20449" respawnDelay="60" /> <!-- Nephilim Guard -->
+		<npc id="21199" x="88526" y="83069" z="-5128" heading="16881" respawnDelay="60" /> <!-- Nephilim Guard -->
+		<npc id="21199" x="83742" y="78590" z="-5128" heading="11498" respawnDelay="60" /> <!-- Nephilim Guard -->
+		<npc id="21199" x="84645" y="81205" z="-5130" heading="53626" respawnDelay="60" /> <!-- Nephilim Guard -->
+		<npc id="21200" x="83883" y="84090" z="-5128" heading="33272" respawnDelay="60" /> <!-- Nephilim Bishop -->
+		<npc id="21200" x="83724" y="86848" z="-5128" heading="50009" respawnDelay="60" /> <!-- Nephilim Bishop -->
+		<npc id="21200" x="83976" y="86535" z="-5130" heading="63638" respawnDelay="60" /> <!-- Nephilim Bishop -->
+		<npc id="21200" x="83517" y="88702" z="-5149" heading="24509" respawnDelay="60" /> <!-- Nephilim Bishop -->
+		<npc id="21200" x="85370" y="84059" z="-5128" heading="63035" respawnDelay="60" /> <!-- Nephilim Bishop -->
+		<npc id="21200" x="86507" y="84022" z="-5149" heading="54373" respawnDelay="60" /> <!-- Nephilim Bishop -->
+		<npc id="21200" x="85979" y="85706" z="-5130" heading="24428" respawnDelay="60" /> <!-- Nephilim Bishop -->
+		<npc id="21200" x="86161" y="85336" z="-5130" heading="51031" respawnDelay="60" /> <!-- Nephilim Bishop -->
+		<npc id="21200" x="86266" y="85875" z="-5128" heading="16672" respawnDelay="60" /> <!-- Nephilim Bishop -->
+		<npc id="21200" x="88179" y="88649" z="-5128" heading="44162" respawnDelay="60" /> <!-- Nephilim Bishop -->
+		<npc id="21200" x="87250" y="88893" z="-5128" heading="12357" respawnDelay="60" /> <!-- Nephilim Bishop -->
+		<npc id="21200" x="88520" y="86898" z="-5130" heading="52708" respawnDelay="60" /> <!-- Nephilim Bishop -->
+		<npc id="21200" x="88255" y="86134" z="-5130" heading="52377" respawnDelay="60" /> <!-- Nephilim Bishop -->
+		<npc id="21200" x="88214" y="84042" z="-5128" heading="23984" respawnDelay="60" /> <!-- Nephilim Bishop -->
+		<npc id="21244" x="82706" y="83233" z="-5128" heading="23988" respawnDelay="60" /> <!-- Crypt Archon -->
+		<npc id="21244" x="80953" y="81311" z="-5130" heading="23243" respawnDelay="60" /> <!-- Crypt Archon -->
+		<npc id="21244" x="82479" y="80176" z="-5151" heading="18403" respawnDelay="60" /> <!-- Crypt Archon -->
+		<npc id="21244" x="79228" y="79324" z="-5128" heading="63071" respawnDelay="60" /> <!-- Crypt Archon -->
+		<npc id="21244" x="79794" y="78643" z="-5149" heading="42219" respawnDelay="60" /> <!-- Crypt Archon -->
+		<npc id="21244" x="80158" y="78604" z="-5130" heading="59576" respawnDelay="60" /> <!-- Crypt Archon -->
+		<npc id="21244" x="79383" y="82818" z="-5128" heading="48033" respawnDelay="60" /> <!-- Crypt Archon -->
+		<npc id="21244" x="79700" y="82507" z="-5130" heading="9074" respawnDelay="60" /> <!-- Crypt Archon -->
+		<npc id="21244" x="79159" y="80582" z="-5128" heading="59800" respawnDelay="60" /> <!-- Crypt Archon -->
+		<npc id="21244" x="82881" y="78402" z="-5128" heading="652" respawnDelay="60" /> <!-- Crypt Archon -->
+		<npc id="21244" x="78252" y="83048" z="-5128" heading="30263" respawnDelay="60" /> <!-- Crypt Archon -->
+		<npc id="21244" x="79378" y="81857" z="-5128" heading="52845" respawnDelay="60" /> <!-- Crypt Archon -->
+		<npc id="21244" x="80703" y="80937" z="-5130" heading="14962" respawnDelay="60" /> <!-- Crypt Archon -->
+		<npc id="21244" x="81804" y="79474" z="-5151" heading="40795" respawnDelay="60" /> <!-- Crypt Archon -->
+		<npc id="21244" x="81289" y="79690" z="-5130" heading="28393" respawnDelay="60" /> <!-- Crypt Archon -->
+		<npc id="21244" x="78170" y="79593" z="-5128" heading="52588" respawnDelay="60" /> <!-- Crypt Archon -->
+		<npc id="21244" x="78258" y="80114" z="-5130" heading="57588" respawnDelay="60" /> <!-- Crypt Archon -->
+		<npc id="21245" x="82471" y="83035" z="-5128" heading="39470" respawnDelay="60" /> <!-- Crypt Inquisitor -->
+		<npc id="21245" x="82681" y="78615" z="-5128" heading="46077" respawnDelay="60" /> <!-- Crypt Inquisitor -->
+		<npc id="21245" x="80953" y="78627" z="-5128" heading="0" respawnDelay="60" /> <!-- Crypt Inquisitor -->
+		<npc id="21245" x="80317" y="78855" z="-5130" heading="32930" respawnDelay="60" /> <!-- Crypt Inquisitor -->
+		<npc id="21245" x="78101" y="82799" z="-5128" heading="43466" respawnDelay="60" /> <!-- Crypt Inquisitor -->
+		<npc id="21245" x="79469" y="81623" z="-5130" heading="53163" respawnDelay="60" /> <!-- Crypt Inquisitor -->
+		<npc id="21245" x="79255" y="82180" z="-5149" heading="24576" respawnDelay="60" /> <!-- Crypt Inquisitor -->
+		<npc id="21245" x="79171" y="83059" z="-5130" heading="49026" respawnDelay="60" /> <!-- Crypt Inquisitor -->
+		<npc id="21245" x="79361" y="80480" z="-5128" heading="13182" respawnDelay="60" /> <!-- Crypt Inquisitor -->
+		<npc id="21245" x="81522" y="81207" z="-5128" heading="1593" respawnDelay="60" /> <!-- Crypt Inquisitor -->
+		<npc id="21245" x="81232" y="81059" z="-5128" heading="64856" respawnDelay="60" /> <!-- Crypt Inquisitor -->
+		<npc id="21245" x="81242" y="79946" z="-5130" heading="27549" respawnDelay="60" /> <!-- Crypt Inquisitor -->
+		<npc id="21245" x="81599" y="79450" z="-5151" heading="49873" respawnDelay="60" /> <!-- Crypt Inquisitor -->
+		<npc id="21245" x="82198" y="79648" z="-5130" heading="29442" respawnDelay="60" /> <!-- Crypt Inquisitor -->
+		<npc id="21245" x="79087" y="79541" z="-5149" heading="4573" respawnDelay="60" /> <!-- Crypt Inquisitor -->
+		<npc id="21245" x="78167" y="80613" z="-5130" heading="16323" respawnDelay="60" /> <!-- Crypt Inquisitor -->
+		<npc id="21245" x="77923" y="80131" z="-5130" heading="63040" respawnDelay="60" /> <!-- Crypt Inquisitor -->
+		<npc id="21246" x="79700" y="84475" z="-5130" heading="14451" respawnDelay="60" /> <!-- Tomb Archon -->
+		<npc id="21246" x="79770" y="85506" z="-5130" heading="16021" respawnDelay="60" /> <!-- Tomb Archon -->
+		<npc id="21246" x="80090" y="87542" z="-5130" heading="57849" respawnDelay="60" /> <!-- Tomb Archon -->
+		<npc id="21246" x="80355" y="88418" z="-5130" heading="41869" respawnDelay="60" /> <!-- Tomb Archon -->
+		<npc id="21246" x="82001" y="87468" z="-5128" heading="38733" respawnDelay="60" /> <!-- Tomb Archon -->
+		<npc id="21246" x="82326" y="87253" z="-5130" heading="56890" respawnDelay="60" /> <!-- Tomb Archon -->
+		<npc id="21246" x="81062" y="84966" z="-5130" heading="7533" respawnDelay="60" /> <!-- Tomb Archon -->
+		<npc id="21246" x="81501" y="85070" z="-5130" heading="1448" respawnDelay="60" /> <!-- Tomb Archon -->
+		<npc id="21246" x="81313" y="85495" z="-5128" heading="15499" respawnDelay="60" /> <!-- Tomb Archon -->
+		<npc id="21246" x="82678" y="83871" z="-5149" heading="49700" respawnDelay="60" /> <!-- Tomb Archon -->
+		<npc id="21246" x="82916" y="88705" z="-5128" heading="63588" respawnDelay="60" /> <!-- Tomb Archon -->
+		<npc id="21246" x="78679" y="86934" z="-5130" heading="52265" respawnDelay="60" /> <!-- Tomb Archon -->
+		<npc id="21246" x="78389" y="87220" z="-5130" heading="59402" respawnDelay="60" /> <!-- Tomb Archon -->
+		<npc id="21246" x="80077" y="84792" z="-5130" heading="17870" respawnDelay="60" /> <!-- Tomb Archon -->
+		<npc id="21246" x="78234" y="88661" z="-5149" heading="49605" respawnDelay="60" /> <!-- Tomb Archon -->
+		<npc id="21246" x="78072" y="83944" z="-5128" heading="57840" respawnDelay="60" /> <!-- Tomb Archon -->
+		<npc id="21247" x="79832" y="84157" z="-5128" heading="8192" respawnDelay="60" /> <!-- Tomb Inquisitor -->
+		<npc id="21247" x="79990" y="85552" z="-5128" heading="17052" respawnDelay="60" /> <!-- Tomb Inquisitor -->
+		<npc id="21247" x="80224" y="88665" z="-5128" heading="36818" respawnDelay="60" /> <!-- Tomb Inquisitor -->
+		<npc id="21247" x="80338" y="87606" z="-5130" heading="47308" respawnDelay="60" /> <!-- Tomb Inquisitor -->
+		<npc id="21247" x="82646" y="87541" z="-5128" heading="12256" respawnDelay="60" /> <!-- Tomb Inquisitor -->
+		<npc id="21247" x="82184" y="87255" z="-5130" heading="46910" respawnDelay="60" /> <!-- Tomb Inquisitor -->
+		<npc id="21247" x="81174" y="85479" z="-5128" heading="21525" respawnDelay="60" /> <!-- Tomb Inquisitor -->
+		<npc id="21247" x="81223" y="84699" z="-5128" heading="17555" respawnDelay="60" /> <!-- Tomb Inquisitor -->
+		<npc id="21247" x="81071" y="84246" z="-5130" heading="1808" respawnDelay="60" /> <!-- Tomb Inquisitor -->
+		<npc id="21247" x="82899" y="84082" z="-5128" heading="6499" respawnDelay="60" /> <!-- Tomb Inquisitor -->
+		<npc id="21247" x="82688" y="88879" z="-5128" heading="49416" respawnDelay="60" /> <!-- Tomb Inquisitor -->
+		<npc id="21247" x="78906" y="86950" z="-5130" heading="55230" respawnDelay="60" /> <!-- Tomb Inquisitor -->
+		<npc id="21247" x="78342" y="86978" z="-5151" heading="55362" respawnDelay="60" /> <!-- Tomb Inquisitor -->
+		<npc id="21247" x="80051" y="85080" z="-5130" heading="17107" respawnDelay="60" /> <!-- Tomb Inquisitor -->
+		<npc id="21247" x="77940" y="84064" z="-5128" heading="58243" respawnDelay="60" /> <!-- Tomb Inquisitor -->
+		<npc id="21247" x="78071" y="88784" z="-5128" heading="48531" respawnDelay="60" /> <!-- Tomb Inquisitor -->
+	</spawn>
+</list>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../xsd/buylist.xsd">
+	<item id="2500" price="0" /> <!-- Dark Legion's Edge -->
+	<item id="81" price="0" /> <!-- Dragon Slayer -->
+	<item id="151" price="0" /> <!-- Sword of Miracles -->
+	<item id="150" price="0" /> <!-- Elemental Sword -->
+	<item id="80" price="0" /> <!-- Tallum Blade -->
+	<item id="305" price="0" /> <!-- Tallum Glaive -->
+	<item id="98" price="0" /> <!-- Halberd -->
+	<item id="270" price="0" /> <!-- Dragon Grinder -->
+	<item id="269" price="0" /> <!-- Blood Tornado -->
+	<item id="236" price="0" /> <!-- Soul Separator -->
+	<item id="235" price="0" /> <!-- Bloody Orchid -->
+	<item id="289" price="0" /> <!-- Soul Bow -->
+	<item id="288" price="0" /> <!-- Carnage Bow -->
+	<item id="213" price="0" /> <!-- Branch of The Mother Tree -->
+	<item id="164" price="0" /> <!-- Elysian Axe -->
+	<item id="2504" price="0" /> <!-- Meteor Shower -->
+	<item id="209" price="0" /> <!-- Divine Staff -->
+	<item id="5596" price="0" /> <!-- Dasparion's Staff - Mana Up -->
+	<item id="5597" price="0" /> <!-- Dasparion's Staff - Conversion -->
+	<item id="5598" price="0" /> <!-- Dasparion's Staff - Acumen -->
+	<item id="5599" price="0" /> <!-- Meteor Shower - Focus -->
+	<item id="5600" price="0" /> <!-- Meteor Shower - Critical Bleed -->
+	<item id="5601" price="0" /> <!-- Meteor Shower - Rsk. Haste -->
+	<item id="5602" price="0" /> <!-- Elysian - Health -->
+	<item id="5603" price="0" /> <!-- Elysian - Anger -->
+	<item id="5604" price="0" /> <!-- Elysian - Critical Drain -->
+	<item id="5605" price="0" /> <!-- Branch of The Mother Tree - Conversion -->
+	<item id="5606" price="0" /> <!-- Branch of The Mother Tree - Magic Damage -->
+	<item id="5607" price="0" /> <!-- Branch of The Mother Tree - Acumen -->
+	<item id="5608" price="0" /> <!-- Carnage Bow - Light -->
+	<item id="5609" price="0" /> <!-- Carnage Bow - Critical Bleed -->
+	<item id="5610" price="0" /> <!-- Carnage Bow - Mana Up -->
+	<item id="5611" price="0" /> <!-- Soul Bow - Cheap Shot -->
+	<item id="5612" price="0" /> <!-- Soul Bow - Quick Recovery -->
+	<item id="5613" price="0" /> <!-- Soul Bow - Critical Poison -->
+	<item id="5614" price="0" /> <!-- Bloody Orchid - Focus -->
+	<item id="5615" price="0" /> <!-- Bloody Orchid - Back Blow -->
+	<item id="5616" price="0" /> <!-- Bloody Orchid - Critical Bleed -->
+	<item id="5617" price="0" /> <!-- Soul Separator - Guidance -->
+	<item id="5618" price="0" /> <!-- Soul Separator - Critical Damage -->
+	<item id="5619" price="0" /> <!-- Soul Separator - Rsk. Haste -->
+	<item id="5620" price="0" /> <!-- Blood Tornado - Haste -->
+	<item id="5621" price="0" /> <!-- Blood Tornado - Focus -->
+	<item id="5622" price="0" /> <!-- Blood Tornado - Anger -->
+	<item id="5623" price="0" /> <!-- Dragon Grinder - Rsk. Evasion -->
+	<item id="5624" price="0" /> <!-- Dragon Grinder - Guidance -->
+	<item id="5625" price="0" /> <!-- Dragon Grinder - Health -->
+	<item id="5626" price="0" /> <!-- Halberd - Haste -->
+	<item id="5627" price="0" /> <!-- Halberd - Critical Stun -->
+	<item id="5628" price="0" /> <!-- Halberd - Wide Blow -->
+	<item id="5632" price="0" /> <!-- Tallum Glaive - Guidance -->
+	<item id="5633" price="0" /> <!-- Tallum Glaive - Health -->
+	<item id="5634" price="0" /> <!-- Tallum Glaive - Wide Blow -->
+	<item id="5635" price="0" /> <!-- Tallum Blade - Critical Poison -->
+	<item id="5636" price="0" /> <!-- Tallum Blade - Haste -->
+	<item id="5637" price="0" /> <!-- Tallum Blade - Anger -->
+	<item id="5638" price="0" /> <!-- Elemental Sword - Magic Power -->
+	<item id="5639" price="0" /> <!-- Elemental Sword - Magic Paralyze -->
+	<item id="5640" price="0" /> <!-- Elemental Sword - Empower -->
+	<item id="5641" price="0" /> <!-- Sword of Miracles - Magic Power -->
+	<item id="5642" price="0" /> <!-- Sword of Miracles - Magic Silence -->
+	<item id="5643" price="0" /> <!-- Sword of Miracles - Acumen -->
+	<item id="5644" price="0" /> <!-- Dragon Slayer - Health -->
+	<item id="5645" price="0" /> <!-- Dragon Slayer - Critical Bleed -->
+	<item id="5646" price="0" /> <!-- Dragon Slayer - Critical Drain -->
+	<item id="5647" price="0" /> <!-- Dark Legion's Edge - Critical Damage -->
+	<item id="5648" price="0" /> <!-- Dark Legion's Edge - Health -->
+	<item id="5649" price="0" /> <!-- Dark Legion's Edge - Rsk. Focus -->
+	<item id="5704" price="0" /> <!-- Keshanberk*Keshanberk -->
+	<item id="5705" price="0" /> <!-- Keshanberk*Damascus -->
+	<item id="5706" price="0" /> <!-- Damascus*Damascus -->
+</list>

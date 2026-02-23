@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/skills.xsd">
+	<skill id="3600" levels="9" name="Special Ability: Anger">
+		<!-- Level 1: Decreases Max HP and increases P. Atk. Allows one to attack multiple opponents. -->
+		<!-- Level 2: Decreases Max HP and increases P. Atk. Allows one to attack multiple opponents. -->
+		<!-- Level 3: Decreases Max HP and increases P. Atk. Allows one to attack multiple opponents. -->
+		<!-- Level 4: Decreases Max HP and increases P. Atk. Allows one to attack multiple opponents. -->
+		<!-- Level 5: Decreases Max HP and increases P. Atk. Allows one to attack multiple opponents. -->
+		<!-- Level 6: Decreases Max HP and increases P. Atk. Allows one to attack multiple opponents. -->
+		<!-- Level 7: Decreases Max HP and increases P. Atk. Allows one to attack multiple opponents. Inflicts additional damage during PvP. -->
+		<!-- Level 8: Decreases Max HP and increases P. Atk. Allows one to attack multiple opponents. Inflicts additional damage during PvP. -->
+		<!-- Level 9: Decreases Max HP and increases P. Atk. Allows one to attack multiple opponents. Inflicts additional damage during PvP. -->
+		<table name="#magicLevel">46 49 52 55 58 61 64 67 75</table>
+		<table name="#pAtk">20.44 22.64 24.77 26.78 28.59 30.12 31.30 39 45</table>
+		<table name="#pvpBonus">1 1 1 1 1 1 1.05 1.05 1.05</table>
+		<set name="icon" val="icon.skill1062" />
+		<set name="operateType" val="P" />
+		<set name="targetType" val="SELF" />
+		<set name="magicLevel" val="#magicLevel" />
+		<effects>
+			<effect name="Buff">
+				<add stat="pAtk" val="#pAtk" />
+				<mul stat="maxHp" val="0.85" />
+				<add stat="atkCountMax" val="4" />
+				<mul stat="pvpPhysDmg" val="#pvpBonus" />
+				<mul stat="pvpPhysSkillsDmg" val="#pvpBonus" />
+				<mul stat="pvpMagicalDmg" val="#pvpBonus" />
+			</effect>
+		</effects>
+	</skill>
+	<skill id="3601" levels="9" name="Special Ability: Haste">
+		<!-- Level 1: Increases Atk. Spd. Allows one to attak multiple opponents. -->
+		<!-- Level 2: Increases Atk. Spd. Allows one to attak multiple opponents. -->
+		<!-- Level 3: Increases Atk. Spd. Allows one to attak multiple opponents. -->
+		<!-- Level 4: Increases Atk. Spd. Allows one to attak multiple opponents. -->
+		<!-- Level 5: Increases Atk. Spd. Allows one to attak multiple opponents. -->
+		<!-- Level 6: Increases Atk. Spd. Allows one to attak multiple opponents. -->
+		<!-- Level 7: Increases Atk. Spd. Allows one to attak multiple opponents. Inflicts additional damage during PvP. -->
+		<!-- Level 8: Increases Atk. Spd. Allows one to attak multiple opponents. Inflicts additional damage during PvP. -->
+		<!-- Level 9: Increases Atk. Spd. Allows one to attak multiple opponents. Inflicts additional damage during PvP. -->
+		<table name="#magicLevel">46 49 52 55 58 61 64 67 75</table>
+		<table name="#pAtkSpd">1.08 1.07 1.07 1.07 1.06 1.06 1.06 1.06 1.07</table>
+		<table name="#pvpBonus">1 1 1 1 1 1 1.05 1.05 1.05</table>
+		<set name="icon" val="icon.skill1086" />
+		<set name="operateType" val="P" />
+		<set name="targetType" val="SELF" />
+		<set name="magicLevel" val="#magicLevel" />
+		<effects>
+			<effect name="Buff">
+				<mul stat="pAtkSpd" val="#pAtkSpd" />
+				<add stat="atkCountMax" val="4" />
+				<mul stat="pvpPhysDmg" val="#pvpBonus" />
+				<mul stat="pvpMagicalDmg" val="#pvpBonus" />
+			</effect>
+		</effects>
+	</skill>
+	<skill id="3602" levels="9" name="Special Ability: Guidance">
+		<!-- Level 1: Increases Accuracy. Allows one to attak multiple opponents. -->
+		<!-- Level 2: Increases Accuracy. Allows one to attak multiple opponents. -->
+		<!-- Level 3: Increases Accuracy. Allows one to attak multiple opponents. -->
+		<!-- Level 4: Increases Accuracy. Allows one to attak multiple opponents. -->
+		<!-- Level 5: Increases Accuracy. Allows one to attak multiple opponents. -->
+		<!-- Level 6: Increases Accuracy. Allows one to attak multiple opponents. -->
+		<!-- Level 7: Increases Accuracy. Allows one to attak multiple opponents. Inflicts additional damage during PvP. -->
+		<!-- Level 8: Increases Accuracy. Allows one to attak multiple opponents. Inflicts additional damage during PvP. -->
+		<!-- Level 9: Increases Accuracy. Allows one to attak multiple opponents. Inflicts additional damage during PvP. -->
+		<table name="#accCombat">6.88 6.07 5.72 5.37 5.02 4.68 4.34 3.95 5.27</table>
+		<table name="#magicLevel">46 49 52 55 58 61 64 67 75</table>
+		<table name="#pvpBonus">1 1 1 1 1 1 1.05 1.05 1.05</table>
+		<set name="icon" val="icon.skill1240" />
+		<set name="operateType" val="P" />
+		<set name="targetType" val="SELF" />
+		<set name="magicLevel" val="#magicLevel" />
+		<effects>
+			<effect name="Buff">
+				<add stat="accCombat" val="#accCombat" />
+				<add stat="atkCountMax" val="4" />
+				<mul stat="pvpPhysDmg" val="#pvpBonus" />
+				<mul stat="pvpPhysSkillsDmg" val="#pvpBonus" />
+				<mul stat="pvpMagicalDmg" val="#pvpBonus" />
+			</effect>
+		</effects>
+	</skill>
+</list>

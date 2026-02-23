@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../xsd/npcs.xsd">
+	<npc id="29077" displayId="13014" type="Folk" name=" ">
+		<race>HUMAN</race>
+		<sex>MALE</sex>
+		<stats>
+			<vitals hp="2444.46819" hpRegen="7.5" mp="1345.8" mpRegen="2.7" />
+			<attack physical="688.86373" magical="470.40463" random="30" critical="4" accuracy="95" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="295.91597" magical="216.53847" />
+			<speed>
+				<walk ground="0" />
+				<run ground="0" />
+			</speed>
+		</stats>
+		<status attackable="false" targetable="false" talkable="false" />
+		<collision>
+			<radius normal="0" />
+			<height normal="-50" />
+		</collision>
+	</npc>
+	<npc id="29078" displayId="13014" type="Folk" name=" ">
+		<race>HUMAN</race>
+		<sex>MALE</sex>
+		<stats>
+			<vitals hp="2444.46819" hpRegen="7.5" mp="1345.8" mpRegen="2.7" />
+			<attack physical="688.86373" magical="470.40463" random="30" critical="4" accuracy="95" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="295.91597" magical="216.53847" />
+			<speed>
+				<walk ground="0" />
+				<run ground="0" />
+			</speed>
+		</stats>
+		<status attackable="false" targetable="false" talkable="false" />
+		<collision>
+			<radius normal="0" />
+			<height normal="-50" />
+		</collision>
+	</npc>
+	<npc id="29079" displayId="13014" type="Folk" name=" ">
+		<race>HUMAN</race>
+		<sex>MALE</sex>
+		<stats>
+			<vitals hp="2444.46819" hpRegen="7.5" mp="1345.8" mpRegen="2.7" />
+			<attack physical="688.86373" magical="470.40463" random="30" critical="4" accuracy="95" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="295.91597" magical="216.53847" />
+			<speed>
+				<walk ground="0" />
+				<run ground="0" />
+			</speed>
+		</stats>
+		<status attackable="false" targetable="false" talkable="false" />
+		<collision>
+			<radius normal="0" />
+			<height normal="-50" />
+		</collision>
+	</npc>
+	<npc id="29080" displayId="13014" type="Folk" name=" ">
+		<race>HUMAN</race>
+		<sex>MALE</sex>
+		<stats>
+			<vitals hp="2444.46819" hpRegen="7.5" mp="1345.8" mpRegen="2.7" />
+			<attack physical="688.86373" magical="470.40463" random="30" critical="4" accuracy="95" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="295.91597" magical="216.53847" />
+			<speed>
+				<walk ground="0" />
+				<run ground="0" />
+			</speed>
+		</stats>
+		<status attackable="false" targetable="false" talkable="false" />
+		<collision>
+			<radius normal="0" />
+			<height normal="-50" />
+		</collision>
+	</npc>
+	<npc id="29081" displayId="13014" type="Folk" name=" ">
+		<race>HUMAN</race>
+		<sex>MALE</sex>
+		<stats>
+			<vitals hp="2444.46819" hpRegen="7.5" mp="1345.8" mpRegen="2.7" />
+			<attack physical="688.86373" magical="470.40463" random="30" critical="4" accuracy="95" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="295.91597" magical="216.53847" />
+			<speed>
+				<walk ground="0" />
+				<run ground="0" />
+			</speed>
+		</stats>
+		<status attackable="false" targetable="false" talkable="false" />
+		<collision>
+			<radius normal="0" />
+			<height normal="-50" />
+		</collision>
+	</npc>
+	<npc id="29082" displayId="13014" type="Folk" name=" ">
+		<race>HUMAN</race>
+		<sex>MALE</sex>
+		<stats>
+			<vitals hp="2444.46819" hpRegen="7.5" mp="1345.8" mpRegen="2.7" />
+			<attack physical="688.86373" magical="470.40463" random="30" critical="4" accuracy="95" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="295.91597" magical="216.53847" />
+			<speed>
+				<walk ground="0" />
+				<run ground="0" />
+			</speed>
+		</stats>
+		<status attackable="false" targetable="false" talkable="false" />
+		<collision>
+			<radius normal="0" />
+			<height normal="-50" />
+		</collision>
+	</npc>
+	<npc id="29083" displayId="13014" type="Folk" name=" ">
+		<race>HUMAN</race>
+		<sex>MALE</sex>
+		<stats>
+			<vitals hp="2444.46819" hpRegen="7.5" mp="1345.8" mpRegen="2.7" />
+			<attack physical="688.86373" magical="470.40463" random="30" critical="4" accuracy="95" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="295.91597" magical="216.53847" />
+			<speed>
+				<walk ground="0" />
+				<run ground="0" />
+			</speed>
+		</stats>
+		<status attackable="false" targetable="false" talkable="false" />
+		<collision>
+			<radius normal="0" />
+			<height normal="-50" />
+		</collision>
+	</npc>
+	<npc id="29084" displayId="13014" type="Folk" name=" ">
+		<race>HUMAN</race>
+		<sex>MALE</sex>
+		<stats>
+			<vitals hp="2444.46819" hpRegen="7.5" mp="1345.8" mpRegen="2.7" />
+			<attack physical="688.86373" magical="470.40463" random="30" critical="4" accuracy="95" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="295.91597" magical="216.53847" />
+			<speed>
+				<walk ground="0" />
+				<run ground="0" />
+			</speed>
+		</stats>
+		<status attackable="false" targetable="false" talkable="false" />
+		<collision>
+			<radius normal="0" />
+			<height normal="-50" />
+		</collision>
+	</npc>
+	<npc id="29085" displayId="13014" type="Folk" name=" ">
+		<race>HUMAN</race>
+		<sex>MALE</sex>
+		<stats>
+			<vitals hp="2444.46819" hpRegen="7.5" mp="1345.8" mpRegen="2.7" />
+			<attack physical="688.86373" magical="470.40463" random="30" critical="4" accuracy="95" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="295.91597" magical="216.53847" />
+			<speed>
+				<walk ground="0" />
+				<run ground="0" />
+			</speed>
+		</stats>
+		<status attackable="false" targetable="false" talkable="false" />
+		<collision>
+			<radius normal="0" />
+			<height normal="-50" />
+		</collision>
+	</npc>
+	<npc id="29086" displayId="13014" type="Folk" name=" ">
+		<race>HUMAN</race>
+		<sex>MALE</sex>
+		<stats>
+			<vitals hp="2444.46819" hpRegen="7.5" mp="1345.8" mpRegen="2.7" />
+			<attack physical="688.86373" magical="470.40463" random="30" critical="4" accuracy="95" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="295.91597" magical="216.53847" />
+			<speed>
+				<walk ground="0" />
+				<run ground="0" />
+			</speed>
+		</stats>
+		<status attackable="false" targetable="false" talkable="false" />
+		<collision>
+			<radius normal="0" />
+			<height normal="-50" />
+		</collision>
+	</npc>
+	<npc id="29087" displayId="13014" type="Folk" name=" ">
+		<race>HUMAN</race>
+		<sex>MALE</sex>
+		<stats>
+			<vitals hp="2444.46819" hpRegen="7.5" mp="1345.8" mpRegen="2.7" />
+			<attack physical="688.86373" magical="470.40463" random="30" critical="4" accuracy="95" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="295.91597" magical="216.53847" />
+			<speed>
+				<walk ground="0" />
+				<run ground="0" />
+			</speed>
+		</stats>
+		<status attackable="false" targetable="false" talkable="false" />
+		<collision>
+			<radius normal="0" />
+			<height normal="-50" />
+		</collision>
+	</npc>
+	<npc id="29088" displayId="13014" type="Folk" name=" ">
+		<race>HUMAN</race>
+		<sex>MALE</sex>
+		<stats>
+			<vitals hp="2444.46819" hpRegen="7.5" mp="1345.8" mpRegen="2.7" />
+			<attack physical="688.86373" magical="470.40463" random="30" critical="4" accuracy="95" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="295.91597" magical="216.53847" />
+			<speed>
+				<walk ground="0" />
+				<run ground="0" />
+			</speed>
+		</stats>
+		<status attackable="false" targetable="false" talkable="false" />
+		<collision>
+			<radius normal="0" />
+			<height normal="-50" />
+		</collision>
+	</npc>
+	<npc id="29089" displayId="13014" type="Folk" name=" ">
+		<race>HUMAN</race>
+		<sex>MALE</sex>
+		<stats>
+			<vitals hp="2444.46819" hpRegen="7.5" mp="1345.8" mpRegen="2.7" />
+			<attack physical="688.86373" magical="470.40463" random="30" critical="4" accuracy="95" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="295.91597" magical="216.53847" />
+			<speed>
+				<walk ground="0" />
+				<run ground="0" />
+			</speed>
+		</stats>
+		<status attackable="false" targetable="false" talkable="false" />
+		<collision>
+			<radius normal="0" />
+			<height normal="-50" />
+		</collision>
+	</npc>
+	<npc id="29090" displayId="13014" type="Folk" name=" ">
+		<race>HUMAN</race>
+		<sex>MALE</sex>
+		<stats>
+			<vitals hp="2444.46819" hpRegen="7.5" mp="1345.8" mpRegen="2.7" />
+			<attack physical="688.86373" magical="470.40463" random="30" critical="4" accuracy="95" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="295.91597" magical="216.53847" />
+			<speed>
+				<walk ground="0" />
+				<run ground="0" />
+			</speed>
+		</stats>
+		<status attackable="false" targetable="false" talkable="false" />
+		<collision>
+			<radius normal="0" />
+			<height normal="-50" />
+		</collision>
+	</npc>
+	<npc id="29091" displayId="13014" type="Folk" name=" ">
+		<race>HUMAN</race>
+		<sex>MALE</sex>
+		<stats>
+			<vitals hp="2444.46819" hpRegen="7.5" mp="1345.8" mpRegen="2.7" />
+			<attack physical="688.86373" magical="470.40463" random="30" critical="4" accuracy="95" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="295.91597" magical="216.53847" />
+			<speed>
+				<walk ground="0" />
+				<run ground="0" />
+			</speed>
+		</stats>
+		<status attackable="false" targetable="false" talkable="false" />
+		<collision>
+			<radius normal="0" />
+			<height normal="-50" />
+		</collision>
+	</npc>
+	<npc id="29092" displayId="13014" type="Folk" name=" ">
+		<race>HUMAN</race>
+		<sex>MALE</sex>
+		<stats>
+			<vitals hp="2444.46819" hpRegen="7.5" mp="1345.8" mpRegen="2.7" />
+			<attack physical="688.86373" magical="470.40463" random="30" critical="4" accuracy="95" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="295.91597" magical="216.53847" />
+			<speed>
+				<walk ground="0" />
+				<run ground="0" />
+			</speed>
+		</stats>
+		<status attackable="false" targetable="false" talkable="false" />
+		<collision>
+			<radius normal="0" />
+			<height normal="-50" />
+		</collision>
+	</npc>
+	<npc id="29093" displayId="13014" type="Folk" name=" ">
+		<race>HUMAN</race>
+		<sex>MALE</sex>
+		<stats>
+			<vitals hp="2444.46819" hpRegen="7.5" mp="1345.8" mpRegen="2.7" />
+			<attack physical="688.86373" magical="470.40463" random="30" critical="4" accuracy="95" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="295.91597" magical="216.53847" />
+			<speed>
+				<walk ground="0" />
+				<run ground="0" />
+			</speed>
+		</stats>
+		<status attackable="false" targetable="false" talkable="false" />
+		<collision>
+			<radius normal="0" />
+			<height normal="-50" />
+		</collision>
+	</npc>
+	<npc id="29094" displayId="13014" type="Folk" name=" ">
+		<race>HUMAN</race>
+		<sex>MALE</sex>
+		<stats>
+			<vitals hp="2444.46819" hpRegen="7.5" mp="1345.8" mpRegen="2.7" />
+			<attack physical="688.86373" magical="470.40463" random="30" critical="4" accuracy="95" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="295.91597" magical="216.53847" />
+			<speed>
+				<walk ground="0" />
+				<run ground="0" />
+			</speed>
+		</stats>
+		<status attackable="false" targetable="false" talkable="false" />
+		<collision>
+			<radius normal="0" />
+			<height normal="-50" />
+		</collision>
+	</npc>
+</list>

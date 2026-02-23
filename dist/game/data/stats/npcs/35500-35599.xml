@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/npcs.xsd">
+	<npc id="35512" level="70" type="Merchant" name="Manor Manager" title="Rune">
+		<parameters>
+			<param name="MoveAroundSocial" value="0" />
+			<param name="MoveAroundSocial1" value="150" />
+			<param name="manor_id" value="8" />
+		</parameters>
+		<race>HUMAN</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="10">
+			<vitals hp="2676.65854" hpRegen="8.5" mp="1507.8" mpRegen="3" />
+			<attack physical="794.70901" magical="542.68324" random="7" critical="12" accuracy="-3.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="319.24623" magical="233.61053" />
+			<speed>
+				<walk ground="50" />
+				<run ground="120" />
+			</speed>
+		</stats>
+		<status attackable="false" canMove="false" />
+		<skillList>
+			<skill id="4045" level="1" /> <!-- Resist Full Magic Attack -->
+			<skill id="4416" level="14" /> <!-- Humans -->
+		</skillList>
+		<exCrtEffect>true</exCrtEffect>
+		<ai aggroRange="1000" clanHelpRange="300" isAggressive="false" />
+		<collision>
+			<radius normal="9.5" />
+			<height normal="22.5" />
+		</collision>
+	</npc>
+	<npc id="35569" level="70" type="ClanHallDoorman" name="Daniel" title="Clan Hall Gatekeeper">
+		<parameters>
+			<param name="MoveAroundSocial" value="0" />
+			<param name="MoveAroundSocial1" value="120" />
+			<param name="Is_Wyvern" value="1" />
+			<param name="item_baby_pet1" value="9882" /> <!-- Great Wolf Necklace -->
+			<param name="item_grown_pet1" value="10307" /> <!-- Great Snow Wolf Necklace -->
+			<param name="id_grown_pet1" value="14" />
+			<param name="class_id_baby_pet1" value="16025" /> <!-- Great Wolf -->
+			<param name="min_lv_pet1" value="55" />
+			<param name="check_min_lv_pet1" value="1" />
+			<param name="item_baby_pet2" value="4422" /> <!-- Dragon Bugle of Wind -->
+			<param name="item_grown_pet2" value="10308" /> <!-- Red Dragon Bugle of Wind -->
+			<param name="id_grown_pet2" value="15" />
+			<param name="class_id_baby_pet2" value="12526" /> <!-- Wind Strider -->
+			<param name="min_lv_pet2" value="55" />
+			<param name="check_min_lv_pet2" value="1" />
+			<param name="item_baby_pet3" value="4423" /> <!-- Dragon Bugle of Star -->
+			<param name="item_grown_pet3" value="10309" /> <!-- Red Dragon Bugle of Star -->
+			<param name="id_grown_pet3" value="16" />
+			<param name="class_id_baby_pet3" value="12527" /> <!-- Star Strider -->
+			<param name="min_lv_pet3" value="55" />
+			<param name="check_min_lv_pet3" value="1" />
+			<param name="item_baby_pet4" value="4424" /> <!-- Dragon Bugle of Twilight -->
+			<param name="item_grown_pet4" value="10310" /> <!-- Red Dragon Bugle of Twilight -->
+			<param name="id_grown_pet4" value="17" />
+			<param name="class_id_baby_pet4" value="12528" /> <!-- Twilight Strider -->
+			<param name="min_lv_pet4" value="55" />
+			<param name="check_min_lv_pet4" value="1" />
+			<param name="item_baby_pet5" value="10426" /> <!-- Fenrir Necklace -->
+			<param name="item_grown_pet5" value="10611" /> <!-- Snow Fenrir Necklace -->
+			<param name="id_grown_pet5" value="22" />
+			<param name="class_id_baby_pet5" value="16041" /> <!-- Fenrir -->
+			<param name="min_lv_pet5" value="55" />
+			<param name="check_min_lv_pet5" value="1" />
+		</parameters>
+		<race>HUMAN</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="10">
+			<vitals hp="2444.46819" hpRegen="7.5" mp="1345.8" mpRegen="2.7" />
+			<attack physical="688.86373" magical="470.40463" random="30" critical="4" accuracy="5" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="295.91597" magical="216.53847" />
+			<speed>
+				<walk ground="50" />
+				<run ground="120" />
+			</speed>
+		</stats>
+		<status attackable="false" canMove="false" />
+		<skillList>
+			<skill id="4045" level="1" /> <!-- Resist Full Magic Attack -->
+			<skill id="4416" level="14" /> <!-- Humans -->
+		</skillList>
+		<exCrtEffect>true</exCrtEffect>
+		<ai aggroRange="1000" clanHelpRange="300" isAggressive="false" />
+		<collision>
+			<radius normal="8" />
+			<height normal="22" />
+		</collision>
+	</npc>
+</list>

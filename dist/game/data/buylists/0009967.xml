@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../xsd/buylist.xsd">
+	<item id="6411" price="0" /> <!-- Small green nimble fish -->
+	<item id="6412" price="0" /> <!-- Small green ugly fish -->
+	<item id="6413" price="0" /> <!-- Small green fat fish -->
+	<item id="6414" price="0" /> <!-- Green nimble fish -->
+	<item id="6415" price="0" /> <!-- Green ugly fish -->
+	<item id="6416" price="0" /> <!-- Green fat fish -->
+	<item id="6417" price="0" /> <!-- Big nimble green fish -->
+	<item id="6418" price="0" /> <!-- Big green ugly fish -->
+	<item id="6419" price="0" /> <!-- Big green fat fish -->
+	<item id="6420" price="0" /> <!-- Small jade nimble fish -->
+	<item id="6421" price="0" /> <!-- Small jade ugly fish -->
+	<item id="6422" price="0" /> <!-- Small jade fat fish -->
+	<item id="6423" price="0" /> <!-- Jade nimble fish -->
+	<item id="6424" price="0" /> <!-- Jade ugly fish -->
+	<item id="6425" price="0" /> <!-- Jade fat fish -->
+	<item id="6426" price="0" /> <!-- Big jade nimble fish -->
+	<item id="6427" price="0" /> <!-- Big jade ugly fish -->
+	<item id="6428" price="0" /> <!-- Big jade fat fish -->
+	<item id="6429" price="0" /> <!-- Small blue nimble fish -->
+	<item id="6430" price="0" /> <!-- Small blue ugly fish -->
+	<item id="6431" price="0" /> <!-- Small blue fat fish -->
+	<item id="6432" price="0" /> <!-- Blue nimble fish -->
+	<item id="6433" price="0" /> <!-- Blue ugly fish -->
+	<item id="6434" price="0" /> <!-- Blue fat fish -->
+	<item id="6435" price="0" /> <!-- Big blue nimble fish -->
+	<item id="6436" price="0" /> <!-- Big blue ugly fish -->
+	<item id="6437" price="0" /> <!-- Big blue fat fish -->
+	<item id="6438" price="0" /> <!-- Small yellow nimble fish -->
+	<item id="6439" price="0" /> <!-- Small yellow ugly fish -->
+	<item id="6440" price="0" /> <!-- Small yellow fat fish -->
+	<item id="6441" price="0" /> <!-- Yellow nimble fish -->
+	<item id="6442" price="0" /> <!-- Yellow ugly fish -->
+	<item id="6443" price="0" /> <!-- Yellow fat fish -->
+	<item id="6444" price="0" /> <!-- Big yellow nimble fish -->
+	<item id="6445" price="0" /> <!-- Big yellow ugly fish -->
+	<item id="6446" price="0" /> <!-- Big yellow fat fish -->
+	<item id="6447" price="0" /> <!-- Small orange nimble fish -->
+	<item id="6448" price="0" /> <!-- Small orange ugly fish -->
+	<item id="6449" price="0" /> <!-- Small orange fat fish -->
+	<item id="6450" price="0" /> <!-- Orange nimble fish -->
+	<item id="6451" price="0" /> <!-- Orange ugly fish -->
+	<item id="6452" price="0" /> <!-- Orange fat fish -->
+	<item id="6453" price="0" /> <!-- Big orange nimble fish -->
+	<item id="6454" price="0" /> <!-- Big orange ugly fish -->
+	<item id="6455" price="0" /> <!-- Big orange fat fish -->
+	<item id="6456" price="0" /> <!-- Small Purple nimble fish -->
+	<item id="6457" price="0" /> <!-- Small Purple ugly fish -->
+	<item id="6458" price="0" /> <!-- Small Purple fat fish -->
+	<item id="6459" price="0" /> <!-- Purple nimble fish -->
+	<item id="6460" price="0" /> <!-- Purple ugly fish -->
+	<item id="6461" price="0" /> <!-- Purple fat fish -->
+	<item id="6462" price="0" /> <!-- Big purple nimble fish -->
+	<item id="6463" price="0" /> <!-- Big purple ugly fish -->
+	<item id="6464" price="0" /> <!-- Big purple fat fish -->
+	<item id="6465" price="0" /> <!-- Small red nimble fish -->
+	<item id="6466" price="0" /> <!-- Small red ugly fish -->
+	<item id="6467" price="0" /> <!-- Small red fat fish -->
+	<item id="6468" price="0" /> <!-- Red nimble fish -->
+	<item id="6469" price="0" /> <!-- Red ugly fish -->
+	<item id="6470" price="0" /> <!-- Red fat fish -->
+	<item id="6471" price="0" /> <!-- Big red nimble fish -->
+	<item id="6472" price="0" /> <!-- Big red ugly fish -->
+	<item id="6473" price="0" /> <!-- Big red fat fish -->
+	<item id="6474" price="0" /> <!-- Small white nimble fish -->
+	<item id="6475" price="0" /> <!-- Small white ugly fish -->
+	<item id="6476" price="0" /> <!-- Small white fat fish -->
+	<item id="6477" price="0" /> <!-- White nimble fish -->
+	<item id="6478" price="0" /> <!-- White ugly fish -->
+	<item id="6479" price="0" /> <!-- White fat fish -->
+	<item id="6480" price="0" /> <!-- Big white nimble fish -->
+	<item id="6481" price="0" /> <!-- Big white ugly fish -->
+	<item id="6482" price="0" /> <!-- Big white fat fish -->
+	<item id="6483" price="0" /> <!-- Small black nimble fish -->
+	<item id="6484" price="0" /> <!-- Small black ugly fish -->
+	<item id="6485" price="0" /> <!-- Small black fat fish -->
+	<item id="6486" price="0" /> <!-- Black nimble fish -->
+	<item id="6487" price="0" /> <!-- Black ugly fish -->
+	<item id="6488" price="0" /> <!-- Black fat fish -->
+	<item id="6489" price="0" /> <!-- Big black nimble fish -->
+	<item id="6490" price="0" /> <!-- Big black ugly fish -->
+	<item id="6491" price="0" /> <!-- Big black fat fish -->
+	<item id="7734" price="0" /> <!-- Large green fat fish - For Beginners -->
+	<item id="7735" price="0" /> <!-- Small jade nimble fish - For Beginners -->
+	<item id="7736" price="0" /> <!-- Small jade ugly fish - For Beginners -->
+	<item id="7737" price="0" /> <!-- Small jade fat fish - For Beginners -->
+	<item id="7738" price="0" /> <!-- Jade nimble fish - For Beginners -->
+	<item id="7739" price="0" /> <!-- Jade ugly fish - For Beginners -->
+	<item id="7740" price="0" /> <!-- Jade fat fish - For Beginners -->
+	<item id="7741" price="0" /> <!-- Large jade nimble fish - For Beginners -->
+	<item id="7742" price="0" /> <!-- Large jade ugly fish - For Beginners -->
+	<item id="7743" price="0" /> <!-- Large jade fat fish - For Beginners -->
+	<item id="7744" price="0" /> <!-- Small blue nimble fish - For Beginners -->
+	<item id="7745" price="0" /> <!-- Small blue ugly fish - For Beginners -->
+	<item id="7801" price="0" /> <!-- Black nimble fish - For Beginners -->
+	<item id="7802" price="0" /> <!-- Black ugly fish - For Beginners -->
+	<item id="7803" price="0" /> <!-- Black fat fish - For Beginners -->
+	<item id="7727" price="0" /> <!-- Small green ugly fish - For Beginners -->
+	<item id="7750" price="0" /> <!-- Large blue nimble fish - For Beginners -->
+	<item id="7751" price="0" /> <!-- Large blue ugly fish - For Beginners -->
+	<item id="7752" price="0" /> <!-- Large blue fat fish - For Beginners -->
+	<item id="7753" price="0" /> <!-- Small yellow nimble fish - For Beginners -->
+	<item id="7754" price="0" /> <!-- Small yellow ugly fish - For Beginners -->
+	<item id="7755" price="0" /> <!-- Small yellow fat fish - For Beginners -->
+	<item id="7756" price="0" /> <!-- Yellow nimble fish - For Beginners -->
+	<item id="7757" price="0" /> <!-- Yellow ugly fish - For Beginners -->
+	<item id="7758" price="0" /> <!-- Yellow fat fish - For Beginners -->
+	<item id="7759" price="0" /> <!-- Large yellow nimble fish - For Beginners -->
+	<item id="7760" price="0" /> <!-- Large yellow ugly fish - For Beginners -->
+	<item id="7761" price="0" /> <!-- Large yellow fat fish - For Beginners -->
+	<item id="7762" price="0" /> <!-- Small orange nimble fish - For Beginners -->
+	<item id="7763" price="0" /> <!-- Small orange ugly fish - For Beginners -->
+	<item id="7764" price="0" /> <!-- Small orange fat fish - For Beginners -->
+	<item id="7765" price="0" /> <!-- Orange nimble fish - For Beginners -->
+	<item id="7766" price="0" /> <!-- Orange ugly fish - For Beginners -->
+	<item id="7767" price="0" /> <!-- Orange fat fish - For Beginners -->
+	<item id="7768" price="0" /> <!-- Large orange nimble fish - For Beginners -->
+	<item id="7769" price="0" /> <!-- Large orange ugly fish - For Beginners -->
+	<item id="7770" price="0" /> <!-- Large orange fat fish - For Beginners -->
+	<item id="7771" price="0" /> <!-- Small purple nimble fish - For Beginners -->
+	<item id="7772" price="0" /> <!-- Small purple ugly fish - For Beginners -->
+	<item id="7773" price="0" /> <!-- Small purple fat fish - For Beginners -->
+	<item id="7774" price="0" /> <!-- Purple nimble fish - For Beginners -->
+	<item id="7775" price="0" /> <!-- Purple ugly fish - For Beginners -->
+	<item id="7776" price="0" /> <!-- Purple fat fish - For Beginners -->
+	<item id="7777" price="0" /> <!-- Large purple nimble fish - For Beginners -->
+	<item id="7778" price="0" /> <!-- Large purple ugly fish - For Beginners -->
+	<item id="7779" price="0" /> <!-- Large purple fat fish - For Beginners -->
+	<item id="7780" price="0" /> <!-- Small red nimble fish - For Beginners -->
+	<item id="7781" price="0" /> <!-- Small red ugly fish - For Beginners -->
+	<item id="7782" price="0" /> <!-- Small red fat fish - For Beginners -->
+	<item id="7783" price="0" /> <!-- Red nimble fish - For Beginners -->
+	<item id="7784" price="0" /> <!-- Red ugly fish - For Beginners -->
+	<item id="7785" price="0" /> <!-- Red fat fish - For Beginners -->
+	<item id="7786" price="0" /> <!-- Large red nimble fish - For Beginners -->
+	<item id="7787" price="0" /> <!-- Large red ugly fish - For Beginners -->
+	<item id="7788" price="0" /> <!-- Large red fat fish - For Beginners -->
+	<item id="7789" price="0" /> <!-- Small white nimble fish - For Beginners -->
+	<item id="7790" price="0" /> <!-- Small white ugly fish - For Beginners -->
+	<item id="7791" price="0" /> <!-- Small white fat fish - For Beginners -->
+	<item id="7792" price="0" /> <!-- White nimble fish - For Beginners -->
+	<item id="7793" price="0" /> <!-- White ugly fish - For Beginners -->
+	<item id="7794" price="0" /> <!-- White fat fish - For Beginners -->
+	<item id="7795" price="0" /> <!-- Large white nimble fish - For Beginners -->
+	<item id="7796" price="0" /> <!-- Large white ugly fish - For Beginners -->
+	<item id="7797" price="0" /> <!-- Large white fat fish - For Beginners -->
+	<item id="7798" price="0" /> <!-- Small black nimble fish - For Beginners -->
+	<item id="7799" price="0" /> <!-- Small black ugly fish - For Beginners -->
+	<item id="7800" price="0" /> <!-- Small black fat fish - For Beginners -->
+	<item id="7728" price="0" /> <!-- Small green fat fish - For Beginners -->
+	<item id="7729" price="0" /> <!-- Green nimble fish - For Beginners -->
+	<item id="7730" price="0" /> <!-- Green ugly fish - For Beginners -->
+	<item id="7731" price="0" /> <!-- Green fat fish - For Beginners -->
+	<item id="7732" price="0" /> <!-- Large green nimble fish - For Beginners -->
+	<item id="7733" price="0" /> <!-- Large green ugly fish - For Beginners -->
+	<item id="7804" price="0" /> <!-- Large black nimble fish - For Beginners -->
+	<item id="7805" price="0" /> <!-- Large black ugly fish - For Beginners -->
+	<item id="7806" price="0" /> <!-- Large black fat fish - For Beginners -->
+	<item id="7726" price="0" /> <!-- Small green nimble fish - For Beginners -->
+	<item id="7746" price="0" /> <!-- Small blue fat fish - For Beginners -->
+	<item id="7747" price="0" /> <!-- Blue nimble fish - For Beginners -->
+	<item id="7748" price="0" /> <!-- Blue ugly fish - For Beginners -->
+	<item id="7749" price="0" /> <!-- Blue fat fish - For Beginners -->
+</list>

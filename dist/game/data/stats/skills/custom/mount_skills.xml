@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../xsd/skills.xsd">
+	<skill id="49991" levels="1" name="Twilight Dragon">
+		<set name="icon" val="icon.skill1373" />
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="blockedInOlympiad" val="true" />
+		<set name="displayId" val="4714" />
+		<set name="reuseDelay" val="3000" />
+		<conditions>
+			<player canSummon="true" />
+		</conditions>
+		<effects>
+			<effect name="Ride">
+				<param npcId="12526" />
+			</effect>
+		</effects>
+	</skill>
+	<skill id="49992" levels="1" name="Wind Dragon">
+		<set name="icon" val="icon.skill1373" />
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="blockedInOlympiad" val="true" />
+		<set name="displayId" val="4715" />
+		<set name="reuseDelay" val="3000" />
+		<conditions>
+			<player canSummon="true" />
+		</conditions>
+		<effects>
+			<effect name="Ride">
+				<param npcId="12621" />
+			</effect>
+		</effects>
+	</skill>
+</list>

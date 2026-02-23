@@ -1,0 +1,1263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/npcs.xsd">
+	<npc id="14800" level="51" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_action01" value="1087" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="1617.457556" hpRegen="6.5" mp="775.8" mpRegen="2.4" />
+			<attack physical="321.13207" magical="219.29157" random="30" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="204.85194" magical="149.90176" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="3" spirit="1" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14801" level="60" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="2126.564484" hpRegen="6.5" mp="1036.8" mpRegen="2.4" />
+			<attack physical="481.34551" magical="328.69659" random="30" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="247.65008" magical="181.21958" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="4" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14802" level="64" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="2356.003397" hpRegen="7.5" mp="1158" mpRegen="2.7" />
+			<attack physical="562.02275" magical="383.78868" random="30" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="267.04468" magical="195.41171" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="4" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14803" level="68" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="2580.343678" hpRegen="7.5" mp="1282.4" mpRegen="2.7" />
+			<attack physical="646.17968" magical="441.25696" random="30" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="286.3615" magical="209.54692" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14804" level="72" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="2794.168641" hpRegen="8.5" mp="1410" mpRegen="3" />
+			<attack physical="731.52506" magical="499.53679" random="30" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="305.35947" magical="223.44881" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14805" level="76" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="2991.977472" hpRegen="8.5" mp="1540.8" mpRegen="3" />
+			<attack physical="815.37145" magical="556.793" random="30" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="323.78455" magical="236.93149" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14806" level="78" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="860.08905" magical="584.41" random="30" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14807" level="78" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="864.3681" magical="584.41" random="30" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14808" level="78" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="868.64715" magical="584.41" random="30" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14809" level="78" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="872.9262" magical="584.41" random="30" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14810" level="78" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="877.20525" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14811" level="78" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="881.4843" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14812" level="78" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="885.76335" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14813" level="78" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="890.0424" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14814" level="78" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="894.32145" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14815" level="79" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="898.6005" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14816" level="79" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="902.87955" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14817" level="79" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="907.1586" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14818" level="79" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="911.43765" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14819" level="79" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="915.7167" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14820" level="79" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="919.99575" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14821" level="79" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="924.2748" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14822" level="79" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="928.55385" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14823" level="79" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="932.8329" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14824" level="80" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="937.11195" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14825" level="80" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="941.391" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14826" level="80" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="945.67005" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14827" level="80" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="949.9491" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14828" level="80" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="954.22815" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14829" level="80" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="958.5072" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14830" level="80" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="962.78625" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14831" level="80" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="967.0653" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14832" level="80" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="971.34435" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14833" level="80" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="975.6234" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14834" level="80" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="979.90245" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+	<npc id="14835" level="80" type="Pet" name="Dark Panther">
+		<parameters>
+			<param name="step_skill_target01" value="0" />
+			<param name="step_skill_target02" value="0" />
+			<param name="step_skill_target03" value="0" />
+			<param name="step_skill_target04" value="1" />
+			<param name="step_action01" value="1087" />
+			<param name="step_action02" value="1088" />
+			<param name="step_action03" value="1086" />
+			<param name="step_action04" value="1085" />
+		</parameters>
+		<race>ANIMAL</race>
+		<sex>MALE</sex>
+		<stats str="40" int="21" dex="30" wit="20" con="43" men="25">
+			<vitals hp="3180.38891" hpRegen="8.5" mp="1674.8" mpRegen="3" />
+			<attack physical="984.1815" magical="584.41" random="50" critical="4" accuracy="4.75" attackSpeed="253" type="SWORD" range="40" distance="80" width="120" />
+			<defence physical="332.7" magical="243.46" />
+			<speed>
+				<walk ground="25" />
+				<run ground="150" />
+			</speed>
+			<hitTime>200</hitTime>
+		</stats>
+		<status undying="false" />
+		<skillList>
+			<skill id="4121" level="1" /> <!-- Summoned Monster Magic Protection -->
+			<skill id="4416" level="4" /> <!-- Animals -->
+		</skillList>
+		<shots soul="5" spirit="2" />
+		<exCrtEffect>false</exCrtEffect>
+		<sNpcPropHpRate>1.331</sNpcPropHpRate>
+		<collision>
+			<radius normal="7" />
+			<height normal="13" />
+		</collision>
+	</npc>
+</list>

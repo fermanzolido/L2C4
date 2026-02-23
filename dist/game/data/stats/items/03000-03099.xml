@@ -1,0 +1,1112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/items.xsd">
+	<item id="3000" type="EtcItem" name="Recipe: Dwarven Chain Shield">
+		<!-- For Dwarves only. The recipe for a Dwarven chain shield. Requires Create Item Skill Level 5. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="3120" />
+		<set name="recipe_id" val="291" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3001" type="EtcItem" name="Recipe: Rind Leather Boots">
+		<!-- For Dwarves only. The recipe for the rind leather boots. Requires Create Item Skill Level 5. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="3220" />
+		<set name="recipe_id" val="292" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3002" type="EtcItem" name="Recipe: Dwarven Chain Gloves">
+		<!-- For Dwarves only. The recipe for Dwarven chain gloves. Requires Create Item Skill Level 5. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="3220" />
+		<set name="recipe_id" val="293" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3003" type="EtcItem" name="Recipe: Gloves of Seal">
+		<!-- For Dwarves only. The recipe for gloves of seal. Requires Create Item Skill Level 5. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="3220" />
+		<set name="recipe_id" val="294" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3004" type="EtcItem" name="Recipe: Rind Leather Gloves">
+		<!-- For Dwarves only. The recipe for the rind leather gloves. Requires Create Item Skill Level 5. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="3220" />
+		<set name="recipe_id" val="295" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3005" type="EtcItem" name="Recipe: Demon's Boots">
+		<!-- For Dwarves only. The recipe for demon's boots. Requires Create Item Skill Level 5. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="4900" />
+		<set name="recipe_id" val="296" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3006" type="EtcItem" name="Recipe: Demon's Gloves">
+		<!-- For Dwarves only. The recipe for demon's gloves. Requires Create Item Skill Level 5. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="4900" />
+		<set name="recipe_id" val="297" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3007" type="EtcItem" name="Recipe: Theca Leather Boots">
+		<!-- For Dwarves only. The recipe for the theca leather boots. Requires Create Item Skill Level 5. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="5500" />
+		<set name="recipe_id" val="298" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3008" type="EtcItem" name="Recipe: Theca Leather Gloves">
+		<!-- For Dwarves only. The recipe for the theca leather gloves. Requires Create Item Skill Level 5. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="5500" />
+		<set name="recipe_id" val="299" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3009" type="EtcItem" name="Recipe: Composite Boots">
+		<!-- For Dwarves only. The recipe for composite boots. Requires Create Item Skill Level 5. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="4900" />
+		<set name="recipe_id" val="300" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3010" type="EtcItem" name="Recipe: Composite Helmet">
+		<!-- For Dwarves only. The recipe for a composite helmet. Requires Create Item Skill Level 5. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="7360" />
+		<set name="recipe_id" val="301" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3011" type="EtcItem" name="Recipe: Divine Boots">
+		<!-- For Dwarves only. The recipe for divine boots. Requires Create Item Skill Level 6. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="7160" />
+		<set name="recipe_id" val="302" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3012" type="EtcItem" name="Recipe: Full Plate Helmet">
+		<!-- For Dwarves only. The recipe for a full plate helmet. Requires Create Item Skill Level 6. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="10720" />
+		<set name="recipe_id" val="303" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3013" type="EtcItem" name="Recipe: Drake Leather Boots">
+		<!-- For Dwarves only. The recipe for drake leather boots. Requires Create Item Skill Level 6. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="7160" />
+		<set name="recipe_id" val="304" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3014" type="EtcItem" name="Recipe: Full Plate Boots">
+		<!-- For Dwarves only. The recipe for full plate boots. Requires Create Item Skill Level 6. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="7160" />
+		<set name="recipe_id" val="305" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3015" type="EtcItem" name="Recipe: Drake Leather Gloves">
+		<!-- For Dwarves only. The recipe for drake leather gloves. Requires Create Item Skill Level 6. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="7160" />
+		<set name="recipe_id" val="306" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3016" type="EtcItem" name="Recipe: Full Plate Gauntlets">
+		<!-- For Dwarves only. The recipe for full plate gauntlets. Requires Create Item Skill Level 6. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="7160" />
+		<set name="recipe_id" val="307" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3017" type="EtcItem" name="Recipe: Divine Gloves">
+		<!-- For Dwarves only. The recipe for blessed gloves. Requires Create Item Skill Level 6. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="7160" />
+		<set name="recipe_id" val="308" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3018" type="EtcItem" name="Recipe: Blessed Gloves">
+		<!-- For Dwarves only. The recipe for divine gloves. Requires Create Item Skill Level 6. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="7160" />
+		<set name="recipe_id" val="309" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3019" type="EtcItem" name="Recipe: Full Plate Shield">
+		<!-- For Dwarves only. The recipe for a full plate shield. Requires Create Item Skill Level 6. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="7500" />
+		<set name="recipe_id" val="310" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3020" type="EtcItem" name="Recipe: Elven Long Sword">
+		<!-- For Dwarves only. The recipe for an Elven long sword. Requires Create Item Skill Level 4. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_blue_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="36000" />
+		<set name="recipe_id" val="311" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3021" type="EtcItem" name="Recipe: Dwarven War Hammer">
+		<!-- For Dwarves only. The recipe for a Dwarven war hammer. Requires Create Item Skill Level 5. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="57400" />
+		<set name="recipe_id" val="312" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3022" type="EtcItem" name="Recipe: Yaksa Mace">
+		<!-- For Dwarves only. The recipe for the Yaksa Mace. Requires Create Item Skill Level 6. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="122600" />
+		<set name="recipe_id" val="313" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3023" type="EtcItem" name="Recipe: Titan Key">
+		<!-- For Dwarves only. Recipe for Quest. Requiresed to make a Titan Key. Requires Create Item Skill Level 1. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_blue_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="recipe_id" val="314" />
+		<set name="is_tradable" val="false" />
+		<set name="is_dropable" val="false" />
+		<set name="is_destroyable" val="false" />
+		<set name="is_sellable" val="false" />
+		<set name="is_depositable" val="false" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3024" type="EtcItem" name="Recipe: Journeyman Ring">
+		<!-- For Dwarves only. Recipe for Quest. Requiresed to make a Journeyman Ring. Requires Create Item Skill Level 1. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_blue_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="recipe_id" val="315" />
+		<set name="is_tradable" val="false" />
+		<set name="is_dropable" val="false" />
+		<set name="is_destroyable" val="false" />
+		<set name="is_sellable" val="false" />
+		<set name="is_depositable" val="false" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3025" type="EtcItem" name="Recipe: Amber Bead">
+		<!-- For Dwarves only. Recipe for Quest. Requiresed to make an Amber Bead. Requires Create Item Skill Level 2. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_blue_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="recipe_id" val="316" />
+		<set name="is_tradable" val="false" />
+		<set name="is_dropable" val="false" />
+		<set name="is_destroyable" val="false" />
+		<set name="is_sellable" val="false" />
+		<set name="is_depositable" val="false" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3026" type="Weapon" name="Talins Spear">
+		<!-- Use this spear to deliver the final blow to Eva's unicorn. -->
+		<set name="icon" val="icon.weapon_short_spear_i00" />
+		<set name="default_action" val="EQUIP" />
+		<set name="weapon_type" val="POLE" />
+		<set name="bodypart" val="lrhand" />
+		<set name="random_damage" val="10" />
+		<set name="attack_range" val="80" />
+		<set name="damage_range" val="0;0;66;120" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="STEEL" />
+		<set name="weight" val="800" />
+		<set name="price" val="136000" />
+		<set name="soulshots" val="2" />
+		<set name="spiritshots" val="2" />
+		<set name="is_tradable" val="false" />
+		<set name="is_dropable" val="false" />
+		<set name="is_sellable" val="false" />
+		<set name="item_skill" val="3599-1" /> <!-- Polearm Multi-attack -->
+		<stats>
+			<set stat="pAtk" val="24" />
+			<set stat="mAtk" val="17" />
+			<set stat="critRate" val="8" />
+			<add stat="accCombat" val="-3.75" />
+			<set stat="pAtkSpd" val="325" />
+		</stats>
+	</item>
+	<item id="3027" type="Weapon" name="Old Knight's Sword">
+		<!-- Use this sword to deliver the final blow to the spirit of Sir Herod. -->
+		<set name="icon" val="icon.weapon_brandish_i00" />
+		<set name="default_action" val="EQUIP" />
+		<set name="weapon_type" val="SWORD" />
+		<set name="bodypart" val="lrhand" />
+		<set name="random_damage" val="10" />
+		<set name="attack_range" val="40" />
+		<set name="damage_range" val="0;0;44;120" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="STEEL" />
+		<set name="weight" val="2100" />
+		<set name="price" val="136000" />
+		<set name="soulshots" val="2" />
+		<set name="spiritshots" val="2" />
+		<set name="is_tradable" val="false" />
+		<set name="is_dropable" val="false" />
+		<set name="is_sellable" val="false" />
+		<stats>
+			<set stat="pAtk" val="29" />
+			<set stat="mAtk" val="17" />
+			<set stat="critRate" val="8" />
+			<set stat="pAtkSpd" val="325" />
+		</stats>
+	</item>
+	<item id="3028" type="Weapon" name="Crescent Moon Bow">
+		<!-- Use this bow to deliver the final blow to Commander Kadesh. -->
+		<set name="icon" val="icon.weapon_short_bow_i00" />
+		<set name="default_action" val="EQUIP" />
+		<set name="weapon_type" val="BOW" />
+		<set name="bodypart" val="lrhand" />
+		<set name="random_damage" val="5" />
+		<set name="attack_range" val="500" />
+		<set name="damage_range" val="0;0;10;0" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="WOOD" />
+		<set name="weight" val="600" />
+		<set name="price" val="54100" />
+		<set name="soulshots" val="6" />
+		<set name="spiritshots" val="2" />
+		<set name="mp_consume" val="2" />
+		<set name="reuse_delay" val="1500" />
+		<set name="is_tradable" val="false" />
+		<set name="is_dropable" val="false" />
+		<set name="is_sellable" val="false" />
+		<stats>
+			<set stat="pAtk" val="34" />
+			<set stat="mAtk" val="12" />
+			<set stat="critRate" val="12" />
+			<add stat="accCombat" val="-3.75" />
+			<set stat="pAtkSpd" val="293" />
+		</stats>
+	</item>
+	<item id="3029" type="Weapon" name="Sword of Binding">
+		<!-- Use this sword to deliver the final blow to Zeruel. -->
+		<set name="icon" val="icon.weapon_gladius_i00" />
+		<set name="default_action" val="EQUIP" />
+		<set name="weapon_type" val="SWORD" />
+		<set name="bodypart" val="rhand" />
+		<set name="random_damage" val="10" />
+		<set name="attack_range" val="40" />
+		<set name="damage_range" val="0;0;40;120" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="STEEL" />
+		<set name="weight" val="1200" />
+		<set name="price" val="54100" />
+		<set name="soulshots" val="2" />
+		<set name="spiritshots" val="2" />
+		<set name="is_tradable" val="false" />
+		<set name="is_dropable" val="false" />
+		<set name="is_sellable" val="false" />
+		<stats>
+			<set stat="pAtk" val="17" />
+			<set stat="mAtk" val="12" />
+			<set stat="critRate" val="8" />
+			<set stat="pAtkSpd" val="379" />
+		</stats>
+	</item>
+	<item id="3030" type="EtcItem" name="Key of Titan">
+		<!-- A special key that opens the Titan's Box -->
+		<set name="icon" val="icon.etc_key_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="BRONZE" />
+		<set name="weight" val="10" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3031" type="EtcItem" name="Spirit Ore">
+		<!-- A material used by Dwarves in item manufacturing. Can be sold in any shop. -->
+		<set name="icon" val="icon.etc_stone_gray_i00" />
+		<set name="etcitem_type" val="MATERIAL" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="5" /> <!-- Epilogue Modification -->
+		<set name="price" val="400" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3032" type="EtcItem" name="Recipe: Spiritshot D">
+		<!-- For Dwarves only. The recipe for the Spiritshot Grade D. Requires Create Item Skill Level 2. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_blue_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="5000" />
+		<set name="recipe_id" val="317" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3033" type="EtcItem" name="Recipe: Spiritshot C">
+		<!-- For Dwarves only. The recipe for the Spiritshot Grade C. Requires Create Item Skill Level 2. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_yellow_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="60000" />
+		<set name="recipe_id" val="318" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3034" type="EtcItem" name="Recipe: Spiritshot B">
+		<!-- For Dwarves only. The recipe for the Spiritshot Grade B. Requires Create Item Skill Level 2. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_red_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="100000" />
+		<set name="recipe_id" val="319" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3035" type="EtcItem" name="Recipe: Spiritshot A">
+		<!-- For Dwarves only. The recipe for the Spiritshot Grade A. Requires Create Item Skill Level 2. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_violet_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="150000" />
+		<set name="recipe_id" val="320" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3036" type="EtcItem" name="Recipe: Spiritshot S">
+		<!-- For Dwarves only. The recipe for the Spiritshot Grade S. Requires Create Item Skill Level 2. The success rate is 100%. -->
+		<set name="icon" val="icon.etc_recipe_black_i00" />
+		<set name="default_action" val="RECIPE" />
+		<set name="etcitem_type" val="RECIPE" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="LIQUID" />
+		<set name="weight" val="30" />
+		<set name="price" val="450000" />
+		<set name="recipe_id" val="321" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3037" type="EtcItem" name="Kakan's Letter">
+		<!-- Kakan's reply letter to Sla. Collect three reply letters from Sla's disciples and deliver them to Sla. -->
+		<set name="icon" val="icon.etc_scroll_gray_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="STEEL" />
+		<set name="is_tradable" val="false" />
+		<set name="is_dropable" val="false" />
+		<set name="is_sellable" val="false" />
+		<set name="is_depositable" val="false" />
+		<set name="is_stackable" val="true" />
+		<set name="is_questitem" val="true" />
+	</item>
+	<item id="3038" type="EtcItem" name="Blueprint: Summon Mechanic Golem">
+		<!-- A blueprint required for the Summon Mechanic Golem technique. Used by Artisans. -->
+		<set name="icon" val="icon.etc_plan_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="1550" />
+		<set name="is_stackable" val="true" />
+		<set name="handler" val="Recipes" />
+	</item>
+	<item id="3039" type="EtcItem" name="Spellbook: Summon Storm Cubic">
+		<!-- Spellbook required for Summon Storm Cubic magic. Used by Temple Knights and Warlocks. -->
+		<set name="icon" val="icon.etc_spell_books_summon_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3040" type="EtcItem" name="Spellbook: Summon Vampiric Cubic">
+		<!-- Spellbook required for Summon Vampiric Cubic magic. Used by Shillien Knights. -->
+		<set name="icon" val="icon.etc_spell_books_summon_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3700" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3041" type="EtcItem" name="Spellbook: Summon Phantom Cubic">
+		<!-- Spellbook required for Summon Phantom Cubic magic. Used by Shillien Knights and Phantom Summoners. -->
+		<set name="icon" val="icon.etc_spell_books_summon_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3042" type="EtcItem" name="Spellbook: Life Scavenge">
+		<!-- Spellbook required for Life Scavenge magic. Used by Dark Avengers. -->
+		<set name="icon" val="icon.etc_spell_books_hfighter_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3043" type="EtcItem" name="Spellbook: Holy Strike">
+		<!-- Spellbook required for Holy Strike magic. Used by Paladins. -->
+		<set name="icon" val="icon.etc_spell_books_hfighter_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="4250" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3044" type="EtcItem" name="Spellbook: Horror">
+		<!-- Spellbook required for Horror magic. Used by Dark Avengers. -->
+		<set name="icon" val="icon.etc_spell_books_hfighter_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="4250" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3045" type="EtcItem" name="Spellbook: Summon Life Cubic">
+		<!-- Spellbook required for Summon Life Cubic magic. Used by Temple Knights and Elemental Summoners. -->
+		<set name="icon" val="icon.etc_spell_books_defighter_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3700" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3046" type="EtcItem" name="Spellbook: Sacrifice">
+		<!-- Spellbook required for Sacrifice magic. Used by Paladins. -->
+		<set name="icon" val="icon.etc_spell_books_hfighter_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="5400" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3047" type="EtcItem" name="Spellbook: Iron Will">
+		<!-- Spellbook required for Iron Will magic. Used by Paladins and Dark Avengers. -->
+		<set name="icon" val="icon.etc_spell_books_hfighter_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3700" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3048" type="EtcItem" name="Spellbook: Reflect Damage">
+		<!-- Spellbook required for Reflect Damage magic. Used by Dark Avengers. -->
+		<set name="icon" val="icon.etc_spell_books_hfighter_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3049" type="EtcItem" name="Spellbook: Corpse Plague">
+		<!-- Spellbook required for Corpse Plague magic. Used by Dark Avengers and Shillien Knights. -->
+		<set name="icon" val="icon.etc_spell_books_hfighter_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="4250" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3050" type="EtcItem" name="Spellbook: Hex">
+		<!-- Spellbook required for Hex magic. Used by Shillien Knights, Bladedancers, Abyss Walkers, and Phantom Rangers. -->
+		<set name="icon" val="icon.etc_spell_books_defighter_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3051" type="EtcItem" name="Spellbook: Spirit Barrier">
+		<!-- Spellbook required for Spirit Barrier magic. Used by Temple Knights, Swordsingers, Plainswalkers, and Silver Rangers. -->
+		<set name="icon" val="icon.etc_spell_books_efighter_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3052" type="EtcItem" name="Spellbook: Hamstring">
+		<!-- Spellbook required for Hamstring magic. Used by Dark Avengers. -->
+		<set name="icon" val="icon.etc_spell_books_hfighter_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3700" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3053" type="EtcItem" name="Spellbook: Holy Blessing">
+		<!-- Spellbook required for Holy Blessing magic. Used by Paladins. -->
+		<set name="icon" val="icon.etc_spell_books_hfighter_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3054" type="EtcItem" name="Spellbook: Summon Viper Cubic">
+		<!-- Spellbook required for Summon Viper Cubic magic. Used by Shillien Knights. -->
+		<set name="icon" val="icon.etc_spell_books_defighter_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="4800" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3055" type="EtcItem" name="Spellbook: Lightening Strike">
+		<!-- Spellbook required for Lightning Strike magic. Used by Shillien Knights. -->
+		<set name="icon" val="icon.etc_spell_books_defighter_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="6750" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3056" type="EtcItem" name="Spellbook: Summon Dark Panther">
+		<!-- Spellbook required for Summon Dark Panther magic. Used by Dark Avengers. -->
+		<set name="icon" val="icon.etc_spell_books_hfighter_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3057" type="EtcItem" name="Spellbook: Summon Reanimated Man">
+		<!-- Spellbook required for Summon Reanimated Man magic. Used by Necromancers. -->
+		<set name="icon" val="icon.etc_spell_books_summon_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3850" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3058" type="EtcItem" name="Spellbook: Summon Corrupted Man">
+		<!-- Spellbook required for Summon Corrupted Man magic. Used by Necromancers. -->
+		<set name="icon" val="icon.etc_spell_books_summon_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3059" type="EtcItem" name="Spellbook: Corpse Burst">
+		<!-- Spellbook required for Corpse Burst magic. Used by Necromancers. -->
+		<set name="icon" val="icon.etc_spell_books_black_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="4600" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3060" type="EtcItem" name="Spellbook: Forget">
+		<!-- Spellbook required for Forget magic. Used by Necromancers. -->
+		<set name="icon" val="icon.etc_spell_books_black_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3850" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3061" type="EtcItem" name="Spellbook: Curse Discord">
+		<!-- Spellbook required for Curse Discord magic. Used by Necromancers. -->
+		<set name="icon" val="icon.etc_spell_books_black_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3062" type="EtcItem" name="Spellbook: Curse Fear">
+		<!-- Spellbook required for Curse Fear magic. Used by Necromancers. -->
+		<set name="icon" val="icon.etc_spell_books_black_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3063" type="EtcItem" name="Spellbook: Anchor">
+		<!-- Spellbook required for Anchor magic. Used by Necromancers. -->
+		<set name="icon" val="icon.etc_spell_books_black_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3850" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3064" type="EtcItem" name="Spellbook: Silence">
+		<!-- Spellbook required for Silence magic. Used by Necromancers and Spellhowlers. -->
+		<set name="icon" val="icon.etc_spell_books_black_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3065" type="EtcItem" name="Spellbook: Death Spike">
+		<!-- Spellbook required for Death Spike magic. Used by Necromancers and Spellhowlers. -->
+		<set name="icon" val="icon.etc_spell_books_black_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3850" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3066" type="EtcItem" name="Spellbook: Curse Death Link">
+		<!-- Spellbook required for Curse Death Link magic. Used by Necromancers and Spellhowlers. -->
+		<set name="icon" val="icon.etc_spell_books_black_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="5400" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3067" type="EtcItem" name="Spellbook: Vampiric Claw">
+		<!-- Spellbook required for Vampiric Claw magic. Used by Necromancers and Spellhowlers. -->
+		<set name="icon" val="icon.etc_spell_books_black_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3068" type="EtcItem" name="Spellbook: Vitalize">
+		<!-- Spellbook required for Vitalize magic. Used by Bishops and Elven Elders. -->
+		<set name="icon" val="icon.etc_spell_books_white_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="4600" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3069" type="EtcItem" name="Spellbook: Repose">
+		<!-- Spellbook required for Repose magic. Used by Bishops. -->
+		<set name="icon" val="icon.etc_spell_books_white_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3850" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3070" type="EtcItem" name="Spellbook: Hold Undead">
+		<!-- Spellbook required for Hold Undead magic. Used by Bishops. -->
+		<set name="icon" val="icon.etc_spell_books_white_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="4600" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3071" type="EtcItem" name="Spellbook: Requiem">
+		<!-- Spellbook required for Requiem magic. Used by Bishops. -->
+		<set name="icon" val="icon.etc_spell_books_white_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3072" type="EtcItem" name="Spellbook: Purify">
+		<!-- Spellbook required for Purify magic. Used by Bishops and Shillien Elders. -->
+		<set name="icon" val="icon.etc_spell_books_white_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3850" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3073" type="EtcItem" name="Spellbook: Might Of Heaven">
+		<!-- Spellbook required for Might of Heaven magic. Used by Bishops and Elven Elders. -->
+		<set name="icon" val="icon.etc_spell_books_white_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3074" type="EtcItem" name="Spellbook: Surrender to Wind">
+		<!-- Spellbook required for Surrender to Wind magic. Used by Sorcerers and Spellhowlers. -->
+		<set name="icon" val="icon.etc_spell_books_element_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3075" type="EtcItem" name="Spellbook: Blazing Circle">
+		<!-- Spellbook required for Blazing Circle magic. Used by Sorcerers and Sorceresses. -->
+		<set name="icon" val="icon.etc_spell_books_element_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3076" type="EtcItem" name="Spellbook: Prominence">
+		<!-- Spellbook required for Prominence magic. Used by Sorcerers and Sorceresses. -->
+		<set name="icon" val="icon.etc_spell_books_element_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3077" type="EtcItem" name="Spellbook: Blazing Skin">
+		<!-- Spellbook required for Blazing Skin magic. Used by Sorcerers and Sorceresses. -->
+		<set name="icon" val="icon.etc_spell_books_element_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3078" type="EtcItem" name="Spellbook: Decay">
+		<!-- Spellbook required for Decay magic. Used by Sorcerers and Sorceresses. -->
+		<set name="icon" val="icon.etc_spell_books_element_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="4600" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3079" type="EtcItem" name="Spellbook: Cancel">
+		<!-- Spellbook required for Cancel magic. Used by Sorcerers and Sorceresses. -->
+		<set name="icon" val="icon.etc_spell_books_assistance_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="4600" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3080" type="EtcItem" name="Spellbook: Sleeping Cloud">
+		<!-- Spellbook required for Sleeping Cloud magic. Used by Sorcerers, Sorceresses and Spellsingers. -->
+		<set name="icon" val="icon.etc_spell_books_assistance_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3850" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3081" type="EtcItem" name="Spellbook: Aura Flare">
+		<!-- Spellbook required for Aura Flare magic. Used by Sorcerers, Sorceresses and Spellsingers. -->
+		<set name="icon" val="icon.etc_spell_books_element_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3082" type="EtcItem" name="Spellbook: Surrender to Water">
+		<!-- Spellbook required for Surrender to Water magic. Used by Spellsingers. -->
+		<set name="icon" val="icon.etc_spell_books_element_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3083" type="EtcItem" name="Spellbook: Frost Wall">
+		<!-- Spellbook required for Frost Wall magic. Used by Spellsingers. -->
+		<set name="icon" val="icon.etc_spell_books_element_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="5400" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3084" type="EtcItem" name="Spellbook: Freezing Shackle">
+		<!-- Spellbook required for Freezing Shackle magic. Used by Spellsingers. -->
+		<set name="icon" val="icon.etc_spell_books_element_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3850" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3085" type="EtcItem" name="Spellbook: Hydro Blast">
+		<!-- Spellbook required for Hydro Blast magic. Used by Spellsingers. -->
+		<set name="icon" val="icon.etc_spell_books_element_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3086" type="EtcItem" name="Spellbook: Frost Bolt">
+		<!-- Spellbook required for Frost Bolt magic. Used by Spellsingers. -->
+		<set name="icon" val="icon.etc_spell_books_element_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3087" type="EtcItem" name="Spellbook: Ice Dagger">
+		<!-- Spellbook required for Ice Dagger magic. Used by Spellsingers. -->
+		<set name="icon" val="icon.etc_spell_books_element_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3850" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3088" type="EtcItem" name="Spellbook: Freezing Skin">
+		<!-- Spellbook required for Freezing Skin magic. Used by Spellsingers. -->
+		<set name="icon" val="icon.etc_spell_books_element_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3089" type="EtcItem" name="Spellbook: Tempest">
+		<!-- Spellbook required for Tempest magic. Used by Spellhowlers. -->
+		<set name="icon" val="icon.etc_spell_books_element_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="4600" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3090" type="EtcItem" name="Spellbook: Hurricane">
+		<!-- Spellbook required for Hurricane magic. Used by Spellhowlers. -->
+		<set name="icon" val="icon.etc_spell_books_element_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3091" type="EtcItem" name="Spellbook: Servitor Magic Shield">
+		<!-- Spellbook required for Servitor Magic Shield magic. Used by Warlocks, Elemental Summoners and Phantom Summoners. -->
+		<set name="icon" val="icon.etc_spell_books_summon_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3850" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3092" type="EtcItem" name="Spellbook: Servitor Physical Shield">
+		<!-- Spellbook required for Servitor Physical Shield magic. Used by Warlocks, Elemental Summoners and Phantom Summoners. -->
+		<set name="icon" val="icon.etc_spell_books_summon_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3093" type="EtcItem" name="Spellbook: Servitor Haste">
+		<!-- Spellbook required for Servitor Haste magic. Used by Warlocks, Elemental Summoners and Phantom Summoners. -->
+		<set name="icon" val="icon.etc_spell_books_summon_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3850" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3094" type="EtcItem" name="Spellbook: Invigor">
+		<!-- Spellbook required for Invigor magic. Used by Prophets. -->
+		<set name="icon" val="icon.etc_spell_books_assistance_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3095" type="EtcItem" name="Spellbook: Magic Barrier">
+		<!-- Spellbook required for Magic Barrier magic. Used by Prophets. -->
+		<set name="icon" val="icon.etc_spell_books_assistance_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3850" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3096" type="EtcItem" name="Spellbook: Bless the Body">
+		<!-- Spellbook required for Bless the Body magic. Used by Prophets. -->
+		<set name="icon" val="icon.etc_spell_books_assistance_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3850" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3097" type="EtcItem" name="Spellbook: Bless the Soul">
+		<!-- Spellbook required for Bless the Soul magic. Used by Prophets. -->
+		<set name="icon" val="icon.etc_spell_books_assistance_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3850" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3098" type="EtcItem" name="Spellbook: Return">
+		<!-- Spellbook required for Return magic. Used by Prophets and Elven Elders. -->
+		<set name="icon" val="icon.etc_spell_books_assistance_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3200" />
+		<set name="is_stackable" val="true" />
+	</item>
+	<item id="3099" type="EtcItem" name="Spellbook: Haste">
+		<!-- Spellbook required for Haste magic. Used by Prophets. -->
+		<set name="icon" val="icon.etc_spell_books_assistance_i00" />
+		<set name="immediate_effect" val="true" />
+		<set name="material" val="PAPER" />
+		<set name="weight" val="120" />
+		<set name="price" val="3850" />
+		<set name="is_stackable" val="true" />
+	</item>
+</list>

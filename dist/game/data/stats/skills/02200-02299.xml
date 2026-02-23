@@ -1,0 +1,737 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/skills.xsd">
+	<skill id="2200" levels="3" name="Item - Jade Treasue Box">
+		<table name="#extractableItems">
+			6908,24,28.5;7609,26,26.0572
+			6908,24,31.5;7609,26,28.8
+			6908,24,34.5;7609,26,31.5428
+		</table>
+		<table name="#itemConsumeId">6495 6496 6497</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="#itemConsumeId" />
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2201" levels="3" name="Item - Blue Treasue Box">
+		<table name="#extractableItems">
+			6908,24,39.5;7609,26,36.1144
+			6904,1,5.028;6908,28,17.957;6909,8,16.76;7609,30,16.76
+			6904,1,5.22;6908,28,18.6428;6909,8,17.3999;7609,30,17.4
+		</table>
+		<table name="#itemConsumeId">6498 6499 6500</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="#itemConsumeId" />
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2202" levels="3" name="Item - Yellow Treasue Box">
+		<table name="#extractableItems">
+			6904,1,5.424;6908,28,19.3714;6909,8,18.0799;7609,30,18.08
+			6904,1,6.816;6908,28,24.3428;6909,8,22.7199;7609,30,22.72
+			6904,1,7.296;6908,56,13.0286;6909,14,10.8088;7609,30,24.32
+		</table>
+		<table name="#itemConsumeId">6501 6502 6503</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="#itemConsumeId" />
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2203" levels="3" name="Item - Orange Treasue Box">
+		<table name="#extractableItems">
+			6904,1,7.788;6908,56,13.9072;6909,14,11.5376;7609,60,12.98
+			6910,3,50.688
+			6910,3,54.912
+		</table>
+		<table name="#itemConsumeId">6504 6505 6506</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="#itemConsumeId" />
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2204" levels="3" name="Item - Violet Treasue Box">
+		<table name="#extractableItems">
+			6910,3,58.24
+			6910,3,69.76
+			6910,3,74.048
+		</table>
+		<table name="#itemConsumeId">6507 6508 6509</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="#itemConsumeId" />
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2205" levels="3" name="Item - Red Treasue Box">
+		<table name="#extractableItems">
+			6910,3,84.864
+			6910,3,89.728
+			6910,6,54.88
+		</table>
+		<table name="#itemConsumeId">6510 6511 6512</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="#itemConsumeId" />
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2206" levels="3" name="Item - White Treasue Box">
+		<table name="#extractableItems">
+			6910,6,58.048
+			6910,6,61.536
+			6910,6,65.248
+		</table>
+		<table name="#itemConsumeId">6513 6514 6515</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="#itemConsumeId" />
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2207" levels="3" name="Item - Black Treasue Box">
+		<table name="#extractableItems">
+			6910,6,69.312
+			6910,6,76.896
+			6910,6,81.664
+		</table>
+		<table name="#itemConsumeId">6516 6517 6518</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="#itemConsumeId" />
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2208" levels="1" name="Item - Blessed Scroll of Enchant Armor">
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="NONE" />
+		<set name="magicLevel" val="1" />
+	</skill>
+	<skill id="2209" levels="1" name="Item - Blessed Scroll of Enchant Armor">
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="NONE" />
+		<set name="magicLevel" val="1" />
+	</skill>
+	<skill id="2210" levels="1" name="Item - Blessed Scroll of Enchant Armor">
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="NONE" />
+		<set name="magicLevel" val="1" />
+	</skill>
+	<skill id="2211" levels="1" name="Item - Blessed Scroll of Enchant Armor">
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="NONE" />
+		<set name="magicLevel" val="1" />
+	</skill>
+	<skill id="2212" levels="1" name="Item - Blessed Scroll of Enchant Armor">
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="NONE" />
+		<set name="magicLevel" val="1" />
+	</skill>
+	<skill id="2213" levels="21" name="Escape - Talking Island Village">
+		<table name="#coordX">-84200 46915 9723 -45208 115158 -80831 -12728 15633 17860 83378 105760 111388 82916 85289 117052 146818 147922 43840 87326 149800 107946</table>
+		<table name="#coordY">244566 51441 15576 -112502 -178170 149808 122726 142962 170191 147999 113064 219331 53210 16225 76884 25807 -55316 -47779 -143370 -79999 -52280</table>
+		<table name="#coordZ">-3728 -2976 -4568 -240 -880 -3040 -3112 -2696 -3496 -3400 -3176 -3544 -1488 -3672 -2688 -2008 -2728 -792 -1319 -5568 -2408</table>
+		<table name="#itemConsumeId">7117 7118 7119 7120 7121 7122 7123 7124 7125 7126 7127 7128 7129 7130 7131 7132 7133 7134 7135 7618 7619</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="hitTime" val="20000" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="#itemConsumeId" />
+		<set name="magicLevel" val="1" />
+		<conditions msgId="113" addName="1">
+			<and>
+				<player canEscape="true" />
+				<not>
+					<player insideZoneId="10501, 10502, 10503" />
+				</not>
+			</and>
+		</conditions>
+		<effects>
+			<effect name="Teleport">
+				<param x="#coordX" y="#coordY" z="#coordZ" />
+			</effect>
+		</effects>
+	</skill>
+	<skill id="2214" levels="10" name="Scroll of Escape to Giran Castle Town">
+		<table name="#coordX">-84200 46915 9723 -45208 115158 -118092 0 0 0 83378</table>
+		<table name="#coordY">244566 51441 15576 -112502 -178170 46955 0 0 0 147999</table>
+		<table name="#coordZ">-3728 -2976 -4568 -240 -880 342 0 0 0 -3400</table>
+		<table name="#itemConsumeId">7554 7555 7556 7557 7558 9716 0 0 0 7559</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="hitTime" val="20000" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="#itemConsumeId" />
+		<set name="magicLevel" val="1" />
+		<conditions msgId="113" addName="1">
+			<and>
+				<player canEscape="true" />
+				<not>
+					<player insideZoneId="10501, 10502, 10503" />
+				</not>
+			</and>
+		</conditions>
+		<effects>
+			<effect name="Teleport">
+				<param x="#coordX" y="#coordY" z="#coordZ" />
+			</effect>
+		</effects>
+	</skill>
+	<skill id="2215" levels="4" name="Item - Quest Special Box">
+		<table name="#extractableItems">
+			57,100000,8;3456,1,10;3454,1,5.5;3455,1,5.5;3448,1,17.6;3449,1,17;3446,1,18;3468,1,18.4
+			57,100000,7.5;3456,1,6;3454,1,7;3455,1,7.4;3448,1,10;3449,1,22;3446,1,19.6;3468,1,20.4
+			57,100000,12;3456,1,10;3470,1,12;3454,1,6;3455,1,6.5;3450,1,10;3452,1,19.5;3447,1,24
+			57,100000,19;3456,1,10;3470,1,5.9;3454,1,4;3455,1,6.5;3450,1,10;3452,1,19.6;3447,1,25
+		</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2216" levels="4" name="Item - Quest Special Fish">
+		<table name="#extractableItems">
+			57,100,34;1867,1,33;1872,1,33
+			57,100,34;1867,1,33;1872,1,33
+			57,100,34;1867,1,33;1872,1,33
+			57,100,34;1867,1,33;1872,1,33
+		</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2217" levels="5" name="Item - Quest Treasure Box">
+		<table name="#extractableItems">
+			6697,1,9;6693,1,9;6694,1,9;6696,1,9;7579,1,9;6690,1,9;6688,1,9;6691,1,9;6689,1,9;6695,1,9;57,330000,10
+			6706,1,8.5;6710,1,8.5;6714,1,8.5;6703,1,8.5;6704,1,8.5;6708,1,8.5;6709,1,8.5;6712,1,8.5;6713,1,8.5;6705,1,8.5;13099,1,8.5;57,292000,15
+			6702,1,20;6701,1,20;6707,1,20;6711,1,20;57,93000,20
+			6857,1,8.5;6859,1,8.5;6867,1,8.5;6869,1,8.5;6875,1,8.5;6877,1,8.5;6861,1,8.5;13100,1,8.5;6863,1,8.5;6871,1,8.5;6879,1,8.5;57,340000,15
+			6855,1,20;6853,1,20;6865,1,20;6873,1,20;57,850000,20
+		</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2218" levels="3" name="Item - Quest Sac">
+		<table name="#extractableItems">
+			1882,3,20;1876,6,16;1879,3,12;1881,1,12;1880,4,10;1874,1,10;1875,3,10;1877,3,10
+			4039,4,20;4043,4,20;4044,4,20;4040,2,15;4042,2,15;4041,1,10
+			1060,1,39;1061,1,11.8;1539,1,32.2;1540,1,3;735,1,7;6035,1,7
+		</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2219" levels="2" name="Item - Quest Sac">
+		<table name="#extractableItems">
+			1882,20,18;1876,20,16;1879,20,10;1881,20,10;1880,20,5;1874,20,10;1875,20,10;1877,20,11;57,150000,10
+			4039,4,20;4043,4,20;4044,4,20;4040,4,10;4042,4,10;4041,4,10;57,160000,10
+		</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2220" levels="9" name="Item - Easy Green Fish">
+		<table name="#extractableItems">
+			6908,3,55.2
+			6908,3,56.8
+			6908,3,61.6
+			6908,3,67.2
+			6908,3,75.2
+			6908,3,83.2
+			6908,3,90.4
+			6908,3,99.2
+			6908,6,53.2
+		</table>
+		<table name="#itemConsumeId">7726 7727 7728 7729 7730 7731 7732 7733 7734</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="#itemConsumeId" />
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2221" levels="9" name="Item - Easy Jade Fish">
+		<table name="#extractableItems">
+			6908,6,57.2
+			6908,6,66.8
+			6908,6,66.8
+			6908,6,66.4
+			6908,6,66
+			6908,6,66
+			6908,6,65.6
+			6908,6,65.6
+			6908,6,65.2
+		</table>
+		<table name="#itemConsumeId">7735 7736 7737 7738 7739 7740 7741 7742 7743</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="#itemConsumeId" />
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2222" levels="9" name="Item - Easy Blue Fish">
+		<table name="#extractableItems">
+			6908,6,65.2
+			6908,6,65.2
+			6908,6,79.2
+			6904,1,1.616;6908,6,26.9331;6909,2,16.1598
+			6904,1,1.576;6908,6,26.2665;6909,2,15.7598
+			6904,1,1.68;6908,6,27.9998;6909,2,16.7998
+			6904,1,1.704;6908,6,28.3998;6909,2,17.0398
+			6904,1,1.728;6908,6,28.7998;6909,2,17.2798
+			6904,1,1.744;6908,6,29.0665;6909,2,17.4398
+		</table>
+		<table name="#itemConsumeId">7744 7745 7746 7747 7748 7749 7750 7751 7752</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="#itemConsumeId" />
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2223" levels="9" name="Item - Easy Yellow Fish">
+		<table name="#extractableItems">
+			6904,1,1.768;6908,6,29.4664;6909,2,17.6798
+			6904,1,1.792;6908,6,29.8664;6909,2,17.9198
+			6904,1,1.808;6908,6,30.1331;6909,2,18.0798
+			6904,1,2.16;6908,12,17.9998;6909,2,21.5998
+			6904,1,2.216;6908,8,29.5464;6909,2,22.16
+			6904,1,2.272;6908,8,30.2932;6909,2,22.72
+			6904,1,2.32;6908,8,30.9332;6909,2,23.2
+			6904,1,2.376;6908,8,31.68;6909,2,23.76
+			6904,1,2.432;6908,8,32.4264;6909,2,24.32
+		</table>
+		<table name="#itemConsumeId">7753 7754 7755 7756 7757 7758 7759 7760 7761</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="#itemConsumeId" />
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2224" levels="9" name="Item - Easy Orange Fish">
+		<table name="#extractableItems">
+			6904,1,2.488;6908,8,33.1732;6909,2,24.88
+			6904,1,2.544;6908,16,16.96;6909,2,25.44
+			6904,1,2.6;6908,16,17.3332;6909,2,26
+			6910,1,31.872
+			6910,1,37.248
+			6910,1,38.016
+			6910,1,39.168
+			6910,1,40.32
+			6910,1,41.184
+		</table>
+		<table name="#itemConsumeId">7762 7763 7764 7765 7766 7767 7768 7769 7770</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="#itemConsumeId" />
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2225" levels="9" name="Item - Easy Violet Fish">
+		<table name="#extractableItems">
+			6910,1,42.048
+			6910,1,42.912
+			6910,1,43.68
+			6910,1,44.64
+			6910,1,45.504
+			6910,2,26.16
+			6910,2,26.688
+			6910,2,27.216
+			6910,2,27.792
+		</table>
+		<table name="#itemConsumeId">7771 7772 7773 7774 7775 7776 7777 7778 7779</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="#itemConsumeId" />
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2226" levels="9" name="Item - Easy Red Fish">
+		<table name="#extractableItems">
+			6910,2,30.672
+			6910,2,31.248
+			6910,2,31.824
+			6910,2,32.448
+			6910,2,33.024
+			6910,2,33.648
+			6910,2,37.872
+			6910,2,38.592
+			6910,2,41.184
+		</table>
+		<table name="#itemConsumeId">7780 7781 7782 7783 7784 7785 7786 7787 7788</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="#itemConsumeId" />
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2227" levels="9" name="Item - Easy White Fish">
+		<table name="#extractableItems">
+			6910,2,41.952
+			6910,2,42.768
+			6910,2,43.536
+			6910,2,44.4
+			6910,2,45.312
+			6910,2,46.176
+			6910,2,47.088
+			6910,2,48
+			6910,2,48.96
+		</table>
+		<table name="#itemConsumeId">7789 7790 7791 7792 7793 7794 7795 7796 7797</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="#itemConsumeId" />
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2228" levels="9" name="Item - Easy Black Fish">
+		<table name="#extractableItems">
+			6910,2,49.968
+			6910,2,67.968
+			6910,2,69.312
+			6910,2,73.92
+			6910,2,75.456
+			6910,2,76.928
+			6910,2,78.464
+			6910,2,80.064
+			6910,2,81.664
+		</table>
+		<table name="#itemConsumeId">7798 7799 7800 7801 7802 7803 7804 7805 7806</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="#itemConsumeId" />
+		<set name="magicLevel" val="1" />
+		<set name="capsuled_items_skill" val="#extractableItems" />
+		<conditions msgId="129">
+			<and>
+				<player invSize="10" />
+				<player weight="80" />
+			</and>
+		</conditions>
+		<effects>
+			<effect name="RestorationRandom" />
+		</effects>
+	</skill>
+	<skill id="2229" levels="8" name="Key of Treasure Chest - 1">
+		<table name="#effectPoints">-1 -2 -3 -4 -5 -6 -7 -8</table>
+		<table name="#itemConsumeId">6665 6666 6667 6668 6669 6670 6671 6672</table>
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="UNLOCKABLE" />
+		<set name="castRange" val="40" />
+		<set name="effectPoint" val="#effectPoints" />
+		<set name="effectRange" val="400" />
+		<set name="hitTime" val="500" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="#itemConsumeId" />
+		<set name="magicLevel" val="10" />
+		<set name="reuseDelay" val="8000" />
+		<conditions msgId="109">
+			<target npcType="Chest" />
+		</conditions>
+		<effects>
+			<effect name="OpenChest" />
+		</effects>
+	</skill>
+	<skill id="2230" levels="1" name="Item - Theme Sound Crystal">
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="magicLevel" val="1" />
+	</skill>
+	<skill id="2231" levels="1" name="Amulet: Protection of Valakas">
+		<!-- Amulet: Protection of Valakas. Increases one's resistance to attack when Valakas' attacks with its front claws. -->
+		<set name="icon" val="icon.etc_blesscharm_ward_val_i00" />
+		<set name="operateType" val="A2" />
+		<set name="targetType" val="SELF" />
+		<set name="abnormalLevel" val="1" />
+		<set name="abnormalTime" val="1200" />
+		<set name="abnormalType" val="VALAKAS_ITEM" />
+		<set name="hitTime" val="1000" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="6652" /> <!-- Amulet: Protection of Valakas -->
+		<set name="magicLevel" val="75" />
+		<set name="reuseDelay" val="1000" />
+		<effects>
+			<effect name="DefenceTrait">
+				<param VALAKAS="11" />
+			</effect>
+		</effects>
+	</skill>
+	<skill id="2232" levels="1" name="Amulet: Slay Valakas">
+		<!-- Amulet: Slay Valakas. Increases one's P. Atk. when fighting against Valakas. -->
+		<set name="icon" val="icon.etc_blesscharm_slay_val_i00" />
+		<set name="operateType" val="A2" />
+		<set name="targetType" val="SELF" />
+		<set name="abnormalLevel" val="1" />
+		<set name="abnormalTime" val="1200" />
+		<set name="abnormalType" val="VALAKAS_ITEM" />
+		<set name="hitTime" val="1000" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="6655" /> <!-- Amulet: Slay Valakas -->
+		<set name="magicLevel" val="75" />
+		<set name="reuseDelay" val="1000" />
+		<effects>
+			<effect name="AttackTrait">
+				<param VALAKAS="-20" />
+			</effect>
+		</effects>
+	</skill>
+	<skill id="2233" levels="1" name="Amulet: Flames of Valakas">
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="hitTime" val="1000" />
+		<set name="isMagic" val="2" /> <!-- Static Skill -->
+		<set name="itemConsumeCount" val="1" />
+		<set name="itemConsumeId" val="6654" /> <!-- Amulet: Flames of Valakas -->
+		<set name="magicLevel" val="75" />
+		<set name="reuseDelay" val="10000" />
+		<effects>
+			<effect name="DispelBySlot">
+				<param dispel="DRAGON_BREATH,1" />
+			</effect>
+		</effects>
+	</skill>
+</list>

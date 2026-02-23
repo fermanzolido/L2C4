@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list enabled="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/spawns.xsd">
+	<spawn name="23_15">
+		<npc id="31369" x="123712" y="-72224" z="-3008" heading="16000" respawnDelay="60" /> <!-- Mennon -->
+	</spawn>
+</list>

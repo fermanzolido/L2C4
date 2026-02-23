@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/skills.xsd">
+	<skill id="7001" levels="1" name="Dispel Buff">
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="ONE" />
+		<set name="castRange" val="400" />
+		<set name="effectPoint" val="100" />
+		<set name="effectRange" val="900" />
+		<set name="magicLevel" val="99" />
+		<effects>
+			<effect name="DispelByCategory">
+				<param slot="buff" rate="100" max="20" />
+			</effect>
+		</effects>
+	</skill>
+	<skill id="7002" levels="1" name="Dispel Debuff">
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="ONE" />
+		<set name="castRange" val="400" />
+		<set name="effectPoint" val="100" />
+		<set name="effectRange" val="900" />
+		<set name="magicLevel" val="99" />
+		<effects>
+			<effect name="DispelByCategory">
+				<param slot="debuff" rate="100" max="20" />
+			</effect>
+		</effects>
+	</skill>
+	<skill id="7003" levels="1" name="Dispel All">
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="ONE" />
+		<set name="castRange" val="400" />
+		<set name="effectPoint" val="100" />
+		<set name="effectRange" val="900" />
+		<set name="magicLevel" val="99" />
+		<effects>
+			<effect name="DispelByCategory">
+				<param slot="buff" rate="100" max="20" />
+			</effect>
+			<effect name="DispelByCategory">
+				<param slot="debuff" rate="100" max="20" />
+			</effect>
+		</effects>
+	</skill>
+	<skill id="7004" levels="2" name="Dispel Petrification">
+		<!-- Cures petrification with the effect of 2 or less. -->
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="effectPoint" val="566" />
+		<set name="isMagic" val="1" /> <!-- Magic Skill -->
+		<set name="magicLevel" val="60" />
+		<set name="reuseDelay" val="10000" />
+		<effects>
+			<effect name="DispelBySlot">
+				<param dispel="TURN_STONE,2" />
+			</effect>
+		</effects>
+	</skill>
+	<skill id="7005" levels="4" name="Greater Chant of Vampire">
+		<!-- Temporarily allows party members to partially restore HP using damage inflicted upon the enemy. Excludes damage from skill or range attack. Effect 4. -->
+		<set name="operateType" val="A2" />
+		<set name="targetType" val="CLAN_MEMBER" />
+		<set name="abnormalLevel" val="4" />
+		<set name="abnormalTime" val="1200" />
+		<set name="abnormalType" val="VAMPIRIC_ATTACK" />
+		<set name="castRange" val="400" />
+		<set name="effectPoint" val="655" />
+		<set name="effectRange" val="900" />
+		<set name="hitTime" val="2500" />
+		<set name="isMagic" val="1" /> <!-- Magic Skill -->
+		<set name="magicLevel" val="74" />
+		<set name="mpConsume" val="217" />
+		<set name="mpInitialConsume" val="55" />
+		<set name="reuseDelay" val="20000" />
+		<effects>
+			<effect name="Buff">
+				<add stat="absorbDam" val="9" /> <!-- absorb 9% HP from damage inflicted on enemies -->
+			</effect>
+		</effects>
+	</skill>
+	<skill id="7006" levels="13" name="Greater Heart of Paagrio">
+		<!-- Greatly enhances alliance members' HP restoration. Effect 6. -->
+		<set name="operateType" val="A2" />
+		<set name="targetType" val="SELF" />
+		<set name="abnormalLevel" val="6" />
+		<set name="abnormalTime" val="15" />
+		<set name="abnormalType" val="LIFE_FORCE_OTHERS" />
+		<set name="castRange" val="400" />
+		<set name="effectPoint" val="655" />
+		<set name="effectRange" val="900" />
+		<set name="hitTime" val="2500" />
+		<set name="isMagic" val="1" /> <!-- Magic Skill -->
+		<set name="mpConsume" val="272" />
+		<set name="reuseDelay" val="20000" />
+	</skill>
+	<skill id="7007" levels="4" name="Greater Seal of Flame">
+		<!-- A protective ring of fire that continuously reduces HP of surrounding enemies and their alliance members. Effect 8. -->
+		<set name="operateType" val="A2" />
+		<set name="targetType" val="SELF" />
+		<set name="abnormalLevel" val="8" />
+		<set name="abnormalTime" val="15" />
+		<set name="abnormalType" val="DOT_ATTR" />
+		<set name="activateRate" val="35" />
+		<set name="basicProperty" val="MEN" />
+		<set name="castRange" val="400" />
+		<set name="effectPoint" val="-409" />
+		<set name="effectRange" val="900" />
+		<set name="hitTime" val="4000" />
+		<set name="isDebuff" val="true" />
+		<set name="isMagic" val="1" /> <!-- Magic Skill -->
+		<set name="lvlBonusRate" val="1" />
+		<set name="mpConsume" val="153" />
+		<set name="reuseDelay" val="20000" />
+	</skill>
+	<skill id="7008" levels="1" name="not_used">
+		<set name="operateType" val="P" />
+		<set name="targetType" val="SELF" />
+		<set name="magicLevel" val="1" />
+	</skill>
+	<skill id="7009" levels="1" name="not_used">
+		<set name="operateType" val="P" />
+		<set name="targetType" val="SELF" />
+		<set name="magicLevel" val="1" />
+	</skill>
+	<skill id="7010" levels="1" name="not_used">
+		<set name="operateType" val="P" />
+		<set name="targetType" val="SELF" />
+		<set name="magicLevel" val="1" />
+	</skill>
+	<skill id="7011" levels="1" name="not_used">
+		<set name="operateType" val="P" />
+		<set name="targetType" val="SELF" />
+		<set name="magicLevel" val="1" />
+	</skill>
+	<skill id="7012" levels="1" name="not_used">
+		<set name="operateType" val="P" />
+		<set name="targetType" val="SELF" />
+		<set name="magicLevel" val="1" />
+	</skill>
+	<skill id="7013" levels="1" name="not_used">
+		<set name="operateType" val="P" />
+		<set name="targetType" val="SELF" />
+		<set name="magicLevel" val="1" />
+	</skill>
+	<skill id="7014" levels="1" name="Test - Critical Damage Up">
+		<set name="operateType" val="T" />
+		<set name="targetType" val="SELF" />
+		<set name="abnormalVisualEffect" val="NONE" />
+		<set name="magicLevel" val="85" />
+	</skill>
+	<skill id="7015" levels="1" name="Test - Critical Damage Down">
+		<set name="operateType" val="T" />
+		<set name="targetType" val="SELF" />
+		<set name="abnormalVisualEffect" val="NONE" />
+		<set name="magicLevel" val="85" />
+	</skill>
+	<skill id="7016" levels="1" name="Test - Critical Damage Up">
+		<set name="operateType" val="T" />
+		<set name="targetType" val="SELF" />
+		<set name="abnormalVisualEffect" val="NONE" />
+		<set name="magicLevel" val="85" />
+	</skill>
+	<skill id="7017" levels="1" name="Test - Critical Damage Down">
+		<set name="operateType" val="T" />
+		<set name="targetType" val="SELF" />
+		<set name="abnormalVisualEffect" val="NONE" />
+		<set name="magicLevel" val="85" />
+	</skill>
+	<skill id="7018" levels="1" name="Test - Critical Rate Up">
+		<set name="operateType" val="T" />
+		<set name="targetType" val="SELF" />
+		<set name="abnormalVisualEffect" val="NONE" />
+		<set name="magicLevel" val="85" />
+	</skill>
+	<skill id="7019" levels="1" name="Test - Critical Rate Down">
+		<set name="operateType" val="T" />
+		<set name="targetType" val="SELF" />
+		<set name="abnormalVisualEffect" val="NONE" />
+		<set name="magicLevel" val="85" />
+	</skill>
+	<skill id="7020" levels="1" name="Test - Critical Rate Up">
+		<set name="operateType" val="T" />
+		<set name="targetType" val="SELF" />
+		<set name="abnormalVisualEffect" val="NONE" />
+		<set name="magicLevel" val="85" />
+	</skill>
+	<skill id="7021" levels="1" name="Test - Critical Rate Down">
+		<set name="operateType" val="T" />
+		<set name="targetType" val="SELF" />
+		<set name="abnormalVisualEffect" val="NONE" />
+		<set name="magicLevel" val="85" />
+	</skill>
+	<skill id="7022" levels="1" name="Test - Find Hidden Door">
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="affectLimit" val="6-12" />
+		<set name="hitTime" val="1000" />
+		<set name="magicLevel" val="85" />
+	</skill>
+	<skill id="7023" levels="1" name="not_used">
+		<set name="operateType" val="P" />
+		<set name="targetType" val="SELF" />
+		<set name="magicLevel" val="1" />
+	</skill>
+	<skill id="7024" levels="1" name="not_used">
+		<set name="operateType" val="P" />
+		<set name="targetType" val="SELF" />
+		<set name="magicLevel" val="1" />
+	</skill>
+	<skill id="7025" levels="1" name="not_used">
+		<set name="operateType" val="P" />
+		<set name="targetType" val="SELF" />
+		<set name="magicLevel" val="1" />
+	</skill>
+	<skill id="7026" levels="1" name="not_used">
+		<set name="operateType" val="P" />
+		<set name="targetType" val="SELF" />
+		<set name="magicLevel" val="1" />
+	</skill>
+	<skill id="7027" levels="1" name="not_used">
+		<set name="operateType" val="P" />
+		<set name="targetType" val="SELF" />
+		<set name="magicLevel" val="1" />
+	</skill>
+	<skill id="7028" levels="1" name="For Stationary NPCs">
+		<set name="operateType" val="P" />
+		<set name="targetType" val="SELF" />
+		<set name="magicLevel" val="99" />
+		<effects>
+			<effect name="DefenceTrait">
+				<param DERANGEMENT="100" />
+			</effect>
+		</effects>
+	</skill>
+	<skill id="7029" levels="4" name="Super Haste">
+		<!-- Level 1: Becomes very quick -->
+		<!-- Level 2: Becomes very very quick -->
+		<!-- Level 3: Really, really gets faster and stronger. -->
+		<!-- Level 4: Gives the battle power of two people to one person. -->
+		<table name="#amount">1 1 1 1</table>
+		<table name="#mAtkSpd">2 3 4 5</table>
+		<table name="#pAtk">250 500 750 1500</table>
+		<table name="#mAtk">250 500 750 1500</table>
+		<table name="#pAtkSpd">2 3 4 5</table>
+		<table name="#reuse">0.01 0.01 0.01 0.01</table>
+		<table name="#runSpd">2 3 4 5</table>
+		<set name="icon" val="icon.skill7029" />
+		<set name="operateType" val="T" />
+		<set name="targetType" val="SELF" />
+		<set name="effectPoint" val="1" />
+		<set name="magicLevel" val="1" />
+		<effects>
+			<effect name="Buff">
+				<mul stat="pAtkSpd" val="#pAtkSpd" />
+				<mul stat="runSpd" val="#runSpd" />
+				<mul stat="mAtkSpd" val="#mAtkSpd" />
+				<mul stat="pAtk" val="#pAtk" />
+				<mul stat="mAtk" val="#mAtk" /> <!-- custom -->
+				<mul stat="pReuse" val="#reuse" />
+				<mul stat="mReuse" val="#reuse" />
+				<mul stat="regHp" val="#amount" />
+				<mul stat="regMp" val="#amount" />
+				<mul stat="maxMp" val="#amount" />
+				<mul stat="weightLimit" val="#amount" />
+			</effect>
+		</effects>
+	</skill>
+	<skill id="7030" levels="1" name="Summon King Bugbear">
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="hitTime" val="4000" />
+		<set name="isMagic" val="1" /> <!-- Magic Skill -->
+		<set name="itemConsumeCount" val="8" />
+		<set name="itemConsumeId" val="1458" /> <!-- Crystal: D Grade -->
+		<set name="magicLevel" val="1" />
+		<set name="mpConsume" val="3" />
+		<set name="reuseDelay" val="4000" />
+		<conditions>
+			<player canSummon="true" />
+		</conditions>
+		<effects>
+			<effect name="Summon">
+				<param npcId="20150" />
+				<param lifeTime="1200" />
+			</effect>
+		</effects>
+	</skill>
+	<skill id="7031" levels="1" name="Summon Skeleton Royal Guard">
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="hitTime" val="4000" />
+		<set name="isMagic" val="1" /> <!-- Magic Skill -->
+		<set name="itemConsumeCount" val="8" />
+		<set name="itemConsumeId" val="1458" /> <!-- Crystal: D Grade -->
+		<set name="magicLevel" val="1" />
+		<set name="mpConsume" val="3" />
+		<set name="reuseDelay" val="4000" />
+		<conditions>
+			<player canSummon="true" />
+		</conditions>
+		<effects>
+			<effect name="Summon">
+				<param npcId="20169" />
+				<param lifeTime="1200" />
+			</effect>
+		</effects>
+	</skill>
+	<skill id="7032" levels="1" name="Summon Hunter Gargoyle">
+		<set name="operateType" val="A1" />
+		<set name="targetType" val="SELF" />
+		<set name="hitTime" val="4000" />
+		<set name="isMagic" val="1" /> <!-- Magic Skill -->
+		<set name="itemConsumeCount" val="8" />
+		<set name="itemConsumeId" val="1458" /> <!-- Crystal: D Grade -->
+		<set name="magicLevel" val="1" />
+		<set name="mpConsume" val="3" />
+		<set name="reuseDelay" val="4000" />
+		<conditions>
+			<player canSummon="true" />
+		</conditions>
+		<effects>
+			<effect name="Summon">
+				<param npcId="20241" />
+				<param lifeTime="1200" />
+			</effect>
+		</effects>
+	</skill>
+</list>

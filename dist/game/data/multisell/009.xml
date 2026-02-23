@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../xsd/multisell.xsd">
+	<npcs>
+		<npc>31562</npc> <!-- Klufe (Fishing Guild Member) -->
+		<npc>31563</npc> <!-- Perelin (Fishing Guild Member) -->
+		<npc>31564</npc> <!-- Mishini (Fishing Guild Member) -->
+		<npc>31565</npc> <!-- Ogord (Fishing Guild Member) -->
+		<npc>31566</npc> <!-- Ropfi (Fishing Guild Member) -->
+		<npc>31567</npc> <!-- Bleaker (Fishing Guild Member) -->
+		<npc>31568</npc> <!-- Pamfus (Fishing Guild Member) -->
+		<npc>31569</npc> <!-- Cyano (Fishing Guild Member) -->
+		<npc>31570</npc> <!-- Lanosco (Fishing Guild Member) -->
+		<npc>31571</npc> <!-- Hufs (Fishing Guild Member) -->
+		<npc>31572</npc> <!-- O'Fulle (Fishing Guild Member) -->
+		<npc>31573</npc> <!-- Monakan (Fishing Guild Member) -->
+		<npc>31574</npc> <!-- Willie (Fishing Guild Member) -->
+		<npc>31575</npc> <!-- Litulon (Fishing Guild Member) -->
+		<npc>31576</npc> <!-- Berix (Fishing Guild Member) -->
+		<npc>31577</npc> <!-- Linnaeus (Fishing Guild Member) -->
+		<npc>31578</npc> <!-- Hilgendorf (Fishing Guild Member) -->
+		<npc>31579</npc> <!-- Klaus (Fishing Guild Member) -->
+		<npc>31696</npc> <!-- Platis (Fishing Guild Member) -->
+		<npc>31697</npc> <!-- Eindarkner (Fishing Guild Member) -->
+	</npcs>
+	<item>
+		<!-- Fish Oil -->
+		<ingredient count="1" id="6908" />
+		<!-- Proof of Catching a Fish -->
+		<production count="1" id="7609" />
+	</item>
+	<item>
+		<!-- Greater Fish Oil -->
+		<ingredient count="1" id="6909" />
+		<!-- Proof of Catching a Fish -->
+		<production count="5" id="7609" />
+	</item>
+	<item>
+		<!-- Premium Fish Oil -->
+		<ingredient count="1" id="6910" />
+		<!-- Proof of Catching a Fish -->
+		<production count="25" id="7609" />
+	</item>
+	<item>
+		<!-- Fish Scale -->
+		<ingredient count="1" id="6911" />
+		<!-- Proof of Catching a Fish -->
+		<production count="4" id="7609" />
+	</item>
+	<item>
+		<!-- Shiny Fish Scale -->
+		<ingredient count="1" id="6912" />
+		<!-- Proof of Catching a Fish -->
+		<production count="6" id="7609" />
+	</item>
+	<item>
+		<!-- Fish Gem -->
+		<ingredient count="1" id="6913" />
+		<!-- Proof of Catching a Fish -->
+		<production count="10" id="7609" />
+	</item>
+	<item>
+		<!-- Shiny Fish Gem -->
+		<ingredient count="1" id="6914" />
+		<!-- Proof of Catching a Fish -->
+		<production count="20" id="7609" />
+	</item>
+	<item>
+		<!-- Thin Fish Bone -->
+		<ingredient count="1" id="6915" />
+		<!-- Proof of Catching a Fish -->
+		<production count="6" id="7609" />
+	</item>
+	<item>
+		<!-- Thick Fish Bone -->
+		<ingredient count="1" id="6916" />
+		<!-- Proof of Catching a Fish -->
+		<production count="9" id="7609" />
+	</item>
+</list>

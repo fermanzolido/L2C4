@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../xsd/buylist.xsd">
+	<item id="5808" price="0" /> <!-- Party Mask -->
+	<item id="6394" price="0" /> <!-- Red Party Mask -->
+	<item id="6843" price="0" /> <!-- Cat Ear -->
+	<item id="6844" price="0" /> <!-- Lady's Hair Pin -->
+	<item id="6845" price="0" /> <!-- Pirate's Eye Patch -->
+	<item id="6846" price="0" /> <!-- Monocle -->
+	<item id="7059" price="0" /> <!-- Hair Accessory for Events -->
+	<item id="7060" price="0" /> <!-- Tateossian Hairband -->
+	<item id="7680" price="0" /> <!-- Raccoon Ear -->
+	<item id="7681" price="0" /> <!-- Outlaw's Eyepatch -->
+	<item id="7682" price="0" /> <!-- Maiden's Hairpin -->
+	<item id="7683" price="0" /> <!-- Rabbit Ear -->
+	<item id="7694" price="0" /> <!-- Noblesse Tiara -->
+	<item id="7695" price="0" /> <!-- Forget-me-not Hairpin -->
+	<item id="7696" price="0" /> <!-- Daisy Hairpin -->
+	<item id="7836" price="0" /> <!-- Santa's Hat -->
+	<item id="7837" price="0" /> <!-- Gold-line Mask -->
+	<item id="7839" price="0" /> <!-- NoItemName -->
+	<item id="7840" price="0" /> <!-- NoItemName -->
+	<item id="7841" price="0" /> <!-- NoItemName -->
+	<item id="7842" price="0" /> <!-- NoItemName -->
+	<item id="7843" price="0" /> <!-- NoItemName -->
+	<item id="7844" price="0" /> <!-- NoItemName -->
+	<item id="7845" price="0" /> <!-- NoItemName -->
+	<item id="7846" price="0" /> <!-- NoItemName -->
+	<item id="7847" price="0" /> <!-- NoItemName -->
+	<item id="7848" price="0" /> <!-- NoItemName -->
+	<item id="7849" price="0" /> <!-- NoItemName -->
+</list>

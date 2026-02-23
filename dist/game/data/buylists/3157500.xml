@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../xsd/buylist.xsd">
+	<npcs>
+		<npc>31575</npc> <!-- Litulon -->
+	</npcs>
+	<item id="7807" /> <!-- Green Colored Lure - For Beginners -->
+	<item id="7808" /> <!-- Purple Colored Lure - For Beginners -->
+	<item id="7809" /> <!-- Yellow Colored Lure - For Beginners -->
+	<item id="6520" /> <!-- Green Colored Lure - Medium Grade -->
+	<item id="6523" /> <!-- Purple Colored Lure - Medium Grade -->
+	<item id="6526" /> <!-- Yellow Colored Lure - Medium Grade -->
+	<item id="6529" /> <!-- Baby Duck Rod -->
+	<item id="6530" /> <!-- Albatross Rod -->
+	<item id="6531" /> <!-- Pelican Rod -->
+	<item id="6532" /> <!-- Kingfisher Rod -->
+	<item id="6533" /> <!-- Cygnus Pole -->
+	<item id="6534" /> <!-- Triton Pole -->
+	<item id="7561" /> <!-- Fishing Manual -->
+</list>
