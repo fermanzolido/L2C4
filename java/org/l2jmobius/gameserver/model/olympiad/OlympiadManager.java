@@ -342,12 +342,24 @@ class OlympiadManager implements Runnable {
 				return Integer.compare(elo2, elo1); // Descending
 			});
 
-			// Take the first two (highest Elo and the one closest to them)
-			opponents.add(list.get(0));
-			opponents.add(list.get(1));
-
-			list.remove(1);
+			// Pick the first player (highest Elo)
+			final Player playerOne = list.get(0);
+			opponents.add(playerOne);
 			list.remove(0);
+
+			// Pick an opponent from the top candidates to add variety
+			// We look at up to 5 next players or 20% of the list, whichever is smaller, but at least 1.
+			int searchScope = Math.min(Math.max(1, list.size() / 5), 5);
+			if (searchScope > list.size()) {
+				searchScope = list.size();
+			}
+
+			// Select a random opponent within the scope
+			final int opponentIndex = Rnd.get(searchScope);
+			final Player playerTwo = list.get(opponentIndex);
+			opponents.add(playerTwo);
+
+			list.remove(opponentIndex);
 		}
 
 		return opponents;
