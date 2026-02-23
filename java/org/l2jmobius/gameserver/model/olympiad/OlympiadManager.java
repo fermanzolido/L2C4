@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -60,7 +61,7 @@ class OlympiadManager implements Runnable {
 	};
 
 	OlympiadManager() {
-		_olympiadInstances = new HashMap<>();
+		_olympiadInstances = new ConcurrentHashMap<>();
 	}
 
 	public static OlympiadManager getInstance() {
@@ -310,11 +311,7 @@ class OlympiadManager implements Runnable {
 
 	protected void removeGame(OlympiadGame game) {
 		if ((_olympiadInstances != null) && !_olympiadInstances.isEmpty()) {
-			for (int i = 0; i < _olympiadInstances.size(); i++) {
-				if (_olympiadInstances.get(i) == game) {
-					_olympiadInstances.remove(i);
-				}
-			}
+			_olympiadInstances.values().remove(game);
 		}
 	}
 
@@ -332,23 +329,26 @@ class OlympiadManager implements Runnable {
 
 	protected List<Player> nextOpponents(List<Player> list) {
 		final List<Player> opponents = new ArrayList<>();
-		if (list.size() < 2) {
-			return opponents;
+
+		synchronized (list) {
+			if (list.size() < 2) {
+				return opponents;
+			}
+
+			// Sort by Elo
+			list.sort((p1, p2) -> {
+				final int elo1 = Olympiad.getNobleStats(p1.getObjectId()).getInt(Olympiad.ELO);
+				final int elo2 = Olympiad.getNobleStats(p2.getObjectId()).getInt(Olympiad.ELO);
+				return Integer.compare(elo2, elo1); // Descending
+			});
+
+			// Take the first two (highest Elo and the one closest to them)
+			opponents.add(list.get(0));
+			opponents.add(list.get(1));
+
+			list.remove(1);
+			list.remove(0);
 		}
-
-		// Sort by Elo
-		list.sort((p1, p2) -> {
-			final int elo1 = Olympiad.getNobleStats(p1.getObjectId()).getInt(Olympiad.ELO);
-			final int elo2 = Olympiad.getNobleStats(p2.getObjectId()).getInt(Olympiad.ELO);
-			return Integer.compare(elo2, elo1); // Descending
-		});
-
-		// Take the first two (highest Elo and the one closest to them)
-		opponents.add(list.get(0));
-		opponents.add(list.get(1));
-
-		list.remove(1);
-		list.remove(0);
 
 		return opponents;
 	}
