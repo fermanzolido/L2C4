@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -416,8 +417,8 @@ public class Olympiad extends ListenersContainer {
 			return;
 		}
 
-		_nonClassBasedRegisters = new ArrayList<>();
-		_classBasedRegisters = new HashMap<>();
+		_nonClassBasedRegisters = Collections.synchronizedList(new ArrayList<>());
+		_classBasedRegisters = new ConcurrentHashMap<>();
 
 		_compStart = Calendar.getInstance();
 		if (OlympiadConfig.OLYMPIAD_USE_CUSTOM_PERIOD_SETTINGS) {
@@ -597,11 +598,8 @@ public class Olympiad extends ListenersContainer {
 			if (_classBasedRegisters.containsKey(noble.getPlayerClass().getId())) {
 				final List<Player> classed = _classBasedRegisters.get(noble.getPlayerClass().getId());
 				classed.add(noble);
-
-				_classBasedRegisters.remove(noble.getPlayerClass().getId());
-				_classBasedRegisters.put(noble.getPlayerClass().getId(), classed);
 			} else {
-				final List<Player> classed = new ArrayList<>();
+				final List<Player> classed = Collections.synchronizedList(new ArrayList<>());
 				classed.add(noble);
 
 				_classBasedRegisters.put(noble.getPlayerClass().getId(), classed);
@@ -713,9 +711,6 @@ public class Olympiad extends ListenersContainer {
 		} else {
 			final List<Player> classed = _classBasedRegisters.get(noble.getPlayerClass().getId());
 			classed.remove(noble);
-
-			_classBasedRegisters.remove(noble.getPlayerClass().getId());
-			_classBasedRegisters.put(noble.getPlayerClass().getId(), classed);
 		}
 
 		noble.sendPacket(SystemMessageId.YOU_HAVE_BEEN_REMOVED_FROM_THE_GRAND_OLYMPIAD_GAMES_WAITING_LIST);
@@ -738,9 +733,6 @@ public class Olympiad extends ListenersContainer {
 			_nonClassBasedRegisters.remove(player);
 		} else if ((classed != null) && classed.contains(player)) {
 			classed.remove(player);
-
-			_classBasedRegisters.remove(player.getPlayerClass().getId());
-			_classBasedRegisters.put(player.getPlayerClass().getId(), classed);
 		}
 	}
 
