@@ -100,129 +100,137 @@ class OlympiadManager implements Runnable {
 
 					if (STADIUMS[i].isFreeToUse()) {
 						if (i < (STADIUMS.length / 2)) {
-							if (readyNonClassed && existNextOpponents(Olympiad.getRegisteredNonClassBased())) {
+							// Check for non-classed matches first
+							List<Player> opponents = null;
+							if (readyNonClassed) {
+								opponents = nextOpponents(Olympiad.getRegisteredNonClassBased());
+							}
+
+							if ((opponents != null) && (opponents.size() == 2)) {
 								try {
-									_olympiadInstances.put(i, new OlympiadGame(i, CompetitionType.NON_CLASSED,
-											nextOpponents(Olympiad.getRegisteredNonClassBased())));
+									_olympiadInstances.put(i, new OlympiadGame(i, CompetitionType.NON_CLASSED, opponents));
 									gamesQueue.put(i, new OlympiadGameTask(_olympiadInstances.get(i)));
 									STADIUMS[i].setStadiaBusy();
 								} catch (Exception ex) {
 									if (_olympiadInstances.get(i) != null) {
 										for (Player player : _olympiadInstances.get(i).getPlayers()) {
-											player.sendMessage(
-													"Your olympiad registration was canceled due to an error");
+											player.sendMessage("Your olympiad registration was canceled due to an error");
 											player.setInOlympiadMode(false);
 											player.setOlympiadStart(false);
 											player.setOlympiadSide(-1);
 											player.setOlympiadGameId(-1);
 										}
-
 										_olympiadInstances.remove(i);
 									}
-
 									if (gamesQueue.get(i) != null) {
 										gamesQueue.remove(i);
 									}
-
 									STADIUMS[i].setStadiaFree();
-
 									// try to reuse this stadia next time
 									i--;
 								}
-							} else if ((readyClasses != null) && existNextOpponents(
-									getRandomClassList(Olympiad.getRegisteredClassBased(), readyClasses))) {
-								try {
-									_olympiadInstances.put(i,
-											new OlympiadGame(i, CompetitionType.CLASSED,
-													nextOpponents(getRandomClassList(Olympiad.getRegisteredClassBased(),
-															readyClasses))));
-									gamesQueue.put(i, new OlympiadGameTask(_olympiadInstances.get(i)));
-									STADIUMS[i].setStadiaBusy();
-								} catch (Exception ex) {
-									if (_olympiadInstances.get(i) != null) {
-										for (Player player : _olympiadInstances.get(i).getPlayers()) {
-											player.sendMessage(
-													"Your olympiad registration was canceled due to an error");
-											player.setInOlympiadMode(false);
-											player.setOlympiadStart(false);
-											player.setOlympiadSide(-1);
-											player.setOlympiadGameId(-1);
+							} else {
+								// Check for classed matches if no non-classed match was found
+								List<Player> classedList = null;
+								if (readyClasses != null) {
+									classedList = getRandomClassList(Olympiad.getRegisteredClassBased(), readyClasses);
+								}
+
+								opponents = null;
+								if (classedList != null) {
+									opponents = nextOpponents(classedList);
+								}
+
+								if ((opponents != null) && (opponents.size() == 2)) {
+									try {
+										_olympiadInstances.put(i, new OlympiadGame(i, CompetitionType.CLASSED, opponents));
+										gamesQueue.put(i, new OlympiadGameTask(_olympiadInstances.get(i)));
+										STADIUMS[i].setStadiaBusy();
+									} catch (Exception ex) {
+										if (_olympiadInstances.get(i) != null) {
+											for (Player player : _olympiadInstances.get(i).getPlayers()) {
+												player.sendMessage("Your olympiad registration was canceled due to an error");
+												player.setInOlympiadMode(false);
+												player.setOlympiadStart(false);
+												player.setOlympiadSide(-1);
+												player.setOlympiadGameId(-1);
+											}
+											_olympiadInstances.remove(i);
 										}
-
-										_olympiadInstances.remove(i);
+										if (gamesQueue.get(i) != null) {
+											gamesQueue.remove(i);
+										}
+										STADIUMS[i].setStadiaFree();
+										// try to reuse this stadia next time
+										i--;
 									}
-
-									if (gamesQueue.get(i) != null) {
-										gamesQueue.remove(i);
-									}
-
-									STADIUMS[i].setStadiaFree();
-
-									// try to reuse this stadia next time
-									i--;
 								}
 							}
 						} else {
-							if ((readyClasses != null) && existNextOpponents(
-									getRandomClassList(Olympiad.getRegisteredClassBased(), readyClasses))) {
+							// Check for classed matches first
+							List<Player> classedList = null;
+							if (readyClasses != null) {
+								classedList = getRandomClassList(Olympiad.getRegisteredClassBased(), readyClasses);
+							}
+
+							List<Player> opponents = null;
+							if (classedList != null) {
+								opponents = nextOpponents(classedList);
+							}
+
+							if ((opponents != null) && (opponents.size() == 2)) {
 								try {
-									_olympiadInstances.put(i,
-											new OlympiadGame(i, CompetitionType.CLASSED,
-													nextOpponents(getRandomClassList(Olympiad.getRegisteredClassBased(),
-															readyClasses))));
+									_olympiadInstances.put(i, new OlympiadGame(i, CompetitionType.CLASSED, opponents));
 									gamesQueue.put(i, new OlympiadGameTask(_olympiadInstances.get(i)));
 									STADIUMS[i].setStadiaBusy();
 								} catch (Exception ex) {
 									if (_olympiadInstances.get(i) != null) {
 										for (Player player : _olympiadInstances.get(i).getPlayers()) {
-											player.sendMessage(
-													"Your olympiad registration was canceled due to an error");
+											player.sendMessage("Your olympiad registration was canceled due to an error");
 											player.setInOlympiadMode(false);
 											player.setOlympiadStart(false);
 											player.setOlympiadSide(-1);
 											player.setOlympiadGameId(-1);
 										}
-
 										_olympiadInstances.remove(i);
 									}
-
 									if (gamesQueue.get(i) != null) {
 										gamesQueue.remove(i);
 									}
-
 									STADIUMS[i].setStadiaFree();
-
 									// try to reuse this stadia next time
 									i--;
 								}
-							} else if (readyNonClassed && existNextOpponents(Olympiad.getRegisteredNonClassBased())) {
-								try {
-									_olympiadInstances.put(i, new OlympiadGame(i, CompetitionType.NON_CLASSED,
-											nextOpponents(Olympiad.getRegisteredNonClassBased())));
-									gamesQueue.put(i, new OlympiadGameTask(_olympiadInstances.get(i)));
-									STADIUMS[i].setStadiaBusy();
-								} catch (Exception ex) {
-									if (_olympiadInstances.get(i) != null) {
-										for (Player player : _olympiadInstances.get(i).getPlayers()) {
-											player.sendMessage(
-													"Your olympiad registration was canceled due to an error");
-											player.setInOlympiadMode(false);
-											player.setOlympiadStart(false);
-											player.setOlympiadSide(-1);
-											player.setOlympiadGameId(-1);
+							} else {
+								// Check for non-classed matches if no classed match was found
+								opponents = null;
+								if (readyNonClassed) {
+									opponents = nextOpponents(Olympiad.getRegisteredNonClassBased());
+								}
+
+								if ((opponents != null) && (opponents.size() == 2)) {
+									try {
+										_olympiadInstances.put(i, new OlympiadGame(i, CompetitionType.NON_CLASSED, opponents));
+										gamesQueue.put(i, new OlympiadGameTask(_olympiadInstances.get(i)));
+										STADIUMS[i].setStadiaBusy();
+									} catch (Exception ex) {
+										if (_olympiadInstances.get(i) != null) {
+											for (Player player : _olympiadInstances.get(i).getPlayers()) {
+												player.sendMessage("Your olympiad registration was canceled due to an error");
+												player.setInOlympiadMode(false);
+												player.setOlympiadStart(false);
+												player.setOlympiadSide(-1);
+												player.setOlympiadGameId(-1);
+											}
+											_olympiadInstances.remove(i);
 										}
-
-										_olympiadInstances.remove(i);
+										if (gamesQueue.get(i) != null) {
+											gamesQueue.remove(i);
+										}
+										STADIUMS[i].setStadiaFree();
+										// try to reuse this stadia next time
+										i--;
 									}
-
-									if (gamesQueue.get(i) != null) {
-										gamesQueue.remove(i);
-									}
-
-									STADIUMS[i].setStadiaFree();
-
-									// try to reuse this stadia next time
-									i--;
 								}
 							}
 						}
