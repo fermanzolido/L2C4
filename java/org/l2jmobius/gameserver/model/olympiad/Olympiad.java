@@ -1553,6 +1553,7 @@ public class Olympiad extends ListenersContainer {
 		Broadcast.toAllOnlinePlayers(
 				"Olympiad Season " + oldSeason + " has ended! Season " + _currentSeason + " begins.");
 
+		final List<StatSet> offlineRewards = new ArrayList<>();
 		try (Connection con = DatabaseFactory.getConnection();
 				PreparedStatement statement = con.prepareStatement(OLYMPIAD_INSERT_HISTORY)) {
 			for (Entry<Integer, StatSet> entry : NOBLES.entrySet()) {
@@ -1589,10 +1590,24 @@ public class Olympiad extends ListenersContainer {
 				// or just wait for next login)
 				// For C4, adding to inventory/warehouse is easiest via a custom table or
 				// checking online status.
-				giveSeasonReward(charId, division);
+				giveSeasonReward(charId, division, offlineRewards);
 			}
 
 			statement.executeBatch();
+
+			// Batch insert offline rewards
+			if (!offlineRewards.isEmpty()) {
+				try (PreparedStatement rewardStmt = con.prepareStatement(
+						"INSERT INTO character_variables (charId, var, val) VALUES (?, ?, ?)")) {
+					for (StatSet reward : offlineRewards) {
+						rewardStmt.setInt(1, reward.getInt("charId"));
+						rewardStmt.setString(2, reward.getString("var"));
+						rewardStmt.setString(3, reward.getString("val"));
+						rewardStmt.addBatch();
+					}
+					rewardStmt.executeBatch();
+				}
+			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.SEVERE, "Olympiad System: Failed to archive season history: ", e);
 		}
@@ -1601,7 +1616,7 @@ public class Olympiad extends ListenersContainer {
 		_currentCycle = 1;
 	}
 
-	private void giveSeasonReward(int charId, String division) {
+	private void giveSeasonReward(int charId, String division, List<StatSet> offlineRewards) {
 		int rewardId = 0;
 		int rewardCount = 0;
 
@@ -1637,20 +1652,15 @@ public class Olympiad extends ListenersContainer {
 				// it via a more robust system.
 				// In Mobius C4, we can use the 'character_variables' to store unclaimed season
 				// rewards.
-				try (Connection con = DatabaseFactory.getConnection();
-						PreparedStatement statement = con.prepareStatement(
-								"INSERT INTO character_variables (charId, var, val) VALUES (?, ?, ?)")) {
-					statement.setInt(1, charId);
-					statement.setString(2, "SEASON_REWARD_" + _currentSeason);
-					statement.setString(3, rewardId + "," + rewardCount);
-					statement.execute();
+				final StatSet reward = new StatSet();
+				reward.set("charId", charId);
+				reward.set("var", "SEASON_REWARD_" + _currentSeason);
+				reward.set("val", rewardId + "," + rewardCount);
+				offlineRewards.add(reward);
 
-					if (player != null && player.isOnline()) {
-						player.sendMessage("Your Olympiad Season Reward has been stored because your inventory is full. Claim it at the Olympiad Manager.");
-					}
-				} catch (SQLException e) {
-					LOGGER.log(Level.SEVERE,
-							"Olympiad System: Failed to give offline season reward to charId " + charId, e);
+				if (player != null && player.isOnline()) {
+					player.sendMessage(
+							"Your Olympiad Season Reward has been stored because your inventory is full. Claim it at the Olympiad Manager.");
 				}
 			}
 		}
