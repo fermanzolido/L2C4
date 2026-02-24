@@ -255,6 +255,11 @@ public abstract class WorldObject extends ListenersContainer implements IPositio
 		return _objectId;
 	}
 	
+	protected void setObjectId(int objectId)
+	{
+		_objectId = objectId;
+	}
+
 	public abstract void sendInfo(Player player);
 	
 	public void sendPacket(ServerPacket packet)
@@ -628,6 +633,14 @@ public abstract class WorldObject extends ListenersContainer implements IPositio
 		return (T) _scripts.get(script.getName());
 	}
 	
+	public void clearScripts()
+	{
+		if (_scripts != null)
+		{
+			_scripts.clear();
+		}
+	}
+
 	public void removeStatusListener(Creature object)
 	{
 	}
