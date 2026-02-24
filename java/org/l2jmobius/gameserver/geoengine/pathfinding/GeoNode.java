@@ -36,6 +36,11 @@ public class GeoNode
 	private double _hCost = 0; // Heuristic cost to target.
 	private double _fCost = 0; // Total cost (G + H).
 	
+	// Optimization flags (avoid HashSet/PriorityQueue lookups)
+	private int _searchId = -1;
+	private boolean _isClosed = false;
+	private boolean _isOpen = false;
+
 	public GeoNode(GeoLocation location)
 	{
 		_location = location;
@@ -145,13 +150,63 @@ public class GeoNode
 	}
 	
 	/**
-	 * Resets all A* costs to initial values.
+	 * Resets all A* costs and flags for a new search.
+	 * @param searchId the current search ID to validate against
 	 */
+	public void reset(int searchId)
+	{
+		_searchId = searchId;
+		_gCost = -1;
+		_hCost = 0;
+		_fCost = 0;
+		_isClosed = false;
+		_isOpen = false;
+		_parent = null;
+		// Do not reset location or InUse here, managed by buffer
+	}
+
+	public int getSearchId()
+	{
+		return _searchId;
+	}
+
+	public void setSearchId(int searchId)
+	{
+		_searchId = searchId;
+	}
+
+	public boolean isClosed()
+	{
+		return _isClosed;
+	}
+
+	public void setClosed(boolean closed)
+	{
+		_isClosed = closed;
+	}
+
+	public boolean isOpen()
+	{
+		return _isOpen;
+	}
+
+	public void setOpen(boolean open)
+	{
+		_isOpen = open;
+	}
+
+	/**
+	 * Resets all A* costs to initial values.
+	 * Deprecated: Use reset(searchId) instead.
+	 */
+	@Deprecated
 	public void resetCosts()
 	{
 		_gCost = -1;
 		_hCost = 0;
 		_fCost = 0;
+		_isClosed = false;
+		_isOpen = false;
 	}
 	
 	public void free()
@@ -163,6 +218,7 @@ public class GeoNode
 		
 		// Reset A* costs when freeing the node.
 		resetCosts();
+		_searchId = -1;
 	}
 	
 	@Override
