@@ -21,6 +21,7 @@
 package org.l2jmobius.gameserver.network.clientpackets;
 
 import org.l2jmobius.commons.threads.ThreadPool;
+import org.l2jmobius.gameserver.config.PlayerConfig;
 import org.l2jmobius.gameserver.data.xml.DoorData;
 import org.l2jmobius.gameserver.geoengine.GeoEngine;
 import org.l2jmobius.gameserver.model.Location;
@@ -112,11 +113,16 @@ public class ValidatePosition extends ClientPacket
 		}
 		
 		// Check out of sync.
-		if (player.calculateDistance3D(_x, _y, _z) > player.getStat().getMoveSpeed())
+		final double distance = player.calculateDistance3D(_x, _y, _z);
+		if (distance > player.getStat().getMoveSpeed())
 		{
 			if (player.isBlinkActive())
 			{
 				ThreadPool.schedule(() -> player.setBlinkActive(false), 100);
+			}
+			else if (PlayerConfig.ANTI_CHEAT_MOVEMENT_ENABLE && (distance > (player.getStat().getMoveSpeed() * 1.5)))
+			{
+				player.sendPacket(new ValidateLocation(player));
 			}
 			else
 			{
