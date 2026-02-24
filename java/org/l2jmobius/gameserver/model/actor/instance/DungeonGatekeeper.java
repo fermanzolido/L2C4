@@ -161,10 +161,6 @@ public class DungeonGatekeeper extends Npc
 			doTeleport(player, Integer.parseInt(st.nextToken()));
 			player.setIn7sDungeon(false);
 		}
-		else if (actualCommand.startsWith("goto"))
-		{
-			doTeleport(player, Integer.parseInt(st.nextToken()));
-		}
 		else
 		{
 			super.onBypassFeedback(player, command);
