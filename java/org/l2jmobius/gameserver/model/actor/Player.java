@@ -1553,9 +1553,21 @@ public class Player extends Playable {
 			return;
 		}
 
+		// Save the current region.
+		final ZoneRegion oldRegion = ZoneManager.getInstance().getRegion(_lastZoneValidateLocation);
+
 		_lastZoneValidateLocation.setXYZ(this);
 
-		ZoneManager.getInstance().getRegion(this).revalidateZones(this);
+		// Get the new region.
+		final ZoneRegion newRegion = ZoneManager.getInstance().getRegion(this);
+		if (newRegion != null) {
+			newRegion.revalidateZones(this);
+		}
+
+		// If the region has changed, revalidate zones in the old region.
+		if ((oldRegion != null) && (oldRegion != newRegion)) {
+			oldRegion.revalidateZones(this);
+		}
 
 		if (GeneralConfig.ALLOW_WATER) {
 			checkWaterState();
