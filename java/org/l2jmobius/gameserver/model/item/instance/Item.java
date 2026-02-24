@@ -1762,4 +1762,52 @@ public class Item extends WorldObject
 		sb.append("]");
 		return sb.toString();
 	}
+
+	public void claimNewId()
+	{
+		setObjectId(IdManager.getInstance().getNextId());
+	}
+
+	public void reset()
+	{
+		_ownerId = 0;
+		_owner = null;
+		_dropperObjectId = 0;
+		_count = 1;
+		_initCount = 0;
+		_time = _itemTemplate.getTime() == -1 ? -1 : System.currentTimeMillis() + (_itemTemplate.getTime() * 60 * 1000);
+		_decrease = false;
+		_loc = ItemLocation.VOID;
+		_locData = 0;
+		_enchantLevel = 0;
+		_wear = false;
+		_mana = _itemTemplate.getDuration();
+		_consumingMana = false;
+		_type1 = 0;
+		_type2 = 0;
+		_dropTime = 0;
+		_published = false;
+		_protected = false;
+		_lastChange = MODIFIED;
+		_existsInDb = false;
+		_storedInDb = false;
+		if (_itemLootShedule != null)
+		{
+			_itemLootShedule.cancel(true);
+			_itemLootShedule = null;
+		}
+		_shotsMask = 0;
+
+		_dropProtection.unprotect();
+
+		// Reset WorldObject state
+		setWorldRegion(null);
+		setInstanceId(0);
+		setXYZ(0, 0, -10000);
+		setSpawned(false);
+		setInvisible(false);
+
+		// Clear scripts
+		clearScripts();
+	}
 }

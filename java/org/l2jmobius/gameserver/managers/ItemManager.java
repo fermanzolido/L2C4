@@ -86,7 +86,17 @@ public class ItemManager
 	public static Item createItem(ItemProcessType process, int itemId, int count, Creature actor, Object reference)
 	{
 		// Create and Init the Item corresponding to the Item Identifier.
-		final Item item = new Item(IdManager.getInstance().getNextId(), itemId);
+		Item item = ItemPool.getInstance().getItem(itemId);
+		if (item != null)
+		{
+			item.claimNewId();
+			item.scheduleLifeTimeTask();
+		}
+		else
+		{
+			item = new Item(IdManager.getInstance().getNextId(), itemId);
+		}
+
 		if ((process == ItemProcessType.LOOT) && !PlayerConfig.AUTO_LOOT_ITEM_IDS.contains(itemId))
 		{
 			ScheduledFuture<?> itemLootShedule;
@@ -176,6 +186,9 @@ public class ItemManager
 			World.getInstance().removeObject(item);
 			IdManager.getInstance().releaseId(item.getObjectId());
 			
+			item.reset();
+			ItemPool.getInstance().addItem(item);
+
 			if ((process != null) && (process != ItemProcessType.NONE))
 			{
 				if ((GeneralConfig.LOG_ITEMS && ((!GeneralConfig.LOG_ITEMS_SMALL_LOG) && (!GeneralConfig.LOG_ITEMS_IDS_ONLY))) || (GeneralConfig.LOG_ITEMS_SMALL_LOG && (item.isEquipable() || (item.getId() == Inventory.ADENA_ID))) || (GeneralConfig.LOG_ITEMS_IDS_ONLY && GeneralConfig.LOG_ITEMS_IDS_LIST.contains(item.getId())))
