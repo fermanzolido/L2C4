@@ -181,6 +181,7 @@ import org.l2jmobius.gameserver.model.events.EventDispatcher;
 import org.l2jmobius.gameserver.model.events.EventType;
 import org.l2jmobius.gameserver.model.events.holders.actor.playable.OnPlayableExpChanged;
 import org.l2jmobius.gameserver.model.events.holders.actor.player.OnPlayerFameChanged;
+import org.l2jmobius.gameserver.model.events.holders.actor.player.OnPlayerHennaAdd;
 import org.l2jmobius.gameserver.model.events.holders.actor.player.OnPlayerHennaRemove;
 import org.l2jmobius.gameserver.model.events.holders.actor.player.OnPlayerItemEquip;
 import org.l2jmobius.gameserver.model.events.holders.actor.player.OnPlayerKarmaChanged;
@@ -7137,7 +7138,19 @@ public class Player extends Playable {
 	 *         otherwise.
 	 */
 	public boolean addHenna(Henna henna) {
-		for (int i = 0; i < 3; i++) {
+		// Check if the player class is allowed to wear this henna.
+		if (!henna.isAllowedClass(getPlayerClass())) {
+			return false;
+		}
+
+		int maxSlots = 0;
+		if (getPlayerClass().level() == 1) {
+			maxSlots = 2;
+		} else if (getPlayerClass().level() > 1) {
+			maxSlots = 3;
+		}
+
+		for (int i = 0; i < maxSlots; i++) {
 			if (_henna[i] == null) {
 				_henna[i] = henna;
 
@@ -7162,8 +7175,8 @@ public class Player extends Playable {
 				updateUserInfo();
 
 				// Notify to scripts
-				if (EventDispatcher.getInstance().hasListener(EventType.ON_PLAYER_HENNA_REMOVE, this)) {
-					EventDispatcher.getInstance().notifyEventAsync(new OnPlayerHennaRemove(this, henna), this);
+				if (EventDispatcher.getInstance().hasListener(EventType.ON_PLAYER_HENNA_ADD, this)) {
+					EventDispatcher.getInstance().notifyEventAsync(new OnPlayerHennaAdd(this, henna), this);
 				}
 
 				return true;
