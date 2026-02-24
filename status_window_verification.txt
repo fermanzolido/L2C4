@@ -1,0 +1,24 @@
+Status Window Verification Report
+=================================
+
+Files Analyzed:
+- java/org/l2jmobius/gameserver/network/serverpackets/UserInfo.java (Status Window Packet)
+- java/org/l2jmobius/gameserver/network/serverpackets/SkillList.java (Skill List Packet)
+- java/org/l2jmobius/gameserver/model/actor/stat/CreatureStat.java (Stat Calculation)
+- java/org/l2jmobius/gameserver/model/stats/Calculator.java (Math Engine)
+
+Verification Logic:
+1.  **Packet Data Source**: Verified that `UserInfo` correctly calls `_player.getPAtk(null)`, `_player.getMAtk(null, null)`, etc.
+2.  **Stat Calculation**: Verified via test (`tests/StatVerification.java`) that the `Calculator` engine correctly computes base stats + modifiers (passives/buffs).
+    - Base Value + FuncAdd (Passive) works.
+    - Result * FuncMul (Buff) works.
+3.  **Skill List**: Verified that `SkillList` packet iterates over player skills and sends the `passive` flag correctly.
+
+Findings:
+- The data flow from `Player` stats to `UserInfo` packet is correct.
+- The `Calculator` correctly applies passive skills to stats.
+- `SkillList` correctly populates the client's skill window.
+- `UserInfo` packet structure appears consistent with L2J Mobius (High Five) standards, including the re-sending of P.Atk.Spd in the magic block.
+
+Conclusion:
+The "Status (Alt+T)" window data, including skills and passives, is verified to be handled correctly by the server code.
