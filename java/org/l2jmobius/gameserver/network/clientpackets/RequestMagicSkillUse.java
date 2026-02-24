@@ -53,6 +53,12 @@ public class RequestMagicSkillUse extends ClientPacket
 			return;
 		}
 		
+		if (PlayerConfig.ANTI_CHEAT_CAST_SPEED_ENABLE && player.isCastingNow())
+		{
+			player.sendPacket(ActionFailed.STATIC_PACKET);
+			return;
+		}
+
 		if (player.isDead())
 		{
 			player.sendPacket(ActionFailed.STATIC_PACKET);

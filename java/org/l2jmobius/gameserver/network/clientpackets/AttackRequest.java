@@ -20,6 +20,7 @@
  */
 package org.l2jmobius.gameserver.network.clientpackets;
 
+import org.l2jmobius.gameserver.config.PlayerConfig;
 import org.l2jmobius.gameserver.model.World;
 import org.l2jmobius.gameserver.model.WorldObject;
 import org.l2jmobius.gameserver.model.actor.Player;
@@ -63,6 +64,12 @@ public class AttackRequest extends ClientPacket
 			return;
 		}
 		
+		if (PlayerConfig.ANTI_CHEAT_ATTACK_SPEED_ENABLE && player.isAttackingNow())
+		{
+			player.sendPacket(ActionFailed.STATIC_PACKET);
+			return;
+		}
+
 		// Avoid Attacks in Boat.
 		if (player.isPlayable() && player.isInBoat())
 		{

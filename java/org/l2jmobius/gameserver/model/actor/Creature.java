@@ -1055,6 +1055,21 @@ public abstract class Creature extends WorldObject {
 				return;
 			}
 
+			if (PlayerConfig.ANTI_CHEAT_RANGE_ENABLE)
+			{
+				int maxRange = getStat().getPhysicalAttackRange();
+				maxRange += getTemplate().getCollisionRadius();
+				maxRange += target.getTemplate().getCollisionRadius();
+				final int tolerance = 100;
+				if (calculateDistance3D(target) > (maxRange + tolerance))
+				{
+					sendPacket(SystemMessageId.TARGET_IS_TOO_FAR);
+					getAI().setIntention(Intention.ACTIVE);
+					sendPacket(ActionFailed.STATIC_PACKET);
+					return;
+				}
+			}
+
 			// Mobius: Do not move when attack is launched.
 			if (isMoving()) {
 				stopMove(getLocation());

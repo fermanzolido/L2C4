@@ -207,9 +207,17 @@ public class PlayerConfig {
 	public static int PLAYER_MOVEMENT_BLOCK_TIME;
 	public static int HENNA_STAT_CAP;
 	public static boolean HENNA_REMOVE_PENALTY;
+	public static boolean ANTI_CHEAT_MOVEMENT_ENABLE;
+	public static boolean ANTI_CHEAT_ATTACK_SPEED_ENABLE;
+	public static boolean ANTI_CHEAT_CAST_SPEED_ENABLE;
+	public static boolean ANTI_CHEAT_RANGE_ENABLE;
 
 	public static void load() {
 		final ConfigReader config = new ConfigReader(PLAYER_CONFIG_FILE);
+		ANTI_CHEAT_MOVEMENT_ENABLE = config.getBoolean("AntiCheatMovementEnable", true);
+		ANTI_CHEAT_ATTACK_SPEED_ENABLE = config.getBoolean("AntiCheatAttackSpeedEnable", true);
+		ANTI_CHEAT_CAST_SPEED_ENABLE = config.getBoolean("AntiCheatCastSpeedEnable", true);
+		ANTI_CHEAT_RANGE_ENABLE = config.getBoolean("AntiCheatRangeEnable", true);
 		PLAYER_DELEVEL = config.getBoolean("Delevel", true);
 		DECREASE_SKILL_LEVEL = config.getBoolean("DecreaseSkillOnDelevel", true);
 		ALT_WEIGHT_LIMIT = config.getDouble("AltWeightLimit", 1);
