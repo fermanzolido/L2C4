@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.l2jmobius.commons.threads.ThreadPool;
 import org.l2jmobius.gameserver.ai.Intention;
@@ -51,6 +52,7 @@ public class WorldRegion
 	private boolean _active = GeneralConfig.GRIDS_ALWAYS_ON;
 	private ScheduledFuture<?> _neighborsTask = null;
 	private final AtomicInteger _activeNeighbors = new AtomicInteger();
+	private final ReentrantLock _lock = new ReentrantLock();
 	
 	public WorldRegion(int regionX, int regionY)
 	{
@@ -178,32 +180,40 @@ public class WorldRegion
 	 * This function turns this region's AI ON or OFF.
 	 * @param value
 	 */
-	public synchronized void setActive(boolean value)
+	public void setActive(boolean value)
 	{
-		if (_active == value)
+		_lock.lock();
+		try
 		{
-			return;
-		}
-		
-		_active = value;
-		
-		if (value)
-		{
-			for (int i = 0; i < _surroundingRegions.length; i++)
+			if (_active == value)
 			{
-				_surroundingRegions[i].incrementActiveNeighbors();
+				return;
 			}
-		}
-		else
-		{
-			for (int i = 0; i < _surroundingRegions.length; i++)
+
+			_active = value;
+
+			if (value)
 			{
-				_surroundingRegions[i].decrementActiveNeighbors();
+				for (int i = 0; i < _surroundingRegions.length; i++)
+				{
+					_surroundingRegions[i].incrementActiveNeighbors();
+				}
 			}
+			else
+			{
+				for (int i = 0; i < _surroundingRegions.length; i++)
+				{
+					_surroundingRegions[i].decrementActiveNeighbors();
+				}
+			}
+
+			// Turn the AI on or off to match the region's activation.
+			switchAI(value);
 		}
-		
-		// Turn the AI on or off to match the region's activation.
-		switchAI(value);
+		finally
+		{
+			_lock.unlock();
+		}
 	}
 	
 	/**
@@ -215,7 +225,8 @@ public class WorldRegion
 		setActive(true);
 		
 		// If the timer to deactivate neighbors is running, cancel it.
-		synchronized (this)
+		_lock.lock();
+		try
 		{
 			if (_neighborsTask != null)
 			{
@@ -232,6 +243,10 @@ public class WorldRegion
 				}
 			}, 1000 * GeneralConfig.GRID_NEIGHBOR_TURNON_TIME);
 		}
+		finally
+		{
+			_lock.unlock();
+		}
 	}
 	
 	/**
@@ -240,7 +255,8 @@ public class WorldRegion
 	private void startDeactivation()
 	{
 		// If the timer to activate neighbors is running, cancel it.
-		synchronized (this)
+		_lock.lock();
+		try
 		{
 			if (_neighborsTask != null)
 			{
@@ -262,6 +278,10 @@ public class WorldRegion
 				}
 			}, 1000 * GeneralConfig.GRID_NEIGHBOR_TURNOFF_TIME);
 		}
+		finally
+		{
+			_lock.unlock();
+		}
 	}
 	
 	/**
@@ -269,34 +289,42 @@ public class WorldRegion
 	 * If WorldObject is a Player, Add the Player in the HashSet(Player) _allPlayable containing Player of all player in game in this WorldRegion
 	 * @param object
 	 */
-	public synchronized void addVisibleObject(WorldObject object)
+	public void addVisibleObject(WorldObject object)
 	{
 		if (object == null)
 		{
 			return;
 		}
 		
-		_visibleObjects.add(object);
-		
-		if (object.isDoor())
+		_lock.lock();
+		try
 		{
-			for (int i = 0; i < _surroundingRegions.length; i++)
+			_visibleObjects.add(object);
+
+			if (object.isDoor())
 			{
-				_surroundingRegions[i].addDoor(object.asDoor());
+				for (int i = 0; i < _surroundingRegions.length; i++)
+				{
+					_surroundingRegions[i].addDoor(object.asDoor());
+				}
+			}
+			else if (object.isFence())
+			{
+				for (int i = 0; i < _surroundingRegions.length; i++)
+				{
+					_surroundingRegions[i].addFence((Fence) object);
+				}
+			}
+
+			// If this is the first player to enter the region, activate self and neighbors.
+			if (object.isPlayable() && !_active && !GeneralConfig.GRIDS_ALWAYS_ON)
+			{
+				startActivation();
 			}
 		}
-		else if (object.isFence())
+		finally
 		{
-			for (int i = 0; i < _surroundingRegions.length; i++)
-			{
-				_surroundingRegions[i].addFence((Fence) object);
-			}
-		}
-		
-		// If this is the first player to enter the region, activate self and neighbors.
-		if (object.isPlayable() && !_active && !GeneralConfig.GRIDS_ALWAYS_ON)
-		{
-			startActivation();
+			_lock.unlock();
 		}
 	}
 	
@@ -304,38 +332,46 @@ public class WorldRegion
 	 * Remove the WorldObject from the WorldObjectHashSet(WorldObject) _visibleObjects in this WorldRegion. If WorldObject is a Player, remove it from the HashSet(Player) _allPlayable of this WorldRegion
 	 * @param object
 	 */
-	public synchronized void removeVisibleObject(WorldObject object)
+	public void removeVisibleObject(WorldObject object)
 	{
 		if (object == null)
 		{
 			return;
 		}
 		
-		if (_visibleObjects.isEmpty())
+		_lock.lock();
+		try
 		{
-			return;
-		}
-		
-		_visibleObjects.remove(object);
-		
-		if (object.isDoor())
-		{
-			for (int i = 0; i < _surroundingRegions.length; i++)
+			if (_visibleObjects.isEmpty())
 			{
-				_surroundingRegions[i].removeDoor(object.asDoor());
+				return;
+			}
+
+			_visibleObjects.remove(object);
+
+			if (object.isDoor())
+			{
+				for (int i = 0; i < _surroundingRegions.length; i++)
+				{
+					_surroundingRegions[i].removeDoor(object.asDoor());
+				}
+			}
+			else if (object.isFence())
+			{
+				for (int i = 0; i < _surroundingRegions.length; i++)
+				{
+					_surroundingRegions[i].removeFence((Fence) object);
+				}
+			}
+
+			if (object.isPlayable() && areNeighborsEmpty() && !GeneralConfig.GRIDS_ALWAYS_ON)
+			{
+				startDeactivation();
 			}
 		}
-		else if (object.isFence())
+		finally
 		{
-			for (int i = 0; i < _surroundingRegions.length; i++)
-			{
-				_surroundingRegions[i].removeFence((Fence) object);
-			}
-		}
-		
-		if (object.isPlayable() && areNeighborsEmpty() && !GeneralConfig.GRIDS_ALWAYS_ON)
-		{
-			startDeactivation();
+			_lock.unlock();
 		}
 	}
 	

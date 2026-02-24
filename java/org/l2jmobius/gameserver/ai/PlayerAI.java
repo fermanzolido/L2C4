@@ -57,26 +57,34 @@ public class PlayerAI extends PlayableAI
 	 * @param arg1 The second parameter of the Intention
 	 */
 	@Override
-	protected synchronized void changeIntention(Intention intention, Object arg0, Object arg1)
+	protected void changeIntention(Intention intention, Object arg0, Object arg1)
 	{
-		// Forget next if it's not cast or it's cast and skill is toggle.
-		if ((intention != Intention.CAST) || ((arg0 != null) && !((Skill) arg0).isToggle()))
+		_aiLock.lock();
+		try
 		{
-			_nextIntention = null;
+			// Forget next if it's not cast or it's cast and skill is toggle.
+			if ((intention != Intention.CAST) || ((arg0 != null) && !((Skill) arg0).isToggle()))
+			{
+				_nextIntention = null;
+				super.changeIntention(intention, arg0, arg1);
+				return;
+			}
+
+			// do nothing if next intention is same as current one.
+			if ((intention == _intention) && (arg0 == _intentionArg0) && (arg1 == _intentionArg1))
+			{
+				super.changeIntention(intention, arg0, arg1);
+				return;
+			}
+
+			// save current intention so it can be used after cast
+			saveNextIntention(_intention, _intentionArg0, _intentionArg1);
 			super.changeIntention(intention, arg0, arg1);
-			return;
 		}
-		
-		// do nothing if next intention is same as current one.
-		if ((intention == _intention) && (arg0 == _intentionArg0) && (arg1 == _intentionArg1))
+		finally
 		{
-			super.changeIntention(intention, arg0, arg1);
-			return;
+			_aiLock.unlock();
 		}
-		
-		// save current intention so it can be used after cast
-		saveNextIntention(_intention, _intentionArg0, _intentionArg1);
-		super.changeIntention(intention, arg0, arg1);
 	}
 	
 	/**

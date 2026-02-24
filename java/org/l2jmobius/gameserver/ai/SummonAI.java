@@ -99,23 +99,31 @@ public class SummonAI extends PlayableAI implements Runnable
 	}
 	
 	@Override
-	synchronized void changeIntention(Intention intention, Object arg0, Object arg1)
+	void changeIntention(Intention intention, Object arg0, Object arg1)
 	{
-		switch (intention)
+		_aiLock.lock();
+		try
 		{
-			case ACTIVE:
-			case FOLLOW:
+			switch (intention)
 			{
-				startAvoidTask();
-				break;
+				case ACTIVE:
+				case FOLLOW:
+				{
+					startAvoidTask();
+					break;
+				}
+				default:
+				{
+					stopAvoidTask();
+				}
 			}
-			default:
-			{
-				stopAvoidTask();
-			}
+
+			super.changeIntention(intention, arg0, arg1);
 		}
-		
-		super.changeIntention(intention, arg0, arg1);
+		finally
+		{
+			_aiLock.unlock();
+		}
 	}
 	
 	private void thinkAttack()
