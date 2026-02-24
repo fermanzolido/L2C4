@@ -20,6 +20,8 @@
  */
 package org.l2jmobius.gameserver.ai;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.l2jmobius.gameserver.model.Location;
 import org.l2jmobius.gameserver.model.WorldObject;
 import org.l2jmobius.gameserver.model.WorldRegion;
@@ -50,12 +52,14 @@ public abstract class AbstractAI
 	protected final Creature _actor;
 	
 	/** Current long-term intention */
-	protected Intention _intention = Intention.IDLE;
+	protected volatile Intention _intention = Intention.IDLE;
 	/** Current long-term intention parameter */
 	protected Object _intentionArg0 = null;
 	/** Current long-term intention parameter */
 	protected Object _intentionArg1 = null;
 	
+	protected final ReentrantLock _aiLock = new ReentrantLock();
+
 	/** Flags about client's state, in order to know which messages to send */
 	protected volatile boolean _clientAutoAttacking;
 	/** Flags about client's state, in order to know which messages to send */
@@ -122,11 +126,19 @@ public abstract class AbstractAI
 	 * @param arg0 The first parameter of the Intention
 	 * @param arg1 The second parameter of the Intention
 	 */
-	synchronized void changeIntention(Intention intention, Object arg0, Object arg1)
+	void changeIntention(Intention intention, Object arg0, Object arg1)
 	{
-		_intention = intention;
-		_intentionArg0 = arg0;
-		_intentionArg1 = arg1;
+		_aiLock.lock();
+		try
+		{
+			_intention = intention;
+			_intentionArg0 = arg0;
+			_intentionArg1 = arg1;
+		}
+		finally
+		{
+			_aiLock.unlock();
+		}
 	}
 	
 	/**

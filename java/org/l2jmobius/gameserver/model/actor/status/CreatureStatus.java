@@ -23,6 +23,7 @@ package org.l2jmobius.gameserver.model.actor.status;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Logger;
 
 import org.l2jmobius.commons.threads.ThreadPool;
@@ -51,6 +52,8 @@ public class CreatureStatus
 	private static final byte REGEN_FLAG_HP = 1;
 	private static final byte REGEN_FLAG_MP = 2;
 	
+	private final ReentrantReadWriteLock _statusLock = new ReentrantReadWriteLock();
+
 	public CreatureStatus(Creature creature)
 	{
 		_creature = creature;
@@ -174,7 +177,24 @@ public class CreatureStatus
 		
 		if (value > 0)
 		{
-			setCurrentHp(Math.max(_currentHp - value, 0));
+			boolean broadcast = false;
+			_statusLock.writeLock().lock();
+			try
+			{
+				if (setCurrentHp(Math.max(_currentHp - value, 0), false))
+				{
+					broadcast = true;
+				}
+			}
+			finally
+			{
+				_statusLock.writeLock().unlock();
+			}
+
+			if (broadcast)
+			{
+				_creature.broadcastStatusUpdate();
+			}
 		}
 		
 		if ((_creature.getCurrentHp() < 0.5) && _creature.isMortal()) // Die
@@ -188,7 +208,24 @@ public class CreatureStatus
 	
 	public void reduceMp(double value)
 	{
-		setCurrentMp(Math.max(_currentMp - value, 0));
+		boolean broadcast = false;
+		_statusLock.writeLock().lock();
+		try
+		{
+			if (setCurrentMp(Math.max(_currentMp - value, 0), false))
+			{
+				broadcast = true;
+			}
+		}
+		finally
+		{
+			_statusLock.writeLock().unlock();
+		}
+
+		if (broadcast)
+		{
+			_creature.broadcastStatusUpdate();
+		}
 	}
 	
 	/**
@@ -200,15 +237,23 @@ public class CreatureStatus
 	 * <li>Launch the HP/MP/CP Regeneration task with Medium priority</li>
 	 * </ul>
 	 */
-	public synchronized void startHpMpRegeneration()
+	public void startHpMpRegeneration()
 	{
-		if ((_regTask == null) && !_creature.isDead())
+		_statusLock.writeLock().lock();
+		try
 		{
-			// Get the Regeneration period
-			final int period = Formulas.getRegeneratePeriod(_creature);
-			
-			// Create the HP/MP/CP Regeneration task
-			_regTask = ThreadPool.scheduleAtFixedRate(this::doRegeneration, period, period);
+			if ((_regTask == null) && !_creature.isDead())
+			{
+				// Get the Regeneration period
+				final int period = Formulas.getRegeneratePeriod(_creature);
+
+				// Create the HP/MP/CP Regeneration task
+				_regTask = ThreadPool.scheduleAtFixedRate(this::doRegeneration, period, period);
+			}
+		}
+		finally
+		{
+			_statusLock.writeLock().unlock();
 		}
 	}
 	
@@ -221,16 +266,24 @@ public class CreatureStatus
 	 * <li>Stop the HP/MP/CP Regeneration task</li>
 	 * </ul>
 	 */
-	public synchronized void stopHpMpRegeneration()
+	public void stopHpMpRegeneration()
 	{
-		if (_regTask != null)
+		_statusLock.writeLock().lock();
+		try
 		{
-			// Stop the HP/MP/CP Regeneration task
-			_regTask.cancel(false);
-			_regTask = null;
-			
-			// Set the RegenActive flag to false
-			_flagsRegenActive = 0;
+			if (_regTask != null)
+			{
+				// Stop the HP/MP/CP Regeneration task
+				_regTask.cancel(false);
+				_regTask = null;
+
+				// Set the RegenActive flag to false
+				_flagsRegenActive = 0;
+			}
+		}
+		finally
+		{
+			_statusLock.writeLock().unlock();
 		}
 	}
 	
@@ -247,7 +300,15 @@ public class CreatureStatus
 	
 	public double getCurrentHp()
 	{
-		return _currentHp;
+		_statusLock.readLock().lock();
+		try
+		{
+			return _currentHp;
+		}
+		finally
+		{
+			_statusLock.readLock().unlock();
+		}
 	}
 	
 	public void setCurrentHp(double newHp)
@@ -264,20 +325,26 @@ public class CreatureStatus
 	public boolean setCurrentHp(double newHp, boolean broadcastPacket)
 	{
 		// Get the Max HP of the Creature
-		final int currentHp = (int) _currentHp;
 		final double maxHp = _creature.getMaxHp();
 		
 		// Tempfix for updating UserInfo when skills like Final Frenzy and Final Fortress conditions activate.
 		final double thirtyPercent = maxHp * 0.3;
-		final boolean updateUserInfo = _creature.isPlayer() && (((currentHp < thirtyPercent) && (newHp > thirtyPercent)) || ((currentHp > thirtyPercent) && (newHp < thirtyPercent)));
 		
-		synchronized (this)
+		int currentHpInt;
+		boolean updateUserInfo = false;
+		boolean hpWasChanged;
+
+		_statusLock.writeLock().lock();
+		try
 		{
 			if (_creature.isDead())
 			{
 				return false;
 			}
 			
+			currentHpInt = (int) _currentHp;
+			updateUserInfo = _creature.isPlayer() && (((currentHpInt < thirtyPercent) && (newHp > thirtyPercent)) || ((currentHpInt > thirtyPercent) && (newHp < thirtyPercent)));
+
 			if (newHp >= maxHp)
 			{
 				// Set the RegenActive flag to false
@@ -299,9 +366,13 @@ public class CreatureStatus
 				// Start the HP/MP/CP Regeneration task with Medium priority
 				startHpMpRegeneration();
 			}
+
+			hpWasChanged = currentHpInt != _currentHp;
 		}
-		
-		final boolean hpWasChanged = currentHp != _currentHp;
+		finally
+		{
+			_statusLock.writeLock().unlock();
+		}
 		
 		// Send the Server->Client packet StatusUpdate with current HP and MP to all other Player to inform
 		if (hpWasChanged && broadcastPacket)
@@ -329,7 +400,15 @@ public class CreatureStatus
 	
 	public double getCurrentMp()
 	{
-		return _currentMp;
+		_statusLock.readLock().lock();
+		try
+		{
+			return _currentMp;
+		}
+		finally
+		{
+			_statusLock.readLock().unlock();
+		}
 	}
 	
 	public void setCurrentMp(double newMp)
@@ -346,16 +425,21 @@ public class CreatureStatus
 	public boolean setCurrentMp(double newMp, boolean broadcastPacket)
 	{
 		// Get the Max MP of the Creature
-		final int currentMp = (int) _currentMp;
 		final int maxMp = _creature.getMaxMp();
 		
-		synchronized (this)
+		int currentMpInt;
+		boolean mpWasChanged;
+
+		_statusLock.writeLock().lock();
+		try
 		{
 			if (_creature.isDead())
 			{
 				return false;
 			}
 			
+			currentMpInt = (int) _currentMp;
+
 			if (newMp >= maxMp)
 			{
 				// Set the RegenActive flag to false
@@ -377,9 +461,13 @@ public class CreatureStatus
 				// Start the HP/MP/CP Regeneration task with Medium priority
 				startHpMpRegeneration();
 			}
+
+			mpWasChanged = currentMpInt != _currentMp;
 		}
-		
-		final boolean mpWasChanged = currentMp != _currentMp;
+		finally
+		{
+			_statusLock.writeLock().unlock();
+		}
 		
 		// Send the Server->Client packet StatusUpdate with current HP and MP to all other Player to inform
 		if (mpWasChanged && broadcastPacket)
@@ -393,15 +481,37 @@ public class CreatureStatus
 	protected void doRegeneration()
 	{
 		// Modify the current HP/MP of the Creature and broadcast Server->Client packet StatusUpdate
-		if (!_creature.isDead() && ((_currentHp < _creature.getMaxRecoverableHp()) || (_currentMp < _creature.getMaxRecoverableMp())))
+		boolean broadcast = false;
+
+		_statusLock.writeLock().lock();
+		try
 		{
-			final double newHp = _currentHp + Formulas.calcHpRegen(_creature);
-			final double newMp = _currentMp + Formulas.calcMpRegen(_creature);
-			setCurrentHpMp(newHp, newMp);
+			if (!_creature.isDead() && ((_currentHp < _creature.getMaxRecoverableHp()) || (_currentMp < _creature.getMaxRecoverableMp())))
+			{
+				final double newHp = _currentHp + Formulas.calcHpRegen(_creature);
+				final double newMp = _currentMp + Formulas.calcMpRegen(_creature);
+
+				// Use false for broadcast to avoid holding lock during broadcast
+				final boolean hpChange = setCurrentHp(newHp, false);
+				final boolean mpChange = setCurrentMp(newMp, false);
+				if (hpChange || mpChange)
+				{
+					broadcast = true;
+				}
+			}
+			else
+			{
+				stopHpMpRegeneration();
+			}
 		}
-		else
+		finally
 		{
-			stopHpMpRegeneration();
+			_statusLock.writeLock().unlock();
+		}
+
+		if (broadcast)
+		{
+			_creature.broadcastStatusUpdate();
 		}
 	}
 	

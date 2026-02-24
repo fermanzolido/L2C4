@@ -348,45 +348,53 @@ public class AttackableAI extends CreatureAI
 	 * @param arg1 The second parameter of the Intention
 	 */
 	@Override
-	synchronized void changeIntention(Intention newIntention, Object arg0, Object arg1)
+	void changeIntention(Intention newIntention, Object arg0, Object arg1)
 	{
-		Intention intention = newIntention;
-		if ((intention == Intention.IDLE) || (intention == Intention.ACTIVE))
+		_aiLock.lock();
+		try
 		{
-			// Check if actor is not dead
-			final Attackable npc = getActiveChar();
-			if (!npc.isAlikeDead())
+			Intention intention = newIntention;
+			if ((intention == Intention.IDLE) || (intention == Intention.ACTIVE))
 			{
-				// If its _knownPlayer isn't empty set the Intention to ACTIVE
-				if (!World.getInstance().getVisibleObjects(npc, Player.class).isEmpty())
+				// Check if actor is not dead
+				final Attackable npc = getActiveChar();
+				if (!npc.isAlikeDead())
 				{
-					intention = Intention.ACTIVE;
+					// If its _knownPlayer isn't empty set the Intention to ACTIVE
+					if (!World.getInstance().getVisibleObjects(npc, Player.class).isEmpty())
+					{
+						intention = Intention.ACTIVE;
+					}
+					else if ((npc.getSpawn() != null) && !npc.isInsideRadius3D(npc.getSpawn().getLocation(), NpcConfig.MAX_DRIFT_RANGE + NpcConfig.MAX_DRIFT_RANGE))
+					{
+						intention = Intention.ACTIVE;
+					}
 				}
-				else if ((npc.getSpawn() != null) && !npc.isInsideRadius3D(npc.getSpawn().getLocation(), NpcConfig.MAX_DRIFT_RANGE + NpcConfig.MAX_DRIFT_RANGE))
+
+				if (intention == Intention.IDLE)
 				{
-					intention = Intention.ACTIVE;
+					// Set the Intention of this AttackableAI to IDLE
+					super.changeIntention(Intention.IDLE, null, null);
+
+					// Stop AI task and detach AI from NPC
+					stopAITask();
+
+					// Cancel the AI
+					_actor.detachAI();
+					return;
 				}
 			}
 			
-			if (intention == Intention.IDLE)
-			{
-				// Set the Intention of this AttackableAI to IDLE
-				super.changeIntention(Intention.IDLE, null, null);
-				
-				// Stop AI task and detach AI from NPC
-				stopAITask();
-				
-				// Cancel the AI
-				_actor.detachAI();
-				return;
-			}
+			// Set the Intention of this AttackableAI to intention
+			super.changeIntention(intention, arg0, arg1);
+
+			// If not idle - create an AI task (schedule onActionThink repeatedly)
+			startAITask();
 		}
-		
-		// Set the Intention of this AttackableAI to intention
-		super.changeIntention(intention, arg0, arg1);
-		
-		// If not idle - create an AI task (schedule onActionThink repeatedly)
-		startAITask();
+		finally
+		{
+			_aiLock.unlock();
+		}
 	}
 	
 	/**

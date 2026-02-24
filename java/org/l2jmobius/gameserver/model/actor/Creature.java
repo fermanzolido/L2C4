@@ -31,6 +31,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.locks.StampedLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -203,7 +205,7 @@ public abstract class Creature extends WorldObject {
 	private Skill _lastSkillCast;
 	private Skill _lastSimultaneousSkillCast;
 
-	private boolean _isDead = false;
+	private final AtomicBoolean _isDead = new AtomicBoolean(false);
 	private boolean _isImmobilized = false;
 	private boolean _isOverloaded = false; // the char is carrying too much
 	private boolean _isParalyzed = false;
@@ -241,7 +243,7 @@ public abstract class Creature extends WorldObject {
 	private final Map<Integer, Long> _disabledSkills = new ConcurrentHashMap<>();
 	private boolean _allSkillsDisabled;
 
-	private final byte[] _zones = new byte[ZoneId.getZoneCount()];
+	private final AtomicIntegerArray _zones = new AtomicIntegerArray(ZoneId.getZoneCount());
 	protected final Location _lastZoneValidateLocation = new Location(getX(), getY(), getZ());
 
 	private final StampedLock _attackLock = new StampedLock();
@@ -434,8 +436,8 @@ public abstract class Creature extends WorldObject {
 					return true;
 				}
 
-				return (_zones[ZoneId.PVP.ordinal()] > 0) && (_zones[ZoneId.PEACE.ordinal()] == 0)
-						&& (_zones[ZoneId.NO_PVP.ordinal()] == 0);
+				return (_zones.get(ZoneId.PVP.ordinal()) > 0) && (_zones.get(ZoneId.PEACE.ordinal()) == 0)
+						&& (_zones.get(ZoneId.NO_PVP.ordinal()) == 0);
 			}
 			case PEACE: {
 				if ((instance != null) && instance.isPvP()) {
@@ -447,7 +449,7 @@ public abstract class Creature extends WorldObject {
 			}
 		}
 
-		return _zones[zone.ordinal()] > 0;
+		return _zones.get(zone.ordinal()) > 0;
 	}
 
 	/**
@@ -455,12 +457,10 @@ public abstract class Creature extends WorldObject {
 	 * @param state
 	 */
 	public void setInsideZone(ZoneId zone, boolean state) {
-		synchronized (_zones) {
-			if (state) {
-				_zones[zone.ordinal()]++;
-			} else if (_zones[zone.ordinal()] > 0) {
-				_zones[zone.ordinal()]--;
-			}
+		if (state) {
+			_zones.incrementAndGet(zone.ordinal());
+		} else {
+			_zones.updateAndGet(zone.ordinal(), x -> x > 0 ? x - 1 : 0);
 		}
 	}
 
@@ -2236,15 +2236,12 @@ public abstract class Creature extends WorldObject {
 		}
 
 		// killing is only possible one time
-		synchronized (this) {
-			if (_isDead) {
-				return false;
-			}
-
-			// now reset currentHp to zero
-			setCurrentHp(0);
-			setDead(true);
+		if (!_isDead.compareAndSet(false, true)) {
+			return false;
 		}
+
+		// now reset currentHp to zero
+		setCurrentHp(0);
 
 		if (EventDispatcher.getInstance().hasListener(EventType.ON_CREATURE_DEATH, this)) {
 			EventDispatcher.getInstance().notifyEvent(new OnCreatureDeath(killer, this), this);
@@ -2423,7 +2420,7 @@ public abstract class Creature extends WorldObject {
 
 	/** Sets HP, MP and CP and revives the Creature. */
 	public void doRevive() {
-		if (!_isDead) {
+		if (!_isDead.get()) {
 			return;
 		}
 
@@ -2593,18 +2590,18 @@ public abstract class Creature extends WorldObject {
 	 * @return True if the Creature is dead or use fake death.
 	 */
 	public boolean isAlikeDead() {
-		return _isDead;
+		return _isDead.get();
 	}
 
 	/**
 	 * @return True if the Creature is dead.
 	 */
 	public boolean isDead() {
-		return _isDead;
+		return _isDead.get();
 	}
 
 	public void setDead(boolean value) {
-		_isDead = value;
+		_isDead.set(value);
 	}
 
 	public boolean isImmobilized() {
@@ -2669,7 +2666,7 @@ public abstract class Creature extends WorldObject {
 	}
 
 	public boolean isPendingRevive() {
-		return _isDead && _isPendingRevive;
+		return _isDead.get() && _isPendingRevive;
 	}
 
 	public void setIsPendingRevive(boolean value) {
