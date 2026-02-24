@@ -88,6 +88,16 @@ public class DatabaseFactory {
 			// Additional Optimizations.
 			config.setInitializationFailTimeout(-1);
 			config.setValidationTimeout(5000); // 5 seconds.
+			config.addDataSourceProperty("cachePrepStmts", "true");
+			config.addDataSourceProperty("prepStmtCacheSize", "250");
+			config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+			config.addDataSourceProperty("useServerPrepStmts", "true");
+			config.addDataSourceProperty("useLocalSessionState", "true");
+			config.addDataSourceProperty("rewriteBatchedStatements", "true");
+			config.addDataSourceProperty("cacheResultSetMetadata", "true");
+			config.addDataSourceProperty("cacheServerConfiguration", "true");
+			config.addDataSourceProperty("elideSetAutoCommits", "true");
+			config.addDataSourceProperty("maintainTimeStats", "false");
 
 			// Initialize HikariDataSource.
 			DATABASE_POOL = new HikariDataSource(config);
