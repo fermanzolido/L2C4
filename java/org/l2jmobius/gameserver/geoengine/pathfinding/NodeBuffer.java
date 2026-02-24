@@ -20,9 +20,7 @@
  */
 package org.l2jmobius.gameserver.geoengine.pathfinding;
 
-import java.util.HashSet;
 import java.util.PriorityQueue;
-import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.l2jmobius.gameserver.config.GeoEngineConfig;
@@ -39,8 +37,8 @@ public class NodeBuffer
 	private final GeoNode[][] _buffer;
 	
 	// A* specific data structures.
-	private final PriorityQueue<GeoNode> _openList;
-	private final Set<GeoNode> _closedList;
+	// Use a wrapper to preserve Heap integrity when costs change.
+	private final PriorityQueue<NodeRecord> _openList;
 	
 	private int _baseX = 0;
 	private int _baseY = 0;
@@ -50,21 +48,31 @@ public class NodeBuffer
 	private int _targetZ = 0;
 	
 	private GeoNode _current = null;
+	private int _currentSearchId = 0;
+
+	private static class NodeRecord implements Comparable<NodeRecord>
+	{
+		final GeoNode node;
+		final double fCost;
+
+		public NodeRecord(GeoNode node, double fCost)
+		{
+			this.node = node;
+			this.fCost = fCost;
+		}
+
+		@Override
+		public int compareTo(NodeRecord o)
+		{
+			return Double.compare(this.fCost, o.fCost);
+		}
+	}
 	
 	public NodeBuffer(int size)
 	{
 		_mapSize = size;
 		_buffer = new GeoNode[_mapSize][_mapSize];
-		_openList = new PriorityQueue<>((a, b) ->
-		{
-			if (a.getFCost() != b.getFCost())
-			{
-				return Double.compare(a.getFCost(), b.getFCost());
-			}
-			
-			return Double.compare(a.getHCost(), b.getHCost());
-		});
-		_closedList = new HashSet<>();
+		_openList = new PriorityQueue<>();
 	}
 	
 	public final boolean lock()
@@ -84,12 +92,15 @@ public class NodeBuffer
 	 */
 	public GeoNode findPath(int x, int y, int z, int tx, int ty, int tz)
 	{
+		_currentSearchId++;
 		_baseX = x + ((tx - x - _mapSize) / 2); // Middle of the line (x,y) - (tx,ty).
 		_baseY = y + ((ty - y - _mapSize) / 2); // Will be in the center of the buffer.
 		_targetX = tx;
 		_targetY = ty;
 		_targetZ = tz;
 		
+		_openList.clear();
+
 		_current = getNode(x, y, z);
 		if (_current == null)
 		{
@@ -100,8 +111,9 @@ public class NodeBuffer
 		_current.setGCost(0);
 		_current.setHCost(getCost(x, y, z));
 		_current.calculateFCost();
+		_current.setOpen(true);
 		
-		_openList.add(_current);
+		_openList.add(new NodeRecord(_current, _current.getFCost()));
 		
 		for (int count = 0; count < MAX_ITERATIONS; count++)
 		{
@@ -110,7 +122,25 @@ public class NodeBuffer
 				return null; // No path found.
 			}
 			
-			_current = _openList.poll();
+			final NodeRecord record = _openList.poll();
+			_current = record.node;
+
+			// Lazy Deletion: Skip if already closed (visited via a better path previously).
+			if (_current.isClosed())
+			{
+				continue;
+			}
+
+			// Optional: Check if this record is obsolete (we found a better path later).
+			// If record.fCost > _current.getFCost(), it means we improved the cost after inserting this record.
+			// The newer, better record is still in the queue (or already processed).
+			// Since we process min cost first, we would have processed the better record already if valid.
+			// However, if we simply skip closed nodes, that covers most cases.
+			// There is an edge case: we popped the WORSE path first? Impossible with Min-Heap.
+			// We always pop the BEST path available.
+			// If there are duplicate records for the same node, the one with lower fCost comes out first.
+			// We mark it closed.
+			// The one with higher fCost comes out later. It is closed. We skip.
 			
 			// Check if we reached the target.
 			if ((_current.getLocation().getNodeX() == _targetX) && (_current.getLocation().getNodeY() == _targetY) && (Math.abs(_current.getLocation().getZ() - _targetZ) < 64))
@@ -118,7 +148,7 @@ public class NodeBuffer
 				return _current; // Found target.
 			}
 			
-			_closedList.add(_current);
+			_current.setClosed(true);
 			
 			// Get and process neighbors.
 			getNeighbors();
@@ -131,21 +161,6 @@ public class NodeBuffer
 	{
 		_current = null;
 		_openList.clear();
-		_closedList.clear();
-		
-		GeoNode node;
-		for (int i = 0; i < _mapSize; i++)
-		{
-			for (int j = 0; j < _mapSize; j++)
-			{
-				node = _buffer[i][j];
-				if (node != null)
-				{
-					node.free();
-				}
-			}
-		}
-		
 		_lock.unlock();
 	}
 	
@@ -241,13 +256,13 @@ public class NodeBuffer
 		if (result == null)
 		{
 			result = new GeoNode(new GeoLocation(x, y, z));
+			result.setSearchId(_currentSearchId);
 			_buffer[aX][aY] = result;
 		}
-		else if (!result.isInUse())
+		else if (result.getSearchId() != _currentSearchId)
 		{
-			result.setInUse();
-			
-			// Re-init node if needed.
+			// Reset node for this search
+			result.reset(_currentSearchId);
 			if (result.getLocation() != null)
 			{
 				result.getLocation().set(x, y, z);
@@ -256,10 +271,7 @@ public class NodeBuffer
 			{
 				result.setLoc(new GeoLocation(x, y, z));
 			}
-			
-			// Reset A* costs and clear parent reference.
-			result.resetCosts();
-			result.setParent(null);
+			result.setInUse();
 		}
 		
 		return result;
@@ -281,8 +293,8 @@ public class NodeBuffer
 			return null;
 		}
 		
-		// Skip if already in closed list.
-		if (_closedList.contains(newNode))
+		// Skip if already closed.
+		if (newNode.isClosed())
 		{
 			return newNode;
 		}
@@ -304,8 +316,8 @@ public class NodeBuffer
 		// Calculate new G cost (actual cost from start).
 		final double newGCost = _current.getGCost() + weight;
 		
-		// Check if this node is already in open list.
-		final boolean inOpenList = _openList.contains(newNode);
+		// Check if this node is already open.
+		final boolean inOpenList = newNode.isOpen(); // O(1) check
 		
 		// If not in open list or we found a better path.
 		if (!inOpenList || (newGCost < newNode.getGCost()))
@@ -315,17 +327,10 @@ public class NodeBuffer
 			newNode.setGCost(newGCost);
 			newNode.setHCost(getCost(x, y, geoZ));
 			newNode.calculateFCost();
+			newNode.setOpen(true);
 			
-			if (!inOpenList)
-			{
-				_openList.add(newNode);
-			}
-			else
-			{
-				// Update position in priority queue.
-				_openList.remove(newNode);
-				_openList.add(newNode);
-			}
+			// Add new record to PQ. Old records remain but will be ignored if popped later (since this one pops first).
+			_openList.add(new NodeRecord(newNode, newNode.getFCost()));
 		}
 		
 		return newNode;

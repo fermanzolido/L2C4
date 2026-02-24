@@ -67,7 +67,7 @@ public class GeoEngine
 	// Constants.
 	public static final String FILE_NAME_FORMAT = "%d_%d.l2j";
 	private static final int ELEVATED_SEE_OVER_DISTANCE = 2;
-	private static final int MAX_SEE_OVER_HEIGHT = 48;
+	private static final int MAX_SEE_OVER_HEIGHT = 32;
 	private static final int SPAWN_Z_DELTA_LIMIT = 100;
 	private static final int WORLD_MIN_X = -655360;
 	private static final int WORLD_MIN_Y = -589824;
