@@ -94,6 +94,35 @@ public class GlobalAuctionManager
 		}
 
 		LOGGER.info("GlobalAuctionManager: Loaded " + _auctions.size() + " auctions and " + _funds.size() + " fund accounts.");
+
+		// Cleanup orphaned items (Items in AUCTION loc but not in global_auctions)
+		cleanupOrphanedItems();
+	}
+
+	private void cleanupOrphanedItems()
+	{
+		try (Connection con = DatabaseFactory.getConnection();
+			PreparedStatement ps = con.prepareStatement("SELECT object_id, owner_id FROM items WHERE loc='AUCTION' AND object_id NOT IN (SELECT item_object_id FROM global_auctions)");
+			ResultSet rs = ps.executeQuery())
+		{
+			while (rs.next())
+			{
+				final int objectId = rs.getInt("object_id");
+				final int ownerId = rs.getInt("owner_id");
+				LOGGER.warning("GlobalAuctionManager: Found orphaned auction item " + objectId + " for owner " + ownerId + ". Returning to inventory.");
+
+				// Return to inventory
+				try (PreparedStatement update = con.prepareStatement("UPDATE items SET loc='INVENTORY' WHERE object_id=?"))
+				{
+					update.setInt(1, objectId);
+					update.executeUpdate();
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			LOGGER.log(Level.SEVERE, "Failed to cleanup orphaned auction items.", e);
+		}
 	}
 
 	private Item loadItem(int objectId)
@@ -119,9 +148,9 @@ public class GlobalAuctionManager
 
 	public synchronized boolean addListing(Player player, int objectId, long price, int days)
 	{
-		if (price <= 0)
+		if ((price <= 0) || (price > Integer.MAX_VALUE))
 		{
-			player.sendMessage("Price must be positive.");
+			player.sendMessage("Price must be between 1 and " + Integer.MAX_VALUE + ".");
 			return false;
 		}
 
@@ -177,7 +206,7 @@ public class GlobalAuctionManager
 			// Rollback item location
 			droppedItem.setItemLocation(ItemLocation.INVENTORY);
 			droppedItem.updateDatabase();
-			player.getInventory().addItem(droppedItem);
+			player.addItem(ItemProcessType.TRANSFER, droppedItem, null, true);
 			return false;
 		}
 
@@ -198,7 +227,13 @@ public class GlobalAuctionManager
 		final AuctionListing listing = _auctions.get(auctionId);
 		if (listing == null)
 		{
-			buyer.sendMessage("Auction not found or expired.");
+			buyer.sendMessage("Auction not found.");
+			return false;
+		}
+
+		if (System.currentTimeMillis() > listing.getEndTime())
+		{
+			buyer.sendMessage("This auction has expired.");
 			return false;
 		}
 
@@ -215,7 +250,7 @@ public class GlobalAuctionManager
 		}
 
 		// Take Adena
-		if (!buyer.destroyItemByItemId(ItemProcessType.BUY, 57, listing.getPrice(), buyer, null))
+		if (!buyer.destroyItemByItemId(ItemProcessType.BUY, 57, (int) listing.getPrice(), buyer, null))
 		{
 			return false;
 		}
@@ -229,7 +264,7 @@ public class GlobalAuctionManager
 		item.setItemLocation(ItemLocation.INVENTORY);
 		item.updateDatabase();
 
-		buyer.getInventory().addItem(item);
+		buyer.addItem(ItemProcessType.BUY, item, null, true);
 		buyer.sendInventoryUpdate(new InventoryUpdate());
 
 		// Remove listing
@@ -262,7 +297,7 @@ public class GlobalAuctionManager
 		item.setItemLocation(ItemLocation.INVENTORY);
 		item.updateDatabase();
 
-		player.getInventory().addItem(item);
+		player.addItem(ItemProcessType.TRANSFER, item, null, true);
 		player.sendInventoryUpdate(new InventoryUpdate());
 
 		// Remove listing
@@ -310,29 +345,41 @@ public class GlobalAuctionManager
 	public synchronized long collectFunds(Player player)
 	{
 		final int playerId = player.getObjectId();
-		final long amount = _funds.getOrDefault(playerId, 0L);
+		long amount = _funds.getOrDefault(playerId, 0L);
 
 		if (amount <= 0)
 		{
 			return 0;
 		}
 
-		// Reset funds
-		_funds.put(playerId, 0L);
-		try (Connection con = DatabaseFactory.getConnection();
-			PreparedStatement ps = con.prepareStatement("UPDATE global_auction_funds SET adena=0 WHERE player_id=?"))
+		// Cap amount to Integer.MAX_VALUE for addAdena
+		long withdrawAmount = amount;
+		if (withdrawAmount > Integer.MAX_VALUE)
 		{
-			ps.setInt(1, playerId);
+			withdrawAmount = Integer.MAX_VALUE;
+		}
+
+		long remaining = amount - withdrawAmount;
+
+		// Update funds
+		_funds.put(playerId, remaining);
+		try (Connection con = DatabaseFactory.getConnection();
+			PreparedStatement ps = con.prepareStatement("UPDATE global_auction_funds SET adena=? WHERE player_id=?"))
+		{
+			ps.setLong(1, remaining);
+			ps.setInt(2, playerId);
 			ps.executeUpdate();
 		}
 		catch (Exception e)
 		{
-			LOGGER.log(Level.SEVERE, "Failed to reset funds for " + playerId, e);
-			// Rollback logic would be complex here, assume DB works
+			LOGGER.log(Level.SEVERE, "Failed to update funds for " + playerId, e);
+			// Rollback memory
+			_funds.put(playerId, amount);
+			return 0;
 		}
 
-		player.addAdena(ItemProcessType.RESTORE, amount, null, true);
-		return amount;
+		player.addAdena(ItemProcessType.RESTORE, (int) withdrawAmount, null, true);
+		return withdrawAmount;
 	}
 
 	public List<AuctionListing> getAllAuctions()
