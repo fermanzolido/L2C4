@@ -107,25 +107,7 @@ class OlympiadManager implements Runnable {
 							}
 
 							if ((opponents != null) && (opponents.size() == 2)) {
-								try {
-									_olympiadInstances.put(i, new OlympiadGame(i, CompetitionType.NON_CLASSED, opponents));
-									gamesQueue.put(i, new OlympiadGameTask(_olympiadInstances.get(i)));
-									STADIUMS[i].setStadiaBusy();
-								} catch (Exception ex) {
-									if (_olympiadInstances.get(i) != null) {
-										for (Player player : _olympiadInstances.get(i).getPlayers()) {
-											player.sendMessage("Your olympiad registration was canceled due to an error");
-											player.setInOlympiadMode(false);
-											player.setOlympiadStart(false);
-											player.setOlympiadSide(-1);
-											player.setOlympiadGameId(-1);
-										}
-										_olympiadInstances.remove(i);
-									}
-									if (gamesQueue.get(i) != null) {
-										gamesQueue.remove(i);
-									}
-									STADIUMS[i].setStadiaFree();
+								if (!createOlympiadGame(i, CompetitionType.NON_CLASSED, opponents, gamesQueue)) {
 									// try to reuse this stadia next time
 									i--;
 								}
@@ -142,25 +124,7 @@ class OlympiadManager implements Runnable {
 								}
 
 								if ((opponents != null) && (opponents.size() == 2)) {
-									try {
-										_olympiadInstances.put(i, new OlympiadGame(i, CompetitionType.CLASSED, opponents));
-										gamesQueue.put(i, new OlympiadGameTask(_olympiadInstances.get(i)));
-										STADIUMS[i].setStadiaBusy();
-									} catch (Exception ex) {
-										if (_olympiadInstances.get(i) != null) {
-											for (Player player : _olympiadInstances.get(i).getPlayers()) {
-												player.sendMessage("Your olympiad registration was canceled due to an error");
-												player.setInOlympiadMode(false);
-												player.setOlympiadStart(false);
-												player.setOlympiadSide(-1);
-												player.setOlympiadGameId(-1);
-											}
-											_olympiadInstances.remove(i);
-										}
-										if (gamesQueue.get(i) != null) {
-											gamesQueue.remove(i);
-										}
-										STADIUMS[i].setStadiaFree();
+									if (!createOlympiadGame(i, CompetitionType.CLASSED, opponents, gamesQueue)) {
 										// try to reuse this stadia next time
 										i--;
 									}
@@ -179,25 +143,7 @@ class OlympiadManager implements Runnable {
 							}
 
 							if ((opponents != null) && (opponents.size() == 2)) {
-								try {
-									_olympiadInstances.put(i, new OlympiadGame(i, CompetitionType.CLASSED, opponents));
-									gamesQueue.put(i, new OlympiadGameTask(_olympiadInstances.get(i)));
-									STADIUMS[i].setStadiaBusy();
-								} catch (Exception ex) {
-									if (_olympiadInstances.get(i) != null) {
-										for (Player player : _olympiadInstances.get(i).getPlayers()) {
-											player.sendMessage("Your olympiad registration was canceled due to an error");
-											player.setInOlympiadMode(false);
-											player.setOlympiadStart(false);
-											player.setOlympiadSide(-1);
-											player.setOlympiadGameId(-1);
-										}
-										_olympiadInstances.remove(i);
-									}
-									if (gamesQueue.get(i) != null) {
-										gamesQueue.remove(i);
-									}
-									STADIUMS[i].setStadiaFree();
+								if (!createOlympiadGame(i, CompetitionType.CLASSED, opponents, gamesQueue)) {
 									// try to reuse this stadia next time
 									i--;
 								}
@@ -209,25 +155,7 @@ class OlympiadManager implements Runnable {
 								}
 
 								if ((opponents != null) && (opponents.size() == 2)) {
-									try {
-										_olympiadInstances.put(i, new OlympiadGame(i, CompetitionType.NON_CLASSED, opponents));
-										gamesQueue.put(i, new OlympiadGameTask(_olympiadInstances.get(i)));
-										STADIUMS[i].setStadiaBusy();
-									} catch (Exception ex) {
-										if (_olympiadInstances.get(i) != null) {
-											for (Player player : _olympiadInstances.get(i).getPlayers()) {
-												player.sendMessage("Your olympiad registration was canceled due to an error");
-												player.setInOlympiadMode(false);
-												player.setOlympiadStart(false);
-												player.setOlympiadSide(-1);
-												player.setOlympiadGameId(-1);
-											}
-											_olympiadInstances.remove(i);
-										}
-										if (gamesQueue.get(i) != null) {
-											gamesQueue.remove(i);
-										}
-										STADIUMS[i].setStadiaFree();
+									if (!createOlympiadGame(i, CompetitionType.NON_CLASSED, opponents, gamesQueue)) {
 										// try to reuse this stadia next time
 										i--;
 									}
@@ -384,6 +312,32 @@ class OlympiadManager implements Runnable {
 		}
 
 		return true;
+	}
+
+	private boolean createOlympiadGame(int stadiumId, CompetitionType type, List<Player> opponents, Map<Integer, OlympiadGameTask> gamesQueue) {
+		try {
+			_olympiadInstances.put(stadiumId, new OlympiadGame(stadiumId, type, opponents));
+			gamesQueue.put(stadiumId, new OlympiadGameTask(_olympiadInstances.get(stadiumId)));
+			STADIUMS[stadiumId].setStadiaBusy();
+			return true;
+		} catch (Exception ex) {
+			_log.log(Level.WARNING, "Error creating OlympiadGame for stadium " + stadiumId, ex);
+			if (_olympiadInstances.get(stadiumId) != null) {
+				for (Player player : _olympiadInstances.get(stadiumId).getPlayers()) {
+					player.sendMessage("Your olympiad registration was canceled due to an error");
+					player.setInOlympiadMode(false);
+					player.setOlympiadStart(false);
+					player.setOlympiadSide(-1);
+					player.setOlympiadGameId(-1);
+				}
+				_olympiadInstances.remove(stadiumId);
+			}
+			if (gamesQueue.get(stadiumId) != null) {
+				gamesQueue.remove(stadiumId);
+			}
+			STADIUMS[stadiumId].setStadiaFree();
+			return false;
+		}
 	}
 
 	protected Map<Integer, String> getAllTitles() {
