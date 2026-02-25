@@ -221,7 +221,7 @@ INSERT IGNORE INTO `raidboss_spawnlist` (`boss_id`,`loc_x`,`loc_y`,`loc_z`,`head
 -- (29033,0,0,0,0,0,0,0,0), -- Fenril Hound Freki (84) (stats to be done)
 -- (29036,0,0,0,0,0,0,0,0), -- Fenril Hound Uruz (84) (stats to be done)
 -- (29037,0,0,0,0,0,0,0,0), -- Fenril Hound Kinaz (84) (stats to be done)
-(29040,189400,-105702,-782,0,604800,0,520605,4140); -- Wings of Flame Ixion (84) TODO: Check if respawn time should be stored into DB to be restored on restart (original record haven't dbsaving={death_time;parameters}	and boss_respawn_set=yes parameters)
+(29040,189400,-105702,-782,0,604800,0,520605,4140); -- Wings of Flame Ixion (84)
 -- (29054,11882,-49216,-3008,0,0,0,1352750,1494), -- Venom (75)
 -- (29056,0,0,0,0,0,0,0,0), -- Ice Fairy Sirra (60)
 -- (29060,106000,-128000,-3000,0,129600,86400,1566263,9999), -- Captain Of The Ice Queen's Royal Guard (59) (Spawn by Quest)
