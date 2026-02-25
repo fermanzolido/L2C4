@@ -36,6 +36,7 @@ import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -88,6 +89,16 @@ public interface IXmlReader {
 		factory.setNamespaceAware(true);
 		factory.setValidating(isValidating());
 		factory.setIgnoringComments(true);
+		try {
+			factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+			factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+			factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+			factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+			factory.setXIncludeAware(false);
+			factory.setExpandEntityReferences(false);
+		} catch (ParserConfigurationException e) {
+			LOGGER.log(Level.WARNING, "Failed to set security features on DocumentBuilderFactory", e);
+		}
 		try {
 			factory.setAttribute(JAXP_SCHEMA_LANGUAGE, W3C_XML_SCHEMA);
 			final DocumentBuilder builder = factory.newDocumentBuilder();
