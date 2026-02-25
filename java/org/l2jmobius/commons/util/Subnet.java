@@ -33,6 +33,10 @@ public class Subnet {
 	private final boolean _v4;
 
 	public Subnet(String input) throws UnknownHostException {
+		if ((input == null) || input.trim().isEmpty() || input.equals("/")) {
+			throw new IllegalArgumentException("Subnet input cannot be empty or invalid format.");
+		}
+
 		final String[] parts = input.split("/");
 		final InetAddress inetAddress = InetAddress.getByName(parts[0]);
 		_address = inetAddress.getAddress();
