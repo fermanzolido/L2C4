@@ -333,15 +333,7 @@ public class LoginController
 				return false;
 			}
 			
-			ok = true;
-			for (int i = 0; i < expected.length; i++)
-			{
-				if (hash[i] != expected[i])
-				{
-					ok = false;
-					break;
-				}
-			}
+			ok = MessageDigest.isEqual(hash, expected);
 			
 			if (ok)
 			{
