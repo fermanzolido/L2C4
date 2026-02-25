@@ -1,1 +1,7 @@
 /bin/
+build/
+.gradle/
+.idea/
+.DS_Store
+nbproject/
+*.class
