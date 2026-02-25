@@ -339,21 +339,13 @@ public class RaidBossSpawnManager
 					continue;
 				}
 				
-				try
-				{
-					// DB updates are individual (not batched).
-					ps.setLong(1, info.getLong("respawnTime"));
-					ps.setDouble(2, boss.isDead() ? boss.getMaxHp() : info.getDouble("currentHP"));
-					ps.setDouble(3, boss.isDead() ? boss.getMaxMp() : info.getDouble("currentMP"));
-					ps.setInt(4, bossId);
-					ps.executeUpdate();
-					ps.clearParameters();
-				}
-				catch (SQLException e)
-				{
-					LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Could not update raidboss_spawnlist table " + e.getMessage(), e);
-				}
+				ps.setLong(1, info.getLong("respawnTime"));
+				ps.setDouble(2, boss.isDead() ? boss.getMaxHp() : info.getDouble("currentHP"));
+				ps.setDouble(3, boss.isDead() ? boss.getMaxMp() : info.getDouble("currentMP"));
+				ps.setInt(4, bossId);
+				ps.addBatch();
 			}
+			ps.executeBatch();
 		}
 		catch (SQLException e)
 		{
