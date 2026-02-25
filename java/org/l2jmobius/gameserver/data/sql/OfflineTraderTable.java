@@ -102,9 +102,9 @@ public class OfflineTraderTable
 									stmItems.setInt(2, i.getItem().getId());
 									stmItems.setInt(3, i.getCount());
 									stmItems.setInt(4, i.getPrice());
-									stmItems.executeUpdate();
-									stmItems.clearParameters();
+									stmItems.addBatch();
 								}
+								stmItems.executeBatch();
 								break;
 							}
 							case SELL:
@@ -124,8 +124,7 @@ public class OfflineTraderTable
 										stmItems.setInt(2, holder.getSkillId());
 										stmItems.setInt(3, 0);
 										stmItems.setInt(4, holder.getPrice());
-										stmItems.executeUpdate();
-										stmItems.clearParameters();
+										stmItems.addBatch();
 									}
 								}
 								else
@@ -136,10 +135,10 @@ public class OfflineTraderTable
 										stmItems.setInt(2, i.getObjectId());
 										stmItems.setInt(3, i.getCount());
 										stmItems.setInt(4, i.getPrice());
-										stmItems.executeUpdate();
-										stmItems.clearParameters();
+										stmItems.addBatch();
 									}
 								}
+								stmItems.executeBatch();
 								break;
 							}
 							case MANUFACTURE:
@@ -156,9 +155,9 @@ public class OfflineTraderTable
 									stmItems.setInt(2, i.getRecipeId());
 									stmItems.setInt(3, 0);
 									stmItems.setInt(4, i.getCost());
-									stmItems.executeUpdate();
-									stmItems.clearParameters();
+									stmItems.addBatch();
 								}
+								stmItems.executeBatch();
 								break;
 							}
 							default:
@@ -391,9 +390,9 @@ public class OfflineTraderTable
 									stm3.setInt(2, i.getItem().getId());
 									stm3.setInt(3, i.getCount());
 									stm3.setInt(4, i.getPrice());
-									stm3.executeUpdate();
-									stm3.clearParameters();
+									stm3.addBatch();
 								}
+								stm3.executeBatch();
 								break;
 							}
 							case SELL:
@@ -412,8 +411,7 @@ public class OfflineTraderTable
 										stm3.setInt(2, holder.getSkillId());
 										stm3.setInt(3, 0);
 										stm3.setInt(4, holder.getPrice());
-										stm3.executeUpdate();
-										stm3.clearParameters();
+										stm3.addBatch();
 									}
 								}
 								else
@@ -424,10 +422,10 @@ public class OfflineTraderTable
 										stm3.setInt(2, i.getObjectId());
 										stm3.setInt(3, i.getCount());
 										stm3.setInt(4, i.getPrice());
-										stm3.executeUpdate();
-										stm3.clearParameters();
+										stm3.addBatch();
 									}
 								}
+								stm3.executeBatch();
 								break;
 							}
 							case MANUFACTURE:
@@ -443,9 +441,9 @@ public class OfflineTraderTable
 									stm3.setInt(2, i.getRecipeId());
 									stm3.setInt(3, 0);
 									stm3.setInt(4, i.getCost());
-									stm3.executeUpdate();
-									stm3.clearParameters();
+									stm3.addBatch();
 								}
+								stm3.executeBatch();
 								break;
 							}
 							default:
