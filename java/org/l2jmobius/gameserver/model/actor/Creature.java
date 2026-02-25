@@ -6429,7 +6429,7 @@ public abstract class Creature extends WorldObject {
 	}
 
 	public void updateSeenCreatures() {
-		if ((_seenCreatures == null) || _isDead || !isSpawned()) {
+		if ((_seenCreatures == null) || _isDead.get() || !isSpawned()) {
 			return;
 		}
 
