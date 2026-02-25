@@ -52,7 +52,6 @@ public class LoginServer extends FloodProtectorListener
 	
 	private static LoginServer _instance;
 	private static GameServerListener _gameServerListener;
-	private ServerSocket _serverSocket;
 	
 	private LoginServer() throws Exception
 	{
@@ -216,17 +215,7 @@ public class LoginServer extends FloodProtectorListener
 		_gameServerListener.interrupt();
 		GameServerTable.getInstance().shutDown();
 		
-		try
-		{
-			if (_serverSocket != null)
-			{
-				_serverSocket.close();
-			}
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+		super.close();
 		
 		Runtime.getRuntime().exit(restart ? 2 : 0);
 	}
