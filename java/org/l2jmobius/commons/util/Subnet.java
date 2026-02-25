@@ -33,11 +33,15 @@ public class Subnet {
 	private final boolean _v4;
 
 	public Subnet(String input) throws UnknownHostException {
-		if ((input == null) || input.trim().isEmpty() || input.equals("/")) {
-			throw new IllegalArgumentException("Subnet input cannot be empty or invalid format.");
+		if ((input == null) || input.trim().isEmpty()) {
+			throw new IllegalArgumentException("Subnet input cannot be null or empty.");
 		}
 
 		final String[] parts = input.split("/");
+		if ((parts.length == 0) || parts[0].isEmpty()) {
+			throw new IllegalArgumentException("Invalid subnet format. Expected 'host/mask' or 'host'.");
+		}
+
 		final InetAddress inetAddress = InetAddress.getByName(parts[0]);
 		_address = inetAddress.getAddress();
 		_v4 = _address.length == 4;

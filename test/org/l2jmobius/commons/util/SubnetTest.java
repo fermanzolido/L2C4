@@ -1,96 +1,74 @@
 package org.l2jmobius.commons.util;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.net.UnknownHostException;
-
 import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class SubnetTest
-{
-	@Test
-	public void testValidSubnet() throws Exception
-	{
-		// Test valid CIDR notation
-		Subnet subnet = new Subnet("192.168.1.0/24");
+public class SubnetTest {
 
-		// Valid cases
-		assertTrue("Address in subnet should be accepted",
-				subnet.isInSubnet(java.net.InetAddress.getByName("192.168.1.5").getAddress()));
-		assertTrue("Address in subnet should be accepted",
-				subnet.isInSubnet(java.net.InetAddress.getByName("192.168.1.254").getAddress()));
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructorNull() throws UnknownHostException {
+        new Subnet(null);
+    }
 
-		// Invalid cases
-		assertFalse("Address outside subnet should be rejected",
-				subnet.isInSubnet(java.net.InetAddress.getByName("192.168.2.1").getAddress()));
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructorEmpty() throws UnknownHostException {
+        new Subnet("");
+    }
 
-	@Test
-	public void testSingleIp() throws Exception
-	{
-		// Test single IP without CIDR prefix (should default to /32 for IPv4)
-		Subnet subnet = new Subnet("192.168.1.1");
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructorWhitespace() throws UnknownHostException {
+        new Subnet("   ");
+    }
 
-		assertTrue("Exact match should be accepted",
-				subnet.isInSubnet(java.net.InetAddress.getByName("192.168.1.1").getAddress()));
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructorSlashOnly() throws UnknownHostException {
+        new Subnet("/");
+    }
 
-		assertFalse("Different IP should be rejected",
-				subnet.isInSubnet(java.net.InetAddress.getByName("192.168.1.2").getAddress()));
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructorSlashStart() throws UnknownHostException {
+        new Subnet("/24");
+    }
 
-	@Test
-	public void testSlashInput() throws Exception
-	{
-		try
-		{
-			new Subnet("/");
-			fail("Expected IllegalArgumentException for '/' input");
-		}
-		catch (IllegalArgumentException e)
-		{
-			// Expected
-		}
-		catch (Exception e)
-		{
-			fail("Expected IllegalArgumentException, but got " + e.getClass().getName());
-		}
-	}
+    @Test(expected = UnknownHostException.class)
+    public void testConstructorInvalidIP() throws UnknownHostException {
+        new Subnet("999.999.999.999");
+    }
 
-	@Test
-	public void testEmptyInput() throws Exception
-	{
-		try
-		{
-			new Subnet("");
-			fail("Expected IllegalArgumentException for empty input");
-		}
-		catch (IllegalArgumentException e)
-		{
-			// Expected
-		}
-		catch (Exception e)
-		{
-			fail("Expected IllegalArgumentException, but got " + e.getClass().getName());
-		}
-	}
+    @Test
+    public void testConstructorValidIPv4() throws UnknownHostException {
+        Subnet s = new Subnet("127.0.0.1/24");
+        assertNotNull(s);
+        assertTrue(s.isInSubnet(java.net.InetAddress.getByName("127.0.0.5").getAddress()));
+    }
 
-	@Test
-	public void testNullInput() throws Exception
-	{
-		try
-		{
-			new Subnet(null);
-			fail("Expected IllegalArgumentException for null input");
-		}
-		catch (IllegalArgumentException e)
-		{
-			// Expected
-		}
-		catch (Exception e)
-		{
-			fail("Expected IllegalArgumentException, but got " + e.getClass().getName());
-		}
-	}
+    @Test
+    public void testConstructorValidIPv4NoMask() throws UnknownHostException {
+        Subnet s = new Subnet("127.0.0.1"); // defaults to /32
+        assertNotNull(s);
+        assertTrue(s.isInSubnet(java.net.InetAddress.getByName("127.0.0.1").getAddress()));
+        assertFalse(s.isInSubnet(java.net.InetAddress.getByName("127.0.0.2").getAddress()));
+    }
+
+    @Test
+    public void testConstructorValidIPv6() throws UnknownHostException {
+        Subnet s = new Subnet("2001:db8::/32");
+        assertNotNull(s);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructorIPv4PrefixTooLarge() throws UnknownHostException {
+        new Subnet("127.0.0.1/33");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructorIPv4PrefixNegative() throws UnknownHostException {
+        new Subnet("127.0.0.1/-1");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructorIPv6PrefixTooLarge() throws UnknownHostException {
+        new Subnet("2001:db8::/129");
+    }
 }
