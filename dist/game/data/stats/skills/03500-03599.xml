@@ -1225,14 +1225,17 @@
 		</effects>
 	</skill>
 	<skill id="3581" levels="1" name="Discord">
-		<set name="operateType" val="A1" />
+		<set name="operateType" val="A2" />
 		<set name="targetType" val="ONE" />
+		<set name="abnormalLevel" val="1" />
+		<set name="abnormalTime" val="20" />
+		<set name="abnormalType" val="DISTRUST" />
+		<set name="activateRate" val="20" />
+		<set name="basicProperty" val="MEN" />
+		<set name="isDebuff" val="true" />
 		<set name="magicLevel" val="80" />
 		<effects>
-			<!-- FIXME: this should be "Distrust" effect -->
-			<effect name="Confuse" abnormalTime="20">
-				<param chance="20" />
-			</effect>
+			<effect name="Distrust" />
 		</effects>
 	</skill>
 	<skill id="3582" levels="1" name="Special Ability: Infinity Cleaver">
