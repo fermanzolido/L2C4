@@ -59,7 +59,10 @@ public enum TraitType
 	TARGET(3),
 	PHYSICAL_WEAKNESS(3),
 	MAGICAL_WEAKNESS(3),
-	DUALDAGGER(1);
+	DUALDAGGER(1),
+	RAPIER(1),
+	ANCIENT_SWORD(1),
+	CROSSBOW(1);
 	
 	private final int _type; // 1 = weapon, 2 = weakness, 3 = resistance
 	

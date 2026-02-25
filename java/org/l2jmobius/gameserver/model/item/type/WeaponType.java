@@ -37,7 +37,10 @@ public enum WeaponType implements ItemType
 	FISHINGROD(TraitType.NONE),
 	FLAG(TraitType.NONE),
 	OWNTHING(TraitType.NONE),
-	DUALDAGGER(TraitType.DUALDAGGER);
+	DUALDAGGER(TraitType.DUALDAGGER),
+	RAPIER(TraitType.RAPIER),
+	ANCIENT_SWORD(TraitType.ANCIENT_SWORD),
+	CROSSBOW(TraitType.CROSSBOW);
 	
 	private final int _mask;
 	private final TraitType _traitType;
