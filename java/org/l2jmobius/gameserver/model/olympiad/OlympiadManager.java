@@ -249,10 +249,6 @@ class OlympiadManager implements Runnable {
 					}
 				}
 
-				/*
-				 * try { wait(30000); } catch (InterruptedException e) { }
-				 */
-
 				// Start games
 				gamesQueueSize = gamesQueue.size();
 				for (int i = 0; i < gamesQueueSize; i++) {

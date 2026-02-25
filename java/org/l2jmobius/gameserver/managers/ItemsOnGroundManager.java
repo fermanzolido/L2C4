@@ -206,39 +206,50 @@ public class ItemsOnGroundManager implements Runnable
 			return;
 		}
 		
-		try (Connection con = DatabaseFactory.getConnection();
-			PreparedStatement ps = con.prepareStatement("INSERT INTO itemsonground(object_id,item_id,count,enchant_level,x,y,z,drop_time,equipable) VALUES(?,?,?,?,?,?,?,?,?)"))
+		try (Connection con = DatabaseFactory.getConnection())
 		{
-			for (Item item : _items)
+			storeItems(con, _items);
+		}
+		catch (SQLException e)
+		{
+			LOGGER.log(Level.SEVERE, getClass().getSimpleName() + ": SQL error while storing items on ground: " + e.getMessage(), e);
+		}
+	}
+
+	protected static void storeItems(Connection con, Collection<Item> items)
+	{
+		try (PreparedStatement ps = con.prepareStatement("INSERT INTO itemsonground(object_id,item_id,count,enchant_level,x,y,z,drop_time,equipable) VALUES(?,?,?,?,?,?,?,?,?)"))
+		{
+			int i = 0;
+			for (Item item : items)
 			{
 				if (item == null)
 				{
 					continue;
 				}
 				
-				try
+				ps.setInt(1, item.getObjectId());
+				ps.setInt(2, item.getId());
+				ps.setInt(3, item.getCount());
+				ps.setInt(4, item.getEnchantLevel());
+				ps.setInt(5, item.getX());
+				ps.setInt(6, item.getY());
+				ps.setInt(7, item.getZ());
+				ps.setLong(8, item.isProtected() ? -1 : item.getDropTime()); // item is protected or AutoDestroyed
+				ps.setLong(9, item.isEquipable() ? 1 : 0); // set equip-able
+				ps.addBatch();
+
+				i++;
+				if ((i % 1000) == 0)
 				{
-					ps.setInt(1, item.getObjectId());
-					ps.setInt(2, item.getId());
-					ps.setInt(3, item.getCount());
-					ps.setInt(4, item.getEnchantLevel());
-					ps.setInt(5, item.getX());
-					ps.setInt(6, item.getY());
-					ps.setInt(7, item.getZ());
-					ps.setLong(8, item.isProtected() ? -1 : item.getDropTime()); // item is protected or AutoDestroyed
-					ps.setLong(9, item.isEquipable() ? 1 : 0); // set equip-able
-					ps.execute();
-					ps.clearParameters();
-				}
-				catch (Exception e)
-				{
-					LOGGER.log(Level.SEVERE, getClass().getSimpleName() + ": Error while inserting into table ItemsOnGround: " + e.getMessage(), e);
+					ps.executeBatch();
 				}
 			}
+			ps.executeBatch();
 		}
-		catch (SQLException e)
+		catch (Exception e)
 		{
-			LOGGER.log(Level.SEVERE, getClass().getSimpleName() + ": SQL error while storing items on ground: " + e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, ItemsOnGroundManager.class.getSimpleName() + ": Error while inserting into table ItemsOnGround: " + e.getMessage(), e);
 		}
 	}
 	
