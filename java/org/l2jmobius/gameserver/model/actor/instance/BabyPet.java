@@ -87,7 +87,7 @@ public class BabyPet extends Pet
 	{
 		super.onSpawn();
 		
-		double healPower = 0;
+		int healPower = 0;
 		for (PetSkillLearn psl : PetDataTable.getInstance().getPetData(getId()).getAvailableSkills())
 		{
 			final int id = psl.getSkillId();
@@ -121,12 +121,12 @@ public class BabyPet extends Pet
 					// set both heal types to the same skill
 					_majorHeal = new SkillHolder(skill);
 					_minorHeal = _majorHeal;
-					healPower = skill.getPower();
+					healPower = skill.getEffectPoint();
 				}
 				else
 				{
 					// another heal skill found - search for most powerful
-					if (skill.getPower() > healPower)
+					if (skill.getEffectPoint() > healPower)
 					{
 						_majorHeal = new SkillHolder(skill);
 					}
