@@ -582,7 +582,6 @@
 		<set name="isMagic" val="1" /> <!-- Magic Skill -->
 		<set name="magicLevel" val="#magicLevel" />
 		<set name="mpConsume" val="#mpConsume" />
-		<set name="power" val="#effectPoints" /> <!-- TODO: remove after BabyPet rework -->
 		<set name="reuseDelay" val="8000" />
 		<effects>
 			<effect name="Heal">
@@ -616,7 +615,6 @@
 		<set name="isMagic" val="1" /> <!-- Magic Skill -->
 		<set name="magicLevel" val="#magicLevel" />
 		<set name="mpConsume" val="#mpConsume" />
-		<set name="power" val="#effectPoints" /> <!-- TODO: remove after BabyPet rework -->
 		<set name="reuseDelay" val="8000" />
 		<effects>
 			<effect name="Heal">
