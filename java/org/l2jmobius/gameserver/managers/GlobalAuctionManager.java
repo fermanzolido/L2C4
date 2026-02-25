@@ -177,7 +177,7 @@ public class GlobalAuctionManager
 			// Rollback item location
 			droppedItem.setItemLocation(ItemLocation.INVENTORY);
 			droppedItem.updateDatabase();
-			player.getInventory().addItem(ItemProcessType.TRANSFER, droppedItem, player, null);
+			player.addItem(ItemProcessType.TRANSFER, droppedItem, null, true);
 			return false;
 		}
 
@@ -215,7 +215,7 @@ public class GlobalAuctionManager
 		}
 
 		// Take Adena
-		if (!buyer.destroyItemByItemId(ItemProcessType.BUY, 57, (int) listing.getPrice(), buyer, true))
+		if (!buyer.destroyItemByItemId(ItemProcessType.BUY, 57, (int) listing.getPrice(), buyer, null))
 		{
 			return false;
 		}
@@ -229,8 +229,7 @@ public class GlobalAuctionManager
 		item.setItemLocation(ItemLocation.INVENTORY);
 		item.updateDatabase();
 
-		buyer.getInventory().addItem(ItemProcessType.BUY, item, buyer, null);
-		buyer.sendInventoryUpdate(new InventoryUpdate());
+		buyer.addItem(ItemProcessType.BUY, item, null, true);
 
 		// Remove listing
 		removeAuction(auctionId);
@@ -262,8 +261,7 @@ public class GlobalAuctionManager
 		item.setItemLocation(ItemLocation.INVENTORY);
 		item.updateDatabase();
 
-		player.getInventory().addItem(ItemProcessType.RESTORE, item, player, null);
-		player.sendInventoryUpdate(new InventoryUpdate());
+		player.addItem(ItemProcessType.TRANSFER, item, null, true);
 
 		// Remove listing
 		removeAuction(auctionId);
