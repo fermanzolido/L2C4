@@ -270,23 +270,20 @@ public class GrandBossManager
 				}
 			}
 			
-			for (Entry<Integer, StatSet> e : _storedInfo.entrySet())
+			try (PreparedStatement update = con.prepareStatement(UPDATE_GRAND_BOSS_DATA);
+				PreparedStatement update2 = con.prepareStatement(UPDATE_GRAND_BOSS_DATA2))
 			{
-				final GrandBoss boss = BOSSES.get(e.getKey());
-				final StatSet info = e.getValue();
-				if ((boss == null) || (info == null))
+				for (Entry<Integer, StatSet> e : _storedInfo.entrySet())
 				{
-					try (PreparedStatement update = con.prepareStatement(UPDATE_GRAND_BOSS_DATA2))
+					final GrandBoss boss = BOSSES.get(e.getKey());
+					final StatSet info = e.getValue();
+					if ((boss == null) || (info == null))
 					{
-						update.setInt(1, _bossStatus.get(e.getKey()));
-						update.setInt(2, e.getKey());
-						update.executeUpdate();
-						update.clearParameters();
+						update2.setInt(1, _bossStatus.get(e.getKey()));
+						update2.setInt(2, e.getKey());
+						update2.addBatch();
 					}
-				}
-				else
-				{
-					try (PreparedStatement update = con.prepareStatement(UPDATE_GRAND_BOSS_DATA))
+					else
 					{
 						update.setInt(1, boss.getX());
 						update.setInt(2, boss.getY());
@@ -305,10 +302,12 @@ public class GrandBossManager
 						update.setDouble(7, mp);
 						update.setInt(8, _bossStatus.get(e.getKey()));
 						update.setInt(9, e.getKey());
-						update.executeUpdate();
-						update.clearParameters();
+						update.addBatch();
 					}
 				}
+
+				update.executeBatch();
+				update2.executeBatch();
 			}
 		}
 		catch (SQLException e)
