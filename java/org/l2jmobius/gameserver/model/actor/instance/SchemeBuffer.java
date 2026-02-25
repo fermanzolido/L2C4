@@ -55,10 +55,7 @@ public class SchemeBuffer extends Npc
 	@Override
 	public void onBypassFeedback(Player player, String commandValue)
 	{
-		// Simple hack to use createscheme bypass with a space.
-		final String command = commandValue.replace("createscheme ", "createscheme;");
-		
-		final StringTokenizer st = new StringTokenizer(command, ";");
+		final StringTokenizer st = new StringTokenizer(commandValue, ";");
 		final String currentCommand = st.nextToken();
 		if (currentCommand.startsWith("menu"))
 		{
@@ -174,7 +171,22 @@ public class SchemeBuffer extends Npc
 		{
 			try
 			{
-				final String schemeName = st.nextToken().trim();
+				String schemeName = "";
+				if (currentCommand.length() > 12)
+				{
+					schemeName = currentCommand.substring(12).trim();
+				}
+
+				if (schemeName.isEmpty() && st.hasMoreTokens())
+				{
+					schemeName = st.nextToken().trim();
+				}
+
+				if (schemeName.isEmpty())
+				{
+					throw new Exception();
+				}
+
 				if (schemeName.length() > 14)
 				{
 					player.sendMessage("Scheme's name must contain up to 14 chars.");
