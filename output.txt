@@ -1,0 +1,13 @@
+Buildfile: /app/build.xml
+
+checkRequirements:
+
+init:
+   [delete] Deleting directory /app/build/bin
+    [mkdir] Created dir: /app/build/bin
+
+compile:
+    [javac] Compiling 1557 source files to /app/build/bin
+
+BUILD SUCCESSFUL
+Total time: 11 seconds
