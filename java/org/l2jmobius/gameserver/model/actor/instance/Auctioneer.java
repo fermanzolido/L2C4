@@ -373,18 +373,18 @@ public class Auctioneer extends Npc
 					auctionId = Integer.parseInt(val);
 				}
 				
-				String biders = "";
+				final StringBuilder biders = new StringBuilder();
 				final Map<Integer, Bidder> bidders = ClanHallAuctionManager.getInstance().getAuction(auctionId).getBidders();
 				for (Bidder b : bidders.values())
 				{
-					biders += "<tr><td>" + b.getClanName() + "</td><td>" + b.getName() + "</td><td>" + b.getTimeBid().get(Calendar.YEAR) + "/" + (b.getTimeBid().get(Calendar.MONTH) + 1) + "/" + b.getTimeBid().get(Calendar.DATE) + "</td><td>" + b.getBid() + "</td></tr>";
+					biders.append("<tr><td>").append(b.getClanName()).append("</td><td>").append(b.getName()).append("</td><td>").append(b.getTimeBid().get(Calendar.YEAR)).append("/").append(b.getTimeBid().get(Calendar.MONTH) + 1).append("/").append(b.getTimeBid().get(Calendar.DATE)).append("</td><td>").append(b.getBid()).append("</td></tr>");
 				}
 				
 				final String filename = "data/html/auction/AgitBidderList.htm";
 				
 				final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 				html.setFile(player, filename);
-				html.replace("%AGIT_LIST%", biders);
+				html.replace("%AGIT_LIST%", biders.toString());
 				html.replace("%AGIT_LINK_BACK%", "bypass -h npc_" + getObjectId() + "_selectedItems");
 				html.replace("%x%", val);
 				html.replace("%objectId%", String.valueOf(getObjectId()));
