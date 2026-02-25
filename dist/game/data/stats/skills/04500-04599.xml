@@ -225,9 +225,13 @@
 		<effects>
 			<effect name="Buff">
 				<mul stat="critRatePos" val="2">
+					<using kind="DAGGER,DUALDAGGER" />
 					<player behind="true" />
 				</mul>
-				<!-- TODO: Missing bonus for Rapier -->
+				<mul stat="critDmg" val="1.2">
+					<using kind="RAPIER" />
+					<player behind="true" />
+				</mul>
 			</effect>
 		</effects>
 	</skill>
