@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 import javax.crypto.Cipher;
 
 import org.l2jmobius.commons.database.DatabaseFactory;
+import org.l2jmobius.commons.util.BCrypt;
 import org.l2jmobius.commons.util.Rnd;
 import org.l2jmobius.loginserver.config.LoginConfig;
 import org.l2jmobius.loginserver.network.LoginClient;
@@ -283,11 +284,7 @@ public class LoginController
 		
 		try (Connection con = DatabaseFactory.getConnection())
 		{
-			final MessageDigest md = MessageDigest.getInstance("SHA");
-			final byte[] raw = password.getBytes("UTF-8");
-			final byte[] hash = md.digest(raw);
-			
-			byte[] expected = null;
+			String expected = null;
 			int access = 0;
 			int lastServer = 1;
 			
@@ -298,7 +295,7 @@ public class LoginController
 				{
 					if (rset.next())
 					{
-						expected = Base64.getDecoder().decode(rset.getString("password"));
+						expected = rset.getString("password");
 						access = rset.getInt("accessLevel");
 						lastServer = rset.getInt("lastServer");
 					}
@@ -314,7 +311,7 @@ public class LoginController
 						try (PreparedStatement statement = con.prepareStatement("INSERT INTO accounts (login,password,lastactive,accessLevel,lastIP) values(?,?,?,?,?)"))
 						{
 							statement.setString(1, user);
-							statement.setString(2, Base64.getEncoder().encodeToString(hash));
+							statement.setString(2, BCrypt.hashpw(password, BCrypt.gensalt()));
 							statement.setLong(3, System.currentTimeMillis());
 							statement.setInt(4, 0);
 							statement.setString(5, address.getHostAddress());
@@ -333,18 +330,49 @@ public class LoginController
 				return false;
 			}
 			
-			ok = MessageDigest.isEqual(hash, expected);
+			boolean migrate = false;
+			if (expected.startsWith("$2"))
+			{
+				ok = BCrypt.checkpw(password, expected);
+			}
+			else
+			{
+				final MessageDigest md = MessageDigest.getInstance("SHA");
+				final byte[] raw = password.getBytes("UTF-8");
+				final byte[] hash = md.digest(raw);
+				byte[] expectedBytes = Base64.getDecoder().decode(expected);
+				ok = MessageDigest.isEqual(hash, expectedBytes);
+				if (ok)
+				{
+					migrate = true;
+				}
+			}
 			
 			if (ok)
 			{
 				client.setAccessLevel(access);
 				client.setLastServer(lastServer);
-				try (PreparedStatement statement = con.prepareStatement("UPDATE accounts SET lastactive=?, lastIP=? WHERE login=?"))
+				if (migrate)
 				{
-					statement.setLong(1, System.currentTimeMillis());
-					statement.setString(2, address.getHostAddress());
-					statement.setString(3, user);
-					statement.execute();
+					try (PreparedStatement statement = con.prepareStatement("UPDATE accounts SET password=?, lastactive=?, lastIP=? WHERE login=?"))
+					{
+						statement.setString(1, BCrypt.hashpw(password, BCrypt.gensalt()));
+						statement.setLong(2, System.currentTimeMillis());
+						statement.setString(3, address.getHostAddress());
+						statement.setString(4, user);
+						statement.execute();
+					}
+					LOGGER.info("Migrated account " + user + " to BCrypt.");
+				}
+				else
+				{
+					try (PreparedStatement statement = con.prepareStatement("UPDATE accounts SET lastactive=?, lastIP=? WHERE login=?"))
+					{
+						statement.setLong(1, System.currentTimeMillis());
+						statement.setString(2, address.getHostAddress());
+						statement.setString(3, user);
+						statement.execute();
+					}
 				}
 			}
 		}
