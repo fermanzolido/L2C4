@@ -152,7 +152,7 @@ public class SchemeBufferTable
 						final StringBuilder sb = new StringBuilder();
 						for (int skillId : scheme.getValue())
 						{
-							sb.append(skillId + ",");
+							sb.append(skillId).append(",");
 						}
 						
 						// Delete the last "," : must be called only if there is something to delete !
