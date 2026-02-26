@@ -4227,16 +4227,14 @@ public abstract class Creature extends WorldObject {
 				final double originalDistance = distance;
 				final int gtx = (originalX - World.WORLD_X_MIN) >> 4;
 				final int gty = (originalY - World.WORLD_Y_MIN) >> 4;
-				if (isOnGeodataPath()) {
-					try {
-						if ((gtx == _move.geoPathGtx) && (gty == _move.geoPathGty)) {
-							sendPacket(ActionFailed.STATIC_PACKET);
-							return;
-						}
-
-						_move.onGeodataPathIndex = -1; // Set not on geodata path.
-					} catch (NullPointerException e) {
+				final MoveData currentMove = _move;
+				if ((currentMove != null) && isOnGeodataPath(currentMove)) {
+					if ((gtx == currentMove.geoPathGtx) && (gty == currentMove.geoPathGty)) {
+						sendPacket(ActionFailed.STATIC_PACKET);
+						return;
 					}
+
+					currentMove.onGeodataPathIndex = -1; // Set not on geodata path.
 				}
 
 				// Support for player attack with direct movement. Tested at retail on May 11th
