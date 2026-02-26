@@ -52,6 +52,11 @@ public class Sleep extends AbstractEffect
 	@Override
 	public void onExit(Creature effector, Creature effected, Skill skill)
 	{
+		if ((effected == null) || effected.isRaid())
+		{
+			return;
+		}
+
 		if (effected.isPlayer())
 		{
 			effected.getAI().setIntention(Intention.ACTIVE);
@@ -60,14 +65,22 @@ public class Sleep extends AbstractEffect
 		{
 			effected.getAI().notifyAction(Action.THINK);
 		}
+
+		effected.updateAbnormalEffect();
 	}
 	
 	@Override
 	public void onStart(Creature effector, Creature effected, Skill skill)
 	{
+		if ((effected == null) || effected.isRaid())
+		{
+			return;
+		}
+
 		effected.abortAttack();
 		effected.abortCast();
 		effected.stopMove(null);
 		effected.getAI().notifyAction(Action.SLEEPING);
+		effected.updateAbnormalEffect();
 	}
 }
