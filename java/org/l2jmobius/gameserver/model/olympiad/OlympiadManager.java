@@ -322,16 +322,33 @@ class OlympiadManager implements Runnable {
 			return true;
 		} catch (Exception ex) {
 			_log.log(Level.WARNING, "Error creating OlympiadGame for stadium " + stadiumId, ex);
-			if (_olympiadInstances.get(stadiumId) != null) {
-				for (Player player : _olympiadInstances.get(stadiumId).getPlayers()) {
-					player.sendMessage("Your olympiad registration was canceled due to an error");
-					player.setInOlympiadMode(false);
-					player.setOlympiadStart(false);
-					player.setOlympiadSide(-1);
-					player.setOlympiadGameId(-1);
+
+			// Remove form instances if it was added
+			final OlympiadGame game = _olympiadInstances.remove(stadiumId);
+			if (game != null) {
+				// If game was created but failed later, try to use its player list
+				for (Player player : game.getPlayers()) {
+					if (player != null) {
+						player.sendMessage("Your olympiad registration was canceled due to an error");
+						player.setInOlympiadMode(false);
+						player.setOlympiadStart(false);
+						player.setOlympiadSide(-1);
+						player.setOlympiadGameId(-1);
+					}
 				}
-				_olympiadInstances.remove(stadiumId);
+			} else {
+				// Fallback to the opponents list if game creation failed before adding to map
+				for (Player player : opponents) {
+					if (player != null) {
+						player.sendMessage("Your olympiad registration was canceled due to an error");
+						player.setInOlympiadMode(false);
+						player.setOlympiadStart(false);
+						player.setOlympiadSide(-1);
+						player.setOlympiadGameId(-1);
+					}
+				}
 			}
+
 			if (gamesQueue.get(stadiumId) != null) {
 				gamesQueue.remove(stadiumId);
 			}

@@ -277,7 +277,7 @@ public class GrandBossManager
 				{
 					final GrandBoss boss = BOSSES.get(e.getKey());
 					final StatSet info = e.getValue();
-					if ((boss == null) || (info == null))
+					if (info == null)
 					{
 						update2.setInt(1, _bossStatus.get(e.getKey()));
 						update2.setInt(2, e.getKey());
@@ -285,14 +285,25 @@ public class GrandBossManager
 					}
 					else
 					{
-						update.setInt(1, boss.getX());
-						update.setInt(2, boss.getY());
-						update.setInt(3, boss.getZ());
-						update.setInt(4, boss.getHeading());
+						if (boss != null)
+						{
+							update.setInt(1, boss.getX());
+							update.setInt(2, boss.getY());
+							update.setInt(3, boss.getZ());
+							update.setInt(4, boss.getHeading());
+						}
+						else
+						{
+							update.setInt(1, info.getInt("loc_x"));
+							update.setInt(2, info.getInt("loc_y"));
+							update.setInt(3, info.getInt("loc_z"));
+							update.setInt(4, info.getInt("heading"));
+						}
 						update.setLong(5, info.getLong("respawn_time"));
-						double hp = boss.getCurrentHp();
-						double mp = boss.getCurrentMp();
-						if (boss.isDead())
+
+						double hp = (boss != null) ? boss.getCurrentHp() : info.getDouble("currentHP");
+						double mp = (boss != null) ? boss.getCurrentMp() : info.getDouble("currentMP");
+						if ((boss != null) && boss.isDead())
 						{
 							hp = boss.getMaxHp();
 							mp = boss.getMaxMp();
@@ -325,7 +336,7 @@ public class GrandBossManager
 		{
 			final GrandBoss boss = BOSSES.get(bossId);
 			final StatSet info = _storedInfo.get(bossId);
-			if (statusOnly || (boss == null) || (info == null))
+			if (statusOnly || (info == null))
 			{
 				try (PreparedStatement ps = con.prepareStatement(UPDATE_GRAND_BOSS_DATA2))
 				{
@@ -338,14 +349,25 @@ public class GrandBossManager
 			{
 				try (PreparedStatement ps = con.prepareStatement(UPDATE_GRAND_BOSS_DATA))
 				{
-					ps.setInt(1, boss.getX());
-					ps.setInt(2, boss.getY());
-					ps.setInt(3, boss.getZ());
-					ps.setInt(4, boss.getHeading());
+					if (boss != null)
+					{
+						ps.setInt(1, boss.getX());
+						ps.setInt(2, boss.getY());
+						ps.setInt(3, boss.getZ());
+						ps.setInt(4, boss.getHeading());
+					}
+					else
+					{
+						ps.setInt(1, info.getInt("loc_x"));
+						ps.setInt(2, info.getInt("loc_y"));
+						ps.setInt(3, info.getInt("loc_z"));
+						ps.setInt(4, info.getInt("heading"));
+					}
 					ps.setLong(5, info.getLong("respawn_time"));
-					double hp = boss.getCurrentHp();
-					double mp = boss.getCurrentMp();
-					if (boss.isDead())
+
+					double hp = (boss != null) ? boss.getCurrentHp() : info.getDouble("currentHP");
+					double mp = (boss != null) ? boss.getCurrentMp() : info.getDouble("currentMP");
+					if ((boss != null) && boss.isDead())
 					{
 						hp = boss.getMaxHp();
 						mp = boss.getMaxMp();
