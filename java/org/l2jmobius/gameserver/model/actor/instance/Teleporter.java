@@ -91,21 +91,12 @@ public class Teleporter extends Merchant
 					return;
 				}
 				
-				holder.doTeleport(player, this, parseNextInt(st, -1));
+				holder.doTeleport(player, this, parseNextInt(st, -1, player, command));
 				break;
 			}
 			case "chat":
 			{
-				int val = 0;
-				try
-				{
-					val = Integer.parseInt(command.substring(5));
-				}
-				catch (IndexOutOfBoundsException | NumberFormatException ignored)
-				{
-				}
-				
-				showChatWindow(player, val);
+				showChatWindow(player, parseNextInt(st, 0, player, command));
 				break;
 			}
 			default:
@@ -115,14 +106,18 @@ public class Teleporter extends Merchant
 		}
 	}
 	
-	private int parseNextInt(StringTokenizer st, int defaultVal)
+	static int parseNextInt(StringTokenizer st, int defaultVal, Player player, String command)
 	{
 		if (st.hasMoreTokens())
 		{
 			final String token = st.nextToken();
-			if (StringUtil.isNumeric(token))
+			try
 			{
 				return Integer.parseInt(token);
+			}
+			catch (NumberFormatException e)
+			{
+				LOGGER.warning("Invalid numeric value '" + token + "' in command '" + command + "' from player " + player);
 			}
 		}
 		
