@@ -527,7 +527,7 @@ public class Formulas {
 		}
 
 		// Initial damage
-		final double baseMod = ((77 * (power + (attacker.getPAtk(target) * ssboost))) / defence);
+		final double baseMod = ((77 * (power + attacker.getPAtk(target))) / defence) * ssboost;
 
 		// Critical
 		final double criticalMod = (attacker.calcStat(Stat.CRITICAL_DAMAGE, 1, target, skill));
