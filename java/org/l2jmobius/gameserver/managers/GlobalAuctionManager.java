@@ -215,7 +215,7 @@ public class GlobalAuctionManager
 		}
 
 		// Take Adena
-		if (!buyer.destroyItemByItemId(ItemProcessType.BUY, 57, (int) listing.getPrice(), buyer, null))
+		if (!buyer.destroyItemByItemId(ItemProcessType.BUY, 57, (int) listing.getPrice(), buyer, true))
 		{
 			return false;
 		}

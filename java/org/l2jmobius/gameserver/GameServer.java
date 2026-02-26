@@ -418,7 +418,6 @@ public class GameServer
 			deadlockWatcher.start();
 		}
 		
-		System.gc();
 		final long totalMem = Runtime.getRuntime().maxMemory() / 1048576;
 		LOGGER.info(getClass().getSimpleName() + ": Started, using " + getUsedMemoryMB() + " of " + totalMem + " MB total memory.");
 		LOGGER.info(getClass().getSimpleName() + ": Maximum number of connected players is " + ServerConfig.MAXIMUM_ONLINE_USERS + ".");
