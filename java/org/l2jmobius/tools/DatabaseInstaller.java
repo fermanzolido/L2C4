@@ -42,6 +42,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -75,6 +77,7 @@ import org.l2jmobius.commons.util.ConfigReader;
  * @author Skache
  */
 public class DatabaseInstaller extends JFrame {
+	private static final Logger LOGGER = Logger.getLogger(DatabaseInstaller.class.getName());
 	public static final String INTERFACE_CONFIG_FILE = "./config/Interface.ini";
 
 	private JTextField _hostField;
@@ -277,7 +280,8 @@ public class DatabaseInstaller extends JFrame {
 						try {
 							Thread.sleep(2000);
 						} catch (InterruptedException e) {
-
+							LOGGER.log(Level.WARNING, "Thread interrupted during installer execution", e);
+							Thread.currentThread().interrupt();
 						}
 
 						System.exit(0);
