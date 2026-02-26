@@ -32,6 +32,8 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.l2jmobius.commons.network.internal.MMOThreadFactory;
 
@@ -44,6 +46,8 @@ import org.l2jmobius.commons.network.internal.MMOThreadFactory;
  * @author Mobius
  */
 public class ConnectionManager<T extends Client<Connection<T>>> {
+	private static final Logger LOGGER = Logger.getLogger(ConnectionManager.class.getName());
+
 	private final AsynchronousChannelGroup _group;
 	private final AsynchronousServerSocketChannel _socketChannel;
 	private final ConnectionConfig _config;
@@ -146,11 +150,12 @@ public class ConnectionManager<T extends Client<Connection<T>>> {
 				} catch (ClosedChannelException e) {
 					// Placeholder for handling/logging ClosedChannelException if needed.
 				} catch (Exception e) {
+					LOGGER.log(Level.WARNING, "Error processing new connection.", e);
 					// Close the channel on exception during setup.
 					try {
 						channel.close();
 					} catch (IOException ioe) {
-						// Placeholder for handling/logging IOException if needed.
+						LOGGER.log(Level.WARNING, "Error closing channel.", ioe);
 					}
 				}
 			}
