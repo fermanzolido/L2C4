@@ -62,7 +62,7 @@ public class LoginServer extends FloodProtectorListener
 		InterfaceConfig.load();
 		if (InterfaceConfig.ENABLE_GUI)
 		{
-			System.out.println("LoginServer: Running in GUI mode.");
+			LOGGER.info("Running in GUI mode.");
 			new Gui();
 		}
 		
