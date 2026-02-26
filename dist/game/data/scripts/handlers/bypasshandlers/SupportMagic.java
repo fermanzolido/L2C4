@@ -20,8 +20,9 @@
  */
 package handlers.bypasshandlers;
 
+import java.util.StringTokenizer;
+
 import org.l2jmobius.gameserver.config.PlayerConfig;
-import org.l2jmobius.gameserver.data.enums.CategoryType;
 import org.l2jmobius.gameserver.data.xml.SkillData;
 import org.l2jmobius.gameserver.handler.IBypassHandler;
 import org.l2jmobius.gameserver.model.actor.Creature;
@@ -39,8 +40,8 @@ public class SupportMagic implements IBypassHandler
 	};
 	
 	// Levels
-	private static final int LOWEST_LEVEL = 8;
-	private static final int HIGHEST_LEVEL = 24;
+	private static final int LOWEST_LEVEL = 1;
+	private static final int HIGHEST_LEVEL = 40;
 	
 	@Override
 	public boolean onCommand(String command, Player player, Creature target)
@@ -50,97 +51,115 @@ public class SupportMagic implements IBypassHandler
 			return false;
 		}
 		
-		if (command.equalsIgnoreCase(COMMANDS[0]))
+		final StringTokenizer st = new StringTokenizer(command);
+		st.nextToken(); // Skip command
+		int stage = 0;
+		if (st.hasMoreTokens())
 		{
-			final int level = player.getLevel();
-			final Npc npc = target.asNpc();
-			if (!PlayerConfig.ALT_GAME_NEW_CHAR_ALWAYS_IS_NEWBIE && !player.isNewbie())
+			try
 			{
-				npc.showChatWindow(player, "data/html/default/SupportMagicNovice.htm");
-				return false;
+				stage = Integer.parseInt(st.nextToken());
 			}
-			else if (level > HIGHEST_LEVEL)
+			catch (NumberFormatException e)
 			{
-				npc.showChatWindow(player, "data/html/default/SupportMagicHighLevel.htm");
-				return false;
+				// ignore
 			}
-			else if (level < LOWEST_LEVEL)
+		}
+
+		final int level = player.getLevel();
+		final Npc npc = target.asNpc();
+		if (!PlayerConfig.ALT_GAME_NEW_CHAR_ALWAYS_IS_NEWBIE && !player.isNewbie())
+		{
+			npc.showChatWindow(player, "data/html/default/SupportMagicNovice.htm");
+			return false;
+		}
+		else if (level > HIGHEST_LEVEL)
+		{
+			npc.showChatWindow(player, "data/html/default/SupportMagicHighLevel.htm");
+			return false;
+		}
+		else if (level < LOWEST_LEVEL)
+		{
+			npc.showChatWindow(player, "data/html/default/SupportMagicLowLevel.htm");
+			return false;
+		}
+		else if (player.getPlayerClass().level() == 3)
+		{
+			player.sendMessage("Only adventurers who have not completed their 3rd class transfer may receive these buffs.");
+			return false;
+		}
+
+		if (stage == 0)
+		{
+			npc.showChatWindow(player, "data/html/default/SupportMagic.htm");
+			return true;
+		}
+
+		npc.setTarget(player);
+
+		if ((stage == 1) && (level <= 20))
+		{
+			giveStage1Buffs(player, npc);
+		}
+		else if ((stage == 2) && (level >= 20) && (level <= 40))
+		{
+			giveStage2Buffs(player, npc);
+		}
+		else
+		{
+			if ((stage == 1) && (level > 20))
 			{
-				npc.showChatWindow(player, "data/html/default/SupportMagicLowLevel.htm");
-				return false;
+				player.sendMessage("You are too experienced for the beginner buffs.");
 			}
-			else if (player.getPlayerClass().level() == 3)
+			if ((stage == 2) && (level < 20))
 			{
-				player.sendMessage("Only adventurers who have not completed their 3rd class transfer may receive these buffs."); // Custom message
-				return false;
+				player.sendMessage("You are not experienced enough for the pro buffs.");
 			}
-			
-			npc.setTarget(player);
-			
-			if ((player.getLevel() >= 8) && (player.getLevel() <= 24))
-			{
-				npc.doCast(SkillData.getInstance().getSkill(4322, 1)); // WindWalk
-			}
-			
-			if ((player.getLevel() >= 11) && (player.getLevel() <= 24))
-			{
-				npc.doCast(SkillData.getInstance().getSkill(4323, 1)); // Shield
-			}
-			
-			if (player.isInCategory(CategoryType.BEGINNER_MAGE))
-			{
-				if ((player.getLevel() >= 12) && (player.getLevel() <= 23))
-				{
-					npc.doCast(SkillData.getInstance().getSkill(4328, 1)); // Bless the Soul
-				}
-				
-				if ((player.getLevel() >= 13) && (player.getLevel() <= 22))
-				{
-					npc.doCast(SkillData.getInstance().getSkill(4329, 1)); // Acumen
-				}
-				
-				if ((player.getLevel() >= 14) && (player.getLevel() <= 21))
-				{
-					npc.doCast(SkillData.getInstance().getSkill(4330, 1)); // Concentration
-				}
-				
-				if ((player.getLevel() >= 15) && (player.getLevel() <= 20))
-				{
-					npc.doCast(SkillData.getInstance().getSkill(4331, 1)); // Empower
-				}
-			}
-			else
-			{
-				if ((player.getLevel() >= 12) && (player.getLevel() <= 23))
-				{
-					npc.doCast(SkillData.getInstance().getSkill(4324, 1)); // Bless the Body
-				}
-				
-				if ((player.getLevel() >= 13) && (player.getLevel() <= 22))
-				{
-					npc.doCast(SkillData.getInstance().getSkill(4325, 1)); // Vampiric Rage
-				}
-				
-				if ((player.getLevel() >= 14) && (player.getLevel() <= 21))
-				{
-					npc.doCast(SkillData.getInstance().getSkill(4326, 1)); // Regeneration
-				}
-				
-				if ((player.getLevel() >= 15) && (player.getLevel() <= 20))
-				{
-					npc.doCast(SkillData.getInstance().getSkill(4327, 1)); // Haste
-				}
-			}
-			
-			if ((player.getLevel() >= 16) && (player.getLevel() <= 19))
-			{
-				player.doSimultaneousCast(SkillData.getInstance().getSkill(4338, 1)); // Life Cubic
-			}
+			return false;
 		}
 		
 		return true;
 	}
 	
+	private void giveStage1Buffs(Player player, Npc npc)
+	{
+		SkillData.getInstance().getSkill(1204, 2).applyEffects(npc, player); // Wind Walk
+		SkillData.getInstance().getSkill(1040, 3).applyEffects(npc, player); // Shield
+		SkillData.getInstance().getSkill(4338, 1).applyEffects(npc, player); // Life Cubic
+
+		if (player.isMageClass())
+		{
+			SkillData.getInstance().getSkill(1085, 3).applyEffects(npc, player); // Acumen
+		}
+		else
+		{
+			SkillData.getInstance().getSkill(1068, 3).applyEffects(npc, player); // Might
+		}
+	}
+
+	private void giveStage2Buffs(Player player, Npc npc)
+	{
+		giveStage1Buffs(player, npc);
+
+		SkillData.getInstance().getSkill(1045, 2).applyEffects(npc, player); // Bless the Body
+
+		// Pro Buffs
+		SkillData.getInstance().getSkill(4367, 1).applyEffects(npc, player); // Clan Hall Manager Buff (MP Regen)
+		SkillData.getInstance().getSkill(1259, 2).applyEffects(npc, player); // Resist Shock
+
+		if (player.isMageClass())
+		{
+			SkillData.getInstance().getSkill(1059, 2).applyEffects(npc, player); // Empower
+			SkillData.getInstance().getSkill(1078, 2).applyEffects(npc, player); // Concentration
+		}
+		else
+		{
+			SkillData.getInstance().getSkill(1086, 2).applyEffects(npc, player); // Haste
+			SkillData.getInstance().getSkill(1268, 2).applyEffects(npc, player); // Vampiric Rage
+			SkillData.getInstance().getSkill(1077, 2).applyEffects(npc, player); // Focus
+		}
+	}
+
 	@Override
 	public String[] getCommandList()
 	{
