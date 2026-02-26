@@ -163,24 +163,6 @@ public class GameServer
 	
 	public GameServer() throws Exception
 	{
-		// Create log folder
-		final File logFolder = new File(".", "log");
-		logFolder.mkdir();
-		
-		// Create input stream for log file -- or store file data into memory
-		try (InputStream is = new FileInputStream(new File("./log.cfg")))
-		{
-			LogManager.getLogManager().readConfiguration(is);
-		}
-		
-		// GUI
-		InterfaceConfig.load();
-		if (InterfaceConfig.ENABLE_GUI)
-		{
-			LOGGER.info("GameServer: Running in GUI mode.");
-			new Gui();
-		}
-
 		// Initialize config
 		ConfigLoader.init();
 		
@@ -453,6 +435,28 @@ public class GameServer
 	
 	public static void main(String[] args) throws Exception
 	{
+		// GUI
+		InterfaceConfig.load();
+		if (InterfaceConfig.ENABLE_GUI)
+		{
+			new Gui();
+		}
+
+		// Create log folder
+		final File logFolder = new File(".", "log");
+		logFolder.mkdir();
+
+		// Create input stream for log file -- or store file data into memory
+		try (InputStream is = new FileInputStream(new File("./log.cfg")))
+		{
+			LogManager.getLogManager().readConfiguration(is);
+		}
+
+		if (InterfaceConfig.ENABLE_GUI)
+		{
+			LOGGER.info("GameServer: Running in GUI mode.");
+		}
+
 		new GameServer();
 	}
 }
