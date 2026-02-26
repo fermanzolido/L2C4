@@ -118,6 +118,7 @@ public class AttackableAI extends CreatureAI
 	private int _attackTimeout;
 	/** The Attackable aggro counter. */
 	private int _globalAggro;
+	private long _globalAggroLastUpdate;
 	/** The flag used to indicate that a thinking action is in progress, to prevent recursive thinking. */
 	private boolean _thinking;
 	private int _chaosTime = 0;
@@ -135,6 +136,7 @@ public class AttackableAI extends CreatureAI
 		super(creature);
 		_attackTimeout = Integer.MAX_VALUE;
 		_globalAggro = -10; // 10 seconds timeout of ATTACK after respawn
+		_globalAggroLastUpdate = System.currentTimeMillis();
 	}
 	
 	/**
@@ -471,17 +473,35 @@ public class AttackableAI extends CreatureAI
 		
 		final Attackable npc = getActiveChar();
 		
-		// Update every 1s the _globalAggro counter to come close to 0
+		// Update the _globalAggro counter to come close to 0
 		if (_globalAggro != 0)
 		{
-			if (_globalAggro < 0)
+			final long now = System.currentTimeMillis();
+			final int elapsed = (int) ((now - _globalAggroLastUpdate) / 1000);
+			if (elapsed > 0)
 			{
-				_globalAggro++;
+				if (_globalAggro < 0)
+				{
+					_globalAggro += elapsed;
+					if (_globalAggro > 0)
+					{
+						_globalAggro = 0;
+					}
+				}
+				else
+				{
+					_globalAggro -= elapsed;
+					if (_globalAggro < 0)
+					{
+						_globalAggro = 0;
+					}
+				}
+				_globalAggroLastUpdate = now;
 			}
-			else
-			{
-				_globalAggro--;
-			}
+		}
+		else
+		{
+			_globalAggroLastUpdate = System.currentTimeMillis();
 		}
 		
 		// Add all autoAttackable Creature in Attackable Aggro Range to its _aggroList with 0 damage and 1 hate
@@ -2389,6 +2409,7 @@ public class AttackableAI extends CreatureAI
 		if (_globalAggro < 0)
 		{
 			_globalAggro = 0;
+			_globalAggroLastUpdate = System.currentTimeMillis();
 		}
 		
 		// Add the attacker to the _aggroList of the actor if not present.
@@ -2587,6 +2608,7 @@ public class AttackableAI extends CreatureAI
 	public void setGlobalAggro(int value)
 	{
 		_globalAggro = value;
+		_globalAggroLastUpdate = System.currentTimeMillis();
 	}
 	
 	public Attackable getActiveChar()
