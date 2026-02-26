@@ -163,14 +163,6 @@ public class GameServer
 	
 	public GameServer() throws Exception
 	{
-		// GUI
-		InterfaceConfig.load();
-		if (InterfaceConfig.ENABLE_GUI)
-		{
-			System.out.println("GameServer: Running in GUI mode.");
-			new Gui();
-		}
-		
 		// Create log folder
 		final File logFolder = new File(".", "log");
 		logFolder.mkdir();
@@ -181,6 +173,14 @@ public class GameServer
 			LogManager.getLogManager().readConfiguration(is);
 		}
 		
+		// GUI
+		InterfaceConfig.load();
+		if (InterfaceConfig.ENABLE_GUI)
+		{
+			LOGGER.info("GameServer: Running in GUI mode.");
+			new Gui();
+		}
+
 		// Initialize config
 		ConfigLoader.init();
 		
