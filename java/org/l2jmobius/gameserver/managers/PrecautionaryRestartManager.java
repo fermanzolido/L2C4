@@ -21,6 +21,7 @@
 package org.l2jmobius.gameserver.managers;
 
 import java.lang.management.ManagementFactory;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.management.Attribute;
@@ -50,6 +51,7 @@ public class PrecautionaryRestartManager
 	private static final String PROCESS_CPU_LOAD_VAR = "ProcessCpuLoad";
 	
 	private static boolean _restarting = false;
+	private static boolean _logCpuError = true;
 	
 	protected PrecautionaryRestartManager()
 	{
@@ -114,6 +116,11 @@ public class PrecautionaryRestartManager
 		}
 		catch (Exception e)
 		{
+			if (_logCpuError)
+			{
+				LOGGER.log(Level.FINE, "No se pudo obtener la carga de CPU via JMX: " + e.getMessage());
+				_logCpuError = false; // Evitamos el spam de logs en llamadas periodicas
+			}
 		}
 		
 		return 0;
