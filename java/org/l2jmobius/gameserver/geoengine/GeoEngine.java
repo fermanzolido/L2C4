@@ -76,7 +76,6 @@ public class GeoEngine
 	private static final int GEO_REGIONS = GEO_REGIONS_X * GEO_REGIONS_Y;
 	private static final int COORDINATE_SCALE = 16;
 	private static final int COORDINATE_OFFSET = 8;
-	private static final int HEIGHT_INCREASE_LIMIT = 40;
 	private static final int SPAWN_HEIGHT_OFFSET = 20;
 	
 	// Region Management.
@@ -685,7 +684,7 @@ public class GeoEngine
 			final int currentX = pointIterator.x();
 			final int currentY = pointIterator.y();
 			final int currentZ = getNearestZ(currentX, currentY, previousZ);
-			if ((currentZ - previousZ) > HEIGHT_INCREASE_LIMIT) // Check for sudden height increase.
+			if ((currentZ - previousZ) > GeoEngineConfig.MAX_OBSTACLE_HEIGHT) // Check for sudden height increase.
 			{
 				// Can't move, return previous location.
 				return new Location(getWorldX(previousX), getWorldY(previousY), previousZ);
@@ -759,7 +758,7 @@ public class GeoEngine
 			final int currentX = pointIterator.x();
 			final int currentY = pointIterator.y();
 			final int currentZ = getNearestZ(currentX, currentY, previousZ);
-			if ((currentZ - previousZ) > HEIGHT_INCREASE_LIMIT) // Check for sudden height increase.
+			if ((currentZ - previousZ) > GeoEngineConfig.MAX_OBSTACLE_HEIGHT) // Check for sudden height increase.
 			{
 				return false;
 			}

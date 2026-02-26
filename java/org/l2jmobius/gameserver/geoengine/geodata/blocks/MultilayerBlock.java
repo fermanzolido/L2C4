@@ -22,6 +22,7 @@ package org.l2jmobius.gameserver.geoengine.geodata.blocks;
 
 import java.nio.ByteBuffer;
 
+import org.l2jmobius.gameserver.config.GeoEngineConfig;
 import org.l2jmobius.gameserver.geoengine.geodata.Cell;
 import org.l2jmobius.gameserver.geoengine.geodata.IBlock;
 
@@ -63,7 +64,7 @@ public class MultilayerBlock implements IBlock
 		final int endOffset = startOffset + 1 + (nLayers * 2);
 		
 		// One layer at least was required on loading so this is set at least once on the loop below.
-		int nearestDZ = 0;
+		int nearestDZ = Integer.MAX_VALUE;
 		short nearestData = 0;
 		for (int offset = startOffset + 1; offset < endOffset; offset += 2)
 		{
@@ -75,8 +76,14 @@ public class MultilayerBlock implements IBlock
 				return layerData;
 			}
 			
-			final int layerDZ = Math.abs(layerZ - worldZ);
-			if ((offset == (startOffset + 1)) || (layerDZ < nearestDZ))
+			int layerDZ = Math.abs(layerZ - worldZ);
+			// Favor floors (layerZ <= worldZ) over ceilings (layerZ > worldZ) by adding a penalty to layers above.
+			if (layerZ > worldZ)
+			{
+				layerDZ += GeoEngineConfig.MAX_OBSTACLE_HEIGHT;
+			}
+
+			if (layerDZ < nearestDZ)
 			{
 				nearestDZ = layerDZ;
 				nearestData = layerData;
@@ -243,8 +250,8 @@ public class MultilayerBlock implements IBlock
 		// Get the height of the nearest terrain layer.
 		final int nearestZ = extractLayerHeight(getNearestLayer(geoX, geoY, worldZ));
 		
-		// If the nearest layer is more than 1000 units above current position (likely a different floor/level).
-		if ((nearestZ - worldZ) > 1000)
+		// If the nearest layer is more than MAX_OBSTACLE_HEIGHT units above current position (likely a different floor/level).
+		if ((nearestZ - worldZ) > GeoEngineConfig.MAX_OBSTACLE_HEIGHT)
 		{
 			// Find the next lower valid height instead to prevent unreachable positions.
 			return getNextLowerZ(geoX, geoY, worldZ);
