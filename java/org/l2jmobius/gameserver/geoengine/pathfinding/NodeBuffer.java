@@ -302,6 +302,12 @@ public class NodeBuffer
 		final int geoZ = newNode.getLocation().getZ();
 		final int stepZ = Math.abs(geoZ - _current.getLocation().getZ());
 		
+		// Check for obstacle height limit.
+		if (stepZ > GeoEngineConfig.MAX_OBSTACLE_HEIGHT)
+		{
+			return null;
+		}
+
 		// Calculate movement cost based on terrain and movement type.
 		float weight = diagonal ? GeoEngineConfig.DIAGONAL_WEIGHT : GeoEngineConfig.LOW_WEIGHT;
 		if (!newNode.getLocation().canGoAll() || (stepZ > 16))

@@ -47,6 +47,7 @@ public class GeoEngineConfig
 	public static boolean AVOID_OBSTRUCTED_PATH_NODES;
 	public static float DIAGONAL_WEIGHT;
 	public static int MAX_POSTFILTER_PASSES;
+	public static int MAX_OBSTACLE_HEIGHT;
 	
 	public static void load()
 	{
@@ -63,5 +64,6 @@ public class GeoEngineConfig
 		AVOID_OBSTRUCTED_PATH_NODES = config.getBoolean("AvoidObstructedPathNodes", true);
 		DIAGONAL_WEIGHT = config.getFloat("DiagonalWeight", 0.707f);
 		MAX_POSTFILTER_PASSES = config.getInt("MaxPostfilterPasses", 3);
+		MAX_OBSTACLE_HEIGHT = config.getInt("MaxObstacleHeight", 50);
 	}
 }
