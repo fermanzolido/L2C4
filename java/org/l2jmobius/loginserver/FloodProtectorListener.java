@@ -57,10 +57,10 @@ public abstract class FloodProtectorListener extends Thread
 	@Override
 	public void run()
 	{
-		Socket connection = null;
-		
 		while (true)
 		{
+			Socket connection = null;
+
 			try
 			{
 				connection = _serverSocket.accept(); // Accept incoming connections.
@@ -106,6 +106,7 @@ public abstract class FloodProtectorListener extends Thread
 			}
 			catch (Exception e)
 			{
+				LOGGER.log(Level.WARNING, "FloodProtectorListener: Error processing connection.", e);
 				try
 				{
 					if (connection != null)
@@ -115,6 +116,7 @@ public abstract class FloodProtectorListener extends Thread
 				}
 				catch (Exception e2)
 				{
+					LOGGER.log(Level.FINE, "FloodProtectorListener: Error closing connection.", e2);
 				}
 				
 				if (isInterrupted())
