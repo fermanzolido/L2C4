@@ -294,7 +294,7 @@ public class GameServerRegister extends JFrame
 			final Map<Integer, String> serverNames = GameServerTable.getInstance().getServerNames();
 			if (serverNames.isEmpty())
 			{
-				JOptionPane.showMessageDialog(null, "No game servers found.", "Information", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(GameServerRegister.this, "No game servers found.", "Information", JOptionPane.INFORMATION_MESSAGE);
 			}
 			else
 			{
@@ -332,7 +332,7 @@ public class GameServerRegister extends JFrame
 			idField
 		};
 		
-		final int option = JOptionPane.showConfirmDialog(null, message, "Register Game Server", JOptionPane.OK_CANCEL_OPTION);
+		final int option = JOptionPane.showConfirmDialog(GameServerRegister.this, message, "Register Game Server", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION)
 		{
 			final String input = idField.getText().trim();
@@ -340,7 +340,7 @@ public class GameServerRegister extends JFrame
 			// Check if the input is empty.
 			if (input.isEmpty())
 			{
-				JOptionPane.showMessageDialog(null, "Game Server ID cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(GameServerRegister.this, "Game Server ID cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 			
@@ -352,7 +352,7 @@ public class GameServerRegister extends JFrame
 				// Validate the ID range (positive IDs are valid).
 				if (id <= 0)
 				{
-					JOptionPane.showMessageDialog(null, "Game Server ID must be a positive number.", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(GameServerRegister.this, "Game Server ID must be a positive number.", "Error", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 				
@@ -362,18 +362,18 @@ public class GameServerRegister extends JFrame
 				// If no server name is found.
 				if (serverName == null)
 				{
-					JOptionPane.showMessageDialog(null, "No server found for ID: " + id, "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(GameServerRegister.this, "No server found for ID: " + id, "Error", JOptionPane.ERROR_MESSAGE);
 				}
 				
 				// If the server ID is already registered.
 				else if (GameServerTable.getInstance().hasRegisteredGameServerOnId(id))
 				{
-					JOptionPane.showMessageDialog(null, "Server '" + serverName + "' with ID " + id + " is already registered.", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(GameServerRegister.this, "Server '" + serverName + "' with ID " + id + " is already registered.", "Error", JOptionPane.ERROR_MESSAGE);
 				}
 				else
 				{
 					createAndRegister(id, ".");
-					JOptionPane.showMessageDialog(null, "Game server with ID: " + id + " (" + serverName + ") has been successfully registered.", "Success", JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(GameServerRegister.this, "Game server with ID: " + id + " (" + serverName + ") has been successfully registered.", "Success", JOptionPane.INFORMATION_MESSAGE);
 					idField.setText(""); // Clear the input field after successful registration.
 					
 					// Refresh the server list after registration.
@@ -382,11 +382,11 @@ public class GameServerRegister extends JFrame
 			}
 			catch (NumberFormatException e)
 			{
-				JOptionPane.showMessageDialog(null, "Invalid Game Server ID entered. Please enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(GameServerRegister.this, "Invalid Game Server ID entered. Please enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
 			}
 			catch (IOException e)
 			{
-				JOptionPane.showMessageDialog(null, "An error occurred while trying to register the Game Server.", "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(GameServerRegister.this, "An error occurred while trying to register the Game Server.", "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
@@ -400,14 +400,14 @@ public class GameServerRegister extends JFrame
 			idField
 		};
 		
-		final int option = JOptionPane.showConfirmDialog(null, message, "Unregister Game Server", JOptionPane.OK_CANCEL_OPTION);
+		final int option = JOptionPane.showConfirmDialog(GameServerRegister.this, message, "Unregister Game Server", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION)
 		{
 			final String input = idField.getText().trim();
 			
 			if (input.isEmpty())
 			{
-				JOptionPane.showMessageDialog(null, "Game Server ID cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(GameServerRegister.this, "Game Server ID cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 			
@@ -417,30 +417,30 @@ public class GameServerRegister extends JFrame
 				final String serverName = GameServerTable.getInstance().getServerNameById(id);
 				if (serverName == null)
 				{
-					JOptionPane.showMessageDialog(null, "No Game Server found for ID: " + id, "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(GameServerRegister.this, "No Game Server found for ID: " + id, "Error", JOptionPane.ERROR_MESSAGE);
 				}
 				else if (GameServerTable.getInstance().hasRegisteredGameServerOnId(id))
 				{
-					final int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to remove GameServer " + id + "  (" + serverName + ")?", "Confirm Removal", JOptionPane.YES_NO_OPTION);
+					final int confirm = JOptionPane.showConfirmDialog(GameServerRegister.this, "Are you sure you want to remove GameServer " + id + "  (" + serverName + ")?", "Confirm Removal", JOptionPane.YES_NO_OPTION);
 					if (confirm == JOptionPane.YES_OPTION)
 					{
 						removeServer(id);
-						JOptionPane.showMessageDialog(null, "Game Server ID: " + id + " (" + serverName + ") has been successfully removed.", "Success", JOptionPane.INFORMATION_MESSAGE);
+						JOptionPane.showMessageDialog(GameServerRegister.this, "Game Server ID: " + id + " (" + serverName + ") has been successfully removed.", "Success", JOptionPane.INFORMATION_MESSAGE);
 						serversList(); // Refresh the server list
 					}
 				}
 				else
 				{
-					JOptionPane.showMessageDialog(null, "No GameServer is registered with ID: " + id, "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(GameServerRegister.this, "No GameServer is registered with ID: " + id, "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 			catch (NumberFormatException e)
 			{
-				JOptionPane.showMessageDialog(null, "Invalid Game Server ID entered. Please enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(GameServerRegister.this, "Invalid Game Server ID entered. Please enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
 			}
 			catch (SQLException e)
 			{
-				JOptionPane.showMessageDialog(null, "An error occurred while trying to unregister the Game Server.", "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(GameServerRegister.this, "An error occurred while trying to unregister the Game Server.", "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
@@ -450,28 +450,28 @@ public class GameServerRegister extends JFrame
 		// Check if there are any registered game servers.
 		if (GameServerTable.getInstance().getGameServerList().isEmpty())
 		{
-			JOptionPane.showMessageDialog(null, "No game servers are currently registered.", "Info", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(GameServerRegister.this, "No game servers are currently registered.", "Info", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		
 		// Ask the user for confirmation before proceeding.
-		final int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to unregister all game servers?", "Confirm Unregister All Game Servers", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+		final int confirm = JOptionPane.showConfirmDialog(GameServerRegister.this, "Are you sure you want to unregister all game servers?", "Confirm Unregister All Game Servers", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 		if (confirm == JOptionPane.YES_OPTION)
 		{
 			try
 			{
 				removeAllServers();
-				JOptionPane.showMessageDialog(null, "All game servers have been unregistered successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(GameServerRegister.this, "All game servers have been unregistered successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
 				serversList(); // Refresh the server list.
 			}
 			catch (SQLException e)
 			{
-				JOptionPane.showMessageDialog(null, "Error while unregistering game servers: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(GameServerRegister.this, "Error while unregistering game servers: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 		else
 		{
-			JOptionPane.showMessageDialog(null, "Unregister operation canceled by the user.", "Canceled", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(GameServerRegister.this, "Unregister operation canceled by the user.", "Canceled", JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 	
