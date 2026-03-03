@@ -57,14 +57,6 @@ public class LoginServer extends FloodProtectorListener
 	{
 		super(LoginConfig.LOGIN_BIND_ADDRESS, LoginConfig.PORT_LOGIN);
 		
-		// GUI.
-		InterfaceConfig.load();
-		if (InterfaceConfig.ENABLE_GUI)
-		{
-			LOGGER.info("Running in GUI mode.");
-			new Gui();
-		}
-		
 		// Prepare the database.
 		DatabaseFactory.init();
 		
@@ -233,6 +225,13 @@ public class LoginServer extends FloodProtectorListener
 	
 	public static void main(String[] args) throws Exception
 	{
+		// GUI.
+		InterfaceConfig.load();
+		if (InterfaceConfig.ENABLE_GUI)
+		{
+			new Gui();
+		}
+
 		// Create log folder.
 		final File logFolder = new File(".", "log");
 		logFolder.mkdir();
@@ -247,6 +246,11 @@ public class LoginServer extends FloodProtectorListener
 			LOGGER.warning("LoginServer: " + e.getMessage());
 		}
 		
+		if (InterfaceConfig.ENABLE_GUI)
+		{
+			LOGGER.info("Running in GUI mode.");
+		}
+
 		// Load LoginConfig.
 		LoginConfig.load();
 		
