@@ -176,10 +176,7 @@ public class CreatureStat
 	{
 		double val = calcStat(Stat.CRITICAL_RATE, _creature.getTemplate().getBaseCritRate(), target, skill);
 		
-		// if (!_creature.isGM())
-		// {
 		val = Math.min(val, PlayerConfig.MAX_PCRIT_RATE);
-		// }
 		
 		return (int) (val + .5);
 	}
@@ -201,10 +198,7 @@ public class CreatureStat
 	{
 		int val = (int) Math.round(calcStat(Stat.EVASION_RATE, 0, target, null));
 		
-		// if (!_creature.isGM())
-		// {
 		val = Math.min(val, PlayerConfig.MAX_EVASION);
-		// }
 		
 		return val;
 	}
@@ -311,10 +305,7 @@ public class CreatureStat
 		
 		double val = calcStat(Stat.MAGIC_ATTACK_SPEED, _creature.getTemplate().getBaseMAtkSpd() * bonusSpdAtk);
 		
-		// if (!_creature.isGM())
-		// {
 		val = Math.min(val, PlayerConfig.MAX_MATK_SPEED);
-		// }
 		
 		return (int) val;
 	}
@@ -340,10 +331,7 @@ public class CreatureStat
 			}
 		}
 		
-		// if (!_creature.isGM())
-		// {
 		val = Math.min(val, PlayerConfig.MAX_MCRIT_RATE);
-		// }
 		
 		return val;
 	}
