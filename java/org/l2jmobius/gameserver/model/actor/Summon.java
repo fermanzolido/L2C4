@@ -132,11 +132,6 @@ public abstract class Summon extends Playable
 		updateAndBroadcastStatus(0);
 		sendPacket(new RelationChanged(this, _owner.getRelation(_owner), false));
 		World.getInstance().forEachVisibleObjectInRange(getOwner(), Player.class, 800, player -> player.sendPacket(new RelationChanged(this, _owner.getRelation(player), isAutoAttackable(player))));
-		// final Party party = _owner.getParty();
-		// if (party != null)
-		// {
-		// party.broadcastToPartyMembers(_owner, new ExPartyPetWindowAdd(this));
-		// }
 		
 		setShowSummonAnimation(false); // addVisibleObject created the info packets with summon animation
 		
@@ -384,11 +379,6 @@ public abstract class Summon extends Playable
 		if (owner != null)
 		{
 			owner.sendPacket(new PetDelete(getSummonType(), getObjectId()));
-			// final Party party = owner.getParty();
-			// if (party != null)
-			// {
-			// party.broadcastToPartyMembers(owner, new ExPartyPetWindowDelete(this));
-			// }
 		}
 		
 		// pet will be deleted along with all his items
@@ -416,11 +406,6 @@ public abstract class Summon extends Playable
 			if (owner != null)
 			{
 				owner.sendPacket(new PetDelete(getSummonType(), getObjectId()));
-				// final Party party = owner.getParty();
-				// if (party != null)
-				// {
-				// party.broadcastToPartyMembers(owner, new ExPartyPetWindowDelete(this));
-				// }
 				
 				if ((getInventory() != null) && (getInventory().getSize() > 0))
 				{
@@ -868,12 +853,6 @@ public abstract class Summon extends Playable
 			sendPacket(new PetInfo(this, value));
 			sendPacket(new PetStatusUpdate(this));
 			broadcastNpcInfo(value);
-			
-			// final Party party = _owner.getParty();
-			// if (party != null)
-			// {
-			// party.broadcastToPartyMembers(_owner, new ExPartyPetWindowUpdate(this));
-			// }
 			
 			updateEffectIcons(true);
 		}

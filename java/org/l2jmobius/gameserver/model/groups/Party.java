@@ -284,15 +284,6 @@ public class Party extends AbstractPlayerGroup
 		// we do all actions before adding member to a list, this speeds things up a little
 		player.sendPacket(new PartySmallWindowAll(player, this));
 		
-		// sends pets/summons of party members
-		// for (Player pMember : _members)
-		// {
-		// if ((pMember != null) && pMember.hasSummon())
-		// {
-		// player.sendPacket(new ExPartyPetWindowAdd(pMember.getSummon()));
-		// }
-		// }
-		
 		SystemMessage msg = new SystemMessage(SystemMessageId.YOU_HAVE_JOINED_S1_S_PARTY);
 		msg.addString(getLeader().getName());
 		player.sendPacket(msg);
@@ -313,12 +304,6 @@ public class Party extends AbstractPlayerGroup
 		// player.sendPacket(new PartyMemberPosition(this));
 		// send the position of the new party member to all party members (except the new one - he knows his own position)
 		// broadcastToPartyMembers(player, new PartyMemberPosition(this));
-		
-		// if member has pet/summon add it to other as well
-		// if (player.hasSummon())
-		// {
-		// broadcastPacket(new ExPartyPetWindowAdd(player.getSummon()));
-		// }
 		
 		// adjust party level
 		if (player.getLevel() > _partyLvl)
@@ -442,11 +427,6 @@ public class Party extends AbstractPlayerGroup
 			player.sendPacket(PartySmallWindowDeleteAll.STATIC_PACKET);
 			player.setParty(null);
 			broadcastPacket(new PartySmallWindowDelete(player));
-			
-			// if (player.hasSummon())
-			// {
-			// broadcastPacket(new ExPartyPetWindowDelete(player.getSummon()));
-			// }
 			
 			if (isInDimensionalRift())
 			{
