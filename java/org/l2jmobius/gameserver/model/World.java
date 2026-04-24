@@ -147,11 +147,6 @@ public class World
 	{
 		_allObjects.putIfAbsent(object.getObjectId(), object);
 		
-		// if (_allObjects.putIfAbsent(object.getObjectId(), object) != null)
-		// {
-		// LOGGER.warning(getClass().getSimpleName() + ": Object " + object + " already exists in the world. Stack Trace: " + CommonUtil.getTraceString(Thread.currentThread().getStackTrace()));
-		// }
-		
 		if (object.isPlayer())
 		{
 			final Player newPlayer = object.asPlayer();
