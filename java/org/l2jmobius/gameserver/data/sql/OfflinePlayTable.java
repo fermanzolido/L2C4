@@ -55,8 +55,7 @@ public class OfflinePlayTable
 	private static final String LOAD_PLAYER = "SELECT * FROM character_offline_play WHERE charId=?";
 	private static final String SAVE_PLAYER = "INSERT INTO character_offline_play (charId, type, id) VALUES (?, ?, ?)";
 	private static final String REMOVE_PLAYER = "DELETE FROM character_offline_play WHERE charId=?";
-	private static final String LOAD_GROUP_LEADER_IDS = "SELECT DISTINCT leaderId FROM character_offline_play_group";
-	private static final String LOAD_GROUP_MEMBERS = "SELECT charId, type FROM character_offline_play_group WHERE leaderId=?";
+	private static final String LOAD_GROUPS = "SELECT leaderId, charId, type FROM character_offline_play_group ORDER BY leaderId";
 	private static final String SAVE_GROUP_MEMBER = "INSERT INTO character_offline_play_group (leaderId, charId, type) VALUES (?, ?, ?)";
 	private static final String REMOVE_GROUP_MEMBERS = "TRUNCATE TABLE character_offline_play_group";
 	
@@ -198,41 +197,39 @@ public class OfflinePlayTable
 		{
 			try (Connection con = DatabaseFactory.getConnection();
 				Statement statement = con.createStatement();
-				ResultSet result = statement.executeQuery(LOAD_GROUP_LEADER_IDS))
+				ResultSet result = statement.executeQuery(LOAD_GROUPS))
 			{
 				int nParties = 0;
+				int lastLeaderId = -1;
+				Player leader = null;
+				Party party = null;
 				
 				while (result.next())
 				{
 					final int leaderId = result.getInt("leaderId");
-					final Player leader = World.getInstance().getPlayer(leaderId);
+					if (leaderId != lastLeaderId)
+					{
+						lastLeaderId = leaderId;
+						leader = World.getInstance().getPlayer(leaderId);
+						if (leader != null)
+						{
+							nParties++;
+						}
+						party = null;
+					}
+
 					if (leader != null)
 					{
-						nParties++;
-						
-						try (PreparedStatement stmtMembers = con.prepareStatement(LOAD_GROUP_MEMBERS))
+						final int charId = result.getInt("charId");
+						final Player member = World.getInstance().getPlayer(charId);
+						if (member != null)
 						{
-							stmtMembers.setInt(1, leaderId);
-							
-							try (ResultSet members = stmtMembers.executeQuery())
+							if (party == null)
 							{
-								Party party = null;
-								
-								while (members.next())
-								{
-									final int charId = members.getInt("charId");
-									final Player member = World.getInstance().getPlayer(charId);
-									if (member != null)
-									{
-										if (party == null)
-										{
-											party = new Party(leader, PartyDistributionType.findById(members.getInt("type")));
-										}
-										
-										member.joinParty(party);
-									}
-								}
+								party = new Party(leader, PartyDistributionType.findById(result.getInt("type")));
 							}
+
+							member.joinParty(party);
 						}
 					}
 				}
