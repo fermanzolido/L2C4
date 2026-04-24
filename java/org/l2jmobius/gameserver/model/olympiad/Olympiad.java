@@ -71,7 +71,7 @@ public class Olympiad extends ListenersContainer {
 	private static final String OLYMPIAD_LOAD_NOBLES = "SELECT olympiad_nobles.charId, olympiad_nobles.class_id, characters.char_name, olympiad_nobles.olympiad_points, olympiad_nobles.competitions_done, olympiad_nobles.competitions_won, olympiad_nobles.competitions_lost, olympiad_nobles.competitions_drawn, olympiad_nobles.elo FROM olympiad_nobles, characters WHERE characters.charId = olympiad_nobles.charId";
 	private static final String OLYMPIAD_SAVE_NOBLES = "INSERT INTO olympiad_nobles (`charId`,`class_id`,`olympiad_points`,`competitions_done`,`competitions_won`,`competitions_lost`,`competitions_drawn`,`elo`) VALUES (?,?,?,?,?,?,?,?)";
 	private static final String OLYMPIAD_UPDATE_NOBLES = "UPDATE olympiad_nobles SET olympiad_points = ?, competitions_done = ?, competitions_won = ?, competitions_lost = ?, competitions_drawn = ?, elo = ? WHERE charId = ?";
-	private static final String OLYMPIAD_GET_HEROS = "SELECT olympiad_nobles.charId, characters.char_name FROM olympiad_nobles, characters WHERE characters.charId = olympiad_nobles.charId AND olympiad_nobles.class_id = ? AND olympiad_nobles.competitions_done >= 9 AND olympiad_nobles.competitions_won > 0 ORDER BY olympiad_nobles.olympiad_points DESC, olympiad_nobles.competitions_done DESC, olympiad_nobles.competitions_won DESC";
+	private static final String OLYMPIAD_GET_HEROS = "SELECT olympiad_nobles.charId, olympiad_nobles.class_id, characters.char_name FROM olympiad_nobles, characters WHERE characters.charId = olympiad_nobles.charId AND olympiad_nobles.class_id IN (%s) AND olympiad_nobles.competitions_done >= 9 AND olympiad_nobles.competitions_won > 0 ORDER BY olympiad_nobles.class_id, olympiad_nobles.olympiad_points DESC, olympiad_nobles.competitions_done DESC, olympiad_nobles.competitions_won DESC";
 	private static final String GET_ALL_CLASSIFIED_NOBLESS = "SELECT charId from olympiad_nobles_eom WHERE competitions_done >= 9 ORDER BY olympiad_points DESC, competitions_done DESC, competitions_won DESC";
 	private static final String GET_EACH_CLASS_LEADER = "SELECT characters.char_name from olympiad_nobles_eom, characters WHERE characters.charId = olympiad_nobles_eom.charId AND olympiad_nobles_eom.class_id = ? AND olympiad_nobles_eom.competitions_done >= 9 ORDER BY olympiad_nobles_eom.olympiad_points DESC, olympiad_nobles_eom.competitions_done DESC, olympiad_nobles_eom.competitions_won DESC LIMIT 10";
 	private static final String GET_EACH_CLASS_LEADER_CURRENT = "SELECT characters.char_name from olympiad_nobles, characters WHERE characters.charId = olympiad_nobles.charId AND olympiad_nobles.class_id = ? AND olympiad_nobles.competitions_done >= 9 ORDER BY olympiad_nobles.olympiad_points DESC, olympiad_nobles.competitions_done DESC, olympiad_nobles.competitions_won DESC LIMIT 10";
@@ -1228,34 +1228,50 @@ public class Olympiad extends ListenersContainer {
 
 		HEROS_TO_BE = new ArrayList<>();
 
+		final StringBuilder sb = new StringBuilder(HERO_IDS.length * 2);
+		for (int i = 0; i < HERO_IDS.length; i++)
+		{
+			sb.append("?,");
+		}
+		sb.setLength(sb.length() - 1);
+
 		try (Connection con = DatabaseFactory.getConnection();
-				PreparedStatement statement = con.prepareStatement(OLYMPIAD_GET_HEROS)) {
+				PreparedStatement statement = con.prepareStatement(OLYMPIAD_GET_HEROS.replace("%s", sb.toString()))) {
+			for (int i = 0; i < HERO_IDS.length; i++)
+			{
+				statement.setInt(i + 1, HERO_IDS[i]);
+			}
+
 			StatSet hero;
 			final List<StatSet> soulHounds = new ArrayList<>();
-			for (int element : HERO_IDS) {
-				statement.setInt(1, element);
+			try (ResultSet rset = statement.executeQuery()) {
+				int lastClassId = -1;
+				while (rset.next()) {
+					final int classId = rset.getInt(CLASS_ID);
+					if (classId == lastClassId)
+					{
+						continue;
+					}
+					lastClassId = classId;
 
-				try (ResultSet rset = statement.executeQuery()) {
-					if (rset.next()) {
-						hero = new StatSet();
-						hero.set(CLASS_ID, element);
+					hero = new StatSet();
+					hero.set(CLASS_ID, classId);
+					hero.set(CHAR_ID, rset.getInt(CHAR_ID));
+					hero.set(CHAR_NAME, rset.getString(CHAR_NAME));
+
+					if ((classId == 132) || (classId == 133)) // Male & Female Soulhounds rank as one hero class
+					{
+						hero = NOBLES.get(hero.getInt(CHAR_ID));
 						hero.set(CHAR_ID, rset.getInt(CHAR_ID));
-						hero.set(CHAR_NAME, rset.getString(CHAR_NAME));
-
-						if ((element == 132) || (element == 133)) // Male & Female Soulhounds rank as one hero class
-						{
-							hero = NOBLES.get(hero.getInt(CHAR_ID));
-							hero.set(CHAR_ID, rset.getInt(CHAR_ID));
-							soulHounds.add(hero);
-						} else {
-							record = new LogRecord(Level.INFO, "Hero " + hero.getString(CHAR_NAME));
-							record.setParameters(new Object[] {
-									hero.getInt(CHAR_ID),
-									hero.getInt(CLASS_ID)
-							});
-							LOGGER_OLYMPIAD.log(record);
-							HEROS_TO_BE.add(hero);
-						}
+						soulHounds.add(hero);
+					} else {
+						record = new LogRecord(Level.INFO, "Hero " + hero.getString(CHAR_NAME));
+						record.setParameters(new Object[] {
+								hero.getInt(CHAR_ID),
+								hero.getInt(CLASS_ID)
+						});
+						LOGGER_OLYMPIAD.log(record);
+						HEROS_TO_BE.add(hero);
 					}
 				}
 			}
