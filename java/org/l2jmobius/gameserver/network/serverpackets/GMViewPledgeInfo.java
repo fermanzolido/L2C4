@@ -48,7 +48,6 @@ public class GMViewPledgeInfo extends ServerPacket
 		buffer.writeInt(_clan.getId());
 		buffer.writeString(_clan.getName());
 		buffer.writeString(_clan.getLeaderName());
-		buffer.writeInt(_clan.getCrestId()); // -> no, it's no longer used (nuocnam) fix by game
 		buffer.writeInt(_clan.getLevel());
 		buffer.writeInt(_clan.getCastleId());
 		buffer.writeInt(_clan.getHideoutId());
