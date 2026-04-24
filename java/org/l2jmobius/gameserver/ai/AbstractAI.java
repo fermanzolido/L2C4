@@ -524,13 +524,6 @@ public abstract class AbstractAI
 			// Calculate movement data for a move to location action and add the actor to movingObjects of GameTimeTaskManager
 			_actor.moveToLocation(pawn.getX(), pawn.getY(), pawn.getZ(), offset);
 			
-			// May result to make monsters stop moving.
-			// if (!_actor.isMoving())
-			// {
-			// clientActionFailed();
-			// return;
-			// }
-			
 			// Send a Server->Client packet MoveToPawn/MoveToLocation to the actor and all Player in its _knownPlayers
 			if (pawn.isCreature())
 			{
