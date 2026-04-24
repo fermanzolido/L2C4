@@ -27,8 +27,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
-import org.l2jmobius.commons.util.StringUtil;
 import org.l2jmobius.gameserver.config.PlayerConfig;
 import org.l2jmobius.gameserver.config.custom.SchemeBufferConfig;
 import org.l2jmobius.gameserver.data.SchemeBufferTable;
@@ -46,6 +46,7 @@ import org.l2jmobius.gameserver.util.HtmlUtil;
 public class SchemeBuffer extends Npc
 {
 	private static final int PAGE_LIMIT = 6;
+	private static final Pattern SCHEME_NAME_PATTERN = Pattern.compile("^(?=.*[\\p{L}\\p{N}])[\\p{L}\\p{N} .,\\-+!?]+$");
 	
 	public SchemeBuffer(NpcTemplate template)
 	{
@@ -193,8 +194,7 @@ public class SchemeBuffer extends Npc
 					return;
 				}
 				
-				// Simple hack to use spaces, dots, commas, minus, plus, exclamations or question marks.
-				if (!StringUtil.isAlphaNumeric(schemeName.replace(" ", "").replace(".", "").replace(",", "").replace("-", "").replace("+", "").replace("!", "").replace("?", "")))
+				if (!SCHEME_NAME_PATTERN.matcher(schemeName).matches())
 				{
 					player.sendMessage("Please use plain alphanumeric characters.");
 					return;
