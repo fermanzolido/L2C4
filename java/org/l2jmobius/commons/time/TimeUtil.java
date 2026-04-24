@@ -32,10 +32,18 @@ import java.util.Date;
 public class TimeUtil
 {
 	/**
-	 * Parses a string duration (e.g., "5days", "2hours") into a {@link Duration} object.
-	 * @param durationString the string representing the duration with a numeric value and time unit (e.g., "5days", "10hours", "2weeks").
-	 * @return a {@link Duration} object representing the specified duration.
-	 * @throws IllegalArgumentException if the input format is invalid or the unit is unrecognized.
+	 * Parses a duration string and converts it to a {@link Duration}.<br>
+	 * Supported formats include plain milliseconds or units like 'y' (years), 'month', 'w' (weeks), 'd' (days), 'h' (hours), 'm' (minutes), 's' (seconds), 'ms' (milliseconds).<br>
+	 * Examples:
+	 * <ul>
+	 * <li>{@code "5000"} -> 5000 milliseconds</li>
+	 * <li>{@code "2h"} -> 2 hours</li>
+	 * <li>{@code "1d"} -> 1 day</li>
+	 * <li>{@code "2w"} -> 2 weeks</li>
+	 * </ul>
+	 * @param durationString the string to parse
+	 * @return the parsed {@link Duration}
+	 * @throws IllegalArgumentException if the duration format is invalid
 	 */
 	public static Duration parseDuration(String durationString)
 	{
@@ -45,45 +53,58 @@ public class TimeUtil
 			index++;
 		}
 		
-		if ((index == 0) || (index == durationString.length()))
+		if (index == 0)
 		{
 			throw new IllegalArgumentException("Invalid duration format: " + durationString);
 		}
 		
-		int durationValue;
-		String durationUnit;
+		final long durationValue;
 		try
 		{
-			durationValue = Integer.parseInt(durationString.substring(0, index));
-			durationUnit = durationString.substring(index).toLowerCase();
+			durationValue = Long.parseLong(durationString.substring(0, index));
 		}
 		catch (NumberFormatException e)
 		{
 			throw new IllegalArgumentException("Invalid duration format: " + durationString);
 		}
 		
+		if (index == durationString.length())
+		{
+			return Duration.ofMillis(durationValue);
+		}
+
+		final String durationUnit = durationString.substring(index).toLowerCase();
 		switch (durationUnit)
 		{
+			case "ms":
+			{
+				return Duration.ofMillis(durationValue);
+			}
+			case "s":
 			case "sec":
 			case "secs":
 			{
 				return Duration.ofSeconds(durationValue);
 			}
+			case "m":
 			case "min":
 			case "mins":
 			{
 				return Duration.ofMinutes(durationValue);
 			}
+			case "h":
 			case "hour":
 			case "hours":
 			{
 				return Duration.ofHours(durationValue);
 			}
+			case "d":
 			case "day":
 			case "days":
 			{
 				return Duration.ofDays(durationValue);
 			}
+			case "w":
 			case "week":
 			case "weeks":
 			{
@@ -94,6 +115,7 @@ public class TimeUtil
 			{
 				return Duration.ofDays(durationValue * 30L);
 			}
+			case "y":
 			case "year":
 			case "years":
 			{
