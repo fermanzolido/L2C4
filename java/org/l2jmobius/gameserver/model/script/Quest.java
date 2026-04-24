@@ -5620,23 +5620,18 @@ public class Quest implements IEventTimerEvent<String>, IEventTimerCancel<String
 	}
 
 	private void setQuestToOfflineMembers(List<Integer> objectsId) {
-		try (Connection con = DatabaseFactory.getConnection()) {
-			final PreparedStatement stm = con
-					.prepareStatement("INSERT INTO character_quests (charId,name,var,value) VALUES (?,?,?,?)");
+		try (Connection con = DatabaseFactory.getConnection();
+			PreparedStatement stm = con.prepareStatement("INSERT INTO character_quests (charId,name,var,value) VALUES (?,?,?,?)")) {
 			for (Integer charId : objectsId) {
 				stm.setInt(1, charId.intValue());
 				stm.setString(2, getName());
 				stm.setString(3, "<state>");
 				stm.setString(4, "1");
-				stm.executeUpdate();
+				stm.addBatch();
 			}
-
-			stm.close();
-			con.close();
+			stm.executeBatch();
 		} catch (Exception e) {
-			LOGGER.log(Level.WARNING,
-					"Error in updating character_quest table from Quest.java on method setQuestToOfflineMembers");
-			LOGGER.info(e.toString());
+			LOGGER.log(Level.WARNING, "Error in updating character_quest table from Quest.java on method setQuestToOfflineMembers: ", e);
 		}
 	}
 
