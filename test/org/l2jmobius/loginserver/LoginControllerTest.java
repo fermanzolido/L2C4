@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.security.MessageDigest;
 import java.util.Arrays;
+import java.util.Objects;
 
 import org.junit.Test;
 
@@ -57,5 +58,23 @@ public class LoginControllerTest
 		expected = new byte[]{1, 2, 3, 4, 6};
 		ok = MessageDigest.isEqual(hash, expected);
 		assertFalse(ok);
+	}
+
+	/**
+	 * Demonstrates the vulnerability where using != for String comparison
+	 * fails to identify equal strings with different references.
+	 */
+	@Test
+	public void testStringComparisonVulnerability()
+	{
+		String password = new String("password");
+		String lastPassword = new String("password");
+
+		// They have different references
+		assertTrue(password != lastPassword);
+
+		// But they are equal in content
+		assertTrue(Objects.equals(password, lastPassword));
+		assertTrue(password.equals(lastPassword));
 	}
 }

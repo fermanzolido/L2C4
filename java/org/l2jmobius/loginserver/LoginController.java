@@ -35,6 +35,7 @@ import java.sql.ResultSet;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -398,7 +399,7 @@ public class LoginController
 				failedCount = failedConnects.intValue() + 1;
 			}
 			
-			if (password != lastPassword)
+			if (!Objects.equals(password, lastPassword))
 			{
 				_hackProtection.put(address.getHostAddress(), failedCount);
 				_lastPassword.put(address.getHostAddress(), password);
