@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -42,6 +43,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -78,6 +80,7 @@ import org.l2jmobius.commons.util.ConfigReader;
  */
 public class DatabaseInstaller extends JFrame {
 	private static final Logger LOGGER = Logger.getLogger(DatabaseInstaller.class.getName());
+	private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-zA-Z0-9_]+$");
 	public static final String INTERFACE_CONFIG_FILE = "./config/Interface.ini";
 
 	private JTextField _hostField;
@@ -427,19 +430,29 @@ public class DatabaseInstaller extends JFrame {
 
 	private boolean createDatabaseConsole(String host, String port, String username, String password, String dbName,
 			Scanner scanner) {
+		if (!isValidIdentifier(dbName)) {
+			System.out.println("[ERROR] Invalid database name: " + dbName);
+			return false;
+		}
+
 		final String dbUrl = "jdbc:mysql://" + host + ":" + port;
 
-		try (Connection connection = DriverManager.getConnection(dbUrl, username, password);
-				Statement statement = connection.createStatement()) {
+		try (Connection connection = DriverManager.getConnection(dbUrl, username, password)) {
 			// Check if the database already exists.
-			ResultSet resultSet = statement.executeQuery("SHOW DATABASES LIKE '" + dbName + "'");
-			if (resultSet.next()) {
-				System.out.println("[INFO] Database '" + dbName + "' already exists, skipping creation.");
-				return true; // Database exists, skip creation.
+			try (PreparedStatement ps = connection.prepareStatement("SHOW DATABASES LIKE ?")) {
+				ps.setString(1, dbName);
+				try (ResultSet resultSet = ps.executeQuery()) {
+					if (resultSet.next()) {
+						System.out.println("[INFO] Database '" + dbName + "' already exists, skipping creation.");
+						return true; // Database exists, skip creation.
+					}
+				}
 			}
 
 			// Create the database if it doesn't already exist.
-			statement.execute("CREATE DATABASE `" + dbName + "`");
+			try (Statement statement = connection.createStatement()) {
+				statement.execute("CREATE DATABASE `" + dbName + "`");
+			}
 
 			System.out.println("[INFO] Database '" + dbName + "' created successfully.");
 			return true;
@@ -776,60 +789,69 @@ public class DatabaseInstaller extends JFrame {
 		final String password = new String(_passField.getPassword()).trim();
 		final String dbName = _dbNameField.getText().trim();
 
-		final String dbUrl = "jdbc:mysql://" + host + ":" + port;
-
-		if (dbName.isEmpty()) {
-			installationProgress("Error: Database name cannot be empty." + System.lineSeparator(), "Error");
+		if (!isValidIdentifier(dbName)) {
+			installationProgress("Error: Invalid database name: " + dbName + System.lineSeparator(), "Error");
 			return false;
 		}
 
-		try (Connection connection = DriverManager.getConnection(dbUrl, user, password);
-				Statement statement = connection.createStatement()) {
+		final String dbUrl = "jdbc:mysql://" + host + ":" + port;
 
+		try (Connection connection = DriverManager.getConnection(dbUrl, user, password)) {
 			installationProgress("Connected." + System.lineSeparator(), "Info");
 
 			// Check if the database already exists.
-			final ResultSet result = statement.executeQuery("SHOW DATABASES LIKE '" + dbName + "'");
-			if (result.next()) {
-				// Database already exists, show confirmation dialog.
-				final int confirm = JOptionPane.showOptionDialog(null,
-						"Database '" + dbName + "' already exists. Do you want to reset it?" + System
-								.lineSeparator() + "This will delete all existing data in the database.",
-						"Database Exists", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null,
-						new String[] {
-								"Delete and Recreate",
-								"Install on Existing Database",
-								"Cancel"
-						}, "Cancel");
-
-				if (confirm == JOptionPane.YES_OPTION) {
-					// Yes: Delete and recreate the database.
-					installationProgress("Backing up existing database..." + System.lineSeparator(), "Info");
-					dumpDatabase(); // Backup the database first.
-
-					statement.execute("DROP DATABASE `" + dbName + "`");
-					installationProgress("Database '" + dbName + "' deleted." + System.lineSeparator(), "Info");
-					statement.execute("CREATE DATABASE `" + dbName + "`");
-					installationProgress("Database '" + dbName + "' created." + System.lineSeparator(), "Info");
-				} else if (confirm == JOptionPane.NO_OPTION) {
-					// No: Proceed with installation on the existing database without deleting it.
-					installationProgress("Proceeding with installation on existing database." + System.lineSeparator(),
-							"Info");
-				} else if (confirm == JOptionPane.CANCEL_OPTION) {
-					// Cancel: Abort the installation process.
-					installationProgress("Installation cancelled." + System.lineSeparator(), "Info");
-					return false;
+			boolean exists = false;
+			try (PreparedStatement ps = connection.prepareStatement("SHOW DATABASES LIKE ?")) {
+				ps.setString(1, dbName);
+				try (ResultSet result = ps.executeQuery()) {
+					if (result.next()) {
+						exists = true;
+					}
 				}
-			} else {
-				// Create the database if it doesn't exist.
-				statement.execute("CREATE DATABASE `" + dbName + "`");
-				installationProgress("Database '" + dbName + "' created successfully." + System.lineSeparator(),
-						"Info");
 			}
 
-			// Proceed with the rest of the installation after database creation.
-			statement.execute("USE `" + dbName + "`");
-			installationProgress("Database '" + dbName + "' is ready." + System.lineSeparator(), "Info");
+			try (Statement statement = connection.createStatement()) {
+				if (exists) {
+					// Database already exists, show confirmation dialog.
+					final int confirm = JOptionPane.showOptionDialog(null,
+							"Database '" + dbName + "' already exists. Do you want to reset it?" + System
+									.lineSeparator() + "This will delete all existing data in the database.",
+							"Database Exists", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null,
+							new String[] {
+									"Delete and Recreate",
+									"Install on Existing Database",
+									"Cancel"
+							}, "Cancel");
+
+					if (confirm == JOptionPane.YES_OPTION) {
+						// Yes: Delete and recreate the database.
+						installationProgress("Backing up existing database..." + System.lineSeparator(), "Info");
+						dumpDatabase(); // Backup the database first.
+
+						statement.execute("DROP DATABASE `" + dbName + "`");
+						installationProgress("Database '" + dbName + "' deleted." + System.lineSeparator(), "Info");
+						statement.execute("CREATE DATABASE `" + dbName + "`");
+						installationProgress("Database '" + dbName + "' created." + System.lineSeparator(), "Info");
+					} else if (confirm == JOptionPane.NO_OPTION) {
+						// No: Proceed with installation on the existing database without deleting it.
+						installationProgress("Proceeding with installation on existing database." + System.lineSeparator(),
+								"Info");
+					} else if (confirm == JOptionPane.CANCEL_OPTION) {
+						// Cancel: Abort the installation process.
+						installationProgress("Installation cancelled." + System.lineSeparator(), "Info");
+						return false;
+					}
+				} else {
+					// Create the database if it doesn't exist.
+					statement.execute("CREATE DATABASE `" + dbName + "`");
+					installationProgress("Database '" + dbName + "' created successfully." + System.lineSeparator(),
+							"Info");
+				}
+
+				// Proceed with the rest of the installation after database creation.
+				statement.execute("USE `" + dbName + "`");
+				installationProgress("Database '" + dbName + "' is ready." + System.lineSeparator(), "Info");
+			}
 
 			return true; // Database creation successful.
 		} catch (SQLException e) {
@@ -868,13 +890,17 @@ public class DatabaseInstaller extends JFrame {
 
 				while (result.next()) {
 					final String tableName = result.getString(1);
+					if (!isValidIdentifier(tableName)) {
+						installationProgress("Skipping dump of invalid table name: " + tableName + System.lineSeparator(), "Error");
+						continue;
+					}
 					installationProgress("Dumping Table " + tableName + System.lineSeparator(), "Info");
 
 					writer.write("CREATE TABLE `" + tableName + "` (" + System.lineSeparator());
 
 					// Get table structure.
 					try (Statement descStatement = con.createStatement();
-							ResultSet descResult = descStatement.executeQuery("DESC " + tableName)) {
+							ResultSet descResult = descStatement.executeQuery("DESC `" + tableName + "`")) {
 
 						boolean firstColumn = true;
 						while (descResult.next()) {
@@ -899,7 +925,7 @@ public class DatabaseInstaller extends JFrame {
 
 					// Write INSERT INTO statements.
 					try (Statement dataStatement = con.createStatement();
-							ResultSet dataResult = dataStatement.executeQuery("SELECT * FROM " + tableName)) {
+							ResultSet dataResult = dataStatement.executeQuery("SELECT * FROM `" + tableName + "`")) {
 						int rowCount = 0;
 						while (dataResult.next()) {
 							if ((rowCount % 100) == 0) {
@@ -1004,6 +1030,10 @@ public class DatabaseInstaller extends JFrame {
 
 		final String dbUrl = "jdbc:mysql://" + host + ":" + port + "/" + dbName;
 		return DriverManager.getConnection(dbUrl, user, password);
+	}
+
+	private boolean isValidIdentifier(String text) {
+		return (text != null) && !text.isEmpty() && IDENTIFIER_PATTERN.matcher(text).matches();
 	}
 
 	public static void main(String[] args) {
