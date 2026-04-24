@@ -337,6 +337,7 @@ public class LoginController
 			}
 			else
 			{
+				// Legacy SHA-1 password support.
 				final MessageDigest md = MessageDigest.getInstance("SHA");
 				final byte[] raw = password.getBytes("UTF-8");
 				final byte[] hash = md.digest(raw);
