@@ -43,8 +43,6 @@ import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -52,7 +50,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -90,6 +87,7 @@ import javax.swing.table.TableRowSorter;
 
 import org.l2jmobius.commons.config.InterfaceConfig;
 import org.l2jmobius.commons.database.DatabaseFactory;
+import org.l2jmobius.commons.util.BCrypt;
 import org.l2jmobius.commons.time.TimeUtil;
 import org.l2jmobius.commons.ui.DarkTheme;
 
@@ -938,14 +936,12 @@ public class AccountManager extends JFrame
 					}
 				}
 				
-				final MessageDigest md = MessageDigest.getInstance("SHA");
-				final byte[] raw = password.getBytes(StandardCharsets.UTF_8);
-				final String hashBase64 = Base64.getEncoder().encodeToString(md.digest(raw));
+				final String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 				
 				try (PreparedStatement statement = con.prepareStatement("INSERT INTO accounts (login, password, accessLevel) VALUES (?, ?, ?)"))
 				{
 					statement.setString(1, username);
-					statement.setString(2, hashBase64);
+					statement.setString(2, hashedPassword);
 					statement.setInt(3, accessLevel);
 					
 					if (statement.executeUpdate() > 0)
@@ -1003,12 +999,8 @@ public class AccountManager extends JFrame
 				
 				if (!password.isEmpty())
 				{
-					final MessageDigest md = MessageDigest.getInstance("SHA");
-					final byte[] raw = password.getBytes(StandardCharsets.UTF_8);
-					final String hashBase64 = Base64.getEncoder().encodeToString(md.digest(raw));
-					
 					sql.append("password = ?, ");
-					params.add(hashBase64);
+					params.add(BCrypt.hashpw(password, BCrypt.gensalt()));
 				}
 				
 				// Only add access level if it's changed
@@ -1387,9 +1379,7 @@ public class AccountManager extends JFrame
 					}
 				}
 				
-				final MessageDigest md = MessageDigest.getInstance("SHA");
-				final byte[] hashedBytes = md.digest(password.getBytes(StandardCharsets.UTF_8));
-				final String hashedPassword = Base64.getEncoder().encodeToString(hashedBytes);
+				final String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 				
 				try (PreparedStatement statement = con.prepareStatement("INSERT INTO accounts (login, password, accessLevel) VALUES (?, ?, ?)"))
 				{
@@ -1527,9 +1517,7 @@ public class AccountManager extends JFrame
 				
 				if (!newPassword.isEmpty())
 				{
-					final MessageDigest md = MessageDigest.getInstance("SHA");
-					final byte[] raw = newPassword.getBytes(StandardCharsets.UTF_8);
-					hashBase64 = Base64.getEncoder().encodeToString(md.digest(raw));
+					hashBase64 = BCrypt.hashpw(newPassword, BCrypt.gensalt());
 				}
 				
 				// Get new access level (optional)
