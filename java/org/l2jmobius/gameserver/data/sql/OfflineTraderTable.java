@@ -104,7 +104,6 @@ public class OfflineTraderTable
 									stmItems.setInt(4, i.getPrice());
 									stmItems.addBatch();
 								}
-								stmItems.executeBatch();
 								break;
 							}
 							case SELL:
@@ -138,7 +137,6 @@ public class OfflineTraderTable
 										stmItems.addBatch();
 									}
 								}
-								stmItems.executeBatch();
 								break;
 							}
 							case MANUFACTURE:
@@ -157,7 +155,6 @@ public class OfflineTraderTable
 									stmItems.setInt(4, i.getCost());
 									stmItems.addBatch();
 								}
-								stmItems.executeBatch();
 								break;
 							}
 							default:
@@ -167,9 +164,7 @@ public class OfflineTraderTable
 						}
 						
 						stm3.setString(4, title);
-						stm3.executeUpdate();
-						stm3.clearParameters();
-						// No need to call con.commit() as HikariCP autocommit is true.
+						stm3.addBatch();
 					}
 				}
 				catch (Exception e)
@@ -178,6 +173,9 @@ public class OfflineTraderTable
 				}
 			}
 			
+			// Execute batches to reduce database round-trips from O(N_players + N_items) to O(2).
+			stm3.executeBatch();
+			stmItems.executeBatch();
 			LOGGER.info(getClass().getSimpleName() + ": Offline traders stored.");
 		}
 		catch (Exception e)
