@@ -20,11 +20,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.l2jmobius.commons.database.DatabaseFactory;
 import org.l2jmobius.commons.network.WritableBuffer;
-import org.l2jmobius.gameserver.data.sql.CharInfoTable;
 import org.l2jmobius.gameserver.model.World;
 import org.l2jmobius.gameserver.model.actor.Player;
 import org.l2jmobius.gameserver.network.GameClient;
@@ -59,43 +61,65 @@ public class FriendListExtended extends ServerPacket
 	
 	public FriendListExtended(Player player)
 	{
-		_info = new ArrayList<>(player.getFriendList().size());
-		for (int objId : player.getFriendList())
+		final Collection<Integer> friendList = player.getFriendList();
+		_info = new ArrayList<>(friendList.size());
+		final List<Integer> offlineFriends = new ArrayList<>();
+		for (int objId : friendList)
 		{
-			final String name = CharInfoTable.getInstance().getNameById(objId);
-			final Player player1 = World.getInstance().getPlayer(objId);
-			boolean online = false;
-			int classid = 0;
-			int level = 0;
-			if (player1 == null)
+			if (World.getInstance().getPlayer(objId) == null)
 			{
-				try (Connection con = DatabaseFactory.getConnection();
-					PreparedStatement statement = con.prepareStatement("SELECT char_name, online, classid, level FROM characters WHERE charId = ?"))
+				offlineFriends.add(objId);
+			}
+		}
+
+		final Map<Integer, FriendInfo> offlineInfo = new HashMap<>();
+		if (!offlineFriends.isEmpty())
+		{
+			final StringBuilder query = new StringBuilder("SELECT charId, char_name, online, classid, level FROM characters WHERE charId IN (");
+			for (int i = 0; i < offlineFriends.size(); i++)
+			{
+				query.append(i == 0 ? "?" : ",?");
+			}
+			query.append(")");
+
+			try (Connection con = DatabaseFactory.getConnection();
+				PreparedStatement statement = con.prepareStatement(query.toString()))
+			{
+				for (int i = 0; i < offlineFriends.size(); i++)
 				{
-					statement.setInt(1, objId);
-					try (ResultSet rset = statement.executeQuery())
+					statement.setInt(i + 1, offlineFriends.get(i));
+				}
+
+				try (ResultSet rset = statement.executeQuery())
+				{
+					while (rset.next())
 					{
-						if (rset.next())
-						{
-							_info.add(new FriendInfo(objId, rset.getString(1), rset.getInt(2) == 1, rset.getInt(3), rset.getInt(4)));
-						}
+						final int objId = rset.getInt(1);
+						offlineInfo.put(objId, new FriendInfo(objId, rset.getString(2), rset.getInt(3) == 1, rset.getInt(4), rset.getInt(5)));
 					}
 				}
-				catch (Exception e)
-				{
-					// Who cares?
-				}
-				continue;
 			}
-			
-			if (player1.isOnline())
+			catch (Exception e)
 			{
-				online = true;
+				// Who cares?
 			}
-			
-			classid = player1.getPlayerClass().getId();
-			level = player1.getLevel();
-			_info.add(new FriendInfo(objId, name, online, classid, level));
+		}
+
+		for (int objId : friendList)
+		{
+			final Player friend = World.getInstance().getPlayer(objId);
+			if (friend != null)
+			{
+				_info.add(new FriendInfo(objId, friend.getName(), friend.isOnline(), friend.getPlayerClass().getId(), friend.getLevel()));
+			}
+			else
+			{
+				final FriendInfo info = offlineInfo.get(objId);
+				if (info != null)
+				{
+					_info.add(info);
+				}
+			}
 		}
 	}
 	

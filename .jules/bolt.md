@@ -1,0 +1,3 @@
+## 2026-04-25 - Batched database lookups for FriendListExtended
+**Learning:** Found an N+1 query vulnerability in the `FriendListExtended` packet constructor where a database query was executed for every offline friend in a player's list. This caused significant latency for players with large friend lists during login.
+**Action:** Implemented a batched `SELECT` query using an `IN` clause to fetch all offline friend details in a single database round-trip. Used a `Map` to store results and maintained original list order by iterating through the original ID collection and merging data from `World` (online) and the batched results (offline). This pattern should be applied to any packet or service that hydrates data for a collection of IDs.
