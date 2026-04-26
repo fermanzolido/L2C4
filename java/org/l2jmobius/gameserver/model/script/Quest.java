@@ -5619,24 +5619,31 @@ public class Quest implements IEventTimerEvent<String>, IEventTimerCancel<String
 		return null;
 	}
 
-	private void setQuestToOfflineMembers(List<Integer> objectsId) {
-		try (Connection con = DatabaseFactory.getConnection()) {
-			final PreparedStatement stm = con
-					.prepareStatement("INSERT INTO character_quests (charId,name,var,value) VALUES (?,?,?,?)");
-			for (Integer charId : objectsId) {
+	private void setQuestToOfflineMembers(List<Integer> objectsId)
+	{
+		if ((objectsId == null) || objectsId.isEmpty())
+		{
+			return;
+		}
+
+		// Bolt Optimization: Use JDBC batching to reduce database round-trips when updating quest states for multiple members.
+		// Expected impact: Significant performance improvement (O(1) instead of O(N) database calls).
+		try (Connection con = DatabaseFactory.getConnection();
+			PreparedStatement stm = con.prepareStatement("INSERT INTO character_quests (charId,name,var,value) VALUES (?,?,?,?)"))
+		{
+			for (Integer charId : objectsId)
+			{
 				stm.setInt(1, charId.intValue());
 				stm.setString(2, getName());
 				stm.setString(3, "<state>");
 				stm.setString(4, "1");
-				stm.executeUpdate();
+				stm.addBatch();
 			}
-
-			stm.close();
-			con.close();
-		} catch (Exception e) {
-			LOGGER.log(Level.WARNING,
-					"Error in updating character_quest table from Quest.java on method setQuestToOfflineMembers");
-			LOGGER.info(e.toString());
+			stm.executeBatch();
+		}
+		catch (Exception e)
+		{
+			LOGGER.log(Level.WARNING, "Error in updating character_quest table from Quest.java on method setQuestToOfflineMembers: ", e);
 		}
 	}
 
