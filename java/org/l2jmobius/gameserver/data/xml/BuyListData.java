@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,6 +44,7 @@ import org.l2jmobius.gameserver.model.item.ItemTemplate;
 public class BuyListData implements IXmlReader
 {
 	private static final Logger LOGGER = Logger.getLogger(BuyListData.class.getName());
+	private static final Pattern XML_FILE_PATTERN = Pattern.compile("\\d+\\.xml", Pattern.CASE_INSENSITIVE);
 	
 	private final Map<Integer, BuyListHolder> _buyLists = new ConcurrentHashMap<>();
 	
@@ -184,7 +186,7 @@ public class BuyListData implements IXmlReader
 	@Override
 	public boolean isValidXmlFile(File file)
 	{
-		return (file != null) && file.isFile() && file.getName().toLowerCase().matches("\\d+\\.xml");
+		return (file != null) && file.isFile() && XML_FILE_PATTERN.matcher(file.getName()).matches();
 	}
 	
 	public BuyListHolder getBuyList(int listId)
