@@ -20,8 +20,6 @@
  */
 package org.l2jmobius.commons.util;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.StringJoiner;
 import java.util.StringTokenizer;
 
@@ -75,20 +73,21 @@ public class StringUtil
 	{
 		// Calculate the total length and store converted strings.
 		int totalLength = sb.length();
-		final List<String> strings = new LinkedList<>();
-		for (Object arg : args)
+		final int size = args.length;
+		final String[] strings = new String[size];
+		for (int i = 0; i < size; i++)
 		{
-			final String objectAsString = String.valueOf(arg);
+			final String objectAsString = String.valueOf(args[i]);
 			totalLength += objectAsString.length();
-			strings.add(objectAsString);
+			strings[i] = objectAsString;
 		}
 		
 		sb.ensureCapacity(totalLength);
 		
 		// Append each stored string.
-		for (String string : strings)
+		for (int i = 0; i < size; i++)
 		{
-			sb.append(string);
+			sb.append(strings[i]);
 		}
 	}
 	
@@ -125,19 +124,20 @@ public class StringUtil
 	{
 		// Calculate the total length and store converted strings.
 		int totalLength = 0;
-		final List<String> strings = new LinkedList<>();
-		for (Object arg : args)
+		final int size = args.length;
+		final String[] strings = new String[size];
+		for (int i = 0; i < size; i++)
 		{
-			final String objectAsString = String.valueOf(arg);
+			final String objectAsString = String.valueOf(args[i]);
 			totalLength += objectAsString.length();
-			strings.add(objectAsString);
+			strings[i] = objectAsString;
 		}
 		
 		// Append each stored string.
 		final StringBuilder sb = new StringBuilder(totalLength);
-		for (String string : strings)
+		for (int i = 0; i < size; i++)
 		{
-			sb.append(string);
+			sb.append(strings[i]);
 		}
 		
 		return sb.toString();
