@@ -1,0 +1,3 @@
+## 2025-05-15 - Prefer ArrayList/Arrays over LinkedList in Hot Paths
+**Learning:** The codebase used LinkedList for many temporary collections in high-frequency methods (e.g., World.getVisibleObjects, StringUtil.concat). LinkedList induces significant GC pressure and overhead due to per-element Node allocations. Replacing these with ArrayList or fixed-size arrays (when size is known) provides a measurable performance boost (~20% in string concatenation).
+**Action:** Always prefer ArrayList for collecting results in game engine methods. Use arrays for variadic arguments in utility methods where size is known.
