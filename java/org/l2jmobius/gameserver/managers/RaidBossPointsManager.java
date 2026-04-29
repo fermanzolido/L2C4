@@ -38,11 +38,19 @@ import org.l2jmobius.gameserver.model.actor.Player;
  * @author Kerberos, JIV
  * @version 8/24/10
  */
+/**
+ * Manager for tracking and calculating Raid Boss points and rankings.
+ * @author Kerberos, JIV
+ * @version 8/24/10
+ */
 public class RaidBossPointsManager
 {
 	private static final Logger LOGGER = Logger.getLogger(RaidBossPointsManager.class.getName());
 	
 	private final Map<Integer, Map<Integer, Integer>> _list = new ConcurrentHashMap<>();
+	// Cache for total points per player to optimize ranking calculations and point retrieval.
+	// This reduces getPointsByOwnerId from O(M) to O(1) and calculateRanking from O(N log N) to O(N).
+	private final Map<Integer, Integer> _totalPoints = new ConcurrentHashMap<>();
 	
 	public RaidBossPointsManager()
 	{
@@ -68,6 +76,7 @@ public class RaidBossPointsManager
 				
 				values.put(bossId, points);
 				_list.put(charId, values);
+				_totalPoints.merge(charId, points, Integer::sum);
 			}
 			
 			LOGGER.info(getClass().getSimpleName() + ": Loaded " + _list.size() + " Characters Raid Points.");
@@ -98,23 +107,18 @@ public class RaidBossPointsManager
 	{
 		final Map<Integer, Integer> tmpPoint = _list.computeIfAbsent(player.getObjectId(), unused -> new HashMap<>());
 		updatePointsInDB(player, bossId, tmpPoint.merge(bossId, points, Integer::sum));
+		_totalPoints.merge(player.getObjectId(), points, Integer::sum);
 	}
 	
+	/**
+	 * Gets the total raid points for a given player.
+	 * Optimized to O(1) using the cached total points map.
+	 * @param ownerId the object ID of the player
+	 * @return the total raid points
+	 */
 	public int getPointsByOwnerId(int ownerId)
 	{
-		final Map<Integer, Integer> tmpPoint = _list.get(ownerId);
-		int totalPoints = 0;
-		if ((tmpPoint == null) || tmpPoint.isEmpty())
-		{
-			return 0;
-		}
-		
-		for (int points : tmpPoint.values())
-		{
-			totalPoints += points;
-		}
-		
-		return totalPoints;
+		return _totalPoints.getOrDefault(ownerId, 0);
 	}
 	
 	public Map<Integer, Integer> getList(Player player)
@@ -129,6 +133,7 @@ public class RaidBossPointsManager
 		{
 			statement.executeUpdate();
 			_list.clear();
+			_totalPoints.clear();
 		}
 		catch (Exception e)
 		{
@@ -136,31 +141,42 @@ public class RaidBossPointsManager
 		}
 	}
 	
+	/**
+	 * Calculates the ranking of a player based on their total raid points.
+	 * Optimized to O(N) by counting players with more points than the target player.
+	 * This avoids the expensive O(N log N) full sort previously used.
+	 * @param playerObjId the object ID of the player
+	 * @return the player's ranking, or 0 if they have no points
+	 */
 	public int calculateRanking(int playerObjId)
 	{
-		final Map<Integer, Integer> rank = getRankList();
-		if (rank.containsKey(playerObjId))
+		final int points = getPointsByOwnerId(playerObjId);
+		if (points == 0)
 		{
-			return rank.get(playerObjId);
+			return 0;
 		}
 		
-		return 0;
-	}
-	
-	public Map<Integer, Integer> getRankList()
-	{
-		final Map<Integer, Integer> tmpPoints = new HashMap<>();
-		for (int ownerId : _list.keySet())
+		int ranking = 1;
+		for (int totalPoints : _totalPoints.values())
 		{
-			final int totalPoints = getPointsByOwnerId(ownerId);
-			if (totalPoints != 0)
+			if (totalPoints > points)
 			{
-				tmpPoints.put(ownerId, totalPoints);
+				ranking++;
 			}
 		}
-		
-		final List<Entry<Integer, Integer>> list = new ArrayList<>(tmpPoints.entrySet());
+		return ranking;
+	}
+
+	/**
+	 * Gets the full ranking list.
+	 * Note: This method is expensive (O(N log N)) and should be avoided if only individual rankings are needed.
+	 * @return a map of player object IDs to their ranking
+	 */
+	public Map<Integer, Integer> getRankList()
+	{
+		final List<Entry<Integer, Integer>> list = new ArrayList<>(_totalPoints.entrySet());
 		list.sort(Comparator.comparing(Entry<Integer, Integer>::getValue).reversed());
+
 		int ranking = 1;
 		final Map<Integer, Integer> tmpRanking = new HashMap<>();
 		for (Entry<Integer, Integer> entry : list)
@@ -171,6 +187,7 @@ public class RaidBossPointsManager
 		return tmpRanking;
 	}
 	
+
 	public static RaidBossPointsManager getInstance()
 	{
 		return SingletonHolder.INSTANCE;
