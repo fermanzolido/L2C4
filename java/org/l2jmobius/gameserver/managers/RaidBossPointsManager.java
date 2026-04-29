@@ -43,6 +43,7 @@ public class RaidBossPointsManager
 	private static final Logger LOGGER = Logger.getLogger(RaidBossPointsManager.class.getName());
 	
 	private final Map<Integer, Map<Integer, Integer>> _list = new ConcurrentHashMap<>();
+	private final Map<Integer, Integer> _totalPoints = new ConcurrentHashMap<>();
 	
 	public RaidBossPointsManager()
 	{
@@ -64,10 +65,11 @@ public class RaidBossPointsManager
 				if (values == null)
 				{
 					values = new HashMap<>();
+					_list.put(charId, values);
 				}
 				
 				values.put(bossId, points);
-				_list.put(charId, values);
+				_totalPoints.merge(charId, points, Integer::sum);
 			}
 			
 			LOGGER.info(getClass().getSimpleName() + ": Loaded " + _list.size() + " Characters Raid Points.");
@@ -96,25 +98,15 @@ public class RaidBossPointsManager
 	
 	public void addPoints(Player player, int bossId, int points)
 	{
-		final Map<Integer, Integer> tmpPoint = _list.computeIfAbsent(player.getObjectId(), unused -> new HashMap<>());
+		final int playerObjectId = player.getObjectId();
+		final Map<Integer, Integer> tmpPoint = _list.computeIfAbsent(playerObjectId, unused -> new HashMap<>());
 		updatePointsInDB(player, bossId, tmpPoint.merge(bossId, points, Integer::sum));
+		_totalPoints.merge(playerObjectId, points, Integer::sum);
 	}
 	
 	public int getPointsByOwnerId(int ownerId)
 	{
-		final Map<Integer, Integer> tmpPoint = _list.get(ownerId);
-		int totalPoints = 0;
-		if ((tmpPoint == null) || tmpPoint.isEmpty())
-		{
-			return 0;
-		}
-		
-		for (int points : tmpPoint.values())
-		{
-			totalPoints += points;
-		}
-		
-		return totalPoints;
+		return _totalPoints.getOrDefault(ownerId, 0);
 	}
 	
 	public Map<Integer, Integer> getList(Player player)
@@ -129,6 +121,7 @@ public class RaidBossPointsManager
 		{
 			statement.executeUpdate();
 			_list.clear();
+			_totalPoints.clear();
 		}
 		catch (Exception e)
 		{
@@ -138,34 +131,48 @@ public class RaidBossPointsManager
 	
 	public int calculateRanking(int playerObjId)
 	{
-		final Map<Integer, Integer> rank = getRankList();
-		if (rank.containsKey(playerObjId))
+		final int points = getPointsByOwnerId(playerObjId);
+		if (points == 0)
 		{
-			return rank.get(playerObjId);
+			return 0;
 		}
 		
-		return 0;
+		int ranking = 1;
+		for (int total : _totalPoints.values())
+		{
+			if (total > points)
+			{
+				ranking++;
+			}
+		}
+		return ranking;
 	}
 	
 	public Map<Integer, Integer> getRankList()
 	{
-		final Map<Integer, Integer> tmpPoints = new HashMap<>();
-		for (int ownerId : _list.keySet())
+		final List<Entry<Integer, Integer>> list = new ArrayList<>();
+		for (Entry<Integer, Integer> entry : _totalPoints.entrySet())
 		{
-			final int totalPoints = getPointsByOwnerId(ownerId);
-			if (totalPoints != 0)
+			if (entry.getValue() > 0)
 			{
-				tmpPoints.put(ownerId, totalPoints);
+				list.add(entry);
 			}
 		}
-		
-		final List<Entry<Integer, Integer>> list = new ArrayList<>(tmpPoints.entrySet());
 		list.sort(Comparator.comparing(Entry<Integer, Integer>::getValue).reversed());
-		int ranking = 1;
+
 		final Map<Integer, Integer> tmpRanking = new HashMap<>();
+		int ranking = 1;
+		int count = 0;
+		int lastPoints = -1;
 		for (Entry<Integer, Integer> entry : list)
 		{
-			tmpRanking.put(entry.getKey(), ranking++);
+			count++;
+			if (entry.getValue() != lastPoints)
+			{
+				ranking = count;
+				lastPoints = entry.getValue();
+			}
+			tmpRanking.put(entry.getKey(), ranking);
 		}
 		
 		return tmpRanking;
