@@ -1,0 +1,3 @@
+## 2025-05-15 - Optimize RaidBossPointsManager with Point Caching and JDBC Batching
+**Learning:** In high-frequency events like boss deaths, performing individual database updates for each party member (N+1 query problem) and recalculating aggregated totals on every request creates significant overhead. Caching aggregated results (like total points) and using JDBC batching for mass updates provides a massive performance boost.
+**Action:** Always check for loops containing database updates or heavy recalculations of aggregated data. Implement batching for DB writes and caching for frequently accessed aggregated values.

@@ -28,6 +28,9 @@ import org.l2jmobius.gameserver.model.actor.Creature;
 import org.l2jmobius.gameserver.model.actor.Player;
 import org.l2jmobius.gameserver.model.actor.enums.creature.InstanceType;
 import org.l2jmobius.gameserver.model.actor.enums.npc.RaidBossStatus;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.l2jmobius.gameserver.model.actor.templates.NpcTemplate;
 import org.l2jmobius.gameserver.model.groups.Party;
 import org.l2jmobius.gameserver.model.olympiad.Hero;
@@ -78,14 +81,16 @@ public class RaidBoss extends Monster
 			if (party != null)
 			{
 				party.broadcastPacket(msg);
+				final Map<Player, Integer> playerPoints = new HashMap<>();
 				for (Player member : party.getMembers())
 				{
-					RaidBossPointsManager.getInstance().addPoints(member, getId(), (getLevel() / 2) + Rnd.get(-5, 5));
+					playerPoints.put(member, (getLevel() / 2) + Rnd.get(-5, 5));
 					if (member.isNoble())
 					{
 						Hero.getInstance().setRBkilled(member.getObjectId(), getId());
 					}
 				}
+				RaidBossPointsManager.getInstance().addPointsBatch(playerPoints, getId());
 			}
 			else
 			{
