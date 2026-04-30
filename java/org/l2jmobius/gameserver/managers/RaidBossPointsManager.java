@@ -43,8 +43,9 @@ public class RaidBossPointsManager
 	private static final Logger LOGGER = Logger.getLogger(RaidBossPointsManager.class.getName());
 	
 	private final Map<Integer, Map<Integer, Integer>> _list = new ConcurrentHashMap<>();
+	private final Map<Integer, Integer> _totalPoints = new ConcurrentHashMap<>();
 	
-	public RaidBossPointsManager()
+	protected RaidBossPointsManager()
 	{
 		init();
 	}
@@ -60,14 +61,9 @@ public class RaidBossPointsManager
 				final int charId = rs.getInt("charId");
 				final int bossId = rs.getInt("boss_id");
 				final int points = rs.getInt("points");
-				Map<Integer, Integer> values = _list.get(charId);
-				if (values == null)
-				{
-					values = new HashMap<>();
-				}
 				
-				values.put(bossId, points);
-				_list.put(charId, values);
+				_list.computeIfAbsent(charId, unused -> new ConcurrentHashMap<>()).put(bossId, points);
+				_totalPoints.merge(charId, points, Integer::sum);
 			}
 			
 			LOGGER.info(getClass().getSimpleName() + ": Loaded " + _list.size() + " Characters Raid Points.");
@@ -78,6 +74,31 @@ public class RaidBossPointsManager
 		}
 	}
 	
+	/**
+	 * Updates the raid points for multiple players in the database using batching.
+	 * @param playerPoints a map of players and their new points for the given raid ID
+	 * @param raidId the ID of the raid boss
+	 */
+	public void updatePointsInDB(Map<Player, Integer> playerPoints, int raidId)
+	{
+		try (Connection con = DatabaseFactory.getConnection();
+			PreparedStatement ps = con.prepareStatement("REPLACE INTO character_raid_points (`charId`,`boss_id`,`points`) VALUES (?,?,?)"))
+		{
+			for (Entry<Player, Integer> entry : playerPoints.entrySet())
+			{
+				ps.setInt(1, entry.getKey().getObjectId());
+				ps.setInt(2, raidId);
+				ps.setInt(3, entry.getValue());
+				ps.addBatch();
+			}
+			ps.executeBatch();
+		}
+		catch (Exception e)
+		{
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Couldn't update char raid points batch for raid: " + raidId, e);
+		}
+	}
+
 	public void updatePointsInDB(Player player, int raidId, int points)
 	{
 		try (Connection con = DatabaseFactory.getConnection();
@@ -94,27 +115,42 @@ public class RaidBossPointsManager
 		}
 	}
 	
+	/**
+	 * Adds raid points to multiple players and updates the database.
+	 * @param playerPoints a map containing players and the points to be added
+	 * @param bossId the ID of the raid boss
+	 */
+	public void addPoints(Map<Player, Integer> playerPoints, int bossId)
+	{
+		final Map<Player, Integer> newPoints = new HashMap<>();
+		for (Entry<Player, Integer> entry : playerPoints.entrySet())
+		{
+			final Player player = entry.getKey();
+			final int pointsToAdd = entry.getValue();
+			final Map<Integer, Integer> tmpPoint = _list.computeIfAbsent(player.getObjectId(), unused -> new ConcurrentHashMap<>());
+			final int totalRaidPoints = tmpPoint.merge(bossId, pointsToAdd, Integer::sum);
+			_totalPoints.merge(player.getObjectId(), pointsToAdd, Integer::sum);
+			newPoints.put(player, totalRaidPoints);
+		}
+		updatePointsInDB(newPoints, bossId);
+	}
+
 	public void addPoints(Player player, int bossId, int points)
 	{
-		final Map<Integer, Integer> tmpPoint = _list.computeIfAbsent(player.getObjectId(), unused -> new HashMap<>());
-		updatePointsInDB(player, bossId, tmpPoint.merge(bossId, points, Integer::sum));
+		final Map<Integer, Integer> tmpPoint = _list.computeIfAbsent(player.getObjectId(), unused -> new ConcurrentHashMap<>());
+		final int totalRaidPoints = tmpPoint.merge(bossId, points, Integer::sum);
+		_totalPoints.merge(player.getObjectId(), points, Integer::sum);
+		updatePointsInDB(player, bossId, totalRaidPoints);
 	}
 	
+	/**
+	 * Gets the total raid points for a given character ID.
+	 * @param ownerId the character ID
+	 * @return the total points (O(1) lookup)
+	 */
 	public int getPointsByOwnerId(int ownerId)
 	{
-		final Map<Integer, Integer> tmpPoint = _list.get(ownerId);
-		int totalPoints = 0;
-		if ((tmpPoint == null) || tmpPoint.isEmpty())
-		{
-			return 0;
-		}
-		
-		for (int points : tmpPoint.values())
-		{
-			totalPoints += points;
-		}
-		
-		return totalPoints;
+		return _totalPoints.getOrDefault(ownerId, 0);
 	}
 	
 	public Map<Integer, Integer> getList(Player player)
@@ -129,6 +165,7 @@ public class RaidBossPointsManager
 		{
 			statement.executeUpdate();
 			_list.clear();
+			_totalPoints.clear();
 		}
 		catch (Exception e)
 		{
@@ -136,36 +173,64 @@ public class RaidBossPointsManager
 		}
 	}
 	
+	/**
+	 * Calculates the ranking for a player based on their total raid points.
+	 * Uses standard competition ranking: O(N) complexity.
+	 * @param playerObjId the player object ID
+	 * @return the rank, or 0 if no points
+	 */
 	public int calculateRanking(int playerObjId)
 	{
-		final Map<Integer, Integer> rank = getRankList();
-		if (rank.containsKey(playerObjId))
+		final int totalPoints = getPointsByOwnerId(playerObjId);
+		if (totalPoints == 0)
 		{
-			return rank.get(playerObjId);
+			return 0;
 		}
 		
-		return 0;
-	}
-	
-	public Map<Integer, Integer> getRankList()
-	{
-		final Map<Integer, Integer> tmpPoints = new HashMap<>();
-		for (int ownerId : _list.keySet())
+		int rank = 1;
+		for (int points : _totalPoints.values())
 		{
-			final int totalPoints = getPointsByOwnerId(ownerId);
-			if (totalPoints != 0)
+			if (points > totalPoints)
 			{
-				tmpPoints.put(ownerId, totalPoints);
+				rank++;
 			}
 		}
-		
-		final List<Entry<Integer, Integer>> list = new ArrayList<>(tmpPoints.entrySet());
+		return rank;
+	}
+
+	/**
+	 * Gets a map of character IDs and their ranks using standard competition ranking.
+	 * @return a map of charId -> rank
+	 */
+	public Map<Integer, Integer> getRankList()
+	{
+		final List<Entry<Integer, Integer>> list = new ArrayList<>(_totalPoints.entrySet());
 		list.sort(Comparator.comparing(Entry<Integer, Integer>::getValue).reversed());
-		int ranking = 1;
+
 		final Map<Integer, Integer> tmpRanking = new HashMap<>();
+		int rank = 1;
+		int lastPoints = -1;
+		int playersAtRank = 0;
 		for (Entry<Integer, Integer> entry : list)
 		{
-			tmpRanking.put(entry.getKey(), ranking++);
+			final int currentPoints = entry.getValue();
+			if (currentPoints == 0)
+			{
+				continue;
+			}
+
+			if (currentPoints != lastPoints)
+			{
+				rank += playersAtRank;
+				playersAtRank = 1;
+				lastPoints = currentPoints;
+			}
+			else
+			{
+				playersAtRank++;
+			}
+
+			tmpRanking.put(entry.getKey(), rank);
 		}
 		
 		return tmpRanking;
