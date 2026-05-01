@@ -213,7 +213,8 @@ public class InstanceWorld
 	 */
 	public List<Npc> getNpcs(int... id)
 	{
-		final List<Npc> result = new LinkedList<>();
+		// Use ArrayList for better performance and reduced GC pressure.
+		final List<Npc> result = new ArrayList<>();
 		for (Npc npc : _instance.getNpcs())
 		{
 			if (ArrayUtil.contains(id, npc.getId()))
@@ -236,7 +237,8 @@ public class InstanceWorld
 	@SuppressWarnings("unchecked")
 	public final <T extends Creature> List<T> getNpcs(Class<T> clazz, int... ids)
 	{
-		final List<T> result = new LinkedList<>();
+		// Use ArrayList for better performance and reduced GC pressure.
+		final List<T> result = new ArrayList<>();
 		for (Npc npc : _instance.getNpcs())
 		{
 			if (((ids.length == 0) || ArrayUtil.contains(ids, npc.getId())) && clazz.isInstance(npc))
@@ -254,7 +256,8 @@ public class InstanceWorld
 	 */
 	public List<Npc> getAliveNpcs()
 	{
-		final List<Npc> result = new LinkedList<>();
+		// Use ArrayList for better performance and reduced GC pressure.
+		final List<Npc> result = new ArrayList<>();
 		for (Npc npc : _instance.getNpcs())
 		{
 			if (npc.getCurrentHp() > 0)
@@ -273,7 +276,8 @@ public class InstanceWorld
 	 */
 	public List<Npc> getAliveNpcs(int... id)
 	{
-		final List<Npc> result = new LinkedList<>();
+		// Use ArrayList for better performance and reduced GC pressure.
+		final List<Npc> result = new ArrayList<>();
 		for (Npc npc : _instance.getNpcs())
 		{
 			if ((npc.getCurrentHp() > 0) && ArrayUtil.contains(id, npc.getId()))
@@ -296,7 +300,8 @@ public class InstanceWorld
 	@SuppressWarnings("unchecked")
 	public final <T extends Creature> List<T> getAliveNpcs(Class<T> clazz, int... ids)
 	{
-		final List<T> result = new LinkedList<>();
+		// Use ArrayList for better performance and reduced GC pressure.
+		final List<T> result = new ArrayList<>();
 		for (Npc npc : _instance.getNpcs())
 		{
 			if ((((ids.length == 0) || ArrayUtil.contains(ids, npc.getId())) && (npc.getCurrentHp() > 0)) && clazz.isInstance(npc))
