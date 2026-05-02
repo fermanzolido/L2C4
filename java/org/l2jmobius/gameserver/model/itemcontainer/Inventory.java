@@ -26,7 +26,6 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -1322,7 +1321,7 @@ public abstract class Inventory extends ItemContainer {
 			filter = filter.and(additionalFilter);
 		}
 
-		final List<Item> items = new LinkedList<>();
+		final List<Item> items = new ArrayList<>(_paperdoll.length); // Use ArrayList for better performance on sequential add and iteration.
 		for (Item item : _paperdoll) {
 			if (filter.test(item)) {
 				items.add(item);

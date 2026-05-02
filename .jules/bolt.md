@@ -1,0 +1,3 @@
+## 2026-05-02 - [Anti-pattern: LinkedList in Hot Paths]
+**Learning:** In high-frequency game loop paths like `World.getVisibleObjects`, `InstanceWorld.getNpcs`, and `Inventory.getPaperdollItems`, using `LinkedList` for collecting entities introduces unnecessary garbage collection pressure due to per-element node allocations. `ArrayList` is significantly more efficient due to better spatial locality and lower memory overhead.
+**Action:** Use `ArrayList` instead of `LinkedList` when collecting entities for iteration. Always provide an initial capacity when the source size is known to avoid internal array resizing.
