@@ -73,16 +73,7 @@ public class PetNameTable
 			return false;
 		}
 		
-		try
-		{
-			Pattern pattern = Pattern.compile(ServerConfig.PET_NAME_TEMPLATE);
-			return pattern.matcher(name).matches();
-		}
-		catch (PatternSyntaxException e)
-		{
-			LOGGER.warning(getClass().getSimpleName() + ": Invalid PetNameTemplate regex in config: " + ServerConfig.PET_NAME_TEMPLATE);
-			return true; // If regex is broken, fallback to allowing all names.
-		}
+		return ServerConfig.PET_NAME_TEMPLATE.matcher(name).matches();
 	}
 	
 	private static class SingletonHolder
