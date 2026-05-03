@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
@@ -48,6 +49,9 @@ import org.l2jmobius.gameserver.network.serverpackets.MultiSellList;
 
 public class MultisellData implements IXmlReader
 {
+	/** Pre-compiled pattern for XML filename validation (e.g., 123.xml). Avoids repeated regex compilation and string lowercase conversions. */
+	private static final Pattern XML_FILE_PATTERN = Pattern.compile("\\d+\\.xml", Pattern.CASE_INSENSITIVE);
+
 	private final Map<Integer, ListContainer> _entries = new ConcurrentHashMap<>();
 	
 	public static final int PAGE_SIZE = 40;
@@ -154,7 +158,7 @@ public class MultisellData implements IXmlReader
 	@Override
 	public boolean isValidXmlFile(File file)
 	{
-		return (file != null) && file.isFile() && file.getName().toLowerCase().matches("\\d+\\.xml");
+		return (file != null) && file.isFile() && XML_FILE_PATTERN.matcher(file.getName()).matches();
 	}
 	
 	private final Entry parseEntry(Node node, int entryId, ListContainer list)

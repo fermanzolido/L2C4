@@ -80,8 +80,10 @@ public class ServerConfig {
 	public static File DATAPACK_ROOT;
 	public static File SCRIPT_ROOT;
 	public static Pattern CHARNAME_TEMPLATE_PATTERN;
-	public static String PET_NAME_TEMPLATE;
-	public static String CLAN_NAME_TEMPLATE;
+	/** Pre-compiled pattern for pet name template. Avoids repeated regex compilation during validation. */
+	public static Pattern PET_NAME_TEMPLATE;
+	/** Pre-compiled pattern for clan name template. Avoids repeated regex compilation during validation. */
+	public static Pattern CLAN_NAME_TEMPLATE;
 	public static int MAX_CHARACTERS_NUMBER_PER_ACCOUNT;
 	public static int MAXIMUM_ONLINE_USERS;
 	public static boolean HARDWARE_INFO_ENABLED;
@@ -147,8 +149,31 @@ public class ServerConfig {
 			charNamePattern = Pattern.compile(".*");
 		}
 		CHARNAME_TEMPLATE_PATTERN = charNamePattern;
-		PET_NAME_TEMPLATE = config.getString("PetNameTemplate", ".*");
-		CLAN_NAME_TEMPLATE = config.getString("ClanNameTemplate", ".*");
+
+		Pattern petNamePattern;
+		try
+		{
+			petNamePattern = Pattern.compile(config.getString("PetNameTemplate", ".*"));
+		}
+		catch (PatternSyntaxException e)
+		{
+			LOGGER.log(Level.WARNING, "Pet name pattern is invalid!", e);
+			petNamePattern = Pattern.compile(".*");
+		}
+		PET_NAME_TEMPLATE = petNamePattern;
+
+		Pattern clanNamePattern;
+		try
+		{
+			clanNamePattern = Pattern.compile(config.getString("ClanNameTemplate", ".*"));
+		}
+		catch (PatternSyntaxException e)
+		{
+			LOGGER.log(Level.WARNING, "Clan name pattern is invalid!", e);
+			clanNamePattern = Pattern.compile(".*");
+		}
+		CLAN_NAME_TEMPLATE = clanNamePattern;
+
 		MAX_CHARACTERS_NUMBER_PER_ACCOUNT = config.getInt("CharMaxNumber", 7);
 		MAXIMUM_ONLINE_USERS = config.getInt("MaximumOnlineUsers", 100);
 		HARDWARE_INFO_ENABLED = config.getBoolean("EnableHardwareInfo", false);

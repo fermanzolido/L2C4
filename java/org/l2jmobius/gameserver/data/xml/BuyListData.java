@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -43,6 +44,8 @@ import org.l2jmobius.gameserver.model.item.ItemTemplate;
 public class BuyListData implements IXmlReader
 {
 	private static final Logger LOGGER = Logger.getLogger(BuyListData.class.getName());
+	/** Pre-compiled pattern for XML filename validation (e.g., 123.xml). Avoids repeated regex compilation and string lowercase conversions. */
+	private static final Pattern XML_FILE_PATTERN = Pattern.compile("\\d+\\.xml", Pattern.CASE_INSENSITIVE);
 	
 	private final Map<Integer, BuyListHolder> _buyLists = new ConcurrentHashMap<>();
 	
@@ -184,7 +187,7 @@ public class BuyListData implements IXmlReader
 	@Override
 	public boolean isValidXmlFile(File file)
 	{
-		return (file != null) && file.isFile() && file.getName().toLowerCase().matches("\\d+\\.xml");
+		return (file != null) && file.isFile() && XML_FILE_PATTERN.matcher(file.getName()).matches();
 	}
 	
 	public BuyListHolder getBuyList(int listId)
