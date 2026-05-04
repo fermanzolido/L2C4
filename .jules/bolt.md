@@ -1,0 +1,3 @@
+## 2025-05-15 - Optimize transient collections in hot paths
+**Learning:** In high-frequency game loop paths like `World.getVisibleObjects`, `InstanceWorld.getNpcs`, and `Inventory.getPaperdollItems`, the use of `ArrayList` instead of `LinkedList` for collecting entities reduces garbage collection pressure (no per-element `Node` allocations) and improves cache locality during subsequent iteration.
+**Action:** Always prefer `ArrayList` for transient collections that are only appended to and then iterated. Provide an initial capacity based on the source collection size (e.g., `npcs.size()` or `_paperdoll.length`) to eliminate internal array re-allocations.
