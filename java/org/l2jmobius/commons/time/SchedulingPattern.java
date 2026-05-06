@@ -31,6 +31,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import org.l2jmobius.commons.util.Rnd;
 import org.l2jmobius.commons.util.StringUtil;
@@ -68,7 +69,7 @@ public class SchedulingPattern
 	private static final int CRON_PARTS_EXPECTED = 2;
 	private static final String PIPE_SEPARATOR = "\\|";
 	private static final String WHITESPACE_PATTERN = "\\s+";
-	private static final String FIELD_VALIDATION_REGEX = "^[0-9a-zA-Z*,\\-/:~+L]+$";
+	private static final Pattern FIELD_VALIDATION_PATTERN = Pattern.compile("^[0-9a-zA-Z*,\\-/:~+L]+$");
 	private static final String NO_FUTURE_MATCH_MESSAGE = "No future match.";
 	
 	// Month aliases for improved readability.
@@ -186,7 +187,7 @@ public class SchedulingPattern
 		}
 		
 		// Check for valid characters and basic syntax.
-		return field.matches(FIELD_VALIDATION_REGEX);
+		return FIELD_VALIDATION_PATTERN.matcher(field).matches();
 	}
 	
 	/**
