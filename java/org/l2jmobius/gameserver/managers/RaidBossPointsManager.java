@@ -43,6 +43,7 @@ public class RaidBossPointsManager
 	private static final Logger LOGGER = Logger.getLogger(RaidBossPointsManager.class.getName());
 	
 	private final Map<Integer, Map<Integer, Integer>> _list = new ConcurrentHashMap<>();
+	private final Map<Integer, Integer> _totalPoints = new ConcurrentHashMap<>();
 	
 	public RaidBossPointsManager()
 	{
@@ -60,14 +61,9 @@ public class RaidBossPointsManager
 				final int charId = rs.getInt("charId");
 				final int bossId = rs.getInt("boss_id");
 				final int points = rs.getInt("points");
-				Map<Integer, Integer> values = _list.get(charId);
-				if (values == null)
-				{
-					values = new HashMap<>();
-				}
 				
-				values.put(bossId, points);
-				_list.put(charId, values);
+				_list.computeIfAbsent(charId, unused -> new HashMap<>()).put(bossId, points);
+				_totalPoints.merge(charId, points, Integer::sum);
 			}
 			
 			LOGGER.info(getClass().getSimpleName() + ": Loaded " + _list.size() + " Characters Raid Points.");
@@ -96,25 +92,54 @@ public class RaidBossPointsManager
 	
 	public void addPoints(Player player, int bossId, int points)
 	{
-		final Map<Integer, Integer> tmpPoint = _list.computeIfAbsent(player.getObjectId(), unused -> new HashMap<>());
-		updatePointsInDB(player, bossId, tmpPoint.merge(bossId, points, Integer::sum));
+		final int charId = player.getObjectId();
+		final int totalPoints = _list.computeIfAbsent(charId, unused -> new HashMap<>()).merge(bossId, points, Integer::sum);
+		_totalPoints.merge(charId, points, Integer::sum);
+		updatePointsInDB(player, bossId, totalPoints);
 	}
 	
+	/**
+	 * Optimized method to add points for multiple players at once using JDBC batching.
+	 * @param playerPoints a map containing players and the points they earned.
+	 * @param bossId the boss ID.
+	 */
+	public void addPoints(Map<Player, Integer> playerPoints, int bossId)
+	{
+		if ((playerPoints == null) || playerPoints.isEmpty())
+		{
+			return;
+		}
+		
+		try (Connection con = DatabaseFactory.getConnection();
+			PreparedStatement ps = con.prepareStatement("REPLACE INTO character_raid_points (`charId`,`boss_id`,`points`) VALUES (?,?,?)"))
+		{
+			for (Entry<Player, Integer> entry : playerPoints.entrySet())
+			{
+				final Player player = entry.getKey();
+				final int pointsToAdd = entry.getValue();
+				final int charId = player.getObjectId();
+
+				// Update memory cache
+				final int currentPoints = _list.computeIfAbsent(charId, unused -> new HashMap<>()).merge(bossId, pointsToAdd, Integer::sum);
+				_totalPoints.merge(charId, pointsToAdd, Integer::sum);
+
+				// Add to batch
+				ps.setInt(1, charId);
+				ps.setInt(2, bossId);
+				ps.setInt(3, currentPoints);
+				ps.addBatch();
+			}
+			ps.executeBatch();
+		}
+		catch (Exception e)
+		{
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Couldn't update char raid points batch for boss: " + bossId, e);
+		}
+	}
+
 	public int getPointsByOwnerId(int ownerId)
 	{
-		final Map<Integer, Integer> tmpPoint = _list.get(ownerId);
-		int totalPoints = 0;
-		if ((tmpPoint == null) || tmpPoint.isEmpty())
-		{
-			return 0;
-		}
-		
-		for (int points : tmpPoint.values())
-		{
-			totalPoints += points;
-		}
-		
-		return totalPoints;
+		return _totalPoints.getOrDefault(ownerId, 0);
 	}
 	
 	public Map<Integer, Integer> getList(Player player)
@@ -129,6 +154,7 @@ public class RaidBossPointsManager
 		{
 			statement.executeUpdate();
 			_list.clear();
+			_totalPoints.clear();
 		}
 		catch (Exception e)
 		{
@@ -149,23 +175,17 @@ public class RaidBossPointsManager
 	
 	public Map<Integer, Integer> getRankList()
 	{
-		final Map<Integer, Integer> tmpPoints = new HashMap<>();
-		for (int ownerId : _list.keySet())
-		{
-			final int totalPoints = getPointsByOwnerId(ownerId);
-			if (totalPoints != 0)
-			{
-				tmpPoints.put(ownerId, totalPoints);
-			}
-		}
-		
-		final List<Entry<Integer, Integer>> list = new ArrayList<>(tmpPoints.entrySet());
+		final List<Entry<Integer, Integer>> list = new ArrayList<>(_totalPoints.entrySet());
 		list.sort(Comparator.comparing(Entry<Integer, Integer>::getValue).reversed());
+
 		int ranking = 1;
 		final Map<Integer, Integer> tmpRanking = new HashMap<>();
 		for (Entry<Integer, Integer> entry : list)
 		{
-			tmpRanking.put(entry.getKey(), ranking++);
+			if (entry.getValue() != 0)
+			{
+				tmpRanking.put(entry.getKey(), ranking++);
+			}
 		}
 		
 		return tmpRanking;
