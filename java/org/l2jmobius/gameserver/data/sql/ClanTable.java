@@ -68,6 +68,7 @@ public class ClanTable
 {
 	private static final Logger LOGGER = Logger.getLogger(ClanTable.class.getName());
 	private final Map<Integer, Clan> _clans = new ConcurrentHashMap<>();
+	private final Map<String, Clan> _clansByName = new ConcurrentHashMap<>();
 	
 	protected ClanTable()
 	{
@@ -98,6 +99,7 @@ public class ClanTable
 		{
 			final Clan clan = new Clan(cid);
 			_clans.put(cid, clan);
+			_clansByName.put(clan.getName().toLowerCase(), clan);
 			if (clan.getDissolvingExpiryTime() != 0)
 			{
 				scheduleRemoveClan(clan.getId());
@@ -138,17 +140,15 @@ public class ClanTable
 		return _clans.get(clanId);
 	}
 	
+	/**
+	 * Gets the clan by name.
+	 * @param clanName the clan name
+	 * @return the clan if found, null otherwise
+	 */
 	public Clan getClanByName(String clanName)
 	{
-		for (Clan clan : _clans.values())
-		{
-			if (clan.getName().equalsIgnoreCase(clanName))
-			{
-				return clan;
-			}
-		}
-		
-		return null;
+		// Performance optimization: Use O(1) map lookup instead of O(N) linear scan.
+		return (clanName == null) || clanName.isEmpty() ? null : _clansByName.get(clanName.toLowerCase());
 	}
 	
 	/**
@@ -216,6 +216,7 @@ public class ClanTable
 		player.setClanPrivileges(privileges);
 		
 		_clans.put(clan.getId(), clan);
+		_clansByName.put(clan.getName().toLowerCase(), clan);
 		
 		// should be update packet only
 		player.sendPacket(new PledgeShowInfoUpdate(clan));
@@ -274,6 +275,7 @@ public class ClanTable
 			clan.removeClanMember(member.getObjectId(), 0);
 		}
 		
+		_clansByName.remove(clan.getName().toLowerCase());
 		_clans.remove(clanId);
 		IdManager.getInstance().releaseId(clanId);
 		
