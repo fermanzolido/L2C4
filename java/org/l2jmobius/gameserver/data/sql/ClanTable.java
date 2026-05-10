@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -68,6 +69,7 @@ public class ClanTable
 {
 	private static final Logger LOGGER = Logger.getLogger(ClanTable.class.getName());
 	private final Map<Integer, Clan> _clans = new ConcurrentHashMap<>();
+	private final Map<String, Clan> _clansByName = new ConcurrentHashMap<>();
 	
 	protected ClanTable()
 	{
@@ -98,6 +100,7 @@ public class ClanTable
 		{
 			final Clan clan = new Clan(cid);
 			_clans.put(cid, clan);
+			_clansByName.put(clan.getName().toLowerCase(Locale.ENGLISH), clan);
 			if (clan.getDissolvingExpiryTime() != 0)
 			{
 				scheduleRemoveClan(clan.getId());
@@ -140,15 +143,7 @@ public class ClanTable
 	
 	public Clan getClanByName(String clanName)
 	{
-		for (Clan clan : _clans.values())
-		{
-			if (clan.getName().equalsIgnoreCase(clanName))
-			{
-				return clan;
-			}
-		}
-		
-		return null;
+		return (clanName == null) || clanName.isEmpty() ? null : _clansByName.get(clanName.toLowerCase(Locale.ENGLISH));
 	}
 	
 	/**
@@ -216,6 +211,7 @@ public class ClanTable
 		player.setClanPrivileges(privileges);
 		
 		_clans.put(clan.getId(), clan);
+		_clansByName.put(clan.getName().toLowerCase(Locale.ENGLISH), clan);
 		
 		// should be update packet only
 		player.sendPacket(new PledgeShowInfoUpdate(clan));
@@ -275,6 +271,7 @@ public class ClanTable
 		}
 		
 		_clans.remove(clanId);
+		_clansByName.remove(clan.getName().toLowerCase(Locale.ENGLISH));
 		IdManager.getInstance().releaseId(clanId);
 		
 		try (Connection con = DatabaseFactory.getConnection())
@@ -538,9 +535,25 @@ public class ClanTable
 	
 	private void updateClanRanks()
 	{
-		for (Clan clan : _clans.values())
+		final List<Clan> sortedClans = new ArrayList<>(_clans.values());
+		sortedClans.sort((c1, c2) -> Integer.compare(c2.getLevel(), c1.getLevel()));
+
+		int rank = 1;
+		for (int i = 0; i < sortedClans.size(); i++)
 		{
-			clan.setRank(getClanRank(clan));
+			final Clan clan = sortedClans.get(i);
+			if (clan.getLevel() < 3)
+			{
+				clan.setRank(0);
+				continue;
+			}
+
+			if ((i > 0) && (clan.getLevel() < sortedClans.get(i - 1).getLevel()))
+			{
+				rank = i + 1;
+			}
+
+			clan.setRank(rank);
 		}
 	}
 	

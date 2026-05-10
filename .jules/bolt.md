@@ -1,0 +1,3 @@
+## 2025-05-22 - [ClanTable Ranking and Lookup Optimization]
+**Learning:** Replacing O(N²) nested loops in ranking algorithms with O(N log N) sorting is effective, but the ranking logic must strictly follow game mechanics (e.g., standard competition ranking where equal values get equal rank and the next rank is offset by the count of previous equal values). Additionally, using `toLowerCase()` for map keys without `Locale.ENGLISH` can cause inconsistent behavior in different system locales (e.g., the Turkish 'I' problem).
+**Action:** Use `List.sort` for ranking and always specify `Locale.ENGLISH` when generating keys for case-insensitive maps.
