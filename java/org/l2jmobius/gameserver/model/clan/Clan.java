@@ -309,7 +309,9 @@ public class Clan
 	 */
 	public void setName(String name)
 	{
+		final String oldName = _name;
 		_name = name;
+		ClanTable.getInstance().updateClanName(this, oldName);
 	}
 	
 	/**
