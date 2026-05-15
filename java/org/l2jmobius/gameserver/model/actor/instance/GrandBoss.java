@@ -20,6 +20,9 @@
  */
 package org.l2jmobius.gameserver.model.actor.instance;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.l2jmobius.commons.util.Rnd;
 import org.l2jmobius.gameserver.managers.RaidBossPointsManager;
 import org.l2jmobius.gameserver.model.actor.Creature;
@@ -74,14 +77,17 @@ public class GrandBoss extends Monster
 			if (party != null)
 			{
 				party.broadcastPacket(msg);
+				final Map<Player, Integer> playerPoints = new HashMap<>();
 				for (Player member : party.getMembers())
 				{
-					RaidBossPointsManager.getInstance().addPoints(member, getId(), (getLevel() / 2) + Rnd.get(-5, 5));
+					final int points = (getLevel() / 2) + Rnd.get(-5, 5);
+					playerPoints.put(member, points);
 					if (member.isNoble())
 					{
 						Hero.getInstance().setRBkilled(member.getObjectId(), getId());
 					}
 				}
+				RaidBossPointsManager.getInstance().addPoints(playerPoints, getId());
 			}
 			else
 			{
