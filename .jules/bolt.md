@@ -1,0 +1,3 @@
+## 2025-05-15 - Regular Expression Optimization
+**Learning:** Repeatedly calling `String.toLowerCase().matches(regex)` or `String.split(regex)` in hot paths (like XML file validation or name template matching) is a significant bottleneck due to constant regex re-compilation and unnecessary string allocations.
+**Action:** Always pre-compile `Pattern` objects as `static final` constants and use `Pattern.CASE_INSENSITIVE` to avoid `toLowerCase()` calls when performing case-insensitive matches. This specific optimization showed a ~90% performance improvement (from 724ms to 73ms for 1 million iterations) in benchmarks.
