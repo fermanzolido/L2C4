@@ -43,6 +43,7 @@ public class RaidBossPointsManager
 	private static final Logger LOGGER = Logger.getLogger(RaidBossPointsManager.class.getName());
 	
 	private final Map<Integer, Map<Integer, Integer>> _list = new ConcurrentHashMap<>();
+	private final Map<Integer, Integer> _totalPoints = new ConcurrentHashMap<>();
 	
 	public RaidBossPointsManager()
 	{
@@ -64,10 +65,11 @@ public class RaidBossPointsManager
 				if (values == null)
 				{
 					values = new HashMap<>();
+					_list.put(charId, values);
 				}
 				
 				values.put(bossId, points);
-				_list.put(charId, values);
+				_totalPoints.merge(charId, points, Integer::sum);
 			}
 			
 			LOGGER.info(getClass().getSimpleName() + ": Loaded " + _list.size() + " Characters Raid Points.");
@@ -98,23 +100,44 @@ public class RaidBossPointsManager
 	{
 		final Map<Integer, Integer> tmpPoint = _list.computeIfAbsent(player.getObjectId(), unused -> new HashMap<>());
 		updatePointsInDB(player, bossId, tmpPoint.merge(bossId, points, Integer::sum));
+		_totalPoints.merge(player.getObjectId(), points, Integer::sum);
 	}
 	
+	public void addPoints(Map<Player, Integer> playerPoints, int bossId)
+	{
+		if ((playerPoints == null) || playerPoints.isEmpty())
+		{
+			return;
+		}
+		
+		try (Connection con = DatabaseFactory.getConnection();
+			PreparedStatement ps = con.prepareStatement("REPLACE INTO character_raid_points (`charId`,`boss_id`,`points`) VALUES (?,?,?)"))
+		{
+			for (Entry<Player, Integer> entry : playerPoints.entrySet())
+			{
+				final Player player = entry.getKey();
+				final int points = entry.getValue();
+				final Map<Integer, Integer> tmpPoint = _list.computeIfAbsent(player.getObjectId(), unused -> new HashMap<>());
+				final int newPoints = tmpPoint.merge(bossId, points, Integer::sum);
+
+				ps.setInt(1, player.getObjectId());
+				ps.setInt(2, bossId);
+				ps.setInt(3, newPoints);
+				ps.addBatch();
+
+				_totalPoints.merge(player.getObjectId(), points, Integer::sum);
+			}
+			ps.executeBatch();
+		}
+		catch (Exception e)
+		{
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Couldn't update char raid points", e);
+		}
+	}
+
 	public int getPointsByOwnerId(int ownerId)
 	{
-		final Map<Integer, Integer> tmpPoint = _list.get(ownerId);
-		int totalPoints = 0;
-		if ((tmpPoint == null) || tmpPoint.isEmpty())
-		{
-			return 0;
-		}
-		
-		for (int points : tmpPoint.values())
-		{
-			totalPoints += points;
-		}
-		
-		return totalPoints;
+		return _totalPoints.getOrDefault(ownerId, 0);
 	}
 	
 	public Map<Integer, Integer> getList(Player player)
@@ -129,6 +152,7 @@ public class RaidBossPointsManager
 		{
 			statement.executeUpdate();
 			_list.clear();
+			_totalPoints.clear();
 		}
 		catch (Exception e)
 		{
@@ -139,27 +163,12 @@ public class RaidBossPointsManager
 	public int calculateRanking(int playerObjId)
 	{
 		final Map<Integer, Integer> rank = getRankList();
-		if (rank.containsKey(playerObjId))
-		{
-			return rank.get(playerObjId);
-		}
-		
-		return 0;
+		return rank.getOrDefault(playerObjId, 0);
 	}
 	
 	public Map<Integer, Integer> getRankList()
 	{
-		final Map<Integer, Integer> tmpPoints = new HashMap<>();
-		for (int ownerId : _list.keySet())
-		{
-			final int totalPoints = getPointsByOwnerId(ownerId);
-			if (totalPoints != 0)
-			{
-				tmpPoints.put(ownerId, totalPoints);
-			}
-		}
-		
-		final List<Entry<Integer, Integer>> list = new ArrayList<>(tmpPoints.entrySet());
+		final List<Entry<Integer, Integer>> list = new ArrayList<>(_totalPoints.entrySet());
 		list.sort(Comparator.comparing(Entry<Integer, Integer>::getValue).reversed());
 		int ranking = 1;
 		final Map<Integer, Integer> tmpRanking = new HashMap<>();
