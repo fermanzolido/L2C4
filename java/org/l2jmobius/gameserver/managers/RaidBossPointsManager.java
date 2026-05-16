@@ -43,6 +43,7 @@ public class RaidBossPointsManager
 	private static final Logger LOGGER = Logger.getLogger(RaidBossPointsManager.class.getName());
 	
 	private final Map<Integer, Map<Integer, Integer>> _list = new ConcurrentHashMap<>();
+	private final Map<Integer, Integer> _totalPoints = new ConcurrentHashMap<>();
 	
 	public RaidBossPointsManager()
 	{
@@ -60,14 +61,9 @@ public class RaidBossPointsManager
 				final int charId = rs.getInt("charId");
 				final int bossId = rs.getInt("boss_id");
 				final int points = rs.getInt("points");
-				Map<Integer, Integer> values = _list.get(charId);
-				if (values == null)
-				{
-					values = new HashMap<>();
-				}
-				
+				final Map<Integer, Integer> values = _list.computeIfAbsent(charId, k -> new ConcurrentHashMap<>());
 				values.put(bossId, points);
-				_list.put(charId, values);
+				_totalPoints.merge(charId, points, Integer::sum);
 			}
 			
 			LOGGER.info(getClass().getSimpleName() + ": Loaded " + _list.size() + " Characters Raid Points.");
@@ -96,25 +92,68 @@ public class RaidBossPointsManager
 	
 	public void addPoints(Player player, int bossId, int points)
 	{
-		final Map<Integer, Integer> tmpPoint = _list.computeIfAbsent(player.getObjectId(), unused -> new HashMap<>());
-		updatePointsInDB(player, bossId, tmpPoint.merge(bossId, points, Integer::sum));
+		if (points > 0)
+		{
+			final int charId = player.getObjectId();
+			final Map<Integer, Integer> tmpPoint = _list.computeIfAbsent(charId, unused -> new ConcurrentHashMap<>());
+			final int newPoints = tmpPoint.merge(bossId, points, Integer::sum);
+			_totalPoints.merge(charId, points, Integer::sum);
+			updatePointsInDB(player, bossId, newPoints);
+		}
 	}
 	
+	/**
+	 * Adds raid points to multiple players and updates the database using JDBC batching.
+	 * @param playerPoints a map containing players and the points to be added
+	 * @param bossId the ID of the raid boss
+	 */
+	public void addPoints(Map<Player, Integer> playerPoints, int bossId)
+	{
+		if (playerPoints.isEmpty())
+		{
+			return;
+		}
+		
+		for (Entry<Player, Integer> entry : playerPoints.entrySet())
+		{
+			final Player player = entry.getKey();
+			final int pointsToAdd = entry.getValue();
+			if (pointsToAdd > 0)
+			{
+				final int charId = player.getObjectId();
+				final Map<Integer, Integer> tmpPoint = _list.computeIfAbsent(charId, unused -> new ConcurrentHashMap<>());
+				tmpPoint.merge(bossId, pointsToAdd, Integer::sum);
+				_totalPoints.merge(charId, pointsToAdd, Integer::sum);
+			}
+		}
+		
+		try (Connection con = DatabaseFactory.getConnection();
+			PreparedStatement ps = con.prepareStatement("REPLACE INTO character_raid_points (`charId`,`boss_id`,`points`) VALUES (?,?,?)"))
+		{
+			for (Entry<Player, Integer> entry : playerPoints.entrySet())
+			{
+				final Player player = entry.getKey();
+				final int pointsToAdd = entry.getValue();
+				if (pointsToAdd > 0)
+				{
+					final int charId = player.getObjectId();
+					ps.setInt(1, charId);
+					ps.setInt(2, bossId);
+					ps.setInt(3, _list.get(charId).get(bossId));
+					ps.addBatch();
+				}
+			}
+			ps.executeBatch();
+		}
+		catch (Exception e)
+		{
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Couldn't update char raid points: " + e.getMessage(), e);
+		}
+	}
+
 	public int getPointsByOwnerId(int ownerId)
 	{
-		final Map<Integer, Integer> tmpPoint = _list.get(ownerId);
-		int totalPoints = 0;
-		if ((tmpPoint == null) || tmpPoint.isEmpty())
-		{
-			return 0;
-		}
-		
-		for (int points : tmpPoint.values())
-		{
-			totalPoints += points;
-		}
-		
-		return totalPoints;
+		return _totalPoints.getOrDefault(ownerId, 0);
 	}
 	
 	public Map<Integer, Integer> getList(Player player)
@@ -129,6 +168,7 @@ public class RaidBossPointsManager
 		{
 			statement.executeUpdate();
 			_list.clear();
+			_totalPoints.clear();
 		}
 		catch (Exception e)
 		{
