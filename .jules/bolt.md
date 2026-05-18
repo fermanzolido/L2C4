@@ -1,0 +1,3 @@
+## 2026-05-18 - ArrayList Optimization for Entity Collections
+**Learning:** High-frequency game loop paths like visible object lookups and inventory paperdoll retrieval often used LinkedList, which causes unnecessary GC pressure due to node allocations. Switching to ArrayList with appropriate initial capacity (e.g., from the source collection size or a known constant like PAPERDOLL_TOTALSLOTS) significantly reduces allocation overhead and improves cache locality.
+**Action:** Always prefer ArrayList for collections that are primarily built once and then iterated, and use initial capacity whenever the maximum size can be estimated.

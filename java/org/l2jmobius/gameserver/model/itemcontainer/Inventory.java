@@ -1322,9 +1322,11 @@ public abstract class Inventory extends ItemContainer {
 			filter = filter.and(additionalFilter);
 		}
 
-		final List<Item> items = new LinkedList<>();
-		for (Item item : _paperdoll) {
-			if (filter.test(item)) {
+		final List<Item> items = new ArrayList<>(PAPERDOLL_TOTALSLOTS);
+		for (Item item : _paperdoll)
+		{
+			if (filter.test(item))
+			{
 				items.add(item);
 			}
 		}
