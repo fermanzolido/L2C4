@@ -1322,7 +1322,9 @@ public abstract class Inventory extends ItemContainer {
 			filter = filter.and(additionalFilter);
 		}
 
-		final List<Item> items = new LinkedList<>();
+		// Optimized: ArrayList is faster for gathering entities than LinkedList.
+		// Using initial capacity to avoid array reallocations.
+		final List<Item> items = new ArrayList<>(_paperdoll.length);
 		for (Item item : _paperdoll) {
 			if (filter.test(item)) {
 				items.add(item);
