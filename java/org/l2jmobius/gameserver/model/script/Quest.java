@@ -5619,41 +5619,39 @@ public class Quest implements IEventTimerEvent<String>, IEventTimerCancel<String
 		return null;
 	}
 
-	private void setQuestToOfflineMembers(List<Integer> objectsId) {
-		try (Connection con = DatabaseFactory.getConnection()) {
-			final PreparedStatement stm = con
-					.prepareStatement("INSERT INTO character_quests (charId,name,var,value) VALUES (?,?,?,?)");
-			for (Integer charId : objectsId) {
+	private void setQuestToOfflineMembers(List<Integer> objectsId)
+	{
+		try (Connection con = DatabaseFactory.getConnection();
+			PreparedStatement stm = con.prepareStatement("INSERT INTO character_quests (charId,name,var,value) VALUES (?,?,?,?)"))
+		{
+			for (Integer charId : objectsId)
+			{
 				stm.setInt(1, charId.intValue());
 				stm.setString(2, getName());
 				stm.setString(3, "<state>");
 				stm.setString(4, "1");
-				stm.executeUpdate();
+				stm.addBatch();
 			}
-
-			stm.close();
-			con.close();
-		} catch (Exception e) {
-			LOGGER.log(Level.WARNING,
-					"Error in updating character_quest table from Quest.java on method setQuestToOfflineMembers");
-			LOGGER.info(e.toString());
+			stm.executeBatch(); // Optimized using JDBC batching to reduce network round-trips.
+		}
+		catch (Exception e)
+		{
+			LOGGER.log(Level.WARNING, "Error in updating character_quest table from Quest.java on method setQuestToOfflineMembers: " + e.getMessage(), e);
 		}
 	}
 
-	private void deleteQuestToOfflineMembers(int clanId) {
-		try (Connection con = DatabaseFactory.getConnection()) {
-			final PreparedStatement stm = con.prepareStatement(
-					"DELETE FROM character_quests WHERE name = ? and charId IN (SELECT charId FROM characters WHERE clanid = ? AND online = 0)");
+	private void deleteQuestToOfflineMembers(int clanId)
+	{
+		try (Connection con = DatabaseFactory.getConnection();
+			PreparedStatement stm = con.prepareStatement("DELETE FROM character_quests WHERE name = ? and charId IN (SELECT charId FROM characters WHERE clanid = ? AND online = 0)"))
+		{
 			stm.setString(1, getName());
 			stm.setInt(2, clanId);
 			stm.executeUpdate();
-
-			stm.close();
-			con.close();
-		} catch (Exception e) {
-			LOGGER.log(Level.WARNING,
-					"Error in deleting infos from character_quest table from Quest.java on method deleteQuestToOfflineMembers");
-			LOGGER.info(e.toString());
+		}
+		catch (Exception e)
+		{
+			LOGGER.log(Level.WARNING, "Error in deleting infos from character_quest table from Quest.java on method deleteQuestToOfflineMembers: " + e.getMessage(), e);
 		}
 	}
 

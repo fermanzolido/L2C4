@@ -264,10 +264,10 @@ public class GrandBossManager
 					{
 						insert.setInt(1, player);
 						insert.setInt(2, e.getKey());
-						insert.executeUpdate();
-						insert.clearParameters();
+						insert.addBatch();
 					}
 				}
+				insert.executeBatch(); // Optimized using JDBC batching to reduce network round-trips.
 			}
 			
 			try (PreparedStatement update = con.prepareStatement(UPDATE_GRAND_BOSS_DATA);
