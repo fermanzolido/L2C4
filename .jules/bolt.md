@@ -1,0 +1,3 @@
+## 2026-05-20 - [JDBC Batching and Collection Optimizations]
+**Learning:** High-frequency game loop operations like entity collection and bulk database persistence on shutdown are critical performance bottlenecks. JDBC batching significantly reduces network round-trips, and using `ArrayList` instead of `LinkedList` for small, short-lived collections improves cache locality and reduces GC overhead, especially when pre-allocated.
+**Action:** Always prioritize `ArrayList` over `LinkedList` for internal entity collection. Implement JDBC batching (`addBatch`/`executeBatch`) for all bulk database updates, especially those triggered during server shutdown or periodic manager tasks.
