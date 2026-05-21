@@ -96,10 +96,45 @@ public class RaidBossPointsManager
 	
 	public void addPoints(Player player, int bossId, int points)
 	{
-		final Map<Integer, Integer> tmpPoint = _list.computeIfAbsent(player.getObjectId(), unused -> new HashMap<>());
+		final Map<Integer, Integer> tmpPoint = _list.computeIfAbsent(player.getObjectId(), _ -> new HashMap<>());
 		updatePointsInDB(player, bossId, tmpPoint.merge(bossId, points, Integer::sum));
 	}
 	
+	/**
+	 * Adds raid points for multiple players in a batch.
+	 * @param playerPoints a map of players and their points to add
+	 * @param bossId the boss ID
+	 */
+	public void addPoints(Map<Player, Integer> playerPoints, int bossId)
+	{
+		if ((playerPoints == null) || playerPoints.isEmpty())
+		{
+			return;
+		}
+
+		try (Connection con = DatabaseFactory.getConnection();
+			PreparedStatement ps = con.prepareStatement("REPLACE INTO character_raid_points (`charId`,`boss_id`,`points`) VALUES (?,?,?)"))
+		{
+			for (Entry<Player, Integer> entry : playerPoints.entrySet())
+			{
+				final Player player = entry.getKey();
+				final int pointsToAdd = entry.getValue();
+				final Map<Integer, Integer> tmpPoint = _list.computeIfAbsent(player.getObjectId(), _ -> new HashMap<>());
+				final int newPoints = tmpPoint.merge(bossId, pointsToAdd, Integer::sum);
+
+				ps.setInt(1, player.getObjectId());
+				ps.setInt(2, bossId);
+				ps.setInt(3, newPoints);
+				ps.addBatch();
+			}
+			ps.executeBatch();
+		}
+		catch (Exception e)
+		{
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Couldn't update char raid points for batch: " + playerPoints, e);
+		}
+	}
+
 	public int getPointsByOwnerId(int ownerId)
 	{
 		final Map<Integer, Integer> tmpPoint = _list.get(ownerId);
