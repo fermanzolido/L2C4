@@ -1,0 +1,3 @@
+## 2026-05-21 - [JDBC Batching and Allman Style Refactoring]
+**Learning:** Legacy persistence methods in `Quest.java` often use individual `executeUpdate()` calls in loops, leading to N+1 query bottlenecks. They also frequently lack try-with-resources and use legacy formatting/exception logging.
+**Action:** When optimizing database operations, implement JDBC batching (`addBatch()`/`executeBatch()`), use try-with-resources for all JDBC resources, refactor to Allman bracket style, and ensure `LOGGER.log` includes the `Throwable` for better observability. Added defensive null/empty checks for collections to avoid unnecessary DB connections.
