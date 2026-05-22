@@ -81,7 +81,9 @@ public class ServerConfig {
 	public static File SCRIPT_ROOT;
 	public static Pattern CHARNAME_TEMPLATE_PATTERN;
 	public static String PET_NAME_TEMPLATE;
+	public static Pattern PET_NAME_TEMPLATE_PATTERN;
 	public static String CLAN_NAME_TEMPLATE;
+	public static Pattern CLAN_NAME_TEMPLATE_PATTERN;
 	public static int MAX_CHARACTERS_NUMBER_PER_ACCOUNT;
 	public static int MAXIMUM_ONLINE_USERS;
 	public static boolean HARDWARE_INFO_ENABLED;
@@ -148,7 +150,30 @@ public class ServerConfig {
 		}
 		CHARNAME_TEMPLATE_PATTERN = charNamePattern;
 		PET_NAME_TEMPLATE = config.getString("PetNameTemplate", ".*");
+		Pattern petNamePattern;
+		try
+		{
+			petNamePattern = Pattern.compile(PET_NAME_TEMPLATE);
+		}
+		catch (PatternSyntaxException e)
+		{
+			LOGGER.log(Level.WARNING, "Pet name pattern is invalid!", e);
+			petNamePattern = Pattern.compile(".*");
+		}
+		PET_NAME_TEMPLATE_PATTERN = petNamePattern;
+
 		CLAN_NAME_TEMPLATE = config.getString("ClanNameTemplate", ".*");
+		Pattern clanNamePattern;
+		try
+		{
+			clanNamePattern = Pattern.compile(CLAN_NAME_TEMPLATE);
+		}
+		catch (PatternSyntaxException e)
+		{
+			LOGGER.log(Level.WARNING, "Clan name pattern is invalid!", e);
+			clanNamePattern = Pattern.compile(".*");
+		}
+		CLAN_NAME_TEMPLATE_PATTERN = clanNamePattern;
 		MAX_CHARACTERS_NUMBER_PER_ACCOUNT = config.getInt("CharMaxNumber", 7);
 		MAXIMUM_ONLINE_USERS = config.getInt("MaximumOnlineUsers", 100);
 		HARDWARE_INFO_ENABLED = config.getBoolean("EnableHardwareInfo", false);
