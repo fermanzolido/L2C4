@@ -18,7 +18,6 @@ package org.l2jmobius.gameserver.model.instancezone;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -211,9 +210,12 @@ public class InstanceWorld
 	 * @param id IDs of NPCs which should be found
 	 * @return list of filtered NPCs from instance
 	 */
+	/**
+	 * Optimized to use ArrayList with pre-allocated capacity to reduce GC overhead and improve cache locality.
+	 */
 	public List<Npc> getNpcs(int... id)
 	{
-		final List<Npc> result = new LinkedList<>();
+		final List<Npc> result = new ArrayList<>(_instance.getNpcs().size());
 		for (Npc npc : _instance.getNpcs())
 		{
 			if (ArrayUtil.contains(id, npc.getId()))
@@ -232,11 +234,14 @@ public class InstanceWorld
 	 * @param ids IDs of NPCs which should be found
 	 * @return list of filtered NPCs from instance
 	 */
+	/**
+	 * Optimized to use ArrayList with pre-allocated capacity to reduce GC overhead and improve cache locality.
+	 */
 	@SafeVarargs
 	@SuppressWarnings("unchecked")
 	public final <T extends Creature> List<T> getNpcs(Class<T> clazz, int... ids)
 	{
-		final List<T> result = new LinkedList<>();
+		final List<T> result = new ArrayList<>(_instance.getNpcs().size());
 		for (Npc npc : _instance.getNpcs())
 		{
 			if (((ids.length == 0) || ArrayUtil.contains(ids, npc.getId())) && clazz.isInstance(npc))
@@ -252,9 +257,12 @@ public class InstanceWorld
 	 * Get alive NPCs from instance.
 	 * @return set of NPCs from instance
 	 */
+	/**
+	 * Optimized to use ArrayList with pre-allocated capacity to reduce GC overhead and improve cache locality.
+	 */
 	public List<Npc> getAliveNpcs()
 	{
-		final List<Npc> result = new LinkedList<>();
+		final List<Npc> result = new ArrayList<>(_instance.getNpcs().size());
 		for (Npc npc : _instance.getNpcs())
 		{
 			if (npc.getCurrentHp() > 0)
@@ -271,9 +279,12 @@ public class InstanceWorld
 	 * @param id IDs of NPCs which should be found
 	 * @return list of filtered NPCs from instance
 	 */
+	/**
+	 * Optimized to use ArrayList with pre-allocated capacity to reduce GC overhead and improve cache locality.
+	 */
 	public List<Npc> getAliveNpcs(int... id)
 	{
-		final List<Npc> result = new LinkedList<>();
+		final List<Npc> result = new ArrayList<>(_instance.getNpcs().size());
 		for (Npc npc : _instance.getNpcs())
 		{
 			if ((npc.getCurrentHp() > 0) && ArrayUtil.contains(id, npc.getId()))
@@ -292,11 +303,14 @@ public class InstanceWorld
 	 * @param ids IDs of NPCs which should be found
 	 * @return list of filtered NPCs from instance
 	 */
+	/**
+	 * Optimized to use ArrayList with pre-allocated capacity to reduce GC overhead and improve cache locality.
+	 */
 	@SafeVarargs
 	@SuppressWarnings("unchecked")
 	public final <T extends Creature> List<T> getAliveNpcs(Class<T> clazz, int... ids)
 	{
-		final List<T> result = new LinkedList<>();
+		final List<T> result = new ArrayList<>(_instance.getNpcs().size());
 		for (Npc npc : _instance.getNpcs())
 		{
 			if ((((ids.length == 0) || ArrayUtil.contains(ids, npc.getId())) && (npc.getCurrentHp() > 0)) && clazz.isInstance(npc))
