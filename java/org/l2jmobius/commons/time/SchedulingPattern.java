@@ -31,6 +31,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import org.l2jmobius.commons.util.Rnd;
 import org.l2jmobius.commons.util.StringUtil;
@@ -66,9 +67,9 @@ public class SchedulingPattern
 	private static final int MINIMUM_CRON_FIELDS = 5;
 	private static final int MAXIMUM_CRON_FIELDS = 6;
 	private static final int CRON_PARTS_EXPECTED = 2;
-	private static final String PIPE_SEPARATOR = "\\|";
-	private static final String WHITESPACE_PATTERN = "\\s+";
-	private static final String FIELD_VALIDATION_REGEX = "^[0-9a-zA-Z*,\\-/:~+L]+$";
+	private static final Pattern PIPE_SEPARATOR = Pattern.compile("\\|");
+	private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
+	private static final Pattern FIELD_VALIDATION_REGEX = Pattern.compile("^[0-9a-zA-Z*,\\-/:~+L]+$");
 	private static final String NO_FUTURE_MATCH_MESSAGE = "No future match.";
 	
 	// Month aliases for improved readability.
@@ -139,10 +140,10 @@ public class SchedulingPattern
 		try
 		{
 			// Lightweight validation without full parsing.
-			final String[] orPatterns = schedulingPattern.split(PIPE_SEPARATOR);
+			final String[] orPatterns = PIPE_SEPARATOR.split(schedulingPattern);
 			for (String orPattern : orPatterns)
 			{
-				final String[] fields = orPattern.trim().split(WHITESPACE_PATTERN);
+				final String[] fields = WHITESPACE_PATTERN.split(orPattern.trim());
 				if ((fields.length < MINIMUM_CRON_FIELDS) || (fields.length > MAXIMUM_CRON_FIELDS))
 				{
 					return false;
@@ -186,7 +187,7 @@ public class SchedulingPattern
 		}
 		
 		// Check for valid characters and basic syntax.
-		return field.matches(FIELD_VALIDATION_REGEX);
+		return FIELD_VALIDATION_REGEX.matcher(field).matches();
 	}
 	
 	/**
@@ -326,11 +327,11 @@ public class SchedulingPattern
 		final List<CronExpression> result = new ArrayList<>();
 		
 		// Split on pipe for OR expressions.
-		final String[] orPatterns = pattern.split(PIPE_SEPARATOR);
+		final String[] orPatterns = PIPE_SEPARATOR.split(pattern);
 		
 		for (String orPattern : orPatterns)
 		{
-			final String[] fields = orPattern.trim().split(WHITESPACE_PATTERN);
+			final String[] fields = WHITESPACE_PATTERN.split(orPattern.trim());
 			if ((fields.length < MINIMUM_CRON_FIELDS) || (fields.length > MAXIMUM_CRON_FIELDS))
 			{
 				throw new IllegalArgumentException("Pattern must have 5 or 6 fields: " + orPattern);
