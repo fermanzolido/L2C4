@@ -1,0 +1,3 @@
+## 2026-05-23 - [List optimization in high-frequency paths]
+**Learning:** Replacing `LinkedList` with `ArrayList` in high-frequency paths (like `World.getVisibleObjects`, `InstanceWorld.getNpcs`, and `Inventory.getPaperdollItems`) significantly reduces object allocation overhead by avoiding `Node` objects for each element. Pre-allocating `ArrayList` with an initial capacity (e.g., using `_instance.getNpcs().size()` or `_paperdoll.length`) further optimizes performance by eliminating internal array growth and re-allocations.
+**Action:** Favor `ArrayList` over `LinkedList` for temporary collection gathering and pre-allocate initial capacity whenever the maximum possible size is known or can be estimated.
