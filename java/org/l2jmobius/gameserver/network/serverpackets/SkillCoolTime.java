@@ -20,7 +20,7 @@
  */
 package org.l2jmobius.gameserver.network.serverpackets;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.l2jmobius.commons.network.WritableBuffer;
@@ -35,7 +35,8 @@ import org.l2jmobius.gameserver.network.ServerPackets;
  */
 public class SkillCoolTime extends ServerPacket
 {
-	private final List<TimeStamp> _reuseTimestamps = new LinkedList<>();
+	// Optimized using ArrayList to reduce GC overhead and improve cache locality.
+	private final List<TimeStamp> _reuseTimestamps = new ArrayList<>();
 	
 	public SkillCoolTime(Player player)
 	{

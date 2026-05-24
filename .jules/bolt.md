@@ -1,0 +1,3 @@
+## 2026-05-23 - ArrayList Optimization in High-Frequency Paths
+**Learning:** In high-traffic game loop paths such as visible object lookups and inventory filtering, using `LinkedList` introduces significant GC pressure due to per-element `Node` allocations. `ArrayList` provides better cache locality and lower memory overhead. Pre-allocating the `ArrayList` capacity based on known source sizes (e.g., `_paperdoll.length` or `_instance.getNpcs().size()`) further eliminates redundant array resizing.
+**Action:** Always prefer `ArrayList` over `LinkedList` for internal entity collection and filtering unless specific `Deque` features or frequent mid-list insertions/removals are required.
