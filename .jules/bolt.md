@@ -1,0 +1,3 @@
+## 2026-05-23 - ArrayList Optimization for Entity Collections
+**Learning:** In the L2J Mobius codebase, many high-frequency methods (like world visibility checks and inventory filtering) were using `LinkedList` to collect results. Replacing `LinkedList` with `ArrayList` and using pre-allocated initial capacity (where the source collection size is known) significantly reduces object allocation overhead and improves CPU cache locality.
+**Action:** Always prefer `ArrayList` over `LinkedList` for local result collection, especially in performance-critical paths like `World` and `Inventory`. If the maximum possible size is known, pre-allocate the `ArrayList` capacity.

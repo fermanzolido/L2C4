@@ -1322,7 +1322,8 @@ public abstract class Inventory extends ItemContainer {
 			filter = filter.and(additionalFilter);
 		}
 
-		final List<Item> items = new LinkedList<>();
+		// Optimized: ArrayList with pre-allocated size is faster than LinkedList and reduces GC overhead.
+		final List<Item> items = new ArrayList<>(_paperdoll.length);
 		for (Item item : _paperdoll) {
 			if (filter.test(item)) {
 				items.add(item);

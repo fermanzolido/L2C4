@@ -19,8 +19,8 @@ package org.l2jmobius.gameserver.model.itemcontainer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -127,7 +127,8 @@ public abstract class ItemContainer
 	 */
 	public Collection<Item> getAllItemsByItemId(int itemId)
 	{
-		final List<Item> result = new LinkedList<>();
+		// Optimized: ArrayList with pre-allocated size is faster than LinkedList and reduces GC overhead.
+		final List<Item> result = new ArrayList<>(_items.size());
 		for (Item item : _items)
 		{
 			if (itemId == item.getId())
