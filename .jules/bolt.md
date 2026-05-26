@@ -1,0 +1,3 @@
+## 2026-05-23 - O(1) Character Name Lookup Optimization
+**Learning:** High-frequency character name-to-ID lookups were implemented as O(N) linear searches over a `ConcurrentHashMap` of all loaded character names. In a game server with thousands of characters, this is a significant bottleneck.
+**Action:** Implement a secondary `ConcurrentHashMap` index (`_namesLower`) that maps lowercase character names directly to their object IDs. Use `Locale.ENGLISH` for consistent case-insensitivity across different system environments and ensure cache synchronization in all lifecycle methods (constructor, add, remove, update).
