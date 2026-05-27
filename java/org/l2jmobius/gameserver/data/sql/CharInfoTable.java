@@ -25,8 +25,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,6 +39,7 @@ public class CharInfoTable
 	private static final Logger LOGGER = Logger.getLogger(CharInfoTable.class.getName());
 	
 	private final Map<Integer, String> _names = new ConcurrentHashMap<>();
+	private final Map<String, Integer> _namesLower = new ConcurrentHashMap<>();
 	private final Map<Integer, Integer> _accessLevels = new ConcurrentHashMap<>();
 	
 	protected CharInfoTable()
@@ -50,7 +51,9 @@ public class CharInfoTable
 			while (rs.next())
 			{
 				final int id = rs.getInt("charId");
-				_names.put(id, rs.getString("char_name"));
+				final String name = rs.getString("char_name");
+				_names.put(id, name);
+				_namesLower.put(name.toLowerCase(Locale.ENGLISH), id);
 				_accessLevels.put(id, rs.getInt("accesslevel"));
 			}
 		}
@@ -73,15 +76,28 @@ public class CharInfoTable
 	
 	private void addName(int objectId, String name)
 	{
-		if ((name != null) && !name.equals(_names.get(objectId)))
+		if (name != null)
 		{
-			_names.put(objectId, name);
+			final String oldName = _names.get(objectId);
+			if (!name.equals(oldName))
+			{
+				if (oldName != null)
+				{
+					_namesLower.remove(oldName.toLowerCase(Locale.ENGLISH));
+				}
+				_names.put(objectId, name);
+				_namesLower.put(name.toLowerCase(Locale.ENGLISH), objectId);
+			}
 		}
 	}
 	
 	public void removeName(int objId)
 	{
-		_names.remove(objId);
+		final String name = _names.remove(objId);
+		if (name != null)
+		{
+			_namesLower.remove(name.toLowerCase(Locale.ENGLISH));
+		}
 		_accessLevels.remove(objId);
 	}
 	
@@ -92,17 +108,15 @@ public class CharInfoTable
 			return -1;
 		}
 		
-		for (Entry<Integer, String> entry : _names.entrySet())
+		final Integer id = _namesLower.get(name.toLowerCase(Locale.ENGLISH));
+		if (id != null)
 		{
-			if (entry.getValue().equalsIgnoreCase(name))
-			{
-				return entry.getKey();
-			}
+			return id.intValue();
 		}
 		
 		// Should not continue after the above?
 		
-		int id = -1;
+		int charId = -1;
 		int accessLevel = 0;
 		
 		try (Connection con = DatabaseFactory.getConnection();
@@ -113,7 +127,7 @@ public class CharInfoTable
 			{
 				while (rs.next())
 				{
-					id = rs.getInt("charId");
+					charId = rs.getInt("charId");
 					accessLevel = rs.getInt("accesslevel");
 				}
 			}
@@ -123,11 +137,12 @@ public class CharInfoTable
 			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Could not check existing char name: " + e.getMessage(), e);
 		}
 		
-		if (id > 0)
+		if (charId > 0)
 		{
-			_names.put(id, name);
-			_accessLevels.put(id, accessLevel);
-			return id;
+			_names.put(charId, name);
+			_namesLower.put(name.toLowerCase(Locale.ENGLISH), charId);
+			_accessLevels.put(charId, accessLevel);
+			return charId;
 		}
 		
 		return -1; // Not found.
@@ -174,8 +189,18 @@ public class CharInfoTable
 		return getNameById(objectId) != null ? _accessLevels.get(objectId) : 0;
 	}
 	
-	public synchronized boolean doesCharNameExist(String name)
+	public boolean doesCharNameExist(String name)
 	{
+		if ((name == null) || name.isEmpty())
+		{
+			return false;
+		}
+
+		if (_namesLower.containsKey(name.toLowerCase(Locale.ENGLISH)))
+		{
+			return true;
+		}
+
 		boolean result = false;
 		try (Connection con = DatabaseFactory.getConnection();
 			PreparedStatement ps = con.prepareStatement("SELECT COUNT(*) as count FROM characters WHERE char_name=?"))
