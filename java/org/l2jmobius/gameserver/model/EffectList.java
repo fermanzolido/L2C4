@@ -23,7 +23,6 @@ package org.l2jmobius.gameserver.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -171,7 +170,8 @@ public class EffectList {
 			return Collections.<BuffInfo>emptyList();
 		}
 
-		final List<BuffInfo> buffs = new LinkedList<>();
+		// Optimized using ArrayList to reduce object allocation and improve cache locality.
+		final List<BuffInfo> buffs = new ArrayList<>();
 		if (hasBuffs()) {
 			buffs.addAll(_buffs);
 		}
