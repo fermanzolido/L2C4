@@ -167,8 +167,7 @@ public class OfflineTraderTable
 						}
 						
 						stm3.setString(4, title);
-						stm3.executeUpdate();
-						stm3.clearParameters();
+						stm3.addBatch();
 						// No need to call con.commit() as HikariCP autocommit is true.
 					}
 				}
@@ -177,6 +176,7 @@ public class OfflineTraderTable
 					LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Error while saving offline trader: " + pc.getObjectId() + " " + e, e);
 				}
 			}
+			stm3.executeBatch();
 			
 			LOGGER.info(getClass().getSimpleName() + ": Offline traders stored.");
 		}
