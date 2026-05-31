@@ -39,6 +39,7 @@ public class CharInfoTable
 	private static final Logger LOGGER = Logger.getLogger(CharInfoTable.class.getName());
 	
 	private final Map<Integer, String> _names = new ConcurrentHashMap<>();
+	private final Map<String, Integer> _namesLower = new ConcurrentHashMap<>();
 	private final Map<Integer, Integer> _accessLevels = new ConcurrentHashMap<>();
 	
 	protected CharInfoTable()
@@ -50,7 +51,9 @@ public class CharInfoTable
 			while (rs.next())
 			{
 				final int id = rs.getInt("charId");
-				_names.put(id, rs.getString("char_name"));
+				final String name = rs.getString("char_name");
+				_names.put(id, name);
+				_namesLower.put(name.toLowerCase(), id);
 				_accessLevels.put(id, rs.getInt("accesslevel"));
 			}
 		}
@@ -73,15 +76,24 @@ public class CharInfoTable
 	
 	private void addName(int objectId, String name)
 	{
-		if ((name != null) && !name.equals(_names.get(objectId)))
+		if (name != null)
 		{
-			_names.put(objectId, name);
+			final String oldName = _names.put(objectId, name);
+			if (oldName != null)
+			{
+				_namesLower.remove(oldName.toLowerCase());
+			}
+			_namesLower.put(name.toLowerCase(), objectId);
 		}
 	}
 	
 	public void removeName(int objId)
 	{
-		_names.remove(objId);
+		final String name = _names.remove(objId);
+		if (name != null)
+		{
+			_namesLower.remove(name.toLowerCase());
+		}
 		_accessLevels.remove(objId);
 	}
 	
@@ -92,15 +104,11 @@ public class CharInfoTable
 			return -1;
 		}
 		
-		for (Entry<Integer, String> entry : _names.entrySet())
+		final Integer charId = _namesLower.get(name.toLowerCase());
+		if (charId != null)
 		{
-			if (entry.getValue().equalsIgnoreCase(name))
-			{
-				return entry.getKey();
-			}
+			return charId;
 		}
-		
-		// Should not continue after the above?
 		
 		int id = -1;
 		int accessLevel = 0;
@@ -125,7 +133,7 @@ public class CharInfoTable
 		
 		if (id > 0)
 		{
-			_names.put(id, name);
+			addName(id, name);
 			_accessLevels.put(id, accessLevel);
 			return id;
 		}
@@ -176,6 +184,11 @@ public class CharInfoTable
 	
 	public synchronized boolean doesCharNameExist(String name)
 	{
+		if ((name != null) && _namesLower.containsKey(name.toLowerCase()))
+		{
+			return true;
+		}
+
 		boolean result = false;
 		try (Connection con = DatabaseFactory.getConnection();
 			PreparedStatement ps = con.prepareStatement("SELECT COUNT(*) as count FROM characters WHERE char_name=?"))
