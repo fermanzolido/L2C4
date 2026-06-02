@@ -1,0 +1,3 @@
+## 2026-06-02 - [Optimization of Entity Collections in Hot Paths]
+**Learning:** LinkedList is used extensively in core game loop paths (World, InstanceWorld, Inventory, Creature) for collecting and returning lists of entities. These paths are "hot" as they are called frequently during visibility checks, skill casting, and UI updates. Replacing LinkedList with ArrayList reduces the overhead of Node allocations and improves CPU cache locality.
+**Action:** Always prefer ArrayList for short-lived collections and pre-allocate capacity whenever the size of the source collection is known (e.g., using size() on ConcurrentHashMap-backed collections or length on arrays) to avoid internal array resizing.
