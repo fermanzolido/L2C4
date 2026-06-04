@@ -23,7 +23,7 @@ package org.l2jmobius.gameserver.network.serverpackets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -192,7 +192,9 @@ public class CharSelectionInfo extends ServerPacket
 	private static List<CharacterInfoHolder> loadCharacterSelectInfo(String loginName)
 	{
 		CharacterInfoHolder charInfopackage;
-		final List<CharacterInfoHolder> characterList = new LinkedList<>();
+		// Optimized using ArrayList to reduce object allocation and improve cache locality.
+		// This also ensures O(1) access time in writeImpl's loops, avoiding O(N^2) complexity.
+		final List<CharacterInfoHolder> characterList = new ArrayList<>();
 		try (Connection con = DatabaseFactory.getConnection();
 			PreparedStatement statement = con.prepareStatement("SELECT * FROM characters WHERE account_name=? ORDER BY createDate"))
 		{
