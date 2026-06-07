@@ -1,0 +1,3 @@
+## 2026-06-04 - Optimize NPC collection in InstanceWorld
+**Learning:** NPC collection methods in InstanceWorld (getNpcs, getAliveNpcs) were using LinkedList, which is inefficient for collecting and returning lists in high-frequency paths. Replacing with ArrayList pre-allocated with the source collection's size reduces memory overhead and improves cache locality.
+**Action:** In high-frequency game loop paths, prefer ArrayList for entity collections; pre-allocate capacity if the source size is known and the source collection is not an O(n) size() type (like ConcurrentHashMap's keySet size, which is safe).
