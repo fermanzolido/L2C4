@@ -1,0 +1,3 @@
+## 2026-06-09 - O(1) Character Name Lookup in CharInfoTable
+**Learning:** High-traffic lookup methods in core tables (like CharInfoTable) frequently used linear iteration (O(N)) over large maps for case-insensitive searches. This pattern creates a CPU bottleneck as the player database grows. Unnecessary synchronization on read-heavy database fallback methods further limits concurrency.
+**Action:** Implement secondary case-insensitive indexes (ConcurrentHashMap<String, Integer>) to facilitate O(1) lookups. Ensure these indexes are kept in sync during creation, deletion, and update operations. Remove 'synchronized' keywords where ConcurrentHashMap and local thread-safe JDBC handling provide sufficient safety.
