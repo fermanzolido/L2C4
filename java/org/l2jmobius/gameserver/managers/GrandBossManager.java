@@ -250,6 +250,7 @@ public class GrandBossManager
 		{
 			s.executeUpdate(DELETE_GRAND_BOSS_LIST);
 			
+			// Optimized using JDBC batching to reduce database roundtrips.
 			try (PreparedStatement insert = con.prepareStatement(INSERT_GRAND_BOSS_LIST))
 			{
 				for (Entry<Integer, BossZone> e : _zones.entrySet())
@@ -264,10 +265,10 @@ public class GrandBossManager
 					{
 						insert.setInt(1, player);
 						insert.setInt(2, e.getKey());
-						insert.executeUpdate();
-						insert.clearParameters();
+						insert.addBatch();
 					}
 				}
+				insert.executeBatch();
 			}
 			
 			try (PreparedStatement update = con.prepareStatement(UPDATE_GRAND_BOSS_DATA);
