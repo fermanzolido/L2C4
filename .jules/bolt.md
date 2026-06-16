@@ -1,0 +1,3 @@
+## 2026-06-16 - Hot Path LinkedList Anti-pattern
+**Learning:** The codebase extensively uses `LinkedList` for temporary collections in high-frequency visibility methods (e.g., `World.getVisibleObjects`). This leads to unnecessary object allocations (Node objects) and poor cache locality. Switching to `ArrayList` provides a measurable reduction in memory pressure and CPU cycles.
+**Action:** Prioritize replacing `LinkedList` with `ArrayList` in any method that collects items for immediate return or iteration, especially in core gameserver logic like visibility, target handlers, and packet construction.
