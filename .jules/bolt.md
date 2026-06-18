@@ -1,0 +1,3 @@
+## 2026-06-18 - [Visibility and Entity Collection Optimization]
+**Learning:** LinkedList usage in hot paths like world visibility, NPC collection, and effect list retrieval is a significant performance anti-pattern in this architecture. ArrayList provides better CPU cache locality and lower memory overhead. Pre-allocating ArrayList capacity based on source collection sizes (e.g., surrounding world regions or instance NPC counts) minimizes internal array resizing during high-frequency combat and movement operations.
+**Action:** Prioritize replacing LinkedList with pre-allocated ArrayList in core engine loops. Use helper methods to calculate aggregate sizes from partitioned data (like WorldRegions) to ensure optimal initial capacity.
