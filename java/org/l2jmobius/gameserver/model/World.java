@@ -22,7 +22,6 @@ package org.l2jmobius.gameserver.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -133,6 +132,27 @@ public class World
 		}
 	}
 	
+	/**
+	 * Gets the approximate count of objects in surrounding regions of the given object.
+	 * @param object the object
+	 * @return the count of objects in surrounding regions
+	 */
+	private int getSurroundingObjectsCount(WorldObject object)
+	{
+		final WorldRegion worldRegion = getRegion(object);
+		if (worldRegion == null)
+		{
+			return 0;
+		}
+
+		int count = 0;
+		for (WorldRegion region : worldRegion.getSurroundingRegions())
+		{
+			count += region.getVisibleObjects().size();
+		}
+		return count;
+	}
+
 	/**
 	 * Adds an object to the world.<br>
 	 * <br>
@@ -616,16 +636,43 @@ public class World
 		}
 	}
 	
+	/**
+	 * Gets all visible objects of the specified class.
+	 * @param <T> the type of the objects
+	 * @param object the object
+	 * @param clazz the class of the objects to find
+	 * @return a list of visible objects
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz)
 	{
-		final List<T> result = new LinkedList<>();
+		final int count = getSurroundingObjectsCount(object);
+		if (count == 0)
+		{
+			return new ArrayList<>(0);
+		}
+
+		final List<T> result = new ArrayList<>(count);
 		forEachVisibleObject(object, clazz, result::add);
 		return result;
 	}
 	
+	/**
+	 * Gets all visible objects of the specified class that match the given predicate.
+	 * @param <T> the type of the objects
+	 * @param object the object
+	 * @param clazz the class of the objects to find
+	 * @param predicate the predicate to match
+	 * @return a list of visible objects
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		final int count = getSurroundingObjectsCount(object);
+		if (count == 0)
+		{
+			return new ArrayList<>(0);
+		}
+
+		final List<T> result = new ArrayList<>(count);
 		forEachVisibleObject(object, clazz, o ->
 		{
 			if (predicate.test(o))
@@ -676,16 +723,45 @@ public class World
 		}
 	}
 	
+	/**
+	 * Gets all visible objects of the specified class within the given range.
+	 * @param <T> the type of the objects
+	 * @param object the object
+	 * @param clazz the class of the objects to find
+	 * @param range the range within which to find objects
+	 * @return a list of visible objects within range
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range)
 	{
-		final List<T> result = new LinkedList<>();
+		final int count = getSurroundingObjectsCount(object);
+		if (count == 0)
+		{
+			return new ArrayList<>(0);
+		}
+
+		final List<T> result = new ArrayList<>(count);
 		forEachVisibleObjectInRange(object, clazz, range, result::add);
 		return result;
 	}
 	
+	/**
+	 * Gets all visible objects of the specified class within the given range that match the given predicate.
+	 * @param <T> the type of the objects
+	 * @param object the object
+	 * @param clazz the class of the objects to find
+	 * @param range the range within which to find objects
+	 * @param predicate the predicate to match
+	 * @return a list of visible objects within range
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		final int count = getSurroundingObjectsCount(object);
+		if (count == 0)
+		{
+			return new ArrayList<>(0);
+		}
+
+		final List<T> result = new ArrayList<>(count);
 		forEachVisibleObjectInRange(object, clazz, range, o ->
 		{
 			if (predicate.test(o))
