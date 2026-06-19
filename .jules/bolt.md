@@ -1,0 +1,3 @@
+## 2026-06-19 - Entity Visibility Optimization with ArrayList
+**Learning:** Found that core visibility methods in `World.java` were using `LinkedList`, causing high allocation pressure and poor cache locality in hot combat/movement paths. Pre-calculating the total size of objects in surrounding regions (`getSurroundingObjectsCount`) provides an accurate hint for `ArrayList` capacity, avoiding multiple internal array copies.
+**Action:** Always prefer `ArrayList` with pre-allocated capacity for entity collection in `World`, `InstanceWorld`, and `EffectList`. Use surrounding region counts or parent collection sizes for the capacity hint.
