@@ -22,7 +22,6 @@ package org.l2jmobius.gameserver.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -616,16 +615,45 @@ public class World
 		}
 	}
 	
+	/**
+	 * Gets the count of surrounding objects for the given object.
+	 * Optimization: pre-allocating ArrayList capacity reduces GC pressure and improves cache locality in hot paths.
+	 * @param object the object to check
+	 * @return the count of surrounding objects
+	 */
+	private int getSurroundingObjectsCount(WorldObject object)
+	{
+		final WorldRegion worldRegion = getRegion(object);
+		if (worldRegion == null)
+		{
+			return 0;
+		}
+
+		int count = 0;
+		for (WorldRegion region : worldRegion.getSurroundingRegions())
+		{
+			count += region.getVisibleObjects().size();
+		}
+		return count;
+	}
+
+	/**
+	 * Gets all visible objects of the specified class.
+	 * @param <T> the type of the objects to return
+	 * @param object the object to check
+	 * @param clazz the class of the objects to return
+	 * @return a list of visible objects
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz)
 	{
-		final List<T> result = new LinkedList<>();
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(object));
 		forEachVisibleObject(object, clazz, result::add);
 		return result;
 	}
 	
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(object));
 		forEachVisibleObject(object, clazz, o ->
 		{
 			if (predicate.test(o))
@@ -678,14 +706,14 @@ public class World
 	
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range)
 	{
-		final List<T> result = new LinkedList<>();
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(object));
 		forEachVisibleObjectInRange(object, clazz, range, result::add);
 		return result;
 	}
 	
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(object));
 		forEachVisibleObjectInRange(object, clazz, range, o ->
 		{
 			if (predicate.test(o))
