@@ -22,7 +22,6 @@ package org.l2jmobius.gameserver.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -618,14 +617,16 @@ public class World
 	
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz)
 	{
-		final List<T> result = new LinkedList<>();
+		// ArrayList with pre-allocated capacity is more efficient than LinkedList.
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(object));
 		forEachVisibleObject(object, clazz, result::add);
 		return result;
 	}
 	
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		// ArrayList with pre-allocated capacity is more efficient than LinkedList.
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(object));
 		forEachVisibleObject(object, clazz, o ->
 		{
 			if (predicate.test(o))
@@ -678,14 +679,16 @@ public class World
 	
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range)
 	{
-		final List<T> result = new LinkedList<>();
+		// ArrayList with pre-allocated capacity is more efficient than LinkedList.
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(object));
 		forEachVisibleObjectInRange(object, clazz, range, result::add);
 		return result;
 	}
 	
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		// ArrayList with pre-allocated capacity is more efficient than LinkedList.
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(object));
 		forEachVisibleObjectInRange(object, clazz, range, o ->
 		{
 			if (predicate.test(o))
@@ -739,6 +742,23 @@ public class World
 		}
 	}
 	
+	private int getSurroundingObjectsCount(WorldObject object)
+	{
+		final WorldRegion worldRegion = getRegion(object);
+		if (worldRegion == null)
+		{
+			return 0;
+		}
+
+		int count = 0;
+		final WorldRegion[] surroundingRegions = worldRegion.getSurroundingRegions();
+		for (int i = 0; i < surroundingRegions.length; i++)
+		{
+			count += surroundingRegions[i].getVisibleObjects().size();
+		}
+		return count;
+	}
+
 	/**
 	 * Calculate the current WorldRegions of the object according to its position (x,y). <b><u>Example of use</u>:</b>
 	 * <li>Set position of a new WorldObject (drop, spawn...)</li>
