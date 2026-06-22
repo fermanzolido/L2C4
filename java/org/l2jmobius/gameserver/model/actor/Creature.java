@@ -23,7 +23,6 @@ package org.l2jmobius.gameserver.model.actor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -5196,7 +5195,8 @@ public abstract class Creature extends WorldObject {
 			int skipRange = 0;
 			int skipLOS = 0;
 			int skipPeaceZone = 0;
-			final List<WorldObject> targetList = new LinkedList<>();
+			// Optimization: Using ArrayList with pre-allocated capacity to reduce memory overhead and improve performance during target filtering in combat.
+			final List<WorldObject> targetList = new ArrayList<>(targets.size());
 			for (WorldObject target : targets) {
 				if (target.isCreature()) {
 					if (!isInsideRadius3D(target.getX(), target.getY(), target.getZ(),
