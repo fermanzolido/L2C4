@@ -20,7 +20,7 @@
  */
 package org.l2jmobius.gameserver.network.serverpackets;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.l2jmobius.commons.network.WritableBuffer;
@@ -35,10 +35,12 @@ import org.l2jmobius.gameserver.network.ServerPackets;
  */
 public class SkillCoolTime extends ServerPacket
 {
-	private final List<TimeStamp> _reuseTimestamps = new LinkedList<>();
+	private final List<TimeStamp> _reuseTimestamps;
 	
 	public SkillCoolTime(Player player)
 	{
+		final int size = player.getSkillReuseTimeStamps().size();
+		_reuseTimestamps = new ArrayList<>(size);
 		for (TimeStamp ts : player.getSkillReuseTimeStamps().values())
 		{
 			if (ts.hasNotPassed())
