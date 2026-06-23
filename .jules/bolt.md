@@ -1,0 +1,3 @@
+## 2026-06-20 - [Optimize World visibility methods with pre-allocated ArrayList]
+**Learning:** Core visibility methods in `World.java` are high-frequency hot paths. Replacing `LinkedList` with `ArrayList` and pre-allocating capacity based on surrounding objects significantly reduces memory allocation overhead and array resizing. Avoiding redundant region lookups in these hot paths further improves efficiency.
+**Action:** Always consider pre-allocating `ArrayList` capacity when the upper bound is known or can be cheaply estimated, especially in game engine hot paths like object visibility and collision checks.

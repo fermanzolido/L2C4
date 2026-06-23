@@ -22,7 +22,6 @@ package org.l2jmobius.gameserver.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -616,17 +615,61 @@ public class World
 		}
 	}
 	
+	/**
+	 * Gets the total count of visible objects in the surrounding regions of the given region.
+	 * @param worldRegion the region to check surrounding regions for
+	 * @return the total count of visible objects in surrounding regions
+	 */
+	private int getSurroundingObjectsCount(WorldRegion worldRegion)
+	{
+		if (worldRegion == null)
+		{
+			return 0;
+		}
+
+		int count = 0;
+		for (WorldRegion region : worldRegion.getSurroundingRegions())
+		{
+			count += region.getVisibleObjects().size();
+		}
+		return count;
+	}
+
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz)
 	{
-		final List<T> result = new LinkedList<>();
-		forEachVisibleObject(object, clazz, result::add);
+		if (object == null)
+		{
+			return new ArrayList<>(0);
+		}
+
+		final WorldRegion worldRegion = getRegion(object);
+		if (worldRegion == null)
+		{
+			return new ArrayList<>(0);
+		}
+
+		// Optimization: Use ArrayList with pre-allocated capacity to reduce memory overhead and improve cache locality.
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(worldRegion));
+		forEachVisibleObject(object, worldRegion, clazz, result::add);
 		return result;
 	}
 	
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
-		forEachVisibleObject(object, clazz, o ->
+		if (object == null)
+		{
+			return new ArrayList<>(0);
+		}
+
+		final WorldRegion worldRegion = getRegion(object);
+		if (worldRegion == null)
+		{
+			return new ArrayList<>(0);
+		}
+
+		// Optimization: Use ArrayList with pre-allocated capacity to reduce memory overhead and improve cache locality.
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(worldRegion));
+		forEachVisibleObject(object, worldRegion, clazz, o ->
 		{
 			if (predicate.test(o))
 			{
@@ -639,12 +682,14 @@ public class World
 	
 	public <T extends WorldObject> void forEachVisibleObject(WorldObject object, Class<T> clazz, Consumer<T> c)
 	{
-		if (object == null)
+		if (object != null)
 		{
-			return;
+			forEachVisibleObject(object, getRegion(object), clazz, c);
 		}
-		
-		final WorldRegion worldRegion = getRegion(object);
+	}
+
+	private <T extends WorldObject> void forEachVisibleObject(WorldObject object, WorldRegion worldRegion, Class<T> clazz, Consumer<T> c)
+	{
 		if (worldRegion == null)
 		{
 			return;
@@ -678,15 +723,39 @@ public class World
 	
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range)
 	{
-		final List<T> result = new LinkedList<>();
-		forEachVisibleObjectInRange(object, clazz, range, result::add);
+		if (object == null)
+		{
+			return new ArrayList<>(0);
+		}
+
+		final WorldRegion worldRegion = getRegion(object);
+		if (worldRegion == null)
+		{
+			return new ArrayList<>(0);
+		}
+
+		// Optimization: Use ArrayList with pre-allocated capacity to reduce memory overhead and improve cache locality.
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(worldRegion));
+		forEachVisibleObjectInRange(object, worldRegion, clazz, range, result::add);
 		return result;
 	}
 	
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
-		forEachVisibleObjectInRange(object, clazz, range, o ->
+		if (object == null)
+		{
+			return new ArrayList<>(0);
+		}
+
+		final WorldRegion worldRegion = getRegion(object);
+		if (worldRegion == null)
+		{
+			return new ArrayList<>(0);
+		}
+
+		// Optimization: Use ArrayList with pre-allocated capacity to reduce memory overhead and improve cache locality.
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(worldRegion));
+		forEachVisibleObjectInRange(object, worldRegion, clazz, range, o ->
 		{
 			if (predicate.test(o))
 			{
@@ -699,12 +768,14 @@ public class World
 	
 	public <T extends WorldObject> void forEachVisibleObjectInRange(WorldObject object, Class<T> clazz, int range, Consumer<T> c)
 	{
-		if (object == null)
+		if (object != null)
 		{
-			return;
+			forEachVisibleObjectInRange(object, getRegion(object), clazz, range, c);
 		}
-		
-		final WorldRegion worldRegion = getRegion(object);
+	}
+
+	private <T extends WorldObject> void forEachVisibleObjectInRange(WorldObject object, WorldRegion worldRegion, Class<T> clazz, int range, Consumer<T> c)
+	{
 		if (worldRegion == null)
 		{
 			return;
