@@ -1,0 +1,3 @@
+## 2026-06-20 - [LinkedList Anti-pattern in Hot Paths]
+**Learning:** Found that core visibility and collection methods in `World.java` and `InstanceWorld.java` were using `LinkedList`, which causes excessive `Node` allocations and poor cache locality in high-frequency spatial queries. Modern JVMs perform significantly better with `ArrayList`, especially when pre-allocated.
+**Action:** Replace `LinkedList` with `ArrayList` in hot paths (visibility checks, NPC collections). Pre-allocate capacity using heuristics (like summing surrounding region sizes) to further reduce resizing overhead. Ensure `java.util.LinkedList` import is removed.
