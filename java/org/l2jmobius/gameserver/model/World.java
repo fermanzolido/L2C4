@@ -22,7 +22,6 @@ package org.l2jmobius.gameserver.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -616,16 +615,35 @@ public class World
 		}
 	}
 	
+	/**
+	 * Gets visible objects around the given object.<br>
+	 * Optimized to use {@link ArrayList} with pre-allocated capacity to reduce memory overhead and improve cache locality.
+	 * @param <T> the type of the world object
+	 * @param object the object to check
+	 * @param clazz the class of the objects to find
+	 * @return a list of visible objects
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz)
 	{
-		final List<T> result = new LinkedList<>();
+		final WorldRegion worldRegion = getRegion(object);
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(worldRegion));
 		forEachVisibleObject(object, clazz, result::add);
 		return result;
 	}
 	
+	/**
+	 * Gets visible objects around the given object that match the predicate.<br>
+	 * Optimized to use {@link ArrayList} with pre-allocated capacity to reduce memory overhead and improve cache locality.
+	 * @param <T> the type of the world object
+	 * @param object the object to check
+	 * @param clazz the class of the objects to find
+	 * @param predicate the predicate to match
+	 * @return a list of visible objects matching the predicate
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		final WorldRegion worldRegion = getRegion(object);
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(worldRegion));
 		forEachVisibleObject(object, clazz, o ->
 		{
 			if (predicate.test(o))
@@ -676,16 +694,37 @@ public class World
 		}
 	}
 	
+	/**
+	 * Gets visible objects around the given object within a specific range.<br>
+	 * Optimized to use {@link ArrayList} with pre-allocated capacity to reduce memory overhead and improve cache locality.
+	 * @param <T> the type of the world object
+	 * @param object the object to check
+	 * @param clazz the class of the objects to find
+	 * @param range the range to check
+	 * @return a list of visible objects within the range
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range)
 	{
-		final List<T> result = new LinkedList<>();
+		final WorldRegion worldRegion = getRegion(object);
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(worldRegion));
 		forEachVisibleObjectInRange(object, clazz, range, result::add);
 		return result;
 	}
 	
+	/**
+	 * Gets visible objects around the given object within a specific range that match the predicate.<br>
+	 * Optimized to use {@link ArrayList} with pre-allocated capacity to reduce memory overhead and improve cache locality.
+	 * @param <T> the type of the world object
+	 * @param object the object to check
+	 * @param clazz the class of the objects to find
+	 * @param range the range to check
+	 * @param predicate the predicate to match
+	 * @return a list of visible objects within the range matching the predicate
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		final WorldRegion worldRegion = getRegion(object);
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(worldRegion));
 		forEachVisibleObjectInRange(object, clazz, range, o ->
 		{
 			if (predicate.test(o))
@@ -819,6 +858,40 @@ public class World
 		}
 	}
 	
+	/**
+	 * Helper method to estimate the initial capacity for the visible objects list.<br>
+	 * This helps reduce ArrayList resizing during high-frequency visibility checks.
+	 * @param worldRegion the region to check
+	 * @return the sum of the sizes of the surrounding regions' visible objects collections, capped to a sensible maximum
+	 */
+	private int getSurroundingObjectsCount(WorldRegion worldRegion)
+	{
+		if (worldRegion == null)
+		{
+			return 0;
+		}
+
+		final WorldRegion[] surroundingRegions = worldRegion.getSurroundingRegions();
+		if (surroundingRegions == null)
+		{
+			return 0;
+		}
+
+		int count = 0;
+		for (int i = 0; i < surroundingRegions.length; i++)
+		{
+			final WorldRegion region = surroundingRegions[i];
+			if (region != null)
+			{
+				count += region.getVisibleObjects().size();
+			}
+		}
+
+		// Return the count capped at a sensible maximum to avoid over-allocation in object-dense areas.
+		// Most visibility checks return much fewer than 500 objects.
+		return Math.min(count, 512);
+	}
+
 	public static World getInstance()
 	{
 		return SingletonHolder.INSTANCE;
