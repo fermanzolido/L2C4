@@ -1,0 +1,3 @@
+## 2026-06-20 - Visibility Collection Optimization and Skill Filtering
+**Learning:** Core visibility methods in `World.java` return collections used by script-based target handlers. Some of these handlers (specifically monster buff filtering in `Skill.java`) perform `instanceof LinkedList` checks to ensure they are working with a mutable list they can filter in-place.
+**Action:** When migrating from `LinkedList` to `ArrayList` in core world methods, always update `Skill.getTargetList` (or similar filtering sites) to include `ArrayList` in its mutable implementation checks to prevent logic regressions (e.g., monsters buffing players).
