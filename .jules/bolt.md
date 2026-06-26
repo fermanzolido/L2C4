@@ -1,0 +1,3 @@
+## 2026-06-20 - World Visibility LinkedList Bottleneck
+**Learning:** Core visibility methods in World.java (getVisibleObjects, getVisibleObjectsInRange) were using LinkedList, causing significant allocation overhead and cache misses in hot paths. Additionally, Skill.java had a hard-coded 'instanceof LinkedList' check for monster buff filtering, which would break if World.java was optimized to return ArrayList.
+**Action:** Refactor World.java to use ArrayList with pre-allocated capacity based on surrounding objects, and update Skill.java to support both ArrayList and LinkedList in its filtering logic.
