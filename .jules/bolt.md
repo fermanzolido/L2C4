@@ -1,0 +1,3 @@
+## 2026-06-20 - ArrayList vs LinkedList in hot paths
+**Learning:** Replacing `LinkedList` with `ArrayList` in frequently called visibility and collection methods (like `World.getVisibleObjects`) significantly reduces object allocation overhead (by avoiding `Node` objects) and improves CPU cache locality. Pre-allocating `ArrayList` capacity by estimating from source collections (e.g., surrounding region sizes) further reduces array resizing costs.
+**Action:** Always prefer `ArrayList` for transient collections in hot paths, and attempt to estimate initial capacity when possible. Be careful to maintain null-safety when refactoring methods that previously relied on internal iteration for safety.

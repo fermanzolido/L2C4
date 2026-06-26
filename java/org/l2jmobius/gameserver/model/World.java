@@ -22,7 +22,6 @@ package org.l2jmobius.gameserver.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -618,14 +617,36 @@ public class World
 	
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz)
 	{
-		final List<T> result = new LinkedList<>();
+		if (object == null)
+		{
+			return new ArrayList<>(0);
+		}
+
+		final WorldRegion worldRegion = getRegion(object);
+		if (worldRegion == null)
+		{
+			return new ArrayList<>(0);
+		}
+
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(worldRegion));
 		forEachVisibleObject(object, clazz, result::add);
 		return result;
 	}
 	
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		if (object == null)
+		{
+			return new ArrayList<>(0);
+		}
+
+		final WorldRegion worldRegion = getRegion(object);
+		if (worldRegion == null)
+		{
+			return new ArrayList<>(0);
+		}
+
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(worldRegion));
 		forEachVisibleObject(object, clazz, o ->
 		{
 			if (predicate.test(o))
@@ -678,14 +699,36 @@ public class World
 	
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range)
 	{
-		final List<T> result = new LinkedList<>();
+		if (object == null)
+		{
+			return new ArrayList<>(0);
+		}
+
+		final WorldRegion worldRegion = getRegion(object);
+		if (worldRegion == null)
+		{
+			return new ArrayList<>(0);
+		}
+
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(worldRegion));
 		forEachVisibleObjectInRange(object, clazz, range, result::add);
 		return result;
 	}
 	
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		if (object == null)
+		{
+			return new ArrayList<>(0);
+		}
+
+		final WorldRegion worldRegion = getRegion(object);
+		if (worldRegion == null)
+		{
+			return new ArrayList<>(0);
+		}
+
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(worldRegion));
 		forEachVisibleObjectInRange(object, clazz, range, o ->
 		{
 			if (predicate.test(o))
@@ -739,6 +782,22 @@ public class World
 		}
 	}
 	
+	/**
+	 * Estimates the number of objects in the surrounding regions to pre-allocate ArrayList capacity.<br>
+	 * This optimization reduces memory allocation and CPU cycles during visibility checks.
+	 * @param worldRegion the region to check surrounding objects for
+	 * @return the total number of objects in surrounding regions
+	 */
+	private int getSurroundingObjectsCount(WorldRegion worldRegion)
+	{
+		int count = 0;
+		for (WorldRegion region : worldRegion.getSurroundingRegions())
+		{
+			count += region.getVisibleObjects().size();
+		}
+		return Math.min(count, 512); // Sanity cap.
+	}
+
 	/**
 	 * Calculate the current WorldRegions of the object according to its position (x,y). <b><u>Example of use</u>:</b>
 	 * <li>Set position of a new WorldObject (drop, spawn...)</li>
