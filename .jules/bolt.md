@@ -1,0 +1,3 @@
+## 2026-06-20 - Optimized core collection hot paths
+**Learning:** Core server methods like `World.getVisibleObjects` and `InstanceWorld.getNpcs` were returning `LinkedList`, which has poor cache locality and high allocation overhead. Switching to `ArrayList` with pre-allocated capacity (based on source collections or estimated surrounding density) provides a significant performance boost in high-load scenarios.
+**Action:** Always prefer `ArrayList` with pre-allocation for temporary collection gathering in game server hot paths. Ensure that any `instanceof` checks for list implementations (e.g., in `Skill.java`) are updated to handle the new return types.
