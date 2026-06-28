@@ -1,0 +1,3 @@
+## 2026-06-20 - [Optimized InstanceWorld NPC collections]
+**Learning:** In hot paths like instance NPC filtering, using `ArrayList` with pre-allocated capacity based on the source collection size (`_instance.getNpcs().size()`) significantly reduces memory allocation pressure and array resizing overhead. However, changing core visibility methods to return `ArrayList` requires updating monster buff filtering logic in `Skill.java`, which historically relied on `instanceof LinkedList` checks.
+**Action:** Always verify if downstream logic (like `Skill.getTargetList` filtering) depends on the specific `List` implementation before refactoring core collection getters. Update these checks to be implementation-agnostic or support both types.
