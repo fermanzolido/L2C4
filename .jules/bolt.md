@@ -1,0 +1,3 @@
+## 2026-06-20 - [Optimizing hot-path collections to ArrayList]
+**Learning:** LinkedList is heavily overused in this codebase for collections that are primarily iterated (e.g., world visibility and NPC lists). Switching to ArrayList with pre-allocated capacity based on source collections or estimated counts provides a significant performance boost in hot paths by improving cache locality and reducing allocation pressure.
+**Action:** Always prefer ArrayList over LinkedList for collection gathering in hot paths. Use known sizes or helper methods (like `getSurroundingObjectsCount`) for pre-allocation to avoid array resizing. Update any type-checking logic (e.g., `instanceof`) that depends on specific list implementations.
