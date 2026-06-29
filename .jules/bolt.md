@@ -1,0 +1,3 @@
+## 2026-06-20 - LinkedList Anti-Pattern in Hot-Paths
+**Learning:** `LinkedList` is extensively used in this codebase's hot paths (e.g., world visibility, NPC collections, packet construction), which causes high allocation pressure and poor cache locality. Replacing it with `ArrayList` and providing capacity hints (where source size or estimates are available) significantly improves performance. In `World.java`, a helper method to estimate surrounding object count allows for effective pre-allocation of visibility lists.
+**Action:** Always prefer `ArrayList` for result collections. Use source collection sizes or estimates for initial capacity. Be careful with `instanceof LinkedList` checks in logic that filters these lists (e.g., `Skill.java`).
