@@ -1,0 +1,3 @@
+## 2026-06-20 - [ArrayList Migration & Monster Buff Filtering]
+**Learning:** Replacing LinkedList with ArrayList in hot paths like visibility and NPC collection significantly improves cache locality. However, in this codebase, Skill.getTargetList contains an explicit 'instanceof LinkedList' check for monster buff filtering. Changing the implementation without updating this check causes a functional regression where monsters start buffing players.
+**Action:** Always grep for 'instanceof LinkedList' and 'instanceof ArrayList' when refactoring collection implementations in this repository to ensure AI logic and filtering remains intact.
