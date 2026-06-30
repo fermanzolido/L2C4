@@ -1,0 +1,3 @@
+## 2026-06-20 - Hot-path collection optimization and AI correctness
+**Learning:** In L2J Mobius, core visibility and collection methods often return short-lived lists. Replacing `LinkedList` with `ArrayList` and using pre-allocation (via `ConcurrentHashMap.size()` or surrounding object counts) significantly improves CPU cache locality and reduces allocation pressure. However, many AI/Skill handlers perform `instanceof LinkedList` checks for filtering.
+**Action:** When migrating core visibility methods to `ArrayList`, always update `instanceof` checks in `Skill.java` and related target handlers to support `ArrayList`, ensuring functional correctness of monster-to-playable filtering.
