@@ -1,0 +1,3 @@
+## 2026-06-20 - [Optimizing Name-to-ID Lookups in CharInfoTable]
+**Learning:** In L2JMobius, `CharInfoTable` caches all character names in a map, but lookups by name were performing a linear scan ($O(N)$) over all entries. This is a common performance pitfall in table-style data structures. Adding a secondary index (`_namesLower`) allows $O(1)$ lookups and significantly speeds up case-insensitive name resolution.
+**Action:** Always check if a cached collection is being iterated for lookups. If it is, introduce a secondary map index to provide $O(1)$ access. Ensure the secondary index is kept in sync during all modification operations (`add`, `update`, `remove`).
