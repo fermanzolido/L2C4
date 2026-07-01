@@ -22,7 +22,6 @@ package org.l2jmobius.gameserver.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -616,16 +615,35 @@ public class World
 		}
 	}
 	
+	/**
+	 * Optimized visibility retrieval using ArrayList with pre-allocated capacity.<br>
+	 * ArrayList provides better cache locality and lower memory overhead than LinkedList.
+	 * @param <T> type of the object
+	 * @param object the reference object
+	 * @param clazz the class to filter
+	 * @return a list of visible objects
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz)
 	{
-		final List<T> result = new LinkedList<>();
+		final WorldRegion region = getRegion(object);
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(region));
 		forEachVisibleObject(object, clazz, result::add);
 		return result;
 	}
 	
+	/**
+	 * Optimized visibility retrieval using ArrayList with pre-allocated capacity.<br>
+	 * ArrayList provides better cache locality and lower memory overhead than LinkedList.
+	 * @param <T> type of the object
+	 * @param object the reference object
+	 * @param clazz the class to filter
+	 * @param predicate the filter condition
+	 * @return a list of filtered visible objects
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		final WorldRegion region = getRegion(object);
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(region));
 		forEachVisibleObject(object, clazz, o ->
 		{
 			if (predicate.test(o))
@@ -676,16 +694,37 @@ public class World
 		}
 	}
 	
+	/**
+	 * Optimized visibility retrieval in range using ArrayList with pre-allocated capacity.<br>
+	 * ArrayList provides better cache locality and lower memory overhead than LinkedList.
+	 * @param <T> type of the object
+	 * @param object the reference object
+	 * @param clazz the class to filter
+	 * @param range the search range
+	 * @return a list of visible objects in range
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range)
 	{
-		final List<T> result = new LinkedList<>();
+		final WorldRegion region = getRegion(object);
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(region));
 		forEachVisibleObjectInRange(object, clazz, range, result::add);
 		return result;
 	}
 	
+	/**
+	 * Optimized visibility retrieval in range using ArrayList with pre-allocated capacity.<br>
+	 * ArrayList provides better cache locality and lower memory overhead than LinkedList.
+	 * @param <T> type of the object
+	 * @param object the reference object
+	 * @param clazz the class to filter
+	 * @param range the search range
+	 * @param predicate the filter condition
+	 * @return a list of filtered visible objects in range
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		final WorldRegion region = getRegion(object);
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(region));
 		forEachVisibleObjectInRange(object, clazz, range, o ->
 		{
 			if (predicate.test(o))
@@ -819,6 +858,35 @@ public class World
 		}
 	}
 	
+	/**
+	 * Estimates the number of surrounding objects for pre-allocating ArrayList capacity.
+	 * @param worldRegion the reference region
+	 * @return estimated count of surrounding objects
+	 */
+	private int getSurroundingObjectsCount(WorldRegion worldRegion)
+	{
+		if (worldRegion == null)
+		{
+			return 0;
+		}
+
+		int count = 0;
+		final WorldRegion[] surroundingRegions = worldRegion.getSurroundingRegions();
+		if (surroundingRegions != null)
+		{
+			for (WorldRegion region : surroundingRegions)
+			{
+				if (region != null)
+				{
+					count += region.getVisibleObjects().size();
+				}
+			}
+		}
+
+		// Sanity cap to avoid excessive memory allocation in dense areas.
+		return Math.min(count, 512);
+	}
+
 	public static World getInstance()
 	{
 		return SingletonHolder.INSTANCE;
