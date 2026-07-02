@@ -22,7 +22,6 @@ package org.l2jmobius.gameserver.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -616,16 +615,49 @@ public class World
 		}
 	}
 	
+	/**
+	 * Estimates the number of objects in the surrounding regions to pre-allocate ArrayList capacity.<br>
+	 * O(1) complexity as it sums the sizes of ConcurrentHashMap.KeySetView.
+	 * @param region the region to check
+	 * @return the estimated object count, capped at 512
+	 */
+	private int getSurroundingObjectsCount(WorldRegion region)
+	{
+		if (region == null)
+		{
+			return 0;
+		}
+
+		int count = 0;
+		final WorldRegion[] surroundingRegions = region.getSurroundingRegions();
+		if (surroundingRegions != null)
+		{
+			for (int i = 0; i < surroundingRegions.length; i++)
+			{
+				final WorldRegion surroundingRegion = surroundingRegions[i];
+				if (surroundingRegion != null)
+				{
+					count += surroundingRegion.getVisibleObjects().size();
+				}
+			}
+		}
+		return Math.min(count, 512);
+	}
+
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz)
 	{
-		final List<T> result = new LinkedList<>();
+		// ArrayList is preferred over LinkedList for better cache locality and reduced memory overhead.
+		// Initial capacity is estimated to minimize internal array resizing.
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(getRegion(object)));
 		forEachVisibleObject(object, clazz, result::add);
 		return result;
 	}
 	
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		// ArrayList is preferred over LinkedList for better cache locality and reduced memory overhead.
+		// Initial capacity is estimated to minimize internal array resizing.
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(getRegion(object)));
 		forEachVisibleObject(object, clazz, o ->
 		{
 			if (predicate.test(o))
@@ -678,14 +710,18 @@ public class World
 	
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range)
 	{
-		final List<T> result = new LinkedList<>();
+		// ArrayList is preferred over LinkedList for better cache locality and reduced memory overhead.
+		// Initial capacity is estimated to minimize internal array resizing.
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(getRegion(object)));
 		forEachVisibleObjectInRange(object, clazz, range, result::add);
 		return result;
 	}
 	
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		// ArrayList is preferred over LinkedList for better cache locality and reduced memory overhead.
+		// Initial capacity is estimated to minimize internal array resizing.
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(getRegion(object)));
 		forEachVisibleObjectInRange(object, clazz, range, o ->
 		{
 			if (predicate.test(o))

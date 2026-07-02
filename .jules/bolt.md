@@ -1,0 +1,3 @@
+## 2026-07-01 - Optimized world visibility collection
+**Learning:** `LinkedList` is a major performance bottleneck in high-traffic iteration paths like `World.getVisibleObjects`. Replacing it with `ArrayList` reduces allocation pressure and improves cache locality. Furthermore, pre-allocating `ArrayList` capacity by summing the sizes of surrounding `WorldRegion` collections (which is $O(1)$) further optimizes performance by minimizing array resizing.
+**Action:** Always prefer `ArrayList` for short-lived collections in hot paths. Use `WorldRegion.getVisibleObjects().size()` for $O(1)$ capacity estimation in visibility-related logic. Ensure that any `instanceof LinkedList` checks in `Skill.java` or target handlers are updated to include `ArrayList`.
