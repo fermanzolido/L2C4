@@ -22,7 +22,6 @@ package org.l2jmobius.gameserver.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -616,16 +615,69 @@ public class World
 		}
 	}
 	
+	/**
+	 * Gets the total number of visible objects in the surrounding regions of the given region.
+	 * @param worldRegion the region to check
+	 * @return the total number of visible objects in the surrounding regions
+	 */
+	private int getSurroundingObjectsCount(WorldRegion worldRegion)
+	{
+		int count = 0;
+		final WorldRegion[] surroundingRegions = worldRegion.getSurroundingRegions();
+		if (surroundingRegions != null)
+		{
+			for (int i = 0; i < surroundingRegions.length; i++)
+			{
+				final WorldRegion region = surroundingRegions[i];
+				if (region != null)
+				{
+					count += region.getVisibleObjects().size();
+				}
+			}
+		}
+		return Math.min(count, 512); // Sanity cap to prevent excessive allocation in extreme cases.
+	}
+
+	/**
+	 * Returns a list of visible objects within the surrounding regions of the given object.<br>
+	 * Optimized by pre-allocating an ArrayList based on the total number of objects in the surrounding regions,
+	 * which reduces GC pressure and prevents unnecessary array resizing.
+	 * @param <T> the type of WorldObject
+	 * @param object the reference object
+	 * @param clazz the class type to filter by
+	 * @return a list of visible objects
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz)
 	{
-		final List<T> result = new LinkedList<>();
+		final WorldRegion worldRegion = getRegion(object);
+		if (worldRegion == null)
+		{
+			return new ArrayList<>(0);
+		}
+
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(worldRegion));
 		forEachVisibleObject(object, clazz, result::add);
 		return result;
 	}
 	
+	/**
+	 * Returns a filtered list of visible objects within the surrounding regions of the given object.<br>
+	 * Optimized with ArrayList pre-allocation to improve performance in visibility hot paths.
+	 * @param <T> the type of WorldObject
+	 * @param object the reference object
+	 * @param clazz the class type to filter by
+	 * @param predicate the filter to apply
+	 * @return a list of visible objects
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		final WorldRegion worldRegion = getRegion(object);
+		if (worldRegion == null)
+		{
+			return new ArrayList<>(0);
+		}
+
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(worldRegion));
 		forEachVisibleObject(object, clazz, o ->
 		{
 			if (predicate.test(o))
@@ -676,16 +728,47 @@ public class World
 		}
 	}
 	
+	/**
+	 * Returns a list of visible objects within the given range from the reference object.<br>
+	 * Optimized with ArrayList pre-allocation to minimize memory overhead during object discovery.
+	 * @param <T> the type of WorldObject
+	 * @param object the reference object
+	 * @param clazz the class type to filter by
+	 * @param range the maximum distance
+	 * @return a list of visible objects within range
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range)
 	{
-		final List<T> result = new LinkedList<>();
+		final WorldRegion worldRegion = getRegion(object);
+		if (worldRegion == null)
+		{
+			return new ArrayList<>(0);
+		}
+
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(worldRegion));
 		forEachVisibleObjectInRange(object, clazz, range, result::add);
 		return result;
 	}
 	
+	/**
+	 * Returns a filtered list of visible objects within the given range from the reference object.<br>
+	 * Optimized with ArrayList pre-allocation to minimize memory overhead during object discovery.
+	 * @param <T> the type of WorldObject
+	 * @param object the reference object
+	 * @param clazz the class type to filter by
+	 * @param range the maximum distance
+	 * @param predicate the filter to apply
+	 * @return a list of visible objects within range
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		final WorldRegion worldRegion = getRegion(object);
+		if (worldRegion == null)
+		{
+			return new ArrayList<>(0);
+		}
+
+		final List<T> result = new ArrayList<>(getSurroundingObjectsCount(worldRegion));
 		forEachVisibleObjectInRange(object, clazz, range, o ->
 		{
 			if (predicate.test(o))
