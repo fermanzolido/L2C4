@@ -1,0 +1,3 @@
+## 2026-07-01 - [Collection Refactoring]
+**Learning:** `LinkedList` is an anti-pattern for hot-path iteration in this codebase. Replacing it with `ArrayList` significantly improves cache locality and reduces the memory overhead of node allocations.
+**Action:** Always prefer `ArrayList` for collection methods that are iterated frequently (like visibility and NPC lists). Use `ArrayList` instead of `LinkedList` for return values in hot paths, and update any `instanceof LinkedList` checks accordingly (e.g., in `Skill.getTargetList`). Avoid complex pre-allocation logic if it requires double-iteration of source data, as the overhead may outweigh the benefits of avoiding `ArrayList` resizing.
