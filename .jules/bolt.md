@@ -1,0 +1,3 @@
+## 2026-07-04 - Collection Type Optimization in Hot Paths
+**Learning:** In high-frequency game server operations like visibility checks and NPC collection management, `LinkedList` introduces unnecessary memory overhead (Node objects) and poor cache locality compared to `ArrayList`. Pre-allocating `ArrayList` capacity further optimizes by avoiding resizing during population.
+**Action:** Favor `ArrayList` over `LinkedList` for collections that are primarily populated once and then iterated. Provide capacity hints when the expected size is known (e.g., from an existing collection's size). Always update `instanceof` checks in dependent logic when changing collection implementations.
