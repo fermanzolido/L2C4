@@ -1,0 +1,3 @@
+## 2026-07-01 - ArrayList vs LinkedList in Visibility Hot Paths
+**Learning:** In this codebase, core visibility methods in `World.java` return lists of objects that are frequently iterated and sometimes filtered. `LinkedList` was used, which is less efficient than `ArrayList` due to lack of cache locality and higher GC pressure. However, some logic (e.g., in `Skill.java`) explicitly checks for `instanceof LinkedList` to ensure the list is mutable before performing operations like `removeIf`.
+**Action:** When migrating from `LinkedList` to `ArrayList` in core models, always perform a codebase-wide search for `instanceof LinkedList` to identify and update dependent logic that relies on specific mutable list implementations.

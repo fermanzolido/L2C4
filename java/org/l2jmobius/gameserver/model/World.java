@@ -22,7 +22,6 @@ package org.l2jmobius.gameserver.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -616,16 +615,33 @@ public class World
 		}
 	}
 	
+	/**
+	 * Gets visible objects of a certain class.
+	 * @param <T> the type of the objects
+	 * @param object the object
+	 * @param clazz the class of the objects
+	 * @return the list of visible objects
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz)
 	{
-		final List<T> result = new LinkedList<>();
+		// Using ArrayList for better performance on iteration and memory locality.
+		final List<T> result = new ArrayList<>();
 		forEachVisibleObject(object, clazz, result::add);
 		return result;
 	}
 	
+	/**
+	 * Gets visible objects of a certain class that match a predicate.
+	 * @param <T> the type of the objects
+	 * @param object the object
+	 * @param clazz the class of the objects
+	 * @param predicate the predicate to match
+	 * @return the list of visible objects
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		// Using ArrayList for better performance on iteration and memory locality.
+		final List<T> result = new ArrayList<>();
 		forEachVisibleObject(object, clazz, o ->
 		{
 			if (predicate.test(o))
@@ -676,16 +692,35 @@ public class World
 		}
 	}
 	
+	/**
+	 * Gets visible objects of a certain class in a certain range.
+	 * @param <T> the type of the objects
+	 * @param object the object
+	 * @param clazz the class of the objects
+	 * @param range the range
+	 * @return the list of visible objects
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range)
 	{
-		final List<T> result = new LinkedList<>();
+		// Using ArrayList for better performance on iteration and memory locality.
+		final List<T> result = new ArrayList<>();
 		forEachVisibleObjectInRange(object, clazz, range, result::add);
 		return result;
 	}
 	
+	/**
+	 * Gets visible objects of a certain class in a certain range that match a predicate.
+	 * @param <T> the type of the objects
+	 * @param object the object
+	 * @param clazz the class of the objects
+	 * @param range the range
+	 * @param predicate the predicate to match
+	 * @return the list of visible objects
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		// Using ArrayList for better performance on iteration and memory locality.
+		final List<T> result = new ArrayList<>();
 		forEachVisibleObjectInRange(object, clazz, range, o ->
 		{
 			if (predicate.test(o))
