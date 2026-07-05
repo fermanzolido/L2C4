@@ -1,0 +1,3 @@
+## 2026-07-04 - Core Visibility and Collection Optimization
+**Learning:** LinkedList is an anti-pattern for hot-path iteration and collection in this codebase. While ArrayList is preferred, the monster buff filtering logic in `Skill.java` depends on an `instanceof` check that specifically looks for mutable list types (like `LinkedList`) before applying filtering.
+**Action:** When refactoring collections from `LinkedList` to `ArrayList`, always check for dependent `instanceof` checks in `Skill.java` to prevent functional regressions where monsters could buff players. Pre-allocating `ArrayList` capacity using `size()` on the source collection is a safe and effective optimization when the source is a `ConcurrentHashMap.KeySetView` (O(1) size).
