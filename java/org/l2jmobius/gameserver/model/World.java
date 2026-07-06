@@ -616,16 +616,31 @@ public class World
 		}
 	}
 	
+	/**
+	 * @param <T>
+	 * @param object
+	 * @param clazz
+	 * @return a list of visible objects of the given class.
+	 * @implNote use ArrayList for better cache locality and lower memory overhead.
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz)
 	{
-		final List<T> result = new LinkedList<>();
+		final List<T> result = new ArrayList<>();
 		forEachVisibleObject(object, clazz, result::add);
 		return result;
 	}
 	
+	/**
+	 * @param <T>
+	 * @param object
+	 * @param clazz
+	 * @param predicate
+	 * @return a list of visible objects of the given class that match the predicate.
+	 * @implNote use ArrayList for better cache locality and lower memory overhead.
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		final List<T> result = new ArrayList<>();
 		forEachVisibleObject(object, clazz, o ->
 		{
 			if (predicate.test(o))
@@ -676,16 +691,33 @@ public class World
 		}
 	}
 	
+	/**
+	 * @param <T>
+	 * @param object
+	 * @param clazz
+	 * @param range
+	 * @return a list of visible objects of the given class within the given range.
+	 * @implNote use ArrayList for better cache locality and lower memory overhead.
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range)
 	{
-		final List<T> result = new LinkedList<>();
+		final List<T> result = new ArrayList<>();
 		forEachVisibleObjectInRange(object, clazz, range, result::add);
 		return result;
 	}
 	
+	/**
+	 * @param <T>
+	 * @param object
+	 * @param clazz
+	 * @param range
+	 * @param predicate
+	 * @return a list of visible objects of the given class within the given range that match the predicate.
+	 * @implNote use ArrayList for better cache locality and lower memory overhead.
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		final List<T> result = new ArrayList<>();
 		forEachVisibleObjectInRange(object, clazz, range, o ->
 		{
 			if (predicate.test(o))

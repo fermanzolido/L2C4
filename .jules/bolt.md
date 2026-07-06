@@ -1,0 +1,3 @@
+## 2026-07-04 - Hot-path collection optimization
+**Learning:** LinkedList is a performance anti-pattern in high-frequency visibility and NPC collection paths due to node allocation overhead and poor cache locality. Refactoring to ArrayList significantly reduces GC pressure. When changing these core collection types, it is critical to verify downstream logic (like Skill.getTargetList) that might rely on 'instanceof LinkedList' checks to ensure mutability before filtering.
+**Action:** Always favor ArrayList for collection results in hot paths and ensure dependent instanceof checks are updated to maintain functional correctness.
