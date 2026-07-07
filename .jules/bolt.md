@@ -1,0 +1,3 @@
+## 2026-07-04 - Collection Type Anti-Pattern
+**Learning:** `LinkedList` is a significant performance anti-pattern in hot-path iteration (like visibility checks and packet construction) due to poor CPU cache locality and higher allocation overhead. `ArrayList` is almost always better for these use cases in this codebase. However, when refactoring to `ArrayList`, it's critical to check for `instanceof LinkedList` checks in dependent logic (e.g., `Skill.java` monster buff filtering) to prevent functional regressions.
+**Action:** Always prefer `ArrayList` for iteration-heavy collections. When refactoring, search for `instanceof LinkedList` usage that might be guarding mutation logic on those collections.
