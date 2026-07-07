@@ -616,16 +616,33 @@ public class World
 		}
 	}
 	
+	/**
+	 * Gets visible objects from the world.
+	 * @param <T> the world object type
+	 * @param object the object to check
+	 * @param clazz the class of the world object
+	 * @return a list of visible objects
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz)
 	{
-		final List<T> result = new LinkedList<>();
+		// Using ArrayList for better CPU cache locality in visibility hot paths.
+		final List<T> result = new ArrayList<>();
 		forEachVisibleObject(object, clazz, result::add);
 		return result;
 	}
 	
+	/**
+	 * Gets visible objects from the world.
+	 * @param <T> the world object type
+	 * @param object the object to check
+	 * @param clazz the class of the world object
+	 * @param predicate the predicate to filter the objects
+	 * @return a list of visible objects
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		// Using ArrayList for better CPU cache locality in visibility hot paths.
+		final List<T> result = new ArrayList<>();
 		forEachVisibleObject(object, clazz, o ->
 		{
 			if (predicate.test(o))
@@ -676,16 +693,35 @@ public class World
 		}
 	}
 	
+	/**
+	 * Gets visible objects from the world in a given range.
+	 * @param <T> the world object type
+	 * @param object the object to check
+	 * @param clazz the class of the world object
+	 * @param range the range to check
+	 * @return a list of visible objects
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range)
 	{
-		final List<T> result = new LinkedList<>();
+		// Using ArrayList for better CPU cache locality in visibility hot paths.
+		final List<T> result = new ArrayList<>();
 		forEachVisibleObjectInRange(object, clazz, range, result::add);
 		return result;
 	}
 	
+	/**
+	 * Gets visible objects from the world in a given range.
+	 * @param <T> the world object type
+	 * @param object the object to check
+	 * @param clazz the class of the world object
+	 * @param range the range to check
+	 * @param predicate the predicate to filter the objects
+	 * @return a list of visible objects
+	 */
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range, Predicate<T> predicate)
 	{
-		final List<T> result = new LinkedList<>();
+		// Using ArrayList for better CPU cache locality in visibility hot paths.
+		final List<T> result = new ArrayList<>();
 		forEachVisibleObjectInRange(object, clazz, range, o ->
 		{
 			if (predicate.test(o))
