@@ -617,7 +617,7 @@ public class World
 	
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz)
 	{
-		// Optimized to ArrayList for better CPU cache locality in hot-path visibility checks.
+		// ArrayList is used instead of LinkedList for better performance on hot paths.
 		final List<T> result = new ArrayList<>();
 		forEachVisibleObject(object, clazz, result::add);
 		return result;
@@ -625,7 +625,6 @@ public class World
 	
 	public <T extends WorldObject> List<T> getVisibleObjects(WorldObject object, Class<T> clazz, Predicate<T> predicate)
 	{
-		// Optimized to ArrayList for better CPU cache locality in hot-path visibility checks.
 		final List<T> result = new ArrayList<>();
 		forEachVisibleObject(object, clazz, o ->
 		{
@@ -679,7 +678,7 @@ public class World
 	
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range)
 	{
-		// Optimized to ArrayList for better CPU cache locality in hot-path visibility checks.
+		// ArrayList is used instead of LinkedList for better performance on hot paths.
 		final List<T> result = new ArrayList<>();
 		forEachVisibleObjectInRange(object, clazz, range, result::add);
 		return result;
@@ -687,7 +686,6 @@ public class World
 	
 	public <T extends WorldObject> List<T> getVisibleObjectsInRange(WorldObject object, Class<T> clazz, int range, Predicate<T> predicate)
 	{
-		// Optimized to ArrayList for better CPU cache locality in hot-path visibility checks.
 		final List<T> result = new ArrayList<>();
 		forEachVisibleObjectInRange(object, clazz, range, o ->
 		{
