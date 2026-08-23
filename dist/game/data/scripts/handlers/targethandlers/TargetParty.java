@@ -16,7 +16,7 @@
  */
 package handlers.targethandlers;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.l2jmobius.gameserver.handler.ITargetTypeHandler;
@@ -35,7 +35,7 @@ public class TargetParty implements ITargetTypeHandler
 	@Override
 	public List<WorldObject> getTargetList(Skill skill, Creature creature, boolean onlyFirst, Creature target)
 	{
-		final List<WorldObject> targetList = new LinkedList<>();
+		final List<WorldObject> targetList = new ArrayList<>();
 		
 		// Check for null target or any other invalid target
 		if ((target == null) || target.isDead() || (target == creature))

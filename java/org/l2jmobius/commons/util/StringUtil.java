@@ -20,8 +20,6 @@
  */
 package org.l2jmobius.commons.util;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.StringJoiner;
 import java.util.StringTokenizer;
 
@@ -75,12 +73,12 @@ public class StringUtil
 	{
 		// Calculate the total length and store converted strings.
 		int totalLength = sb.length();
-		final List<String> strings = new LinkedList<>();
-		for (Object arg : args)
+		final String[] strings = new String[args.length];
+		for (int i = 0; i < args.length; i++)
 		{
-			final String objectAsString = String.valueOf(arg);
+			final String objectAsString = String.valueOf(args[i]);
 			totalLength += objectAsString.length();
-			strings.add(objectAsString);
+			strings[i] = objectAsString;
 		}
 		
 		sb.ensureCapacity(totalLength);
@@ -125,12 +123,12 @@ public class StringUtil
 	{
 		// Calculate the total length and store converted strings.
 		int totalLength = 0;
-		final List<String> strings = new LinkedList<>();
-		for (Object arg : args)
+		final String[] strings = new String[args.length];
+		for (int i = 0; i < args.length; i++)
 		{
-			final String objectAsString = String.valueOf(arg);
+			final String objectAsString = String.valueOf(args[i]);
 			totalLength += objectAsString.length();
-			strings.add(objectAsString);
+			strings[i] = objectAsString;
 		}
 		
 		// Append each stored string.

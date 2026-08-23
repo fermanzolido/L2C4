@@ -16,7 +16,7 @@
  */
 package handlers.targethandlers;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.l2jmobius.gameserver.config.PlayerConfig;
@@ -36,7 +36,7 @@ public class PartyNotMe implements ITargetTypeHandler
 	@Override
 	public List<WorldObject> getTargetList(Skill skill, Creature creature, boolean onlyFirst, Creature target)
 	{
-		final List<WorldObject> targetList = new LinkedList<>();
+		final List<WorldObject> targetList = new ArrayList<>();
 		if (creature.getParty() != null)
 		{
 			final List<Player> partyList = creature.getParty().getMembers();

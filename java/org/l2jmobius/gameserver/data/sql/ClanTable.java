@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -68,6 +69,7 @@ public class ClanTable
 {
 	private static final Logger LOGGER = Logger.getLogger(ClanTable.class.getName());
 	private final Map<Integer, Clan> _clans = new ConcurrentHashMap<>();
+	private final Map<String, Clan> _clansByName = new ConcurrentHashMap<>();
 	
 	protected ClanTable()
 	{
@@ -98,6 +100,7 @@ public class ClanTable
 		{
 			final Clan clan = new Clan(cid);
 			_clans.put(cid, clan);
+			_clansByName.put(clan.getName().toLowerCase(Locale.ENGLISH), clan);
 			if (clan.getDissolvingExpiryTime() != 0)
 			{
 				scheduleRemoveClan(clan.getId());
@@ -140,15 +143,19 @@ public class ClanTable
 	
 	public Clan getClanByName(String clanName)
 	{
-		for (Clan clan : _clans.values())
+		return (clanName == null) || clanName.isEmpty() ? null : _clansByName.get(clanName.toLowerCase(Locale.ENGLISH));
+	}
+
+	public synchronized void updateClanName(Clan clan, String oldName)
+	{
+		if (oldName != null)
 		{
-			if (clan.getName().equalsIgnoreCase(clanName))
-			{
-				return clan;
-			}
+			_clansByName.remove(oldName.toLowerCase(Locale.ENGLISH));
 		}
-		
-		return null;
+		if (clan.getName() != null)
+		{
+			_clansByName.put(clan.getName().toLowerCase(Locale.ENGLISH), clan);
+		}
 	}
 	
 	/**
@@ -216,6 +223,7 @@ public class ClanTable
 		player.setClanPrivileges(privileges);
 		
 		_clans.put(clan.getId(), clan);
+		_clansByName.put(clan.getName().toLowerCase(Locale.ENGLISH), clan);
 		
 		// should be update packet only
 		player.sendPacket(new PledgeShowInfoUpdate(clan));
@@ -275,6 +283,7 @@ public class ClanTable
 		}
 		
 		_clans.remove(clanId);
+		_clansByName.remove(clan.getName().toLowerCase(Locale.ENGLISH));
 		IdManager.getInstance().releaseId(clanId);
 		
 		try (Connection con = DatabaseFactory.getConnection())
@@ -538,9 +547,31 @@ public class ClanTable
 	
 	private void updateClanRanks()
 	{
-		for (Clan clan : _clans.values())
+		final List<Clan> clans = new ArrayList<>(_clans.values());
+		if (clans.isEmpty())
 		{
-			clan.setRank(getClanRank(clan));
+			return;
+		}
+
+		// Optimization: Sort by level descending (O(N log N)) to maintain correct ranking.
+		clans.sort((c1, c2) -> Integer.compare(c2.getLevel(), c1.getLevel()));
+
+		int rank = 1;
+		for (int i = 0; i < clans.size(); i++)
+		{
+			final Clan clan = clans.get(i);
+			if (clan.getLevel() < 3)
+			{
+				clan.setRank(0);
+			}
+			else
+			{
+				if ((i > 0) && (clan.getLevel() < clans.get(i - 1).getLevel()))
+				{
+					rank = i + 1;
+				}
+				clan.setRank(rank);
+			}
 		}
 	}
 	
