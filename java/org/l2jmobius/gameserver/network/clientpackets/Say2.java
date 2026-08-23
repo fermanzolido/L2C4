@@ -21,6 +21,7 @@
 package org.l2jmobius.gameserver.network.clientpackets;
 
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import org.l2jmobius.gameserver.config.GeneralConfig;
 import org.l2jmobius.gameserver.config.ServerConfig;
@@ -236,11 +237,11 @@ public class Say2 extends ClientPacket
 	private void checkText()
 	{
 		String filteredText = _text;
-		for (String pattern : ServerConfig.FILTER_LIST)
+		for (Pattern pattern : ServerConfig.FILTER_PATTERNS)
 		{
-			filteredText = filteredText.replaceAll("(?i)" + pattern, GeneralConfig.CHAT_FILTER_CHARS);
+			filteredText = pattern.matcher(filteredText).replaceAll(GeneralConfig.CHAT_FILTER_CHARS);
 		}
-		
+
 		_text = filteredText;
 	}
 	

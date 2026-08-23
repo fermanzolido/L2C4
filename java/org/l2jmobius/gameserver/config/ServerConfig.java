@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -112,6 +113,7 @@ public class ServerConfig {
 	// Other
 	public static boolean RESERVE_HOST_ON_LOGIN = false;
 	public static List<String> FILTER_LIST;
+	public static List<Pattern> FILTER_PATTERNS;
 	public static int SERVER_ID;
 	public static byte[] HEX_ID;
 
@@ -231,16 +233,34 @@ public class ServerConfig {
 	 * Loads the chat filter words from the specified file.<br>
 	 * This method reads lines from the {@code CHAT_FILTER_FILE}, trims whitespace
 	 * and ignores empty lines or lines starting with a '#' character.<br>
-	 * The filtered words are collected into the {@code FILTER_LIST}. If an error
-	 * occurs during file reading, a warning message is logged.
+	 * The filtered words are collected into the {@code FILTER_LIST}, and each is precompiled
+	 * into a case-insensitive {@link Pattern} in {@code FILTER_PATTERNS} so chat messages don't
+	 * pay for regex compilation on every filter word, every time a player speaks.
+	 * If an error occurs during file reading, a warning message is logged.
 	 */
 	private static void loadChatFilter() {
 		try {
 			FILTER_LIST = Files.lines(Paths.get(CHAT_FILTER_FILE), StandardCharsets.UTF_8).map(String::trim)
 					.filter(line -> (!line.isEmpty() && (line.charAt(0) != '#'))).collect(Collectors.toList());
+			FILTER_PATTERNS = FILTER_LIST.stream().map(ServerConfig::compileFilterPattern).filter(Objects::nonNull).collect(Collectors.toList());
 			LOGGER.info("Loaded " + FILTER_LIST.size() + " Filter Words.");
 		} catch (IOException e) {
 			LOGGER.log(Level.WARNING, "Error while loading chat filter words!", e);
+		}
+	}
+
+	/**
+	 * Compiles a single chat filter word into a case-insensitive {@link Pattern}.<br>
+	 * Invalid regex entries are logged and skipped instead of failing the whole load.
+	 * @param pattern the raw filter word/regex read from {@code CHAT_FILTER_FILE}
+	 * @return the compiled pattern, or {@code null} if it is not a valid regex
+	 */
+	private static Pattern compileFilterPattern(String pattern) {
+		try {
+			return Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
+		} catch (PatternSyntaxException e) {
+			LOGGER.log(Level.WARNING, "Invalid chat filter pattern skipped: " + pattern, e);
+			return null;
 		}
 	}
 
