@@ -18,7 +18,6 @@ package org.l2jmobius.gameserver.model.instancezone;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
