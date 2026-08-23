@@ -212,7 +212,6 @@ public class InstanceWorld
 	 */
 	public List<Npc> getNpcs(int... id)
 	{
-		// Optimized to ArrayList with pre-allocated capacity to reduce resizing overhead.
 		final List<Npc> result = new ArrayList<>(_instance.getNpcs().size());
 		for (Npc npc : _instance.getNpcs())
 		{
@@ -236,7 +235,6 @@ public class InstanceWorld
 	@SuppressWarnings("unchecked")
 	public final <T extends Creature> List<T> getNpcs(Class<T> clazz, int... ids)
 	{
-		// Optimized to ArrayList with pre-allocated capacity to reduce resizing overhead.
 		final List<T> result = new ArrayList<>(_instance.getNpcs().size());
 		for (Npc npc : _instance.getNpcs())
 		{
@@ -255,7 +253,6 @@ public class InstanceWorld
 	 */
 	public List<Npc> getAliveNpcs()
 	{
-		// Optimized to ArrayList with pre-allocated capacity to reduce resizing overhead.
 		final List<Npc> result = new ArrayList<>(_instance.getNpcs().size());
 		for (Npc npc : _instance.getNpcs())
 		{
@@ -275,7 +272,6 @@ public class InstanceWorld
 	 */
 	public List<Npc> getAliveNpcs(int... id)
 	{
-		// Optimized to ArrayList with pre-allocated capacity to reduce resizing overhead.
 		final List<Npc> result = new ArrayList<>(_instance.getNpcs().size());
 		for (Npc npc : _instance.getNpcs())
 		{
@@ -299,7 +295,6 @@ public class InstanceWorld
 	@SuppressWarnings("unchecked")
 	public final <T extends Creature> List<T> getAliveNpcs(Class<T> clazz, int... ids)
 	{
-		// Optimized to ArrayList with pre-allocated capacity to reduce resizing overhead.
 		final List<T> result = new ArrayList<>(_instance.getNpcs().size());
 		for (Npc npc : _instance.getNpcs())
 		{
