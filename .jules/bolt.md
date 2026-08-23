@@ -1,0 +1,3 @@
+## 2026-07-04 - [Re-optimization of World Visibility and Collection Hot Paths]
+**Learning:** LinkedList is a performance anti-pattern in visibility and network packet construction hot paths due to poor CPU cache locality and allocation overhead. Previous optimizations were missing, likely due to regressions or environment resets. When refactoring World visibility to ArrayList, the monster buff filtering in Skill.java must be updated to handle both list types to avoid functional regressions in AI.
+**Action:** Always favor ArrayList for collection results in hot-path methods. When changing returned collection types, grep for instanceof checks in dependent logic.
