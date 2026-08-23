@@ -20,18 +20,14 @@
  */
 package org.l2jmobius.gameserver.model.actor.instance;
 
-import java.util.List;
-
 import org.l2jmobius.gameserver.config.NpcConfig;
 import org.l2jmobius.gameserver.config.custom.FakePlayersConfig;
-import org.l2jmobius.gameserver.model.WorldObject;
 import org.l2jmobius.gameserver.model.actor.Attackable;
 import org.l2jmobius.gameserver.model.actor.Creature;
 import org.l2jmobius.gameserver.model.actor.enums.creature.InstanceType;
 import org.l2jmobius.gameserver.model.actor.holders.npc.MinionList;
 import org.l2jmobius.gameserver.model.actor.templates.NpcTemplate;
 import org.l2jmobius.gameserver.model.effects.EffectFlag;
-import org.l2jmobius.gameserver.model.skill.Skill;
 
 /**
  * This class manages all Monsters.
@@ -205,19 +201,5 @@ public class Monster extends Attackable
 	public boolean giveRaidCurse()
 	{
 		return (isRaidMinion() && (_master != null)) ? _master.giveRaidCurse() : super.giveRaidCurse();
-	}
-	
-	@Override
-	public void doCast(Skill skill, Creature target, List<WorldObject> targets)
-	{
-		// Might need some exceptions here, but it will prevent the monster buffing player bug.
-		if (!skill.hasNegativeEffect() && (getTarget() != null) && getTarget().isPlayer())
-		{
-			setCastingNow(false);
-			setCastingSimultaneouslyNow(false);
-			return;
-		}
-		
-		super.doCast(skill, target, targets);
 	}
 }

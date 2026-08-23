@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1002,16 +1001,7 @@ public class Skill
 		{
 			try
 			{
-				final List<WorldObject> result = handler.getTargetList(this, creature, onlyFirst, target);
-				
-				// Prevent monsters buffing playables.
-				// Supporting both ArrayList and LinkedList to handle optimized visibility results and legacy script handlers.
-				if ((creature != null) && creature.isMonster() && !hasNegativeEffect() && ((result instanceof ArrayList) || (result instanceof LinkedList)))
-				{
-					result.removeIf(wo -> wo.isPlayable());
-				}
-				
-				return result;
+				return handler.getTargetList(this, creature, onlyFirst, target);
 			}
 			catch (Exception e)
 			{

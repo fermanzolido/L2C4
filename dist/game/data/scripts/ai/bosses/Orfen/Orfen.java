@@ -306,7 +306,8 @@ public class Orfen extends Script
 		}
 		else if ((npcId == RIBA_IREN) && !npc.isCastingNow() && ((npc.getCurrentHp() - damage) < (npc.getMaxHp() / 2.0)))
 		{
-			npc.setTarget(attacker);
+			// Orfen Heal is a beneficial ONE target skill, it must be cast on self and not on the attacker.
+			npc.setTarget(npc);
 			npc.doCast(SkillData.getInstance().getSkill(4516, 1));
 		}
 	}
