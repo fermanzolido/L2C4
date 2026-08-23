@@ -1,0 +1,56 @@
+# Registro de decisiones de performance
+
+Este archivo es la memoria de las revisiones automáticas de performance.
+**Leelo antes de proponer cualquier optimización.** Si algo ya está acá como
+aplicado o como rechazado, no lo vuelvas a proponer.
+
+Regla importante: **este archivo nunca debe modificarse dentro de la rama de
+una PR de optimización.** Se actualiza solo con un commit aparte sobre `main`.
+Commitearlo en cada rama fue exactamente lo que puso en conflicto entre sí a
+las 143 PRs del bot anterior.
+
+---
+
+## Ya aplicado en main (no re-proponer)
+
+| Área | Qué se hizo |
+|---|---|
+| `CharInfoTable.getIdByName` | Índice `_namesLower` en minúsculas para lookup O(1), mantenido en add/remove y en los fallbacks a BD. Usa `Locale.ENGLISH`. |
+| `ClanTable.getClanByName` | Índice `_clansByName`, mantenido en alta, rename y baja. Usa `Locale.ENGLISH`. |
+| `Quest.setQuestToOfflineMembers` | JDBC batching + try-with-resources + guarda de lista vacía. |
+| `Quest.deleteQuestToOfflineMembers` | try-with-resources (fix de leak de `PreparedStatement`). |
+| `OfflineTraderTable.storeOffliners` | Batches ejecutados fuera del bucle. |
+| `GrandBossManager.storeMe` | `executeUpdate` en bucle reemplazado por batch. |
+| `RaidBossPointsManager` | Cache `_totalPoints`: `getPointsByOwnerId` O(1), ranking O(n). Se limpia en `cleanUp()`. |
+| `FriendListExtended` | N+1 reemplazado por una query `IN (...)`, preservando el orden de la lista. |
+| `SchedulingPattern`, `BuyListData`, `MultisellData` | Regex precompilados en constantes estáticas. |
+| `ServerConfig` + `PetNameTable` + `VillageMaster` | `PET_NAME_TEMPLATE` y `CLAN_NAME_TEMPLATE` compilados una vez a `Pattern` en vez de por llamada. |
+| `StringUtil.append/concat` | `LinkedList` intermedia reemplazada por `String[]` dimensionado. |
+| `World`, `InstanceWorld`, `SkillCoolTime`, `CharSelectionInfo` | Ya usan `ArrayList` en los hot paths de visibilidad y packets. |
+| Target handlers (20 archivos) + `Creature.getTargetList` | `LinkedList` → `ArrayList` en el hot path de targeting. |
+| `EffectList`, `Inventory`, `ItemContainer`, `PlayerInventory` | Nueve acumuladores locales `LinkedList` → `ArrayList`. |
+
+## Rechazado con motivo (no re-proponer sin argumento nuevo)
+
+| Propuesta | Por qué se rechazó |
+|---|---|
+| Pre-dimensionar las listas de visibilidad de `World` contando primero los objetos de las regiones vecinas | Cuesta una pasada completa extra solo para evitar el crecimiento amortizado de `ArrayList`. Probablemente más lento que no hacer nada. |
+| Dimensionar listas en target handlers con `skill.getAffectLimit()` | Ese método llama a `Rnd.get()` internamente, y los handlers ya lo llaman para el tope real de objetivos. Dimensionar así produce una segunda tirada de RNG distinta en cada casteo. |
+| Batchear raid points por party (nueva API `addPoints(Map, int)`) | Requiere cambiar la API de `RaidBossPointsManager` y solo ayuda al matar un raid boss. Ganancia marginal, riesgo de reemplazar una implementación ya verificada. |
+| Sacar `synchronized` de `CharInfoTable.doesCharNameExist` | El atajo O(1) ya está dentro del método; mantener el lock preserva la serialización de la que dependía el código original. |
+| Hoistear `_instance.getNpcs()` a una variable local en `InstanceWorld` | `getNpcs()` solo devuelve un campo. La JIT lo inlinea; el cambio es cosmético. |
+| Reescribir comentarios de optimizaciones existentes | Sin cambio funcional. Es ruido en el diff. |
+
+## Conocido, pendiente de decisión (no es una optimización)
+
+- `Skill.java` (~línea 1005): el filtro que impide que los monstruos buffeen
+  jugadores solo corre si la lista de objetivos es `ArrayList` o `LinkedList`.
+  Muchos handlers de objetivo único devuelven `Collections.singletonList(...)`,
+  así que para esas skills el filtro nunca se aplica. Es preexistente. Hay que
+  decidir si es intencional antes de tocarlo.
+
+## Quedan `LinkedList` a propósito
+
+No todo `LinkedList` es un error. Antes de convertir uno, verificá que sea un
+acumulador local y no se use con semántica de cola (`addFirst`, `removeFirst`,
+`poll`) ni con borrado desde el medio.
