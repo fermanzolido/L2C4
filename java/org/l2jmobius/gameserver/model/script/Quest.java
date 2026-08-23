@@ -5645,20 +5645,18 @@ public class Quest implements IEventTimerEvent<String>, IEventTimerCancel<String
 		}
 	}
 
-	private void deleteQuestToOfflineMembers(int clanId) {
-		try (Connection con = DatabaseFactory.getConnection()) {
-			final PreparedStatement stm = con.prepareStatement(
-					"DELETE FROM character_quests WHERE name = ? and charId IN (SELECT charId FROM characters WHERE clanid = ? AND online = 0)");
+	private void deleteQuestToOfflineMembers(int clanId)
+	{
+		try (Connection con = DatabaseFactory.getConnection();
+			PreparedStatement stm = con.prepareStatement("DELETE FROM character_quests WHERE name = ? and charId IN (SELECT charId FROM characters WHERE clanid = ? AND online = 0)"))
+		{
 			stm.setString(1, getName());
 			stm.setInt(2, clanId);
 			stm.executeUpdate();
-
-			stm.close();
-			con.close();
-		} catch (Exception e) {
-			LOGGER.log(Level.WARNING,
-					"Error in deleting infos from character_quest table from Quest.java on method deleteQuestToOfflineMembers");
-			LOGGER.info(e.toString());
+		}
+		catch (Exception e)
+		{
+			LOGGER.log(Level.WARNING, "Error in deleting infos from character_quest table from Quest.java on method deleteQuestToOfflineMembers: " + e.getMessage(), e);
 		}
 	}
 
