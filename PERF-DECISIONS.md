@@ -59,6 +59,19 @@ las 143 PRs del bot anterior.
   otros); varios son buffers legítimos, pero ninguno está auditado. No lo
   toques desde una PR de performance.
 
+  **Auditado el 2026-08-23: no quedaron casos.** Se revisaron las 74 skills
+  distintas que castean los scripts de `ai/` (no solo los 13 con el patrón
+  `setTarget` + `doCast` — el barrido amplio agregó `QueenAnt`, que usa
+  `useMagic`). Solo 4 son beneficiosas con target distinto de SELF: Angel Heal
+  (4133), Orfen Heal (4516) y los dos heals de Queen Ant (4020/4024). Las
+  cuatro apuntan siempre a NPCs — a sí mismo, al `caller` de `onFactionCall`,
+  a la larva o a la reina — nunca a un jugador. Todo lo que un monstruo lanza
+  sobre un jugador tiene `effectPoint` -100 o -1, o sea hostil.
+
+  Los buffers que sí apuntan a jugadores a propósito (Ketra, Varka, Cabale,
+  ArenaManager, CastleChamberlain) son `Folk`, `Warehouse` o `Merchant`, no
+  `Monster`, así que el guard nunca les aplicó: exigía `isMonster()`.
+
 ## Quedan `LinkedList` a propósito
 
 No todo `LinkedList` es un error. Antes de convertir uno, verificá que sea un
