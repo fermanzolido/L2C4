@@ -41,13 +41,23 @@ las 143 PRs del bot anterior.
 | Hoistear `_instance.getNpcs()` a una variable local en `InstanceWorld` | `getNpcs()` solo devuelve un campo. La JIT lo inlinea; el cambio es cosmético. |
 | Reescribir comentarios de optimizaciones existentes | Sin cambio funcional. Es ruido en el diff. |
 
-## Conocido, pendiente de decisión (no es una optimización)
+## Resuelto
 
-- `Skill.java` (~línea 1005): el filtro que impide que los monstruos buffeen
-  jugadores solo corre si la lista de objetivos es `ArrayList` o `LinkedList`.
-  Muchos handlers de objetivo único devuelven `Collections.singletonList(...)`,
-  así que para esas skills el filtro nunca se aplica. Es preexistente. Hay que
-  decidir si es intencional antes de tocarlo.
+- **Filtro anti-buff de monstruos en `Skill.java`** (resuelto 2026-08-23). El
+  guard `(result instanceof ArrayList || result instanceof LinkedList)` nunca
+  corría para las skills de objetivo único, porque esos handlers devuelven
+  `Collections.singletonList` o `emptyList` — y tampoco podía funcionar sobre
+  ellas, al ser inmutables (`removeIf` habría tirado excepción). Se eliminó el
+  guard y se arregló el caso real en el origen: Riba Iren (`Orfen.java`)
+  casteaba heal 4516 sobre su atacante en vez de sobre sí mismo. También se
+  quitó el override muerto `doCast` de `Monster.java`.
+
+  **Pendiente relacionado, no es performance:** la protección efectiva quedó
+  solo en `AttackableAI`, que los scripts de AI con `setTarget(player)` a mano
+  esquivan. Hay 13 scripts con el patrón `setTarget` + `doCast` (Baium,
+  Valakas, Zaken, KetraOrcSupport, VarkaSilenosSupport, CabaleBuffer, entre
+  otros); varios son buffers legítimos, pero ninguno está auditado. No lo
+  toques desde una PR de performance.
 
 ## Quedan `LinkedList` a propósito
 
