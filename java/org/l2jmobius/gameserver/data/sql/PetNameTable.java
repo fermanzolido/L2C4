@@ -26,8 +26,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 import org.l2jmobius.commons.database.DatabaseFactory;
 import org.l2jmobius.commons.util.StringUtil;
@@ -68,21 +66,7 @@ public class PetNameTable
 	public boolean isValidPetName(String name)
 	{
 		// Only allow alphanumeric names.
-		if (!StringUtil.isAlphaNumeric(name))
-		{
-			return false;
-		}
-		
-		try
-		{
-			Pattern pattern = Pattern.compile(ServerConfig.PET_NAME_TEMPLATE);
-			return pattern.matcher(name).matches();
-		}
-		catch (PatternSyntaxException e)
-		{
-			LOGGER.warning(getClass().getSimpleName() + ": Invalid PetNameTemplate regex in config: " + ServerConfig.PET_NAME_TEMPLATE);
-			return true; // If regex is broken, fallback to allowing all names.
-		}
+		return StringUtil.isAlphaNumeric(name) && ServerConfig.PET_NAME_TEMPLATE_PATTERN.matcher(name).matches();
 	}
 	
 	private static class SingletonHolder

@@ -937,17 +937,6 @@ public class VillageMaster extends Folk
 	
 	private static boolean isValidName(String name)
 	{
-		Pattern pattern;
-		try
-		{
-			pattern = Pattern.compile(ServerConfig.CLAN_NAME_TEMPLATE);
-		}
-		catch (PatternSyntaxException e)
-		{
-			LOGGER.warning("ERROR: Wrong pattern for clan name!");
-			pattern = Pattern.compile(".*");
-		}
-		
-		return pattern.matcher(name).matches();
+		return ServerConfig.CLAN_NAME_TEMPLATE_PATTERN.matcher(name).matches();
 	}
 }
