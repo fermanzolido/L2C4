@@ -29,6 +29,7 @@ las 143 PRs del bot anterior.
 | `World`, `InstanceWorld`, `SkillCoolTime`, `CharSelectionInfo` | Ya usan `ArrayList` en los hot paths de visibilidad y packets. |
 | Target handlers (20 archivos) + `Creature.getTargetList` | `LinkedList` → `ArrayList` en el hot path de targeting. |
 | `EffectList`, `Inventory`, `ItemContainer`, `PlayerInventory` | Nueve acumuladores locales `LinkedList` → `ArrayList`. |
+| `ServerConfig` + `Say2.checkText` | Filtro de chat: `replaceAll("(?i)" + palabra, ...)` compilaba el regex de cada palabra en **cada mensaje de chat**. Ahora se precompilan a `List<Pattern>` con `CASE_INSENSITIVE` al cargar la config. Regex inválido se loguea y se saltea en la carga en vez de tirar excepción durante el chat. (PR #199, mergeada 2026-08-23) |
 
 ## Rechazado con motivo (no re-proponer sin argumento nuevo)
 
