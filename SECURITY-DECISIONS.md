@@ -24,7 +24,13 @@ Al abrir una PR de seguridad:
 
 ## Ya arreglado
 
-_(vacío por ahora)_
+- **PR #202** (2026-08-24): en el handler de multisell (`MultiSellChoose`), se
+  corrigieron dos chequeos de desbordamiento que comparaban una
+  multiplicación/suma de cantidad ya calculada en `int` contra
+  `Integer.MAX_VALUE` — la comparación nunca podía dispararse porque el
+  cálculo ya se había desbordado antes de llegar a ella. Ahora la comparación
+  se hace en `long`, así una cantidad que desbordaría se detecta y la
+  operación se cancela en vez de continuar con un valor incorrecto.
 
 ## Rechazado con motivo
 
