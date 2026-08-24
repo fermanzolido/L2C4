@@ -65,7 +65,7 @@ public class RequestBuySeed extends ClientPacket
 		{
 			final int itemId = readInt();
 			final int cnt = readInt();
-			if ((cnt > Integer.MAX_VALUE) || (cnt < 1) || (itemId < 1))
+			if ((cnt < 1) || (itemId < 1))
 			{
 				_items = null;
 				return;

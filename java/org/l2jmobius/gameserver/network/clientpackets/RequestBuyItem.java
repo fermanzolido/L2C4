@@ -67,7 +67,7 @@ public class RequestBuyItem extends ClientPacket
 		{
 			final int itemId = readInt();
 			final int count = readInt();
-			if ((count > Integer.MAX_VALUE) || (itemId < 1) || (count < 1))
+			if ((itemId < 1) || (count < 1))
 			{
 				_items = null;
 				return;

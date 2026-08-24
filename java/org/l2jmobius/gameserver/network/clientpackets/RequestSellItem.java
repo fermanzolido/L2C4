@@ -70,7 +70,7 @@ public class RequestSellItem extends ClientPacket
 			final int objectId = readInt();
 			final int itemId = readInt();
 			final int count = readInt();
-			if ((count > Integer.MAX_VALUE) || (objectId < 1) || (itemId < 1) || (count < 1))
+			if ((objectId < 1) || (itemId < 1) || (count < 1))
 			{
 				_items = null;
 				return;

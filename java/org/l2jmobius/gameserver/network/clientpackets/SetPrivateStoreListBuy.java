@@ -62,7 +62,7 @@ public class SetPrivateStoreListBuy extends ClientPacket
 			
 			final int cnt = readInt();
 			final int price = readInt();
-			if ((cnt > Integer.MAX_VALUE) || (itemId < 1) || (cnt < 1) || (price < 0))
+			if ((itemId < 1) || (cnt < 1) || (price < 0))
 			{
 				_items = null;
 				return;

@@ -62,7 +62,7 @@ public class RequestPrivateStoreSell extends ClientPacket
 			readShort(); // Price/count validation.
 			final int cnt = readInt();
 			final int price = readInt();
-			if ((count > Integer.MAX_VALUE) || (objectId < 1) || (itemId < 1) || (cnt < 1) || (price < 0))
+			if ((objectId < 1) || (itemId < 1) || (cnt < 1) || (price < 0))
 			{
 				_items = null;
 				return;
