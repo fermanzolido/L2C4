@@ -15,6 +15,7 @@ dentro de la rama de una PR.
 | `CharInfoTable.java` | Import `Map.Entry` sin uso. |
 | `RaidBossPointsManager.java` | Bloque javadoc duplicado. |
 | `LoginServer.java` | Import `java.net.ServerSocket` sin uso (PR #203). |
+| `VillageMaster.java`, `Teleporter.java` | Imports sin uso: `Pattern`, `PatternSyntaxException`, `StringUtil` (PR #205). |
 
 ## Conocido, pendiente de decisión humana
 
