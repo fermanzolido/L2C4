@@ -62,7 +62,7 @@ public class SendWareHouseDepositList extends ClientPacket
 		{
 			final int objId = readInt();
 			final int count = readInt();
-			if ((count > Integer.MAX_VALUE) || (objId < 1) || (count < 1))
+			if ((objId < 1) || (count < 1))
 			{
 				_items = null;
 				return;

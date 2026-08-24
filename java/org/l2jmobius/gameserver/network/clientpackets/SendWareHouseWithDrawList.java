@@ -61,7 +61,7 @@ public class SendWareHouseWithDrawList extends ClientPacket
 		{
 			final int objId = readInt();
 			final int cnt = readInt();
-			if ((cnt > Integer.MAX_VALUE) || (objId < 1) || (cnt < 0))
+			if ((objId < 1) || (cnt < 0))
 			{
 				_items = null;
 				return;

@@ -60,12 +60,7 @@ public class RequestPrivateStoreBuy extends ClientPacket
 		for (int i = 0; i < count; i++)
 		{
 			final int objectId = readInt();
-			int cnt = readInt();
-			if (cnt > Integer.MAX_VALUE)
-			{
-				cnt = Integer.MAX_VALUE;
-			}
-			
+			final int cnt = readInt();
 			final int price = readInt();
 			if ((objectId < 1) || (cnt < 1) || (price < 0))
 			{

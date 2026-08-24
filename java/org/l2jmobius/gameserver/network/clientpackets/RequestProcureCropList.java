@@ -55,11 +55,7 @@ public class RequestProcureCropList extends ClientPacket {
 			final int objId = readInt();
 			final int itemId = readInt();
 			final int manorId = readInt();
-			int cnt = readInt();
-			if (cnt > Integer.MAX_VALUE) {
-				cnt = Integer.MAX_VALUE;
-			}
-
+			final int cnt = readInt();
 			if ((objId < 1) || (itemId < 1) || (manorId < 0) || (cnt < 0)) {
 				_items = null;
 				return;
