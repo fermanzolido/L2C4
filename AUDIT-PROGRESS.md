@@ -41,14 +41,13 @@ la única clase de bug que puede arruinar una economía de forma irreversible.
 
 ## `model/itemcontainer` — en curso
 
-**Leído:** `ItemContainer.java` (661 líneas, la clase base) e `Inventory.java`
-parcialmente — las vías de integridad de ítems: `dropItem`, `addItem`,
-`removeItem`. Falta la lógica de paperdoll (equipar/desequipar) y los
-listeners.
+**Leído:** `ItemContainer.java` completo (661 líneas, la clase base) e
+`Inventory.java` hasta la línea ~930: vías de integridad de ítems (`dropItem`,
+`addItem`, `removeItem`) y el núcleo del paperdoll (`setPaperdollItem`).
 
-**Pendiente:** `Inventory.java` (1333), `PlayerInventory.java` (999),
-`ClanWarehouse`, `Mail`, `PetInventory`, `PlayerFreight`, `PlayerRefund`,
-`PlayerWarehouse`, `Warehouse`.
+**Pendiente:** `equipItem` (183 líneas de lógica por body part), los cinco
+listeners de paperdoll, `restore`, `PlayerInventory.java` (999) y siete
+archivos chicos.
 
 ### Evaluación de la clase base
 
@@ -68,6 +67,7 @@ esperado:
 |---|---|
 | Bajo | `MULTIPLE_ITEM_DROP` gobierna dos cosas distintas: tirar ítems al piso (`Npc.java:1649`) y **agregar al inventario** (`ItemContainer.java:300`). Si un admin lo pone en `False` pensando en los drops, agregar N ítems no apilables agrega 1 y los otros se pierden en silencio. Hoy no afecta: viene en `True` por defecto y en el `General.ini` que se distribuye. |
 | Medio | `Inventory.dropItem(process, objectId, count, ...)` no validaba `count`. Con un valor negativo, la rama de drop parcial hacía `changeCount(-count)` sobre el ítem de origen, o sea **le sumaba**: duplicación. **No era explotable** — `RequestDropItem` rechaza `count` negativo, cero y mayor al disponible, y el otro llamador con count (`Pet`) pasa `item.getCount()`. El problema real era la inconsistencia: `transferItem` acota internamente y `destroyItem` rechaza internamente, pero este delegaba en el llamador. **Arreglado:** ahora rechaza `count <= 0` y `count > getCount()`. Inocuo, porque todos los llamadores actuales ya cumplían. |
+| Medio | `setPaperdollItem` notificaba `ON_PLAYER_ITEM_UNEQUIP` cuando `old == item`, o sea cuando el slot no cambió y el bloque de trabajo se salteó entero. **Alcanzable desde el cliente:** `UseItem.java:253` mete el cebo de pesca en `PAPERDOLL_LHAND` sin chequear si ya está ahí, así que usar el mismo cebo dos veces seguidas con la caña equipada dispara un unequip que nunca ocurrió. Sin impacto observable hoy porque ningún script escucha ese evento. **Arreglado:** la condición ahora es `(old != null) && (old != item)`. |
 
 ### Sospechas evaluadas y descartadas
 
@@ -80,7 +80,16 @@ esperado:
 - **`destroyAllItems` iterando mientras remueve** — seguro, `_items` es un set
   concurrente.
 
-### Asimetría anotada, sin consecuencia demostrada
+### Asimetrías anotadas, sin consecuencia demostrada
+
+**Cobertura despareja de los eventos de equipar.** `ON_PLAYER_ITEM_UNEQUIP` se
+dispara desde `Inventory.setPaperdollItem`, o sea desde cualquier camino,
+incluidos los internos como restaurar el inventario al loguear.
+`ON_PLAYER_ITEM_EQUIP` se dispara desde `Player.useEquippableItem`, o sea solo
+en el camino iniciado por el jugador. Un ítem equipado por un camino interno no
+genera evento de equip, pero al removerlo sí genera el de unequip. Hoy no rompe
+nada: ningún script del datapack escucha ninguno de los dos.
+
 
 `transferItem` revalida la pertenencia del ítem al contenedor dentro del lock;
 la rama de destrucción parcial de `destroyItem` (`item.getCount() > count`) no

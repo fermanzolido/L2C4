@@ -906,8 +906,10 @@ public abstract class Inventory extends ItemContainer {
 			}
 		}
 
-		// Notify to scripts
-		if (old != null) {
+		// Notify to scripts. Only when something was actually unequipped: when
+		// old == item the block above is skipped and the slot never changed, so
+		// firing the event there would report an unequip that did not happen.
+		if ((old != null) && (old != item)) {
 			final Creature owner = getOwner();
 			if ((owner != null) && owner.isPlayer()
 					&& EventDispatcher.getInstance().hasListener(EventType.ON_PLAYER_ITEM_UNEQUIP, old.getTemplate())) {
