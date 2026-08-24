@@ -21,6 +21,7 @@
 package org.l2jmobius.gameserver.model.stats;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.l2jmobius.commons.util.Rnd;
@@ -96,6 +97,9 @@ public class Formulas {
 	public static final byte SHIELD_DEFENSE_PERFECT_BLOCK = 2; // perfect block
 
 	private static final byte MELEE_ATTACK_RANGE = 40;
+
+	/** Weakness (type 2) trait subset of {@link TraitType#values()}, precomputed once instead of filtering the full enum array on every hit. */
+	private static final TraitType[] WEAKNESS_TRAITS = Arrays.stream(TraitType.values()).filter(traitType -> traitType.getType() == 2).toArray(TraitType[]::new);
 
 	/**
 	 * Return the period between 2 regeneration task (3s for Creature, 5 min for
@@ -1814,12 +1818,10 @@ public class Formulas {
 		}
 
 		double weaknessBonus = 1.0;
-		for (TraitType traitType : TraitType.values()) {
-			if (traitType.getType() == 2) {
-				weaknessBonus *= calcGeneralTraitBonus(attacker, target, traitType, true);
-				if (weaknessBonus == 0) {
-					return 0;
-				}
+		for (TraitType traitType : WEAKNESS_TRAITS) {
+			weaknessBonus *= calcGeneralTraitBonus(attacker, target, traitType, true);
+			if (weaknessBonus == 0) {
+				return 0;
 			}
 		}
 
