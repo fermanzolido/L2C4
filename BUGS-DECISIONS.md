@@ -18,6 +18,8 @@ lo que puso en conflicto entre sí a las 143 PRs del bot anterior.
 | `Monster.java` | Se quitó el override muerto `doCast(Skill, Creature, List<WorldObject>)`. |
 | `Quest.deleteQuestToOfflineMembers` | `PreparedStatement` fuera de try-with-resources: se filtraba si `executeUpdate()` tiraba excepción. |
 | `FriendListExtended.java` | Decidía "amigo online" con `World.getInstance().getPlayer(objId) != null` en vez de `Player.isOnline()`. Durante la ventana de logout (entre que `deleteMe()` marca `_isOnline=false`/persiste `online=0` y que `decayMe()` saca al jugador de `World`), un amigo desconectándose aparecía como online con su `objectId` real en vez de con los datos offline de la DB. |
+| `FriendPacket` y `FriendStatusPacket` | El mismo defecto de `FriendListExtended`, en dos clases hermanas. Corregidas en la PR #204. `FriendPacket` no tiene call sites hoy; se arregló por consistencia. |
+| `ClanHallAuction` (2 sitios) | Chequeaban `World.getInstance().getPlayer(nombre) != null` y después volvían a llamar `getPlayer(nombre)` para mandar el mensaje. Si el jugador se decae entre las dos llamadas, la segunda devuelve null y el envío tira NPE. Además `World.getPlayer(String)` no es una lectura de campo: resuelve nombre a id vía `CharInfoTable` y después busca ese id, así que corría la cadena entera dos veces. Ahora resuelven el jugador a una variable local. |
 
 ## Auditado, sin hallazgos (no repetir el barrido)
 
@@ -26,6 +28,15 @@ lo que puso en conflicto entre sí a las 143 PRs del bot anterior.
   beneficiosas con target distinto de SELF: Angel Heal (4133), Orfen Heal (4516)
   y los dos heals de Queen Ant (4020/4024). Las cuatro apuntan siempre a NPCs.
   Todo lo que un monstruo lanza sobre un jugador tiene `effectPoint` negativo.
+
+## Evaluado y descartado a propósito
+
+- **`Clan.java:1385` y `AccountingFormatter.java:75`** (2026-08-24). Tienen la
+  misma forma chequear-y-usar que se corrigió en `ClanHallAuction`, pero sobre
+  `ClanMember.getPlayer()` y `GameClient.getPlayer()`, que son lecturas de campo
+  (`return _player;`) y no una búsqueda en dos pasos. El perfil de riesgo es
+  distinto y el arreglo sería cosmético. No re-proponer salvo que aparezca un
+  caso real de NPE en esos puntos.
 
 ## Rechazado con motivo
 
