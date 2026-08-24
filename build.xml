@@ -26,12 +26,28 @@
 	<property name="datapack" location="dist" />
 	<property name="libs" location="${datapack}/libs" />
 	<property name="src" location="java" />
+	<property name="test.src" location="test" />
+	<property name="test.libs" location="test/libs" />
+	<property name="build.test" location="${build}/test" />
 
 	<path id="classpath">
 		<fileset dir="${libs}">
 			<include name="*.jar" />
 			<exclude name="**/*-sources.jar" />
 		</fileset>
+	</path>
+
+	<path id="test.classpath">
+		<path refid="classpath" />
+		<pathelement location="${build.bin}" />
+		<fileset dir="${test.libs}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<path id="test.run.classpath">
+		<path refid="test.classpath" />
+		<pathelement location="${build.test}" />
 	</path>
 
 	<pathconvert property="manifest.libs" pathsep=" ">
@@ -63,6 +79,31 @@
 
 	<target name="compile" depends="init" description="Compile the source.">
 		<javac srcdir="${src}" classpathref="classpath" destdir="${build.bin}" compiler="modern" debug="true" debuglevel="lines,vars,source" includeantruntime="false" source="25" target="25" encoding="UTF-8" />
+	</target>
+
+	<target name="compile-tests" depends="compile" description="Compile the unit tests.">
+		<mkdir dir="${build.test}" />
+		<javac srcdir="${test.src}" classpathref="test.classpath" destdir="${build.test}" compiler="modern" debug="true" includeantruntime="false" source="25" target="25" encoding="UTF-8" />
+	</target>
+
+	<!-- Runs JUnitCore directly instead of Ant's optional <junit> task, so the
+	     build does not depend on ant-junit.jar being installed. -->
+	<target name="test" depends="compile-tests" description="Run the unit tests.">
+		<fileset dir="${build.test}" id="test.classes">
+			<include name="**/*Test.class" />
+			<!-- Not a JUnit test: uses main(), starts a ThreadPool and builds 2500 items. -->
+			<exclude name="**/ItemsOnGroundManagerTest.class" />
+			<exclude name="**/*$$*.class" />
+		</fileset>
+		<pathconvert property="test.class.names" refid="test.classes" pathsep=" ">
+			<chainedmapper>
+				<globmapper from="${build.test}${file.separator}*" to="*" />
+				<packagemapper from="*.class" to="*" />
+			</chainedmapper>
+		</pathconvert>
+		<java classname="org.junit.runner.JUnitCore" classpathref="test.run.classpath" fork="true" failonerror="true">
+			<arg line="${test.class.names}" />
+		</java>
 	</target>
 
 	<target name="jar" depends="compile" description="Create the jar files.">

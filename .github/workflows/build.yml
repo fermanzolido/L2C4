@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Compile core and datapack scripts
+    name: Compile, test, and compile datapack scripts
     runs-on: ubuntu-latest
 
     steps:
@@ -26,10 +26,11 @@ jobs:
           java -version
           ant -version
 
-      # Uses the project's own build.xml so CI exercises the real build path,
-      # including its Java 25 requirement check.
-      - name: Compile core
-        run: ant compile
+      # A single ant invocation: 'test' depends on compile-tests, which depends on
+      # compile. Splitting it would recompile the core twice, because the 'init'
+      # target deletes the output directory before every compile.
+      - name: Compile core and run unit tests
+        run: ant test
 
       # build.xml only compiles java/. The datapack scripts are compiled
       # separately at runtime by the script engine, so a change in java/ that
