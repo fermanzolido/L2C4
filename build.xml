@@ -38,8 +38,11 @@
 	</path>
 
 	<path id="test.classpath">
-		<path refid="classpath" />
+		<!-- Freshly compiled classes MUST come before ${libs}: dist/libs holds a
+		     prebuilt GameServer.jar of this same project, and javac would resolve
+		     stale copies of our own classes from it if it were searched first. -->
 		<pathelement location="${build.bin}" />
+		<path refid="classpath" />
 		<fileset dir="${test.libs}">
 			<include name="*.jar" />
 		</fileset>
