@@ -1,0 +1,44 @@
+name: Build
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    name: Compile core and datapack scripts
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # The project targets Java 25 and dist/libs/*.jar are class file version 69,
+      # so an older JDK cannot even read them.
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Show toolchain
+        run: |
+          java -version
+          ant -version
+
+      # Uses the project's own build.xml so CI exercises the real build path,
+      # including its Java 25 requirement check.
+      - name: Compile core
+        run: ant compile
+
+      # build.xml only compiles java/. The datapack scripts are compiled
+      # separately at runtime by the script engine, so a change in java/ that
+      # breaks a script does NOT fail the core build. This step is what catches it.
+      - name: Compile datapack scripts
+        run: |
+          set -euo pipefail
+          CP="$(ls dist/libs/*.jar | grep -v sources | tr '\n' ':')"
+          mkdir -p ../build/scripts
+          find dist/game/data/scripts -name '*.java' > /tmp/scripts.txt
+          echo "Compiling $(wc -l < /tmp/scripts.txt) script files"
+          javac -nowarn -encoding UTF-8 -cp "../build/bin:${CP}" -d ../build/scripts @/tmp/scripts.txt
