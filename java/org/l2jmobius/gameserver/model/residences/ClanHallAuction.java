@@ -371,9 +371,10 @@ public class ClanHallAuction
 					ps.execute();
 				}
 				
-				if (World.getInstance().getPlayer(_highestBidderName) != null)
+				final Player outBidPlayer = World.getInstance().getPlayer(_highestBidderName);
+				if (outBidPlayer != null)
 				{
-					World.getInstance().getPlayer(_highestBidderName).sendMessage("You have been out bidded");
+					outBidPlayer.sendMessage("You have been out bidded");
 				}
 			}
 			
@@ -419,9 +420,13 @@ public class ClanHallAuction
 			{
 				returnItem(b.getClanName(), b.getBid(), true); // 10 % tax
 			}
-			else if (World.getInstance().getPlayer(b.getName()) != null)
+			else
 			{
-				World.getInstance().getPlayer(b.getName()).sendMessage("Congratulation you have won ClanHall!");
+				final Player winner = World.getInstance().getPlayer(b.getName());
+				if (winner != null)
+				{
+					winner.sendMessage("Congratulation you have won ClanHall!");
+				}
 			}
 			
 			ClanTable.getInstance().getClanByName(b.getClanName()).setAuctionBiddedAt(0, true);
