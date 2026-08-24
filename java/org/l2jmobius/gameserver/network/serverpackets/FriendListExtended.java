@@ -73,7 +73,8 @@ public class FriendListExtended extends ServerPacket
 		final List<Integer> offlineFriends = new ArrayList<>();
 		for (int objId : friendList)
 		{
-			if (World.getInstance().getPlayer(objId) == null)
+			final Player friend = World.getInstance().getPlayer(objId);
+			if ((friend == null) || !friend.isOnline())
 			{
 				offlineFriends.add(objId);
 			}
@@ -116,7 +117,7 @@ public class FriendListExtended extends ServerPacket
 		for (int objId : friendList)
 		{
 			final Player onlineFriend = World.getInstance().getPlayer(objId);
-			if (onlineFriend != null)
+			if ((onlineFriend != null) && onlineFriend.isOnline())
 			{
 				_info.add(new FriendInfo(objId, onlineFriend.getName(), true, onlineFriend.getPlayerClass().getId(), onlineFriend.getLevel()));
 			}
