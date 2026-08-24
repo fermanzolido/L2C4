@@ -22,6 +22,12 @@ Al abrir una PR de seguridad:
 - Si el hallazgo es grave y no se puede arreglar sin describirlo, **no abras
   PR**: informalo en la salida de la corrida para que lo maneje una persona.
 
+## Pendiente para esta rutina (tomar de acá primero)
+
+Lo que esté en esta sección es **trabajo para hacer**, no una exclusión. Si hay algo acá, tiene prioridad sobre buscar candidatos nuevos. Todas las demás secciones del archivo son listas de NO proponer.
+
+_(vacío)_
+
 ## Ya arreglado
 
 - **PR #202** (2026-08-24): en el handler de multisell (`MultiSellChoose`), se

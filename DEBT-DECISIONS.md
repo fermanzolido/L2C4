@@ -27,7 +27,11 @@ dentro de la rama de una PR.
   en la misma línea, mientras el proyecto usa estilo Allman. Reformatearlo
   entero generaría un diff enorme que taparía el historial. Requiere decisión.
 
-## Candidato derivado desde otra rutina
+## Pendiente para esta rutina (tomar de acá primero)
+
+Lo que esté en esta sección es **trabajo para hacer**, no una exclusión. Si hay algo acá, tiene prioridad sobre buscar candidatos nuevos. Todas las demás secciones del archivo son listas de NO proponer.
+
+### Derivado desde la rutina de seguridad
 
 - **Condiciones muertas `int > Integer.MAX_VALUE` en `clientpackets/`** (anotado
   el 2026-08-24 por la rutina de seguridad). Once archivos comparan una variable

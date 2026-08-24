@@ -11,6 +11,12 @@ las 143 PRs del bot anterior.
 
 ---
 
+## Pendiente para esta rutina (tomar de acá primero)
+
+Lo que esté en esta sección es **trabajo para hacer**, no una exclusión. Si hay algo acá, tiene prioridad sobre buscar candidatos nuevos. Todas las demás secciones del archivo son listas de NO proponer.
+
+_(vacío)_
+
 ## Ya aplicado en main (no re-proponer)
 
 | Área | Qué se hizo |
