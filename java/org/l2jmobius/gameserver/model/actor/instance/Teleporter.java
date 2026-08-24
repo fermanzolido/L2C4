@@ -19,7 +19,6 @@ package org.l2jmobius.gameserver.model.actor.instance;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
-import org.l2jmobius.commons.util.StringUtil;
 import org.l2jmobius.gameserver.data.xml.TeleporterData;
 import org.l2jmobius.gameserver.managers.CastleManager;
 import org.l2jmobius.gameserver.model.actor.Creature;

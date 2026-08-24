@@ -26,8 +26,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 import org.l2jmobius.gameserver.config.PlayerConfig;
