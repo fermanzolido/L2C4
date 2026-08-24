@@ -14,6 +14,7 @@ dentro de la rama de una PR.
 | `Monster.java` | Override muerto `doCast` y sus imports sin uso. |
 | `CharInfoTable.java` | Import `Map.Entry` sin uso. |
 | `RaidBossPointsManager.java` | Bloque javadoc duplicado. |
+| `LoginServer.java` | Import `java.net.ServerSocket` sin uso (PR #203). |
 
 ## Conocido, pendiente de decisión humana
 
