@@ -41,8 +41,10 @@ la única clase de bug que puede arruinar una economía de forma irreversible.
 
 ## `model/itemcontainer` — en curso
 
-**Leído:** `ItemContainer.java` (661 líneas, la clase base de la que heredan las
-otras nueve).
+**Leído:** `ItemContainer.java` (661 líneas, la clase base) e `Inventory.java`
+parcialmente — las vías de integridad de ítems: `dropItem`, `addItem`,
+`removeItem`. Falta la lógica de paperdoll (equipar/desequipar) y los
+listeners.
 
 **Pendiente:** `Inventory.java` (1333), `PlayerInventory.java` (999),
 `ClanWarehouse`, `Mail`, `PetInventory`, `PlayerFreight`, `PlayerRefund`,
@@ -65,6 +67,7 @@ esperado:
 | Severidad | Qué |
 |---|---|
 | Bajo | `MULTIPLE_ITEM_DROP` gobierna dos cosas distintas: tirar ítems al piso (`Npc.java:1649`) y **agregar al inventario** (`ItemContainer.java:300`). Si un admin lo pone en `False` pensando en los drops, agregar N ítems no apilables agrega 1 y los otros se pierden en silencio. Hoy no afecta: viene en `True` por defecto y en el `General.ini` que se distribuye. |
+| Medio | `Inventory.dropItem(process, objectId, count, ...)` no validaba `count`. Con un valor negativo, la rama de drop parcial hacía `changeCount(-count)` sobre el ítem de origen, o sea **le sumaba**: duplicación. **No era explotable** — `RequestDropItem` rechaza `count` negativo, cero y mayor al disponible, y el otro llamador con count (`Pet`) pasa `item.getCount()`. El problema real era la inconsistencia: `transferItem` acota internamente y `destroyItem` rechaza internamente, pero este delegaba en el llamador. **Arreglado:** ahora rechaza `count <= 0` y `count > getCount()`. Inocuo, porque todos los llamadores actuales ya cumplían. |
 
 ### Sospechas evaluadas y descartadas
 

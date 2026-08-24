@@ -644,6 +644,15 @@ public abstract class Inventory extends ItemContainer {
 				return null;
 			}
 
+			// The sibling methods validate the requested count themselves:
+			// transferItem clamps it to what is available, destroyItem rejects an
+			// excessive one. This one used to rely on its callers instead, which
+			// left a negative count turning the partial branch below into item
+			// duplication: changeCount(-count) would add to the source stack.
+			if ((count <= 0) || (count > item.getCount())) {
+				return null;
+			}
+
 			// Adjust item quantity and create new instance to drop
 			// Directly drop entire item
 			if (item.getCount() > count) {
