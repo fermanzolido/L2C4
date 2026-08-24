@@ -17,6 +17,7 @@ lo que puso en conflicto entre sí a las 143 PRs del bot anterior.
 | `Orfen.java` (Riba Iren) | Casteaba heal 4516 sobre su atacante en vez de sobre sí mismo. Era el único caso real que el guard pretendía tapar. |
 | `Monster.java` | Se quitó el override muerto `doCast(Skill, Creature, List<WorldObject>)`. |
 | `Quest.deleteQuestToOfflineMembers` | `PreparedStatement` fuera de try-with-resources: se filtraba si `executeUpdate()` tiraba excepción. |
+| `FriendListExtended.java` | Decidía "amigo online" con `World.getInstance().getPlayer(objId) != null` en vez de `Player.isOnline()`. Durante la ventana de logout (entre que `deleteMe()` marca `_isOnline=false`/persiste `online=0` y que `decayMe()` saca al jugador de `World`), un amigo desconectándose aparecía como online con su `objectId` real en vez de con los datos offline de la DB. |
 
 ## Auditado, sin hallazgos (no repetir el barrido)
 
