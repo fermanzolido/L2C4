@@ -23,6 +23,7 @@ package org.l2jmobius.gameserver.network.serverpackets;
 import org.l2jmobius.commons.network.WritableBuffer;
 import org.l2jmobius.gameserver.data.sql.CharInfoTable;
 import org.l2jmobius.gameserver.model.World;
+import org.l2jmobius.gameserver.model.actor.Player;
 import org.l2jmobius.gameserver.network.GameClient;
 import org.l2jmobius.gameserver.network.ServerPackets;
 
@@ -31,12 +32,13 @@ public class FriendStatusPacket extends ServerPacket
 	private final boolean _online;
 	private final int _objid;
 	private final String _name;
-	
+
 	public FriendStatusPacket(int objId)
 	{
 		_objid = objId;
 		_name = CharInfoTable.getInstance().getNameById(objId);
-		_online = World.getInstance().getPlayer(objId) != null;
+		final Player player = World.getInstance().getPlayer(objId);
+		_online = (player != null) && player.isOnline();
 	}
 	
 	@Override
