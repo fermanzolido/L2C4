@@ -41,13 +41,14 @@ la única clase de bug que puede arruinar una economía de forma irreversible.
 
 ## `model/itemcontainer` — en curso
 
-**Leído:** `ItemContainer.java` completo (661 líneas, la clase base) e
-`Inventory.java` hasta la línea ~930: vías de integridad de ítems (`dropItem`,
-`addItem`, `removeItem`) y el núcleo del paperdoll (`setPaperdollItem`).
+**Leído:** `ItemContainer.java` completo e `Inventory.java` hasta ~1330:
+integridad de ítems (`dropItem`, `addItem`, `removeItem`), el núcleo del
+paperdoll (`setPaperdollItem`), `equipItem` entero, `BowCrossRodListener` y
+`reloadEquippedItems`.
 
-**Pendiente:** `equipItem` (183 líneas de lógica por body part), los cinco
-listeners de paperdoll, `restore`, `PlayerInventory.java` (999) y siete
-archivos chicos.
+**Pendiente:** `ArmorSetListener` (190 líneas), `ItemSkillsListener`,
+`StatsListener`, `ChangeRecorder`, `restore`, `PlayerInventory.java` (999) y
+siete archivos chicos.
 
 ### Evaluación de la clase base
 
@@ -81,6 +82,36 @@ esperado:
   concurrente.
 
 ### Asimetrías anotadas, sin consecuencia demostrada
+
+**`equipItem` está bien.** Se revisaron todos los casos de body part: arma a
+dos manos (`LR_HAND` limpia el LHAND), mano izquierda (desequipa el arma a dos
+manos del RHAND salvo las combinaciones arco+flecha y caña+cebo), aro, anillo,
+armadura completa (limpia piernas) y piernas (limpia la armadura completa). Las
+exclusiones mutuas son correctas.
+
+El comentario `// Don't care about arrows, listener will unequip them
+(hopefully).` en el caso `R_HAND` es injustificado: `BowCrossRodListener`
+efectivamente limpia el LHAND cuando se desequipa un arco o una caña del RHAND.
+
+**`reloadEquippedItems` es frágil, pero converge.** Se usa al cambiar de clase
+y llama `notifyUnequiped` seguido de `notifyEquiped` por cada listener,
+asumiendo que son refrescos puros de stats y skills.
+`BowCrossRodListener.notifyUnequiped` no lo es: hace
+`setPaperdollItem(PAPERDOLL_LHAND, null)`, o sea desequipa la flecha de verdad
+y muta `_paperdoll` mientras el bucle de arriba lo recorre.
+
+Se trazó el flujo completo y **no produce un bug**: el `notifyEquiped` que sigue
+reequipa la flecha, y como RHAND es el índice 7 y LHAND el 8, el orden del
+recorrido hace que el balance de stats cierre. Cuesta escrituras de base y
+eventos de más, nada más. **No se tocó**, pero el acoplamiento es frágil: si
+alguien agrega otro listener con efectos colaterales, o cambia el orden de los
+índices del paperdoll, deja de cerrar.
+
+**`equipItem` ignora el slot guardado.** Al restaurar el inventario,
+`addItem` llama a `equipItem`, que elige el primer slot libre en vez de leer
+`item.getLocationSlot()`. Un aro guardado en REAR puede volver en LEAR. Solo
+cosmético: los dos slots son equivalentes en efecto.
+
 
 **Cobertura despareja de los eventos de equipar.** `ON_PLAYER_ITEM_UNEQUIP` se
 dispara desde `Inventory.setPaperdollItem`, o sea desde cualquier camino,
