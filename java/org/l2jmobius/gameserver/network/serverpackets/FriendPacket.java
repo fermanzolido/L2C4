@@ -19,6 +19,7 @@ package org.l2jmobius.gameserver.network.serverpackets;
 import org.l2jmobius.commons.network.WritableBuffer;
 import org.l2jmobius.gameserver.data.sql.CharInfoTable;
 import org.l2jmobius.gameserver.model.World;
+import org.l2jmobius.gameserver.model.actor.Player;
 import org.l2jmobius.gameserver.network.GameClient;
 import org.l2jmobius.gameserver.network.ServerPackets;
 
@@ -43,7 +44,8 @@ public class FriendPacket extends ServerPacket
 		_action = action;
 		_objid = objId;
 		_name = CharInfoTable.getInstance().getNameById(objId);
-		_online = World.getInstance().getPlayer(objId) != null;
+		final Player player = World.getInstance().getPlayer(objId);
+		_online = (player != null) && player.isOnline();
 	}
 	
 	@Override
