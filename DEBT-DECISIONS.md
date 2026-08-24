@@ -26,6 +26,24 @@ dentro de la rama de una PR.
   en la misma línea, mientras el proyecto usa estilo Allman. Reformatearlo
   entero generaría un diff enorme que taparía el historial. Requiere decisión.
 
+## Candidato derivado desde otra rutina
+
+- **Condiciones muertas `int > Integer.MAX_VALUE` en `clientpackets/`** (anotado
+  el 2026-08-24 por la rutina de seguridad). Once archivos comparan una variable
+  `int` contra `Integer.MAX_VALUE`, comparación que nunca puede ser cierta:
+  `RequestBuyItem`, `RequestBuySeed`, `RequestPrivateStoreBuy`,
+  `RequestPrivateStoreSell`, `RequestProcureCropList`, `RequestSellItem`,
+  `SendWareHouseDepositList`, `SendWareHouseWithDrawList`, entre otros.
+
+  Ya se verificó que NO son un problema de seguridad: la protección real contra
+  overflow es `MAX_ADENA / count < price`, que no multiplica primero. Son código
+  muerto y nada más.
+
+  **Cuidado al tocarlas:** en `RequestPrivateStoreBuy` y `RequestProcureCropList`
+  la condición no rechaza sino que acota (`cnt = Integer.MAX_VALUE`), así que
+  sacarla cambia la forma del bloque. Y NO toques `MultiSellChoose`: ahí las
+  guardas tienen cast a `long` y sí están vivas.
+
 ## Rechazado con motivo
 
 _(vacío por ahora)_

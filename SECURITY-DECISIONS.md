@@ -32,6 +32,27 @@ Al abrir una PR de seguridad:
   se hace en `long`, así una cantidad que desbordaría se detecta y la
   operación se cancela en vez de continuar con un valor incorrecto.
 
+## Auditado, sin hallazgos (no repetir el barrido)
+
+- **Guardas de overflow en `clientpackets/`** (2026-08-24). Once archivos
+  comparan un `int` contra `Integer.MAX_VALUE`, lo cual nunca puede ser cierto:
+  son condiciones muertas. Se revisó si esa guarda era la única protección
+  contra un overflow real de cantidad por precio, como sí pasaba en
+  `MultiSellChoose` (PR #202, donde las guardas tienen cast a `long` y una era
+  inefectiva). No lo es: el cálculo de precio usa una comprobación por división
+  (`MAX_ADENA / count < price`) que nunca multiplica primero, y además la
+  cantidad ya está acotada por otra vía — tope de 10000 en compras a NPC, stock
+  real del vendedor en tienda privada, stock del manor en semillas.
+
+  Conclusión: son código muerto, no un agujero. **Limpiarlas le corresponde a la
+  rutina de limpieza, no a esta.** Anotado en `DEBT-DECISIONS.md`.
+
+- **Revisados sin hallazgos en la misma corrida:** handlers de ítems
+  (destroy, drop, crystallize, henna), trade (`AddTradeItem`, `TradeList`),
+  comandos de clan (`RequestPledgeSetMemberPowerGrade`, `RequestOustPledgeMember`)
+  y el despacho de comandos de admin (`AdminCommandHandler`,
+  `RequestBypassToServer`). Validaciones de autorización y rango consistentes.
+
 ## Rechazado con motivo
 
 _(vacío por ahora)_
