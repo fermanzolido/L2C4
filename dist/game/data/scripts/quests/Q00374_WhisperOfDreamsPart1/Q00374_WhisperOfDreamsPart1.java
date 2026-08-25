@@ -83,12 +83,21 @@ public class Q00374_WhisperOfDreamsPart1 extends Quest
 		}
 		else if (event.startsWith("30515-06-"))
 		{
+			// The digit right after the prefix picks the reward row. Nothing guaranteed
+			// that the digit was there at all, or that it named a row of the table, so an
+			// event that stopped at the prefix or carried a larger digit threw out of here.
+			final int rewardIndex = (event.length() > 9) && Character.isDigit(event.charAt(9)) ? event.charAt(9) - '0' : -1;
+			if ((rewardIndex < 0) || (rewardIndex >= REWARDS.length))
+			{
+				return htmltext;
+			}
+			
 			if ((getQuestItemsCount(player, CAVE_BEAST_TOOTH) >= 65) && (getQuestItemsCount(player, DEATH_WAVE_LIGHT) >= 65))
 			{
 				htmltext = "30515-06.htm";
 				playSound(player, QuestSound.ITEMSOUND_QUEST_MIDDLE);
 				
-				final int[] reward = REWARDS[Integer.parseInt(event.substring(9, 10))];
+				final int[] reward = REWARDS[rewardIndex];
 				
 				takeItems(player, CAVE_BEAST_TOOTH, -1);
 				takeItems(player, DEATH_WAVE_LIGHT, -1);

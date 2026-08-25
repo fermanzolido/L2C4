@@ -115,12 +115,31 @@ public class Q00631_DeliciousTopChoiceMeat extends Quest
 		}
 		else if (StringUtil.isNumeric(event))
 		{
+			// The reward row is chosen by an index that arrives with the event.
+			// isNumeric() only rules out non-digits, so an index past the end of the table
+			// still got here, and the meat was taken before the lookup: that cost the
+			// player 120 items and returned nothing.
+			int rewardIndex = -1;
+			try
+			{
+				rewardIndex = Integer.parseInt(event);
+			}
+			catch (NumberFormatException e)
+			{
+				// A run of digits too long for an int, which is out of range anyway.
+			}
+			
+			if ((rewardIndex < 0) || (rewardIndex >= REWARDS.length))
+			{
+				return htmltext;
+			}
+			
 			if (getQuestItemsCount(player, TOP_QUALITY_MEAT) >= 120)
 			{
 				htmltext = "31537-06.htm";
 				takeItems(player, TOP_QUALITY_MEAT, -1);
 				
-				final int[] reward = REWARDS[Integer.parseInt(event)];
+				final int[] reward = REWARDS[rewardIndex];
 				rewardItems(player, reward[0], reward[1]);
 				
 				st.exitQuest(true, true);
