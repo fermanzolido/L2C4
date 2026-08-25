@@ -296,6 +296,10 @@ public class GameServerTable
 		return false;
 	}
 	
+	/**
+	 * @return the lowest server id not taken by a registered game server, or -1 when
+	 *         every id is in use
+	 */
 	public int findFreeID()
 	{
 		for (int i = 0; i < 128; i++)
@@ -306,7 +310,12 @@ public class GameServerTable
 			}
 		}
 		
-		return 0;
+		// Not zero: the search starts at zero, so returning it here would be
+		// indistinguishable from finding it free. Its only caller, the registration in
+		// GameServerThread, tests for a negative result to report that no id is left,
+		// which meant that path could never be taken and a server arriving once all the
+		// ids were in use was registered onto id zero, on top of whichever server held it.
+		return -1;
 	}
 	
 	public void deleteServer(int id)
