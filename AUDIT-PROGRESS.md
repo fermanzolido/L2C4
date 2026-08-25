@@ -22,7 +22,7 @@ hallazgos aunque no hayas terminado el área.
 | ~~`model/skill`~~ | 19 | 3.869 | **TERMINADA** |
 | ~~`model/olympiad`~~ | 7 | 4.554 | **TERMINADA** |
 | ~~`loginserver`~~ | 45 | 5.649 | **TERMINADA** |
-| **`gameserver/ai`** | **15** | **7.907** | **en curso — 7 bugs arreglados** |
+| **`gameserver/ai`** | **15** | **7.907** | **en curso — 8 bugs arreglados** |
 | `commons` | 47 | 11.240 | pendiente |
 | datapack `ai/` | 67 | 14.462 | pendiente |
 | `managers` | 44 | 14.636 | pendiente |
@@ -1307,3 +1307,66 @@ tabla no se puede truncar sin que se note, porque cada fila tiene que aparearse.
 
 **Regla:** cuando la pregunta es "¿están todos?", el resultado no pasa por `head`,
 y si se puede, se responde con un conteo apareado en vez de una lista.
+
+**3 — El bucle principal de IA se tragaba todo.** `AttackableAI.onActionThink`
+envolvía su `switch` entero en `catch (Exception e)` con la línea de log
+**comentada**, así que cualquier falla dentro de `thinkActive`, `thinkAttack` o
+`thinkCast` desaparecía sin dejar rastro. Ese es el bucle que corre una vez por
+tick por cada atacable del servidor.
+
+Sus dos hermanos no hacen eso: `SiegeGuardAI` y `ControllableMobAI` usan
+`try/finally` **sin catch**, así que una falla ahí llega al manejador del pool y
+queda registrada. Solo este se la tragaba.
+
+La línea comentada además no habría compilado: ninguna de `AttackableAI`,
+`CreatureAI` ni `AbstractAI` declara un `LOGGER`. Es un resto de una versión que
+sí lo tenía. Ahora la clase tiene uno y el `catch` loguea con la excepción
+adjunta, sin cambiar el flujo.
+
+**A mirar cuando esto corra:** si el warning nuevo aparece en cada tick en vez de
+raramente, eso es el hallazgo, no el logueo.
+
+### Anotado sin tocar (`gameserver/ai`)
+
+- **`DoorAI` y `BoatAI` anulan tres de las seis acciones de control de masas.**
+  Los dos definen `onActionStunned`, `onActionSleeping` y `onActionRooted` como
+  métodos vacíos —puertas y barcos ignoran eso— pero **no** `onActionParalyzed`,
+  `onActionConfused` ni `onActionMuted`, que caen a la implementación de
+  `CreatureAI` y terminan en `clientStartAutoAttack()` sobre una puerta. Que sea
+  alcanzable depende del `targetType` de las skills del datapack y no pude
+  demostrarlo, así que seis métodos vacíos por un caso no probado quedan sin
+  escribir.
+
+- **`ControllableMobAI.checkAutoAttackCondition` chequea `target.isNpc()` dos
+  veces**, la segunda bajo el comentario "Summon hierarchy check: assumes summons
+  are not in Npc hierarchy". Es un duplicado literal de la línea de arriba, o sea
+  no-op. El estilo del comentario es el mismo marcador de refactor automático que
+  aparece en `Clan.java` y `OlympiadGame`.
+
+### Sospechas evaluadas y descartadas (`gameserver/ai`)
+
+- **Huecos en los `switch` de intenciones y acciones.** Comparados los 9 valores
+  de `Intention` y los 21 de `Action` contra los `case` del despachador: no falta
+  ninguno.
+
+- **Casts sin chequear.** Barridos los 21 sitios del paquete que encadenan
+  `.asPlayer()`, `.asMonster()`, `.asAttackable()` y compañía: todos tienen su
+  `isX()` inmediatamente antes, o el tipo está garantizado por la jerarquía
+  (`ControllableMob` es `Monster`, `RaidBoss` es `Monster`, el `_actor` de
+  `AttackableAI` es `Npc`).
+
+- **`_intentionArg0` y `_intentionArg1` son no-`volatile`** y se escriben bajo el
+  candado. Se leen solo en `PlayerAI.changeIntention`, que toma el mismo candado
+  antes. Consistente.
+
+- **`AttackableAI` no maneja `onActionAggression` con objetivo nulo** mientras que
+  `SiegeGuardAI` sí. Los seis llamadores pasan un objetivo no nulo, y donde puede
+  ser nulo el aggro positivo vuelve no-op a la rama de `SiegeGuardAI`.
+
+- **División por `dist` en `CreatureAI`** cuando el actor ya está en el destino.
+  Es división de `double`: da `NaN`, y `(int) NaN` es 0, así que degrada a "moverse
+  a donde ya estás".
+
+- **La convergencia de `_globalAggro`** clampea a cero desde los dos lados y solo
+  avanza su timestamp cuando pasó al menos un segundo, así que no pierde tiempo en
+  ticks sub-segundo.
