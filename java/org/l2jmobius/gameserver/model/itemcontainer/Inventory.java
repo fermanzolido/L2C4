@@ -510,8 +510,18 @@ public abstract class Inventory extends ItemContainer {
 				{
 					remove = true;
 					skills = armorSet.getSkills();
-					shieldSkill = armorSet.getShieldSkillId();
 					skillId6 = armorSet.getEnchant6skillId();
+
+					// The shield skill is earned by wearing the set's shield, not by
+					// completing the set: notifyEquiped grants it from its own branch,
+					// and containAll() never looks at the shield slot. Dropping it here
+					// because some other piece came off would take away a bonus the
+					// still-equipped shield earns, and with the set incomplete
+					// notifyEquiped never gives it back.
+					if (!armorSet.containShield(player))
+					{
+						shieldSkill = armorSet.getShieldSkillId();
+					}
 				} else if (armorSet.containShield(item.getId())) // removed shield
 				{
 					remove = true;
