@@ -21,7 +21,7 @@ hallazgos aunque no hayas terminado el área.
 | ~~`model/itemcontainer`~~ | 10 | 3.727 | **TERMINADA** |
 | ~~`model/skill`~~ | 19 | 3.869 | **TERMINADA** |
 | ~~`model/olympiad`~~ | 7 | 4.554 | **TERMINADA** |
-| `loginserver` | 45 | 5.649 | pendiente |
+| ~~`loginserver`~~ | 45 | 5.649 | **TERMINADA** |
 | `gameserver/ai` | 15 | 7.907 | pendiente |
 | `commons` | 47 | 11.240 | pendiente |
 | datapack `ai/` | 67 | 14.462 | pendiente |
@@ -1087,3 +1087,150 @@ Los 7 archivos le\u00eddos. **Veinte defectos arreglados**, en trece commits, m\
 barrido transversal de \u00edndices de p\u00e1gina y otro de `getClan()` encadenado que
 salieron del \u00e1rea y tocaron `SchemeBuffer`, `DropSearchBoard`, `AdminSearch`,
 `ClanHallTable`, `Siege` y dos quests.
+
+## `loginserver` — TERMINADA
+
+Son **45** archivos y **5.649** líneas. Superficie de red pura: autenticación de
+jugadores, registro de game servers y la lista de servidores.
+
+**Leído:** `LoginController`, `GameServerThread`, `GameServerTable`,
+`FloodProtectorListener`, `LoginPacketHandler`, `LoginClient` (bucle de lectura y
+desconexión), las dos clases base de paquetes, y los paquetes de cliente y de
+game server. La UI Swing (`Gui`, `frmAbout`, 436 líneas) se revisó **solo por
+acceso a estado del servidor**, no línea por línea: no tiene lógica de juego, y
+lo que sí toca —iterar la lista de game servers y limpiar los baneos— quedó
+cubierto por el hallazgo 5 y por el `ConcurrentHashMap` que ya usaban los baneos.
+
+### Hallazgos
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 1 | `AbstractGameServerPacket` / `AbstractClientPacket` | `readBytes` aloja antes de validar el largo | alta |
+| 2 | `GameServerTable` | la lista de game servers es un `ArrayList` compartido por tres grupos de hilos | alta |
+| 3 | `LoginController` | comparación de contraseñas por referencia: banea al que se equivoca | media |
+| 4 | `FloodProtectorListener` | contador de conexiones no atómico | media |
+| 5 | `GameServerThread` | largo de paquete sin validar sobre la conexión del game server | media |
+| 6 | `GameServerTable` | `findFreeID` devuelve 0 en vez del centinela negativo que su llamador espera | media |
+| 7 | `GameServerThread` | clave blowfish nula pasada a `NewCrypt` | baja |
+
+**1 — Alojar antes de validar.** `readBytes(length)` creaba el array y recién
+después leía, así que el largo solo se validaba fallando la lectura. Dos
+llamadores le pasan un `readInt()` crudo del paquete: `GameServerAuth` para el
+hex id y `BlowFishKey` para la clave. **Los dos se parsean antes de que la
+conexión esté autenticada**, y hasta entonces el cifrado usa una clave blowfish
+por defecto que está hardcodeada en el archivo.
+
+Un largo negativo daba `NegativeArraySizeException`; uno cercano a
+`Integer.MAX_VALUE` le pedía a la VM un array de dos gigabytes antes de que nada
+lo mirara. Eso último es un `OutOfMemoryError`, que es `Error` y no `Exception`,
+así que ni el `catch (IOException)` del bucle de lectura ni nada del camino lo
+contiene — y no queda acotado a la conexión que lo provocó. Ahora el largo se
+compara contra lo que realmente queda en el buffer y se rechaza antes de alojar.
+
+**2 — Una lista compartida sin protección.** `_gameServerList` era un `ArrayList`
+sin sincronizar en ningún lado. Lo escribe **el hilo propio de cada game server**
+al registrarse (`addServer`, que además borra la entrada previa del mismo id y
+después ordena), y lo leen los **hilos de paquetes de los jugadores**
+(`createServerList` lo ordena y lo recorre; `isARegisteredServer`,
+`getServerIDforHex`, `hasRegisteredGameServerOnId` y `getGameServerStatus` lo
+caminan) y el **hilo de eventos de Swing** desde la UI. Un game server
+reconectando mientras hay jugadores pidiendo la lista es una modificación
+estructural concurrente con iteraciones y un sort.
+
+**3 — Comparar contraseñas por referencia.** El contador anti-fuerza-bruta se
+saltea el incremento cuando se reintenta **la misma** contraseña equivocada, para
+no banear a quien se equivoca al tipear. El test decía `password != lastPassword`,
+que compara referencias: una llega del socket como `String` nueva y la otra sale
+de un mapa, nunca son la misma instancia, y el test siempre daba true. La
+exención jamás aplicó. Con el `LoginTryBeforeBan = 5` que trae el repo, tipear la
+misma contraseña mal cinco veces baneaba la dirección quince minutos — el caso
+exacto que el código dice que existe para evitar.
+
+**4 — Contador de flood no atómico.** El hilo de accept lo incrementa y **cada
+hilo de cliente** lo decrementa al desconectar. Era un `int` plano, así que esas
+lecturas-modificaciones-escrituras se pisaban. Si el contador deriva para arriba,
+se empiezan a rechazar conexiones honestas como flood; si deriva para abajo, la
+entrada nunca llega al valor que la saca del mapa. Además el camino de accept
+releía el campo para cada uno de los tres tests de flood, y `removeFloodProtection`
+comparaba con `== 0` exacto, que una entrada ya pasada de largo nunca cumple.
+
+**6 — Un centinela que nunca se produce.** `findFreeID` recorre los ids desde
+cero y devuelve el primero libre; si estaban todos ocupados devolvía **cero**, que
+el mismo recorrido trata como un id perfectamente válido. Su único llamador
+pregunta `if (availableId < 0)` antes de reportar que no quedan ids: esa rama no
+podía ejecutarse nunca, y un servidor que llegara con todos los ids tomados se
+registraba sobre el id cero, encima del que ya lo tenía.
+
+### Anotado sin tocar
+
+- **El hex id del game server se compara con `Arrays.equals`**, que corta en el
+  primer byte distinto, mientras que `isLoginValid` usa `MessageDigest.isEqual`
+  —de tiempo constante— para las contraseñas de jugador. Asimetría real, pero el
+  beneficio práctico es despreciable frente al jitter de red y no toco
+  comparaciones de autenticación por una ganancia teórica.
+
+- **`_lastPassword` guarda la contraseña intentada en texto plano**, indexada por
+  dirección, hasta que esa dirección logra entrar. Un digest serviría igual para
+  la comparación.
+
+- **`readString()` sin terminador.** Si no encuentra el `0x00`, `indexOf` devuelve
+  -1 y el `substring(0, -1)` tira; el `catch` lo traga, la función devuelve el
+  buffer restante entero y **`_off` no avanza**, así que el resto del parseo se
+  desincroniza. Con el hallazgo 1 arreglado la consecuencia queda contenida.
+
+- **`e.printStackTrace()` en vez del logger** en `isInternalIP`, `ServerList` y
+  `readString` — en un camino no autenticado, eso escribe a stdout sin pasar por
+  la configuración de logging.
+
+- **`ServerList` hace `InetAddress.getByName()` al armar el paquete.** Si el
+  valor configurado es un nombre y no una IP, eso es una resolución DNS en el
+  hilo que le responde al jugador.
+
+- **Código muerto que no se toca**: `LoginServer.ForeignConnection` (copia
+  duplicada de la clase de flood, `public` y nunca instanciada);
+  `LoginServer.unblockIp` (sin llamadores, y el `ipBlocked` al que delega **borra**
+  el contador de intentos en vez de levantar el baneo, pese a los dos nombres);
+  `LoginController.loginPossible` y `setMaxAllowedOnlinePlayers` con su campo;
+  `GameServerTable.status()`, que es el único sitio que indexa
+  `STATUS_STRING[status]` con un valor que llega del game server sin validar.
+
+- **`addServer` borra y agrega como dos operaciones separadas**, así que un lector
+  en el medio ve la lista sin ese servidor por un instante. Ventana mucho menor
+  que la que cerró el hallazgo 2, y unificarlo pide otra estructura.
+
+### Sospechas evaluadas y descartadas
+
+- **`RequestAuthLogin` descifra con offsets fijos** (`doFinal(buffer, 0x01, 0x80)`)
+  sobre un buffer del cliente, y sus `catch` son `GeneralSecurityException` e
+  `IllegalArgumentException`. Parecía que un paquete corto escapaba por
+  `ArrayIndexOutOfBoundsException`. **Verificado corriéndolo** con Java 25:
+  `Cipher.doFinal` con offset y largo fuera de rango tira `IllegalArgumentException`,
+  que **sí** está atrapada. El mensaje que loguea ("corrupted system") es
+  engañoso, pero el manejo es correcto.
+
+- **`readByte()` podría devolver un byte con signo** y dar un id de servidor
+  negativo. Enmascara con `& 0xff`.
+
+- **`getGameServerStatus`, `getOnlinePlayerCount` y `getMaxAllowedOnlinePlayers`
+  con un id arbitrario del cliente.** Los tres recorren listas y devuelven un
+  valor por defecto; ninguno indexa un array.
+
+- **Paquetes fuera de orden.** `LoginPacketHandler` gatea estrictamente por estado
+  del cliente: cada opcode solo se acepta en el estado que corresponde.
+
+- **`SessionKey.checkLoginPair` usa `==`.** Son `int`, es correcto.
+
+- **`ServerStatus.STATUS_STRING[status]` del lado del gameserver.**
+  `setServerStatus` valida con un `switch` sobre las constantes válidas y tira
+  `IllegalArgumentException` para el resto.
+
+- **`_serverNames` es un `HashMap` plano y público.** Solo se escribe al cargar,
+  antes de que existan hilos concurrentes.
+
+- **El par de claves de sesión solo se verifica `if (SHOW_LICENCE)`.** Es coherente
+  con el protocolo: sin ese paso el par nunca se le emitió al cliente.
+
+- **`RequestAuthLogin` llama a `setAccount` antes de chequear la sesión duplicada**,
+  y el `finally` del cliente hace `removeLoginClient(_account)`, lo que podría
+  borrar la entrada del cliente legítimo. Es el diseño: `REASON_ACCOUNT_IN_USE` se
+  le manda a **los dos**, así que los dos se van.
