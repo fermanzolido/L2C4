@@ -49,6 +49,19 @@ Lo que esté en esta sección es **trabajo para hacer**, no una exclusión. Si h
   sacarla cambia la forma del bloque. Y NO toques `MultiSellChoose`: ahí las
   guardas tienen cast a `long` y sí están vivas.
 
+## NO TOCAR — parece muerto pero no lo es
+
+- **`ClanAccess.NONE`** (`java/org/l2jmobius/gameserver/model/clan/ClanAccess.java`).
+  No tiene ni un solo uso en todo el repo, así que un barrido de constantes de
+  enum sin usar lo va a marcar. **No lo borres.** Existe para ocupar el ordinal 0.
+  Todo el sistema de privilegios de clan es una máscara de bits construida con
+  `1 << access.ordinal()`, y esa máscara se persiste en la base.
+
+  Sacar `NONE` corre en uno todos los ordinales siguientes, así que cada máscara
+  ya guardada pasa a significar otra cosa: los rangos de clan quedarían con
+  privilegios distintos a los que se les asignó, en silencio y para todos los
+  clanes del servidor a la vez.
+
 ## Rechazado con motivo
 
 _(vacío por ahora)_
