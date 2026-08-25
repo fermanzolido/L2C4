@@ -17,12 +17,13 @@ hallazgos aunque no hayas terminado el área.
 
 | Área | Archivos | Líneas | Estado |
 |---|---:|---:|---|
+| ~~`taskmanagers`~~ | 18 | 3.000 | **TERMINADA** |
 | ~~`model/clan`~~ | 5 | 3.110 | **TERMINADA** |
 | ~~`model/itemcontainer`~~ | 10 | 3.727 | **TERMINADA** |
 | ~~`model/skill`~~ | 19 | 3.869 | **TERMINADA** |
 | ~~`model/olympiad`~~ | 7 | 4.554 | **TERMINADA** |
 | ~~`loginserver`~~ | 45 | 5.649 | **TERMINADA** |
-| **`gameserver/ai`** | **15** | **7.907** | **en curso — 8 bugs arreglados** |
+| ~~`gameserver/ai`~~ | 15 | 7.907 | **TERMINADA** |
 | `commons` | 47 | 11.240 | pendiente |
 | datapack `ai/` | 67 | 14.462 | pendiente |
 | `managers` | 44 | 14.636 | pendiente |
@@ -1235,7 +1236,7 @@ registraba sobre el id cero, encima del que ya lo tenía.
   borrar la entrada del cliente legítimo. Es el diseño: `REASON_ACCOUNT_IN_USE` se
   le manda a **los dos**, así que los dos se van.
 
-## `gameserver/ai` — en curso
+## `gameserver/ai` — TERMINADA
 
 Son **15** archivos y **7.907** líneas, dominadas por `AttackableAI` (2628),
 `CreatureAI` (1605) y `AbstractAI` (850).
@@ -1370,3 +1371,159 @@ raramente, eso es el hallazgo, no el logueo.
 - **La convergencia de `_globalAggro`** clampea a cero desde los dos lados y solo
   avanza su timestamp cuando pasó al menos un segundo, así que no pierde tiempo en
   ticks sub-segundo.
+
+### Segunda vuelta: `CreatureAI` y `PlayerAI`
+
+**9 — `onIntentionActive()` soltaba la intención pero no los objetivos.** El
+método pone la intención en ACTIVE, y ACTIVE significa por definición que el
+actor no tiene objetivo. Después hay una salida temprana cuando la región del
+actor y sus vecinas están inactivas —una optimización para no pensar donde no
+hay nadie mirando— y esa salida quedaba **antes** de `setCastTarget(null)` y
+`setAttackTarget(null)`. Un actor cuyos alrededores se vaciaron se quedaba con
+las dos referencias vivas mientras su intención decía lo contrario.
+
+Los `null` ahora van antes de la puerta; los paquetes y el `onActionThink()`
+quedan atrás, que es para lo que la puerta existe realmente.
+
+**10 — El casteo diferido no revalidaba nada.** `onIntentionCast` tiene un
+preámbulo que rechaza el casteo si el actor está descansando. Si el actor está en
+el retroceso de un disparo de arco, en vez de castear agenda un `CastTask` para
+cuando ese temporizador expire — y ese task llamaba `changeIntentionToCast`
+directo, salteándose el preámbulo entero. Forzaba la intención aunque en el
+ínterin el actor se hubiera sentado o **muerto**.
+
+Ahora descarta el casteo si la criatura murió y si no reentra por
+`onIntentionCast`, de modo que el camino diferido pasa por la misma puerta que el
+inmediato. El temporizador de arco que el task esperó ya expiró, así que no puede
+rebotar a agendarse otra vez.
+
+**11 — Tres de los cuatro `_thinking` sin `volatile`.** `AttackableAI`,
+`PlayerAI`, `SiegeGuardAI` y `SummonAI` llevan una bandera con semántica
+idéntica: se chequea al entrar a `onActionThink`, se prende, y se apaga en un
+`finally`. **`SummonAI` la declara `volatile`; los otros tres no.** Esa
+diferencia solitaria es la evidencia: el mismo razonamiento que produjo el
+`volatile` en los summons vale igual para los hermanos.
+
+`onActionThink` se alcanza desde hilos de paquetes y desde el task manager de IA,
+así que la bandera es compartida de verdad. Sin `volatile`, una lectura vieja o
+deja entrar dos disparos a la vez al bucle de pensamiento —justo lo que la
+bandera existe para impedir— o deja a una criatura viendo un `true` permanente y
+sin volver a pensar nunca.
+
+**12 — `PlayerAI._nextIntention` leído sin el candado que su propia clase toma.**
+`changeIntention` toma `_aiLock` para tocar ese campo, lo que ya establece que la
+clase lo considera disputado. Los otros cinco accesos lo ignoran, y dos de ellos
+chequean null y después lo desreferencian tres veces más.
+`onActionFinishCasting` se notifica desde el task de fin de casteo mientras
+`onActionCancel` corre en el hilo de paquetes del jugador: un null puesto entre
+el chequeo y una lectura es un NPE. Los dos sitios ahora sacan una foto a una
+local, y el campo es `volatile` para que la foto sea una lectura coherente.
+
+**13 — `onActionReadyToAct` limpiaba `_nextIntention` después y no antes.** Para
+un casteo *toggle*, `changeIntention` guarda la intención actual **en ese mismo
+campo** para restaurarla cuando el casteo termine. Limpiarlo después de llamar a
+`setIntention` borraba lo que `changeIntention` acababa de guardar. Limpiarlo
+antes de consumirlo lo marca usado igual y deja la restauración intacta.
+
+### Anotado sin tocar (segunda vuelta)
+
+- **Cinco de los seis `onIntention*` de `CreatureAI` no chequean `_actor.isDead()`
+  y `onIntentionFollow` sí.** Es el patrón de "guard angosto delata la clase" que
+  ya rindió dos veces, pero acá no pude construir el camino concreto por el que
+  llega una intención a un cadáver, y agregar el chequeo a cinco handlers sin
+  ese camino es exactamente el tipo de cambio que compila, se lee obviamente
+  correcto y no lo agarra ningún test. Queda anotado, no aplicado.
+
+- **`onIntentionPickUp` y `onIntentionInteract` llaman a `clientStopAutoAttack()`
+  antes de sus salidas tempranas**, así que interactuar con algo con lo que ya
+  estás interactuando —o levantar un ítem que ya no está en el piso— te corta el
+  auto-ataque sin hacer nada más.
+
+- **`CreatureFollowTaskManager.follow()` traga toda excepción con un `catch`
+  vacío.** Corre cada 500 ms por criatura, así que loguear ahí es un riesgo real
+  de spam; distinto del caso de `AttackableAI.onActionThink`, que ya se logueó.
+
+- **`RespawnTaskManager` hace `spawn._scheduledCount--`** sobre un campo público
+  no atómico, y solo cuando `spawn != null`.
+
+### Sospechas evaluadas y descartadas (segunda vuelta)
+
+- **Fuga en los mapas de seguimiento.** `follow()` decide "dejar de seguir" en dos
+  ramas y en las dos solo llama `ai.setIntention(Intention.IDLE)`, sin sacar la
+  criatura del mapa; `onIntentionIdle` tampoco llama `stopFollow()`. Parecía una
+  fuga permanente que además retiene la `Creature` viva. **Falso:**
+  `AbstractAI.setIntention` llama `stopFollow()` para toda intención que no sea
+  `FOLLOW` ni `ATTACK`, o sea que la baja está en la puerta de entrada, no en el
+  handler.
+
+- **`onActionForgetObject` dejando referencias colgadas.** La IA guarda cuatro
+  (`_target`, `_attackTarget`, `_castTarget`, `_followTarget`) y las limpia a las
+  cuatro, más el caso de que el objeto olvidado sea el propio actor.
+
+- **`maybeMoveToPosition` dividiendo por cero.** `dist` no puede ser 0 dentro de
+  esa rama: el guard `isInsideRadius2D` la excluye. Por el mismo guard,
+  `dist - (offset - 5)` siempre queda positivo.
+
+- **`checkTargetLostOrDead` contradiciendo su javadoc**, que promete "false si es
+  fakedeath" sin que se vea el chequeo. Usa `isDead()` y no `isAlikeDead()`, y el
+  fakedeath está vivo, así que el comportamiento es el que el javadoc describe.
+
+- **`thinkInteract` pasando un no-`Creature` a `doInteract`.** El guard excluye
+  `StaticObject` pero no otros tipos; `WorldObject.asCreature()` devuelve `null`
+  en la clase base en vez de tirar, y `doInteract` chequea null. No-op silencioso.
+
+- **`_nextIntention` retenido después de un `return` temprano en los cuatro
+  bucles de `onActionThink`.** Los cuatro apagan `_thinking` en un `finally`.
+
+## `taskmanagers` — TERMINADA
+
+Son **18** archivos y **3.000** líneas. No estaba en el mapa original; se llegó
+tirando del hilo del seguimiento desde `AbstractAI.startFollow`.
+
+**Leído:** los 12 task managers que llevan bandera de reentrada, entero cada uno.
+
+### Hallazgos
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 1 | 12 archivos | la bandera de reentrada no se resetea en `finally` | **crítica** |
+| 2 | 12 archivos | esa misma bandera no es `volatile` | alta |
+
+**1 — Una excepción mata el subsistema hasta reiniciar.** Cada task manager del
+paquete protege su `run()` recurrente con un `boolean static` que se prende al
+entrar y se apaga al salir. Son **14 banderas en 12 archivos**, y ninguna se
+apagaba en un `finally`.
+
+**10 de los 12 no tienen `try/catch` en ninguna parte.** Una excepción lanzada
+dentro del bucle sale de `run()` y la absorbe `ThreadPool.RunnableWrapper`, que
+atrapa `Throwable` sin relanzar para que la agenda sobreviva — pero la bandera
+nunca se limpia. Cada disparo posterior vuelve en seco en el guard y ese
+subsistema queda muerto para todo el servidor, en silencio, hasta reiniciar.
+
+`RespawnTaskManager` es el caso más filoso: hace `iterator.remove()` **antes** de
+`spawn.respawnNpc(npc)`, así que un solo respawn que falle pierde ese NPC *y*
+detiene todos los respawns futuros del servidor. `DecayTaskManager` (los cadáveres
+no vuelven a desaparecer), `ItemLifeTimeTaskManager` (los ítems temporales no
+vuelven a vencer), `PvpFlagTaskManager` (las banderas de PvP no vuelven a
+bajarse) y `PlayerAutoSaveTaskManager` (ningún jugador vuelve a autoguardarse)
+fallan del mismo modo.
+
+Verificado que ningún cuerpo tenía un `return` temprano —solo dos `continue`—,
+así que el bloqueo requería una excepción y no era determinista.
+
+**2 — La misma bandera, sin `volatile`.** Se escribe y se lee desde hilos
+distintos del pool, así que una lectura vieja o deja solaparse dos disparos
+—exactamente lo que el guard existe para impedir— o se saltea un tick.
+
+Las 14 quedaron `volatile` y limpiadas en un `finally`. Se verificó con un diff
+insensible al whitespace que no cambió ninguna sentencia: los únicos cambios son
+la palabra `volatile` y los envoltorios `try/finally`.
+
+### Método
+
+Esta fue la tercera vez que la tabla sistemática rindió más que el grep. El
+defecto apareció leyendo **un** archivo (`CreatureFollowTaskManager`), y la
+pregunta que lo convirtió en 14 no fue "¿hay más?" sino la tabla explícita de
+*declaración × `volatile` × `finally`* sobre los 12 archivos del paquete: 14
+declaraciones, 0 `volatile`, 0 `finally`. Uniforme. Un grep por `_working` habría
+mostrado los sitios sin mostrar que **ninguno** estaba protegido.
