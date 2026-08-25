@@ -76,6 +76,12 @@ public class ThreadPool {
 					ThreadConfig.HIGH_PRIORITY_SCHEDULED_THREAD_POOL_SIZE,
 					new ThreadProvider("L2jMobius High Priority ScheduledThread", ThreadPriority.PRIORITY_8),
 					new ThreadPoolExecutor.CallerRunsPolicy());
+			// Configured like its sibling below. This pool received none of the three calls, so
+			// cancelled tasks stayed queued until their scheduled time -- on a pool whose tasks
+			// repeat twice a second -- and its core threads started only on first use.
+			HIGH_PRIORITY_SCHEDULED_POOL.setRejectedExecutionHandler(new RejectedExecutionHandlerImpl());
+			HIGH_PRIORITY_SCHEDULED_POOL.setRemoveOnCancelPolicy(true);
+			HIGH_PRIORITY_SCHEDULED_POOL.prestartAllCoreThreads();
 			LOGGER.info(StringUtil.concat("...scheduled pool executor with ",
 					String.valueOf(ThreadConfig.HIGH_PRIORITY_SCHEDULED_THREAD_POOL_SIZE), " high priority threads."));
 		}

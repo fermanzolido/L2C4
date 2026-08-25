@@ -219,8 +219,16 @@ public class DatabaseFactory {
 	 * @return A valid database connection.
 	 */
 	public static Connection getConnection() {
+		// init() logs and swallows a pool that failed to build, leaving this field null. Without
+		// this check callers got a bare NullPointerException from here instead of the
+		// RuntimeException the method promises below.
+		final HikariDataSource pool = DATABASE_POOL;
+		if (pool == null) {
+			throw new RuntimeException("Unable to obtain a database connection: the pool is not initialized.");
+		}
+
 		try {
-			return DATABASE_POOL.getConnection();
+			return pool.getConnection();
 		} catch (SQLException e) {
 			LOGGER.log(Level.SEVERE, "Database: Could not get a connection.", e);
 			throw new RuntimeException("Unable to obtain a database connection.", e);
