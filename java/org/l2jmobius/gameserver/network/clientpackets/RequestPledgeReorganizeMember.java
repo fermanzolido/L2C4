@@ -78,6 +78,15 @@ public class RequestPledgeReorganizeMember extends ClientPacket
 			return;
 		}
 		
+		// This packet swaps two members between subunits, so the requested pledge type
+		// has to be the one the selected member is actually in. Taking the client value
+		// unchecked would move a member into a subunit that does not exist, where they
+		// stop being counted by getSubPledgeMembersCount() and by the member limit.
+		if (_newPledgeType != member2.getPledgeType())
+		{
+			return;
+		}
+		
 		final int oldPledgeType = member1.getPledgeType();
 		if (oldPledgeType == _newPledgeType)
 		{

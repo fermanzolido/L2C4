@@ -1336,7 +1336,17 @@ public class Clan
 						continue;
 					}
 					
-					_privs.get(rank).setPrivs(privileges);
+					// Ranks are created by initializePrivs(), which runs before restore().
+					// A stored rank outside that set would throw here and abort the loop,
+					// leaving every remaining rank of this clan without its privileges.
+					final RankPrivs rankPrivs = _privs.get(rank);
+					if (rankPrivs == null)
+					{
+						LOGGER.warning("Clan " + _clanId + ": ignoring clan_privs row with unknown rank " + rank + ".");
+						continue;
+					}
+					
+					rankPrivs.setPrivs(privileges);
 				}
 			}
 		}
