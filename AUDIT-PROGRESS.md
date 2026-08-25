@@ -20,7 +20,7 @@ hallazgos aunque no hayas terminado el área.
 | ~~`model/clan`~~ | 5 | 3.110 | **TERMINADA** |
 | ~~`model/itemcontainer`~~ | 10 | 3.727 | **TERMINADA** |
 | ~~`model/skill`~~ | 19 | 3.869 | **TERMINADA** |
-| **`model/olympiad`** | **7** | **4.554** | **en curso — 5 bugs arreglados** |
+| **`model/olympiad`** | **7** | **4.554** | **en curso — 6 bugs arreglados** |
 | `loginserver` | 45 | 5.649 | pendiente |
 | `gameserver/ai` | 15 | 7.907 | pendiente |
 | `commons` | 47 | 11.240 | pendiente |
@@ -250,6 +250,24 @@ admin que suba una penalización arriba de 24 días o ponga un boss a un mes de
 respawn obtenía un valor **negativo**. `Auctioneer` es el único alcanzable sin
 tocar config: parsea los días de un bypass sin validar rango, y con 25 la subasta
 nacía vencida.
+
+**6 — Un default doble se registra como victoria.**
+`OlympiadGameTask.checkDefaulted()` recorre a los dos participantes y puede
+marcar a ambos: alcanza con que ninguno de los dos esté bajo el límite de peso,
+o que los dos estén muertos, o que los dos choquen con el límite de conexiones
+por IP. Cuando eso pasa corren los dos bloques de `validateWinner`, y los dos
+escriben el ELO a partir de los valores capturados **antes** de que corriera
+cualquiera de ellos, así que el segundo reemplaza en silencio lo que hizo el
+primero.
+
+Resultado: un combate al que no se presentó ninguno de los dos quedaba anotado
+como victoria del jugador uno. Y como `nextOpponents()` elige como jugador uno al
+de **ELO más alto** del par, el sesgo siempre favorecía al mismo lado: el mejor
+rankeado subía rating por partidas que nadie jugó.
+
+Los puntos sí estaban bien: cada uno pierde los suyos sobre su propio `StatSet`.
+El arreglo deja el ELO quieto cuando fallan los dos, que es lo que ya hacía la
+rama de doble crash unas líneas más abajo.
 
 ### Anotado sin tocar
 
@@ -784,6 +802,7 @@ mensajes, persistencia), `OlympiadGameTask.java`, `OlympiadStadium.java`.
 | 3 | `Q00631` | índice de recompensa sin acotar, y los ítems se consumen **antes** | alta |
 | 4 | `Q00374` | mismo índice sin acotar (sin pérdida de ítems) | media |
 | 5 | `OlympiadGame` | dos `catch` que descartaban la falla al entregar el premio | media |
+| 6 | `OlympiadGame` | con los dos jugadores en default, el ELO queda como victoria del primero | media |
 
 **1 — Los chequeos estaban en las ramas equivocadas.** `MonumentOfHeroes` tiene
 eventos que deciden qué página HTML mostrar y llevan las condiciones
@@ -834,13 +853,12 @@ había pérdida.
 
 ### Anotado sin tocar
 
-- **`_playerOneDefaulted` y `_playerTwoDefaulted` se declaran y se leen, pero
-  nunca se asignan.** Son siempre `false`, no hay subclases de `OlympiadGame`, y
-  el bloque entero de "un jugador no se presentó" es código muerto: el camino
-  vivo es `_pOneCrash` / `_pTwoCrash`. Si alguna vez se reactivara tiene además un
-  defecto propio: con los dos jugadores en default, los dos bloques corren y el
-  segundo escribe el ELO usando los valores **originales** capturados arriba,
-  pisando lo que hizo el primero. No lo toco — misma regla que `ClanAccess.NONE`.
+- **CORRECCIÓN.** Escribí antes que `_playerOneDefaulted` y `_playerTwoDefaulted`
+  nunca se asignaban y que el bloque de "un jugador no se presentó" era código
+  muerto. **Era falso**: grepeé los campos solo dentro de `OlympiadGame.java`, y
+  se asignan en `OlympiadGameTask.checkDefaulted()`, líneas 148 y 152. El bloque
+  está vivo, y el defecto del ELO que había anotado como hipotético era real
+  (ver hallazgo 6).
 
 - **`Hero.claimHero()` construye un `StatSet` vacío** si el jugador no tiene
   registro de héroe, y lo persiste: una fila sin nombre, sin clase y con conteo

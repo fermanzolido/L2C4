@@ -501,15 +501,26 @@ class OlympiadGame {
 
 		// Check for if a player defaulted before battle started
 		if (_playerOneDefaulted || _playerTwoDefaulted) {
+			// checkDefaulted() walks both participants and can flag both of them, for
+			// instance when neither is under the weight limit. Both blocks below then run,
+			// and both write elo from the values captured before either of them, so the
+			// second silently replaces the first: a match neither player showed up for was
+			// recorded as a win for player one. Since nextOpponents() makes the higher
+			// rated of the pair player one, that consistently favoured the same side.
+			// The mutual crash branch further down already leaves elo alone.
+			final boolean bothDefaulted = _playerOneDefaulted && _playerTwoDefaulted;
+
 			if (_playerOneDefaulted) {
 				final int lostPoints = Math.min(playerOnePoints / 3, OlympiadConfig.OLYMPIAD_MAX_POINTS);
 				playerOneStat.set(POINTS, playerOnePoints - lostPoints);
-				playerOneStat.set(Olympiad.ELO,
-						eloOne + (skipEloUpdate ? 0
-								: (int) (OlympiadConfig.OLYMPIAD_ELO_K_FACTOR * (0.0 - expectedOne))));
-				playerTwoStat.set(Olympiad.ELO,
-						eloTwo + (skipEloUpdate ? 0
-								: (int) (OlympiadConfig.OLYMPIAD_ELO_K_FACTOR * (1.0 - expectedTwo))));
+				if (!bothDefaulted) {
+					playerOneStat.set(Olympiad.ELO,
+							eloOne + (skipEloUpdate ? 0
+									: (int) (OlympiadConfig.OLYMPIAD_ELO_K_FACTOR * (0.0 - expectedOne))));
+					playerTwoStat.set(Olympiad.ELO,
+							eloTwo + (skipEloUpdate ? 0
+									: (int) (OlympiadConfig.OLYMPIAD_ELO_K_FACTOR * (1.0 - expectedTwo))));
+				}
 				final SystemMessage sm = new SystemMessage(SystemMessageId.S1_HAS_LOST_S2_OLYMPIAD_POINTS);
 				sm.addString(_playerOneName);
 				sm.addInt(lostPoints);
@@ -534,12 +545,14 @@ class OlympiadGame {
 			if (_playerTwoDefaulted) {
 				final int lostPoints = Math.min(playerTwoPoints / 3, OlympiadConfig.OLYMPIAD_MAX_POINTS);
 				playerTwoStat.set(POINTS, playerTwoPoints - lostPoints);
-				playerOneStat.set(Olympiad.ELO,
-						eloOne + (skipEloUpdate ? 0
-								: (int) (OlympiadConfig.OLYMPIAD_ELO_K_FACTOR * (1.0 - expectedOne))));
-				playerTwoStat.set(Olympiad.ELO,
-						eloTwo + (skipEloUpdate ? 0
-								: (int) (OlympiadConfig.OLYMPIAD_ELO_K_FACTOR * (0.0 - expectedTwo))));
+				if (!bothDefaulted) {
+					playerOneStat.set(Olympiad.ELO,
+							eloOne + (skipEloUpdate ? 0
+									: (int) (OlympiadConfig.OLYMPIAD_ELO_K_FACTOR * (1.0 - expectedOne))));
+					playerTwoStat.set(Olympiad.ELO,
+							eloTwo + (skipEloUpdate ? 0
+									: (int) (OlympiadConfig.OLYMPIAD_ELO_K_FACTOR * (0.0 - expectedTwo))));
+				}
 				final SystemMessage sm = new SystemMessage(SystemMessageId.S1_HAS_LOST_S2_OLYMPIAD_POINTS);
 				sm.addString(_playerTwoName);
 				sm.addInt(lostPoints);
