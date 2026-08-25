@@ -444,7 +444,13 @@ public class Hero
 					final StringBuilder fList = new StringBuilder(500);
 					int counter = 0;
 					int breakat = 0;
-					for (int i = (page - 1) * perpage; i < list.size(); i++)
+					
+					// page arrives straight from a client bypass with no validation. Below
+					// one it makes this index negative, and large enough it overflows the
+					// multiplication back to negative; either way the loop indexed outside
+					// the list. A page past the end simply yields nothing, as before.
+					final long firstEntry = (page < 1) ? 0 : (((long) (page - 1)) * perpage);
+					for (int i = (int) Math.min(firstEntry, list.size()); i < list.size(); i++)
 					{
 						breakat = i;
 						final StatSet diaryEntry = list.get(i);
@@ -531,7 +537,10 @@ public class Hero
 					final StringBuilder fList = new StringBuilder(500);
 					int counter = 0;
 					int breakat = 0;
-					for (int i = (page - 1) * perpage; i < heroFights.size(); i++)
+					
+					// Same as showHeroDiary: page comes from a client bypass unchecked.
+					final long firstEntry = (page < 1) ? 0 : (((long) (page - 1)) * perpage);
+					for (int i = (int) Math.min(firstEntry, heroFights.size()); i < heroFights.size(); i++)
 					{
 						breakat = i;
 						final StatSet fight = heroFights.get(i);
