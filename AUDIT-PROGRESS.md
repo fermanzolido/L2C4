@@ -19,7 +19,7 @@ hallazgos aunque no hayas terminado el área.
 |---|---:|---:|---|
 | ~~`model/clan`~~ | 5 | 3.110 | **TERMINADA** |
 | ~~`model/itemcontainer`~~ | 10 | 3.727 | **TERMINADA** |
-| **`model/skill`** | **19** | **3.869** | **en curso — 5 bugs arreglados** |
+| ~~`model/skill`~~ | 19 | 3.869 | **TERMINADA** |
 | `model/olympiad` | 7 | 4.554 | pendiente |
 | `loginserver` | 45 | 5.649 | pendiente |
 | `gameserver/ai` | 15 | 7.907 | pendiente |
@@ -366,7 +366,7 @@ que alguien parcheó en el valor concreto que vio. Cada guard así es una pista 
 que la misma dereferencia está sin proteger en otro lado — y en los dos casos lo
 estaba.
 
-## `model/skill` — en curso
+## `model/skill` — TERMINADA
 
 Son **19** archivos y **3.869** líneas. Los grandes: `Skill.java` (1758),
 `BuffInfo.java` (482), `AbnormalType.java` (381), `SkillChannelizer.java` (245),
@@ -678,3 +678,83 @@ velocidad en el 88% de los buffs— no lo detecta ningún build ni ningún test.
   `addAbnormalVisualEffects` no.** Ambos vienen del constructor y `applyEffects`
   corta antes si `effected == null`, así que el chequeo del lado de la baja es
   defensivo nada más. Asimetría sin consecuencia.
+
+### Hallazgo transversal: índices de enum tomados del cliente
+
+Salió de revisar los enums del área. El patrón `values()[id]` con un `id` que
+llega del cliente aparece en varios lados. `AdminFence` es el ejemplar correcto:
+deriva la cota del propio enum con `>= FenceState.values().length`.
+
+**Arreglados (3):**
+
+- **`RequestShortcutReg` acotaba con `typeId > 6`.** Ese literal está copiado de
+  `RequestMakeMacro`, cuyo `MacroType` tiene **siete** constantes; `ShortcutType`
+  tiene **seis**. Así que un `typeId` de exactamente 6 pasaba el chequeo e
+  indexaba una posición más allá del final. Y como la búsqueda está en
+  `readImpl()`, fallaba durante el parseo del paquete, antes de llegar a ninguna
+  validación del handler.
+- **`RequestMakeMacro`** tenía el literal correcto para su enum, pero es el mismo
+  número copiado que produjo el defecto de al lado, y ninguna de las dos líneas
+  se enteraría si al enum se le agrega o quita una constante. Ahora las dos
+  derivan la cota del enum.
+- **`AcquireSkillType.getAcquireSkillType()` no tenía cota alguna.** La llaman
+  `RequestAcquireSkill` y `RequestAcquireSkillInfo` con un `readInt()` crudo.
+  Ahora un valor fuera de rango resuelve a `CLASS`, que los dos llamadores
+  rechazan por el camino que ya tienen: `getSkillLearn()` devuelve null para
+  cualquier cosa que el jugador no pueda aprender legítimamente, y cada uno tiene
+  un `default` que loguea el tipo inesperado.
+
+**Verificado y descartado:** `RequestPetition` acota con
+`_type <= 0 || _type >= 10` contra un `PetitionType` de **nueve** constantes
+indexado en `_type - 1`. Es exacto. (Casi lo cuento como off-by-one: mi primer
+conteo dio 8 porque la última constante no lleva coma y no la matcheó el grep.
+Listarlas lo corrigió.)
+
+**Anotado sin tocar:** `MacroList` y `Shortcuts` hacen `values()[]` sin cota
+sobre una columna leída de la base, dentro de un bucle cuyo único `catch` está
+afuera — así que una fila inesperada le costaría al jugador **todas** sus macros
+o atajos restantes. Es la misma forma que el defecto de `clan_privs` ya
+arreglado, pero acá no hay evidencia de que esa fila exista, así que queda
+registrado y no endurecido por especulación.
+
+### Cierre de `model/skill`
+
+**Los 19 archivos leídos.** Los enums (`AbnormalType` con 326 constantes,
+`TargetType`, `AffectScope`, `AffectObject`, `Element`, `SkillFinishType`,
+`EffectCalculationType`, `SkillOperateType`) no persisten ordinales ni los usan
+como índice, y `AbnormalVisualEffect` usa una máscara explícita en vez de
+derivarla del ordinal, que es el patrón seguro.
+
+Descartados en el cierre:
+
+- **`SkillOperateType`**: los 10 valores están cubiertos por alguna de las seis
+  clasificaciones. El datapack solo usa A1, A2, A3, P y T.
+- **`TargetType` tiene 38 constantes y solo hay 14 handlers.** Un tipo sin
+  handler devuelve lista vacía y le manda al jugador "Target type of skill is not
+  currently handled". Usados en datos pero sin handler: `NONE` (25 skills) y
+  `CORPSE` (1). **Ninguno es alcanzable**: de las 25 con `NONE`, 13 son pasivas
+  (nunca se castean) y 11 de las 12 activas son disparadas por item handlers
+  —anzuelos de pesca y pergaminos de encantamiento— que llaman a `activateSkill`
+  directo sin pasar por `getTargetList`. Las dos que quedan, la skill 3049 y la
+  4653 (`CORPSE`), son **datos muertos**: ningún arma las declara en
+  `skills_on_crit` / `skills_on_magic` / `enchant4_skill`, y ningún NPC tiene la
+  4653.
+- **`AbnormalType.getAbnormalType(String)` devuelve `NONE` en silencio** ante un
+  nombre desconocido, y `Enum.valueOf` es sensible a mayúsculas. Validados los 5
+  nombres de las tablas `#dispelAbnormals` y los 45 inline de
+  `DispelBySlotProbability`: **todos existen** en el enum. Los `slot="buff"` y
+  `slot="debuff"` que parecían inválidos van a `DispelByCategory`, que guarda el
+  slot como `String` y no toca `AbnormalType`. Y `BlockAbnormalSlot`, el único
+  que sí lo convertiría, no lo usa ninguna skill.
+- **`SkillHolder.getSkill()` hace lazy init sin candado.** Benigno:
+  `SkillData.getSkill()` devuelve siempre la misma instancia compartida, cargada
+  al arrancar, así que una carrera solo repite la búsqueda.
+- **`SkillUseHolder` hereda `equals`/`hashCode` sin incluir sus propios campos**
+  (`ctrlPressed`, `shiftPressed`). No importa: sus tres usos son campos sueltos
+  de `Player` (`_currentSkill`, `_currentPetSkill`, `_queuedSkill`), nunca claves
+  de un `Set` o `Map`.
+- **`Skill.hasEffectType` castea `ordinal()` a `byte`.** `EffectType` tiene 40
+  constantes, así que entra — mismo margen que `ClanAccess`: correcto hoy, sin
+  lugar para llegar a 128.
+- **`AffectObject` tiene una constante `NOE`**, que parece un typo de `NONE`. No
+  la toco: es exactamente el caso `ClanAccess.NONE`.
