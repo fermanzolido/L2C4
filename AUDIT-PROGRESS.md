@@ -622,3 +622,59 @@ cuerpo ya está adentro del candado.
   `default` como "Any Target", donde los jugadores sí son objetivos válidos. El
   modo se toma sin validar de `settings.get(3)` de un comando por voz. Redundante
   y confuso, sin daño demostrable; cambiarlo es decisión de mecánica.
+
+### `BuffInfo` completo
+
+**Arreglado: `_isInUse` no era `volatile`.** `EffectList` lo apaga cuando un buff
+queda tapado por otro o cuando se reemplaza un pasivo, y lo vuelve a prender
+cuando termina una hierba y hay que restaurar un buff escondido — todo desde el
+hilo que aplica o quita el efecto. `BuffInfo.onTick()` lo lee desde el hilo del
+scheduler que corre los ticks, y tres paquetes de servidor lo leen desde hilos de
+red. Sin `volatile`, un buff tapado podía seguir corriendo su efecto por tick, y
+uno restaurado podía quedarse mudo. `_finishType`, declarado cuatro líneas más
+arriba en el mismo bloque, ya era `volatile`.
+
+Revisado el resto de la clase: `_effector`, `_effected`, `_skill` y
+`_periodStartTicks` son `final`; `_tasks` es un `ConcurrentHashMap`; y `_effects`
+y `_abnormalTime` solo se mutan antes de publicar el objeto. El único que muta un
+`BuffInfo` que no acaba de crear, `StealAbnormal`, le pone el tiempo y le aplica
+los efectos **antes** de agregarlo a la lista del objetivo.
+
+### El caso que ilustra por qué las rutinas eran peligrosas
+
+**`addAbnormalVisualEffects()` llama a `updateAbnormalEffect()` sin condición**,
+aunque ninguna de sus tres ramas haya hecho nada — mientras que su espejo
+`removeAbnormalVisualEffects(broadcast)` solo lo llama si `broadcast`. Y
+`updateAbnormalEffect()` no es barato: para un jugador es un `broadcastUserInfo()`
+completo, y para un NPC recorre **todos** los jugadores que lo ven y le manda un
+`NpcInfo` a cada uno. Se llama en cada aplicación de buff en la que se procesó al
+menos un efecto continuo. Solo **237 de 1970** skills declaran
+`abnormalVisualEffect`, o sea que el ~88% de las veces no hay nada visual que
+mostrar.
+
+Parece una optimización obvia. **Casi la hago, y me hubiera equivocado por poco.**
+El primer razonamiento fue: si la hago condicional, se rompe la propagación de
+stats, porque para el 88% de las skills esa sería la única emisión de
+`UserInfo`/`NpcInfo` al aplicar un buff. Eso resultó **falso**: `addStatFuncs`
+—que corre unas líneas antes, en el mismo `initializeEffects`— ya llama a
+`broadcastModifiedStats`, que emite un broadcast completo si cambió `MOVE_SPEED`
+y un `StatusUpdate` si no. Y los iconos los cubre `updateEffectIcons()` desde
+`EffectList.add`. Así que la llamada probablemente sea **redundante, y encima
+duplicada**.
+
+**Igual no la toqué.** Es una mejora de performance, no una corrección, y quedó
+un riesgo sin cerrar: un `onStart` de algún efecto podría cambiar algo que viaja
+en `UserInfo` sin emitir su propio broadcast, y hoy se estaría apoyando en esta
+llamada sin saberlo. Verificarlo exige auditar los ~200 effect handlers.
+
+Vale la pena dejarlo escrito porque es exactamente el hallazgo que una rutina de
+performance habría "arreglado": compila, el diff es de tres líneas, la
+justificación suena impecable, y el modo de fallo —desincronización visual o de
+velocidad en el 88% de los buffs— no lo detecta ningún build ni ningún test.
+
+### Anotado sin tocar (`BuffInfo`)
+
+- **`removeAbnormalVisualEffects` chequea `_effected == null || _skill == null` y
+  `addAbnormalVisualEffects` no.** Ambos vienen del constructor y `applyEffects`
+  corta antes si `effected == null`, así que el chequeo del lado de la baja es
+  defensivo nada más. Asimetría sin consecuencia.
