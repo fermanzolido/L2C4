@@ -193,9 +193,19 @@ public class TvT extends Event
 								final StatSet params = new StatSet();
 								params.set("Name", name);
 								params.set("SchedulingPattern", pattern);
+								// A negative delay is the "no future match" sentinel, not a time. Adding 5000 to
+								// it turned a pattern that can never fire -- February 30th, say -- into an event
+								// that starts five seconds from now.
 								final long delay = schedulingPattern.getDelayToNextFromNow();
-								getTimers().addTimer("Schedule" + count.incrementAndGet(), params, delay + 5000, null, null); // Added 5 seconds to prevent overlapping.
-								LOGGER.info("Event " + name + " scheduled at " + TimeUtil.getDateTimeString(System.currentTimeMillis() + delay));
+								if (delay < 0)
+								{
+									LOGGER.warning("Event " + name + ": scheduling pattern \"" + pattern + "\" has no future match, not scheduled.");
+								}
+								else
+								{
+									getTimers().addTimer("Schedule" + count.incrementAndGet(), params, delay + 5000, null, null); // Added 5 seconds to prevent overlapping.
+									LOGGER.info("Event " + name + " scheduled at " + TimeUtil.getDateTimeString(System.currentTimeMillis() + delay));
+								}
 								break;
 							}
 						}
@@ -212,9 +222,19 @@ public class TvT extends Event
 		{
 			eventStart(null);
 			final SchedulingPattern schedulingPattern = new SchedulingPattern(params.getString("SchedulingPattern"));
+			// Same sentinel as at load time. Without this the reschedule ran with a delay of 4999
+			// milliseconds, so an event whose pattern has no future match restarted every five
+			// seconds for as long as the server was up.
 			final long delay = schedulingPattern.getDelayToNextFromNow();
-			getTimers().addTimer(event, params, delay + 5000, null, null); // Added 5 seconds to prevent overlapping.
-			LOGGER.info("Event " + params.getString("Name") + " scheduled at " + TimeUtil.getDateTimeString(System.currentTimeMillis() + delay));
+			if (delay < 0)
+			{
+				LOGGER.warning("Event " + params.getString("Name") + ": scheduling pattern has no future match, not rescheduled.");
+			}
+			else
+			{
+				getTimers().addTimer(event, params, delay + 5000, null, null); // Added 5 seconds to prevent overlapping.
+				LOGGER.info("Event " + params.getString("Name") + " scheduled at " + TimeUtil.getDateTimeString(System.currentTimeMillis() + delay));
+			}
 		}
 	}
 	
