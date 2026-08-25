@@ -22,9 +22,10 @@ hallazgos aunque no hayas terminado el área.
 | ~~`model/itemcontainer`~~ | 10 | 3.727 | **TERMINADA** |
 | ~~`model/skill`~~ | 19 | 3.869 | **TERMINADA** |
 | ~~`model/olympiad`~~ | 7 | 4.554 | **TERMINADA** |
+| ~~`gameserver/config`~~ | 55 | 5.554 | **TERMINADA** |
 | ~~`loginserver`~~ | 45 | 5.649 | **TERMINADA** |
 | ~~`gameserver/ai`~~ | 15 | 7.907 | **TERMINADA** |
-| `commons` | 47 | 11.240 | pendiente |
+| **`commons`** | **47** | **11.240** | **en curso** |
 | datapack `ai/` | 67 | 14.462 | pendiente |
 | `managers` | 44 | 14.636 | pendiente |
 | `data` | 71 | 14.922 | pendiente |
@@ -1527,3 +1528,203 @@ pregunta que lo convirtió en 14 no fue "¿hay más?" sino la tabla explícita d
 *declaración × `volatile` × `finally`* sobre los 12 archivos del paquete: 14
 declaraciones, 0 `volatile`, 0 `finally`. Uniforme. Un grep por `_working` habría
 mostrado los sitios sin mostrar que **ninguno** estaba protegido.
+
+## `commons` — en curso
+
+Son **47** archivos y **11.240** líneas. Es infraestructura compartida: cada
+defecto acá se multiplica por todo el servidor.
+
+**Leído:** `network/` entero salvo los buffers de escritura —`ResourcePool`,
+`BufferPool`, `Connection`, `ReadHandler`, `PacketExecutor`, `ConnectionConfig`,
+`ReadablePacket`, `ReadableBuffer`—, `threads/ThreadPool`,
+`database/DatabaseFactory`, la familia de parseo de `util/IXmlReader` y los
+ayudantes de `util/StringUtil`.
+
+**Pendiente:** `ConfigReader`, `time/TimeUtil`, `time/SchedulingPattern`,
+`util/DeadlockWatcher`, `crypt/` (`BlowfishEngine`, `NewCrypt`), `util/BCrypt`,
+`ui/`, y los buffers de escritura (`DynamicPacketBuffer`, `ArrayPacketBuffer`,
+`WritablePacket`, `BaseWritablePacket`).
+
+### Hallazgos
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 1 | `ResourcePool` | el largo declarado por el par remoto hace crecer el índice de pools sin techo | **crítica** |
+| 2 | `ResourcePool` | `TreeMap` plano mutado en caliente por un pool de hilos sin cota | alta |
+| 3 | `Connection` | los buffers se reciclan **antes** de soltar el campo que los apunta | alta |
+| 4 | `ResourcePool` | dos hilos creando el pool del mismo tamaño se pisaban | media |
+| 5 | `BufferPool` | `isFull()` recorre la cola entera, una vez por buffer pedido | media |
+| 6 | `ThreadPool` | el pool de alta prioridad no recibe ninguna de las tres configuraciones de su hermano | media |
+| 7 | `DatabaseFactory` | `getConnection` tira NPE en vez de la excepción que documenta | baja |
+
+**1 — Un largo de la red haciendo crecer una estructura permanente.**
+`ReadHandler.handleHeader` toma el largo del paquete del cable con
+`Short.toUnsignedInt`, le resta los dos bytes de cabecera y se lo pasa a
+`readPayload`, que le pide a `ResourcePool` un buffer de ese tamaño. Los dos
+caminos de búsqueda respondían a un tamaño que ningún pool configurado cubría
+**construyendo un pool para él** y metiéndolo en el mapa compartido.
+
+El mapa es uno por servidor y permanente. El `Network.ini` que se distribuye
+define pools hasta 32768 y el campo de cabecera llega a 65533, así que cada largo
+distinto por encima del pool más grande agregaba una entrada que no se borra
+nunca. Ese mismo archivo pone `BufferPool.InitFactor = 2`, que hace que cada pool
+nuevo aloje **diez buffers directos de su tamaño** al crearse, y después siga
+aceptando más a medida que se reciclan. Es memoria fuera del heap cuyo
+crecimiento lo dirige un valor que elige el par.
+
+Ninguno de los dos caminos registra pools ya. Cuando nada cubre el tamaño pedido
+el llamador recibe un buffer de un solo uso; `recycleBuffer` busca la capacidad,
+no encuentra pool y lo suelta, así que se colecta normalmente. El tráfico dentro
+de los tamaños configurados no cambia y se sigue pooleando.
+
+**2 — Un árbol rojo-negro reestructurado bajo lecturas concurrentes.**
+`ConnectionConfig` arma un `ResourcePool` por servidor y **todas** las conexiones
+lo comparten. `ConnectionManager` le da al grupo de canales asincrónicos un
+`ThreadPoolExecutor` con máximo `Integer.MAX_VALUE`, así que los handlers de
+lectura y escritura corren sobre un conjunto de hilos sin cota y cada uno llega a
+este objeto en cada paquete. El índice era un `TreeMap` plano al que los dos
+caminos del hallazgo 1 le hacían `put` en caliente. Un recorrido que cruza una
+rotación puede devolver el pool equivocado, o seguir un enlace ya reescrito y
+girar: un hilo de red clavado que no vuelve a atender su conexión. Quedó
+`ConcurrentSkipListMap`, que es el `NavigableMap` concurrente.
+
+**3 — Reciclar antes de soltar.** `releaseReadingBuffer` devolvía el buffer al
+pool y **después** limpiaba el campo. Entre esas dos sentencias el buffer ya está
+disponible para otra conexión mientras ésta todavía lo apunta y puede tener una
+lectura en vuelo hacia él. Dos clientes escribiendo la misma memoria es
+corrupción de paquetes y filtración entre conexiones. `releaseWritingBuffer`
+tenía la misma forma a lo largo de todo su bucle. Los dos sueltan primero y
+reciclan después.
+
+### Anotado sin tocar (`commons`)
+
+- **`IXmlReader.parseInt` es el impar de una familia de nueve.** Cada tipo tiene
+  cuatro sobrecargas que devuelven el tipo envuelto; `parseInt` tiene dos y
+  devuelve primitivo, así que es la única que puede tirar NPE al desempaquetar un
+  default nulo. Barridos los llamadores: ninguno le pasa un default que pueda ser
+  nulo.
+
+- **Los enteros usan `decode` y los flotantes `valueOf`.** `Integer.decode("010")`
+  es **8**, no 10, y `decode("08")` tira. Buscados los 1447 XML de datos: no hay
+  ni un atributo numérico con cero a la izquierda, ni ninguno hexadecimal que
+  justifique `decode`. Peligro latente para quien edite datos, no un bug vivo.
+
+- **`StringUtil.isNumeric` no garantiza que el valor entre en un `int`.** Es la
+  misma debilidad que en `Q00631`. Sus 94 llamadores están dominados por
+  `ClassBalanceConfig`, que quedó arreglado.
+
+- **`DatabaseFactory.testDatabaseConnections` no prueba lo que dice.** Su javadoc
+  dice verificar que el pool llega a su máximo, pero pide y devuelve **una**
+  conexión por iteración en vez de sostenerlas, así que re-prueba la misma N veces
+  y siempre reporta éxito total. Eso vuelve inalcanzable a `adjustPoolSize`, que a
+  su vez tiene su propio problema: su piso de 20 puede **subir** el máximo por
+  encima de la cantidad de conexiones que realmente funcionaron, que es lo
+  contrario de para lo que existe. Hacerlo bien exige sostener N conexiones
+  simultáneas en el arranque, que es una decisión de despliegue y no un arreglo de
+  bug; además `TestDatabaseConnections` viene en `false` y ningún `.ini`
+  distribuido lo activa.
+
+- **`ReadablePacket.readSizedString` aloja antes de validar**, igual que el
+  hallazgo 1 del loginserver, pero acá el largo sale de un `readShort()` y queda
+  acotado a 65534, así que no escala. Su `catch (Exception ignored)` sí deja el
+  buffer parcialmente avanzado y desincroniza el resto del parseo.
+
+### Sospechas evaluadas y descartadas (`commons`)
+
+- **`handleHeader` con `dataSize <= 0` llamando a `client.read()` sobre un buffer
+  ya consumido**, lo que parecía un `_channel.read` de cero bytes en bucle
+  infinito. `Client.read()` va a `Connection.readHeader()`, que **libera** el
+  buffer y pide uno nuevo.
+
+- **`resumeRead` sin avanzar cuando `bytesRead == 0`.** Para llegar ahí el buffer
+  tendría que no tener espacio, y en ese caso `_expectedReadSize` ya es 0 y la
+  condición que llama a `resumeRead` no se cumple.
+
+- **Excepción de un paquete malformado escapando.** `parseAndExecutePacket`
+  envuelve el parseo y el `read()` en un `try` que desconecta al cliente. La
+  contención es por conexión.
+
+- **`DynamicPacketBuffer` sin control de límites.** Tira
+  `IndexOutOfBoundsException` desde tres sitios distintos.
+
+- **`RejectedExecutionHandlerImpl` corriendo una tarea diferida de inmediato.**
+  `ScheduledThreadPoolExecutor` usa una cola sin cota, así que solo rechaza
+  después del apagado, y el handler chequea `isShutdown()` y vuelve.
+
+## `gameserver/config` — TERMINADA
+
+Son **55** archivos y **5.554** líneas. No estaba en el mapa; se llegó desde los
+94 llamadores de `StringUtil.isNumeric`.
+
+### Hallazgos
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 1 | `ClassBalanceConfig` | tres caminos de excepción sin guarda, ×37 bloques copiados | alta |
+| 2 | `GeneralConfig` | un `catch` que no puede atrapar lo único que su bloque tira | alta |
+| 3 | 4 archivos | `Enum.valueOf` sin guarda, sensible a mayúsculas | alta |
+| 4 | `ClassBalance.ini` | la línea que se distribuye está malformada y se ignora en silencio | media |
+
+**1 — El mismo bloque, treinta y siete veces, sin validar nada.**
+`ClassBalanceConfig` era el mismo bloque de catorce líneas repetido una vez por
+tabla de multiplicadores, distinto solo en el nombre de la propiedad y el array.
+El **83 %** del archivo era ese bloque. Ninguna copia validaba nada:
+
+```java
+ARRAY[StringUtil.isNumeric(id) ? Integer.parseInt(id)
+    : Enum.valueOf(PlayerClass.class, id).getId()] = Float.parseFloat(...);
+```
+
+Un nombre de clase desconocido tira desde `Enum.valueOf`. Un id numérico más allá
+del final de la tabla tira desde el store del array — y como `isNumeric` solo
+prueba que todos los caracteres sean dígitos, una tira larga de dígitos llega a
+`Integer.parseInt` y tira ahí antes. Un multiplicador que no es número tira desde
+`parseFloat`.
+
+Nada entre acá y el constructor de `GameServer` atrapa ninguna de las tres.
+`ConfigLoader.init()` llama a los cargadores en línea recta, así que **una sola
+entrada mal escrita en este archivo opcional impide arrancar el servidor**, con
+un mensaje que no nombra ni la propiedad ni la entrada, y los ~30 configs
+listados después nunca se cargan.
+
+Los 37 bloques son ahora una llamada a un ayudante que llena la tabla con 1f
+neutro y después valida cada entrada por separado, logueando y salteando la mala
+con el nombre de la propiedad y el texto que falló. El archivo pasó de 636 a 199
+líneas y el comportamiento para toda entrada válida es idéntico.
+
+**2 — Manejo de errores inerte.** La lista de canales de chat baneados ya tenía
+un `try/catch` escrito para exactamente esto, y el `catch` es
+`NumberFormatException`. `NumberFormatException` es **subclase** de
+`IllegalArgumentException`, que es lo que tira `Enum.valueOf`: una subclase no
+puede atrapar a su superclase, así que ese `catch` nunca pudo dispararse por lo
+único del bloque que tira, y su línea de log jamás se imprimió.
+
+Además, aun con el tipo correcto, la primera entrada mala descartaba lo que el
+bucle ya había juntado. Ahora se chequea canal por canal.
+
+**3 — `Enum.valueOf` es sensible a mayúsculas.** Escribir `GlobalChat = on` en vez
+de `ON` alcanzaba para no poder arrancar. `PlayerConfig` era el **único** de los
+seis sitios que pasaba su entrada a mayúsculas antes — ése es el delator: alguien
+chocó con esto una vez y arregló el sitio que tenía adelante. Esa llamada igual
+tiraba con un valor que no fuera un método de corte, y su `toUpperCase` no tenía
+locale; quedó fijado a `Locale.ROOT`.
+
+Los cinco restantes pasan por `StringUtil.isEnum`, que existe justo para esto y
+no se usaba en ninguna parte.
+
+**4 — Una línea distribuida que nunca hizo nada.** El `ClassBalance.ini` que se
+distribuye trae `PvpMagicalSkillDamageMultipliers = 0.85`. El formato, documentado
+dos líneas más arriba **en ese mismo archivo**, es
+`ELVEN_FIGHTER*2;PALUS_KNIGHT*2.5`, así que un número pelado no tiene clase a la
+cual aplicarse: parte en un pedazo en vez de dos y siempre se salteó en silencio.
+Quedó en blanco —que es exactamente lo que ya hacía— para que el arreglo del
+hallazgo 1 no lo convierta en un warning en cada arranque.
+
+### Método
+
+El hallazgo 3 salió de preguntar **dónde más aparece el patrón** después de
+arreglar `ClassBalanceConfig`, no de leer los 55 archivos. Un grep por
+`Enum.valueOf` en el paquete dio seis sitios; de esos seis, uno tenía defensa
+parcial (`toUpperCase`) y otro tenía defensa inerte (el `catch` imposible). Los
+dos son la misma señal que ya rindió tres veces: **una guarda angosta delata a
+toda la clase**.
