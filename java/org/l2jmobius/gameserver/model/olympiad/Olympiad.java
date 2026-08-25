@@ -1028,6 +1028,13 @@ public class Olympiad extends ListenersContainer {
 	}
 
 	public static void addSpectator(int id, Player spectator, boolean storeCoords) {
+		// The arena id reaches this from NPC and observation bypasses, so it can be any
+		// value. removeSpectator() and getSpectators() both defend against an index
+		// outside STADIUMS; this one indexed it directly.
+		if ((id < 0) || (id >= OlympiadManager.STADIUMS.length)) {
+			return;
+		}
+
 		if (!Olympiad.getInstance().inCompPeriod()) {
 			spectator.sendPacket(SystemMessageId.THE_OLYMPIAD_GAME_IS_NOT_CURRENTLY_IN_PROGRESS);
 			return;
@@ -1532,7 +1539,24 @@ public class Olympiad extends ListenersContainer {
 		}
 
 		final String[] commands = command.split(" ");
-		final int id = Integer.parseInt(commands[1]);
+		if (commands.length < 2) {
+			return;
+		}
+
+		final int id;
+		try {
+			id = Integer.parseInt(commands[1]);
+		} catch (NumberFormatException e) {
+			return;
+		}
+
+		// Reject an arena that does not exist before giving up the current one: the
+		// removal below is not undone if the move then fails, which would leave the
+		// player observing nothing.
+		if ((id < 0) || (id >= OlympiadManager.STADIUMS.length)) {
+			return;
+		}
+
 		final int arena = getSpectatorArena(player);
 		if (arena >= 0) {
 			Olympiad.removeSpectator(arena, player);
