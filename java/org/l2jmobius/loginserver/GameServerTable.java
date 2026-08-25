@@ -40,6 +40,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -59,7 +60,10 @@ public class GameServerTable
 {
 	protected static final Logger LOGGER = Logger.getLogger(GameServerTable.class.getName());
 	
-	private final List<GameServer> _gameServerList = new ArrayList<>();
+	// Written by each game server's own thread as it registers, and read, sorted and
+	// iterated from the packet threads that build a player's server list. A plain
+	// ArrayList gave no protection for either side.
+	private final List<GameServer> _gameServerList = new CopyOnWriteArrayList<>();
 	public Map<Integer, String> _serverNames = new HashMap<>();
 	private static final int KEYS_SIZE = 10;
 	private KeyPair[] _keyPairs;
