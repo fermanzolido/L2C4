@@ -46,8 +46,8 @@ integridad de ítems (`dropItem`, `addItem`, `removeItem`), el núcleo del
 paperdoll (`setPaperdollItem`), `equipItem` entero, `BowCrossRodListener` y
 `reloadEquippedItems`.
 
-**Pendiente:** `ItemSkillsListener`, `StatsListener`, `ChangeRecorder`,
-`restore`, `PlayerInventory.java` (999) y siete archivos chicos.
+**Pendiente:** `StatsListener`, `ChangeRecorder`, `restore`,
+`PlayerInventory.java` (999) y siete archivos chicos.
 
 ### Evaluación de la clase base
 
@@ -69,6 +69,7 @@ esperado:
 | Medio | `Inventory.dropItem(process, objectId, count, ...)` no validaba `count`. Con un valor negativo, la rama de drop parcial hacía `changeCount(-count)` sobre el ítem de origen, o sea **le sumaba**: duplicación. **No era explotable** — `RequestDropItem` rechaza `count` negativo, cero y mayor al disponible, y el otro llamador con count (`Pet`) pasa `item.getCount()`. El problema real era la inconsistencia: `transferItem` acota internamente y `destroyItem` rechaza internamente, pero este delegaba en el llamador. **Arreglado:** ahora rechaza `count <= 0` y `count > getCount()`. Inocuo, porque todos los llamadores actuales ya cumplían. |
 | Medio | `setPaperdollItem` notificaba `ON_PLAYER_ITEM_UNEQUIP` cuando `old == item`, o sea cuando el slot no cambió y el bloque de trabajo se salteó entero. **Alcanzable desde el cliente:** `UseItem.java:253` mete el cebo de pesca en `PAPERDOLL_LHAND` sin chequear si ya está ahí, así que usar el mismo cebo dos veces seguidas con la caña equipada dispara un unequip que nunca ocurrió. Sin impacto observable hoy porque ningún script escucha ese evento. **Arreglado:** la condición ahora es `(old != null) && (old != item)`. |
 | **Alto** | `ArmorSetListener.notifyUnequiped` quitaba la skill del escudo al sacar **cualquier** pieza del set, aunque el escudo siguiera equipado. La skill del escudo se gana por llevar el escudo del set, no por completarlo: `notifyEquiped` la otorga desde su propia rama y `containAll()` ni siquiera mira el slot del escudo. Con el set completo se autocorrige al reequipar la pieza, pero **con el set incompleto la skill no vuelve** hasta reequipar el escudo. **Arreglado:** solo se quita si el escudo ya no está puesto. |
+| Bajo | `ItemSkillsListener.notifyUnequiped`: al desequipar una armadura, el bucle que restaura las skills que otro ítem equipado también otorgaba tomaba el cooldown de `item` —la pieza que se está sacando— en vez de `itm`, el ítem del que sale la skill restaurada. `notifyEquiped` lo hace bien porque ahí la skill y el delay salen del mismo ítem. **Arreglado.** |
 
 ### Sospechas evaluadas y descartadas
 
@@ -106,6 +107,14 @@ recorrido hace que el balance de stats cierre. Cuesta escrituras de base y
 eventos de más, nada más. **No se tocó**, pero el acoplamiento es frágil: si
 alguien agrega otro listener con efectos colaterales, o cambia el orden de los
 índices del paperdoll, deja de cerrar.
+
+**El bucle de restauración solo corre para armaduras.** En
+`ItemSkillsListener.notifyUnequiped`, la compensación que devuelve una skill
+que otro ítem equipado también otorga está detrás de `if (item.isArmor())`.
+Desequipar un arma que comparta skill con una armadura puesta quita la skill y
+no la restaura. **No se tocó:** quitar esa condición cambiaría el
+comportamiento en cada cambio de arma, y puede ser deliberado por costo. Hace
+falta decidirlo, no deducirlo.
 
 **`equipItem` ignora el slot guardado.** Al restaurar el inventario,
 `addItem` llama a `equipItem`, que elige el primer slot libre en vez de leer

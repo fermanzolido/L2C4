@@ -277,7 +277,11 @@ public abstract class Inventory extends ItemContainer {
 							player.addSkill(itemSkill, false);
 							if (itemSkill.isActive()) {
 								if (!player.hasSkillReuse(itemSkill.getReuseHashCode())) {
-									final int equipDelay = item.getEquipReuseDelay();
+									// The skill being restored belongs to itm, so its reuse delay
+									// has to come from itm as well. Reading it off item, the piece
+									// being taken off, applied an unrelated cooldown. notifyEquiped
+									// gets this right: there the skill and the delay share an item.
+									final int equipDelay = itm.getEquipReuseDelay();
 									if (equipDelay > 0) {
 										player.addTimeStamp(itemSkill, equipDelay);
 										player.disableSkill(itemSkill, equipDelay);
