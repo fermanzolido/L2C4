@@ -20,7 +20,7 @@ hallazgos aunque no hayas terminado el área.
 | ~~`model/clan`~~ | 5 | 3.110 | **TERMINADA** |
 | ~~`model/itemcontainer`~~ | 10 | 3.727 | **TERMINADA** |
 | ~~`model/skill`~~ | 19 | 3.869 | **TERMINADA** |
-| **`model/olympiad`** | **7** | **4.554** | **en curso — 6 bugs arreglados** |
+| **`model/olympiad`** | **7** | **4.554** | **en curso — 13 bugs arreglados** |
 | `loginserver` | 45 | 5.649 | pendiente |
 | `gameserver/ai` | 15 | 7.907 | pendiente |
 | `commons` | 47 | 11.240 | pendiente |
@@ -907,3 +907,82 @@ había pérdida.
 
 - **`COMP_DONE` no se incrementa en las ramas de crash.** Sí se incrementa, una
   sola vez, después de las tres ramas.
+
+### Segunda ronda de `model/olympiad`: el ciclo de vida del combate
+
+**7 — Un default doble se registra como victoria.** Ver arriba (hallazgo 6).
+
+**8, 9 y 10 — El manager desarmaba todo con partidas en curso.** Al terminar el
+período, `OlympiadManager` espera a que las partidas cierren antes de limpiar la
+cola, las instancias, los registros y el estado del anti-feed. La espera plegaba
+los resultados con **`||`** sobre una variable llamada `allGamesTerminated`, bajo
+un comentario que dice "wait for all games terminated": salía apenas **una**
+partida terminaba, y todo lo de abajo corría con el resto todavía peleándose.
+
+Ese arreglo depende de que cada tarea reporte que terminó, así que hubo que
+tocar dos cosas más primero:
+
+- `OlympiadGameTask.run()` pon\u00eda `_game` en null **antes** de `_terminated`. En
+  esa ventana `isTerminated()` le\u00eda el flag en false y despu\u00e9s dereferenciaba el
+  juego nulo. Lo llama el hilo del manager, en una condici\u00f3n **fuera** del `try`
+  que la rodea, y el manager es un `Thread` crudo: eso habr\u00eda terminado la
+  olimpiada para el resto del per\u00edodo.
+- `run()` tambi\u00e9n ten\u00eda un retorno temprano que no liberaba el estadio ni
+  marcaba el flag. Hoy parece inalcanzable, pero con la espera convertida en
+  conjunci\u00f3n una tarea que no reporta colgar\u00eda el hilo del manager en vez de
+  solo filtrar un estadio, as\u00ed que se maneja igual.
+
+`_game`, `_terminated` y `_started` los escribe el hilo de la tarea y los lee el
+del manager: ahora son `volatile`.
+
+**11 — Los buffs previos al combate nunca se aplicaban.** La cuenta regresiva es
+`for (byte i = 60; i > 0; i -= step)`, y adentro hab\u00eda una rama comentada
+"Apply buffs at 0 seconds remaining" guardada por `if (i == 0)`. La condici\u00f3n
+del bucle es `i > 0`, as\u00ed que el cuerpo **nunca** corre con `i` en cero: pasa por
+60, 50, 40, 30, 20, 10, 5, 4, 3, 2, 1 y sale. La rama era inalcanzable.
+
+`applyBuffs()` y `healplayer()` no tienen otro llamador, as\u00ed que los
+participantes entraban a **cada** combate sin Wind Walk ni Haste/Acumen, y sin
+que les restauraran HP, CP y MP. El que llegaba de otra pelea, o simplemente no
+lleno, com\u00eda con lo que ten\u00eda puesto.
+
+**12 y 13 — Paginaci\u00f3n del diario y el historial de h\u00e9roe.** Los dos m\u00e9todos
+arrancan el bucle en `(page - 1) * perpage` e indexan la lista directo desde
+ah\u00ed. El `page` llega de un bypass del cliente: `RequestBypassToServer` parsea
+`_diary` y `_match` con `Integer.parseInt` y lo pasa sin chequear. Debajo de uno
+el \u00edndice arranca negativo, y lo bastante grande desborda la multiplicaci\u00f3n a
+negativo. El `catch` exterior del handler loguea la excepci\u00f3n **con stack trace
+completo**, as\u00ed que era una forma repetible de llenar el log.
+
+### Barrido transversal: \u00edndices de p\u00e1gina del cliente
+
+Cinco lugares del repo convierten un n\u00famero de p\u00e1gina en \u00edndice de lista. **Dos
+ya lo hac\u00edan bien**: `GlobalAuctioneer` con `Math.max(1, Math.min(page, maxPage))`
+—el modelo— y `AutoPlay`, que pisa sus tres sitios con `Math.max(0, ...)`, lo que
+adem\u00e1s absorbe un negativo por desbordamiento. Los otros tres no:
+
+- **`SchemeBuffer`** acotaba solo el l\u00edmite superior, as\u00ed que una p\u00e1gina menor a
+  uno daba un `subList` con inicio negativo. Su `page` sale de un token de bypass.
+- **`DropSearchBoard`** no acotaba ninguno. Su bucle va de `(page - 1) * 4` y hace
+  `list.get(index)` directo. **Ya calculaba la cantidad de p\u00e1ginas y no la usaba.**
+- **`AdminSearch`** tambi\u00e9n calculaba un `max` que nunca aplicaba, y sin l\u00edmite
+  inferior. Solo admin, pero es la misma l\u00ednea.
+
+### M\u00e1s descartadas
+
+- **`teleportCountdown` escalona con un `switch` sobre valores exactos** (60, 30,
+  15, 5), lo que parec\u00eda romperse con cualquier otro `OlympiadWaitTime`. Est\u00e1
+  **validado al cargar el config**: si no es 120, 60, 30, 15 o 5, se fuerza a 120.
+
+- **`_div` de `pointDiff`**, `getRandomClassList`, los l\u00edmites de `nextOpponents`
+  y `COMP_DONE` en las ramas de crash: ver la ronda anterior.
+
+### Lecci\u00f3n de m\u00e9todo de esta \u00e1rea
+
+**Dos veces grepe\u00e9 dentro de un solo archivo y saqu\u00e9 la conclusi\u00f3n contraria.**
+Con `_playerOneDefaulted` conclu\u00ed "nunca se asigna, es c\u00f3digo muerto" cuando se
+asigna en `OlympiadGameTask`; con `clearRegistered()` conclu\u00ed "no tiene
+llamadores" cuando lo llama `OlympiadManager`. Las dos veces la respuesta real
+estaba en el archivo de al lado. **Para decidir si algo es alcanzable, el grep va
+sobre `java/` y `dist/game/data/scripts/` completos, nunca sobre el archivo que
+estoy leyendo.**
