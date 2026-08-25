@@ -2252,7 +2252,11 @@ public class AttackableAI extends CreatureAI
 		{
 			for (Creature obj : actor.getHateList())
 			{
-				if ((obj == null) || !GeoEngine.getInstance().canSeeTarget(actor, obj) || obj.isDead() || (obj != mostHate) || (obj == actor))
+				// Skip the one already most hated: this method exists to pick somebody
+				// else, which is why the hate handed over below is the amount the current
+				// target holds. The test read "obj != mostHate", which let nothing but the
+				// current target through and so could never choose a new one.
+				if ((obj == null) || !GeoEngine.getInstance().canSeeTarget(actor, obj) || obj.isDead() || (obj == mostHate) || (obj == actor))
 				{
 					continue;
 				}
@@ -2286,7 +2290,9 @@ public class AttackableAI extends CreatureAI
 		{
 			World.getInstance().forEachVisibleObject(actor, Creature.class, obj ->
 			{
-				if ((obj == null) || !GeoEngine.getInstance().canSeeTarget(actor, obj) || obj.isDead() || (obj != mostHate) || (obj == actor) || (obj == getAttackTarget()))
+				// Same inversion as above. The clause beside it already skips the current
+				// attack target, which is what the two of them were meant to do together.
+				if ((obj == null) || !GeoEngine.getInstance().canSeeTarget(actor, obj) || obj.isDead() || (obj == mostHate) || (obj == actor) || (obj == getAttackTarget()))
 				{
 					return;
 				}
