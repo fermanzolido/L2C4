@@ -73,7 +73,10 @@ public class NewCrypt
 		}
 		
 		long chksum = 0;
-		final int count = size - 4;
+		// The region is [offset, offset + size), so the last word starts at offset + size - 4.
+		// The bound used to be size - 4, which ignores the offset it starts the loop from; crypt
+		// and decrypt further down this same file get it right.
+		final int count = (offset + size) - 4;
 		long check = -1;
 		int i;
 		
@@ -113,7 +116,8 @@ public class NewCrypt
 	public static void appendChecksum(byte[] raw, int offset, int size)
 	{
 		long chksum = 0;
-		final int count = size - 4;
+		// Same correction as verifyChecksum above.
+		final int count = (offset + size) - 4;
 		long ecx;
 		int i;
 		
