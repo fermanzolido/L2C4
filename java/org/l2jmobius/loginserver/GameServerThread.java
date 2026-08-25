@@ -183,6 +183,15 @@ public class GameServerThread extends Thread
 					break;
 				}
 				
+				// A declared length below the header size makes the allocation below
+				// negative. LoginClient applies the same guard to the player-facing
+				// reader, where it is described as an illegal packet size.
+				if (packetLength < PACKET_HEADER_SIZE)
+				{
+					LOGGER.warning("GameServerThread: Illegal packet size " + packetLength + " from " + _connectionIpAddress + ". Closing connection.");
+					break;
+				}
+				
 				// Allocate buffer for packet data (excluding header).
 				byte[] packetData = new byte[packetLength - PACKET_HEADER_SIZE];
 				
