@@ -512,8 +512,11 @@ public class PlayerInventory extends Inventory
 			_ancientAdena = null;
 		}
 		
-		// Notify to scripts
-		if (EventDispatcher.getInstance().hasListener(EventType.ON_PLAYER_ITEM_TRANSFER, item.getTemplate()))
+		// Notify to scripts. super.transferItem returns null when the target is
+		// missing, when the object id is not in this container, or when the item
+		// stopped being there between the lookup and the lock, so the result has to
+		// be checked before it is dereferenced. destroyItem below already does this.
+		if ((item != null) && EventDispatcher.getInstance().hasListener(EventType.ON_PLAYER_ITEM_TRANSFER, item.getTemplate()))
 		{
 			EventDispatcher.getInstance().notifyEventAsync(new OnPlayerItemTransfer(actor, item, target), item.getTemplate());
 		}
