@@ -24,6 +24,7 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Utility class for time-related operations, such as parsing durations, scheduling future dates and formatting dates.
@@ -39,6 +40,9 @@ public class TimeUtil
 	 */
 	public static Duration parseDuration(String durationString)
 	{
+		// Trimmed here as well as by ConfigReader, because this is public and reached directly.
+		durationString = durationString.trim();
+		
 		int index = 0;
 		while ((index < durationString.length()) && Character.isDigit(durationString.charAt(index)))
 		{
@@ -55,7 +59,7 @@ public class TimeUtil
 		try
 		{
 			durationValue = Integer.parseInt(durationString.substring(0, index));
-			durationUnit = durationString.substring(index).toLowerCase();
+			durationUnit = durationString.substring(index).toLowerCase(Locale.ROOT);
 		}
 		catch (NumberFormatException e)
 		{

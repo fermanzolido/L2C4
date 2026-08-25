@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -532,9 +533,15 @@ public class SchedulingPattern
 			return LAST_DAY_MARKER; // Special marker for last day of month.
 		}
 		
-		if ((aliases != null) && aliases.containsKey(value.toLowerCase()))
+		// Locale.ROOT, and looked up once: the day alias "fri" carries an i, so a Turkish default
+		// locale folds FRI to "fri" with a dotless i and the alias silently stops matching.
+		if (aliases != null)
 		{
-			return aliases.get(value.toLowerCase());
+			final Integer alias = aliases.get(value.toLowerCase(Locale.ROOT));
+			if (alias != null)
+			{
+				return alias.intValue();
+			}
 		}
 		
 		try

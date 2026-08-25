@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import org.l2jmobius.commons.config.DatabaseConfig;
@@ -74,7 +75,7 @@ public class DatabaseBackup
 		}
 		
 		// Dump to file.
-		final String mysqldumpPath = System.getProperty("os.name").toLowerCase().contains("win") ? DatabaseConfig.MYSQL_BIN_PATH : "";
+		final String mysqldumpPath = System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("win") ? DatabaseConfig.MYSQL_BIN_PATH : "";
 		try
 		{
 			// Java 17

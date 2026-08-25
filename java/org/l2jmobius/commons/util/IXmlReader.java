@@ -24,6 +24,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -726,7 +727,7 @@ public interface IXmlReader {
 	 * @return true if the file is an XML file and exists, false otherwise
 	 */
 	default boolean isValidXmlFile(File file) {
-		return (file != null) && file.isFile() && file.getName().toLowerCase().endsWith(".xml");
+		return (file != null) && file.isFile() && file.getName().toLowerCase(Locale.ROOT).endsWith(".xml");
 	}
 
 	/**
