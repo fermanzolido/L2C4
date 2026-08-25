@@ -49,6 +49,17 @@ public abstract class AbstractGameServerPacket
 	
 	public final byte[] readBytes(int length)
 	{
+		// The length usually comes straight out of the packet, so it is checked against
+		// what is actually left in the buffer before anything is allocated. Reading past
+		// the end would have failed anyway, but only after the array had been requested,
+		// and a declared length near Integer.MAX_VALUE asked the VM for two gigabytes
+		// first.
+		final int remaining = _decrypt.length - _off;
+		if ((length < 0) || (length > remaining))
+		{
+			throw new IllegalArgumentException("Packet declares " + length + " bytes but " + remaining + " remain.");
+		}
+		
 		final byte[] result = new byte[length];
 		for (int i = 0; i < length; i++)
 		{
