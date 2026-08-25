@@ -46,8 +46,12 @@ integridad de ítems (`dropItem`, `addItem`, `removeItem`), el núcleo del
 paperdoll (`setPaperdollItem`), `equipItem` entero, `BowCrossRodListener` y
 `reloadEquippedItems`.
 
-**Pendiente:** `StatsListener`, `ChangeRecorder`, `restore`,
-`PlayerInventory.java` (999) y siete archivos chicos.
+**Pendiente:** `PlayerInventory.java` (999) y siete archivos chicos.
+
+`Inventory.java` queda **terminado**: `StatsListener` es un par simétrico
+limpio, `ChangeRecorder` se da de baja en un `finally` en los tres métodos
+`*AndRecord` (no hay leak de listeners), y `restore` desequipa los ítems de
+héroe en personajes que no lo son antes de agregarlos.
 
 ### Evaluación de la clase base
 
@@ -116,10 +120,14 @@ no la restaura. **No se tocó:** quitar esa condición cambiaría el
 comportamiento en cada cambio de arma, y puede ser deliberado por costo. Hace
 falta decidirlo, no deducirlo.
 
-**`equipItem` ignora el slot guardado.** Al restaurar el inventario,
-`addItem` llama a `equipItem`, que elige el primer slot libre en vez de leer
-`item.getLocationSlot()`. Un aro guardado en REAR puede volver en LEAR. Solo
-cosmético: los dos slots son equivalentes en efecto.
+**`equipItem` ignora el slot guardado, pero `restore` lo compensa.**
+`equipItem` elige el primer slot libre en vez de leer `item.getLocationSlot()`,
+así que en principio un aro guardado en REAR podría volver en LEAR.
+**No pasa:** la consulta de `restore` termina en `ORDER BY loc_data`, o sea que
+los ítems se procesan en orden de slot y cada uno cae en el suyo.
+
+_(Corrección: en una pasada anterior esto se anotó como un efecto cosmético
+real. Era falso, y se detectó al leer `restore`.)_
 
 
 **Cobertura despareja de los eventos de equipar.** `ON_PLAYER_ITEM_UNEQUIP` se
