@@ -20,7 +20,7 @@ hallazgos aunque no hayas terminado el área.
 | ~~`model/clan`~~ | 5 | 3.110 | **TERMINADA** |
 | ~~`model/itemcontainer`~~ | 10 | 3.727 | **TERMINADA** |
 | ~~`model/skill`~~ | 19 | 3.869 | **TERMINADA** |
-| **`model/olympiad`** | **7** | **4.554** | **en curso — 13 bugs arreglados** |
+| ~~`model/olympiad`~~ | 7 | 4.554 | **TERMINADA** |
 | `loginserver` | 45 | 5.649 | pendiente |
 | `gameserver/ai` | 15 | 7.907 | pendiente |
 | `commons` | 47 | 11.240 | pendiente |
@@ -777,7 +777,7 @@ Descartados en el cierre:
 - **`AffectObject` tiene una constante `NOE`**, que parece un typo de `NONE`. No
   la toco: es exactamente el caso `ClanAccess.NONE`.
 
-## `model/olympiad` — en curso
+## `model/olympiad` — TERMINADA
 
 Son **7** archivos y **4.554** líneas: `Olympiad.java` (1695), `OlympiadGame.java`
 (1012), `Hero.java` (935), `OlympiadGameTask.java` (414), `OlympiadManager.java`
@@ -986,3 +986,104 @@ llamadores" cuando lo llama `OlympiadManager`. Las dos veces la respuesta real
 estaba en el archivo de al lado. **Para decidir si algo es alcanzable, el grep va
 sobre `java/` y `dist/game/data/scripts/` completos, nunca sobre el archivo que
 estoy leyendo.**
+
+### Tercera ronda: persistencia, h\u00e9roes y coordinaci\u00f3n entre hilos
+
+**14 y 15 — Referencias a clanes borrados.** `Hero.updateHeroes()` lee el clan y
+la alianza del h\u00e9roe para guardarlos con el registro, con **cuatro** llamadas a
+`ClanTable.getClan()` sin chequear. Una fila de `characters` puede nombrar un clan
+que ya no existe en `clan_data`: **`DatabaseIdManager` tiene una consulta de
+limpieza para exactamente ese estado**, que es lo que prueba que ocurre.
+
+El `catch` que rodea el bloque solo cubre `SQLException`, y
+`OlympiadEndTask.run()` no tiene `catch` ninguno, as\u00ed que el fallo escapaba a los
+dos: abortaba la transici\u00f3n de temporada a la mitad, despu\u00e9s de poner `_period`
+en 1 y recomputar los h\u00e9roes, pero **antes** de agendar `ValidationEndTask`. La
+olimpiada quedaba en per\u00edodo de validaci\u00f3n hasta reiniciar.
+
+Al barrer el patr\u00f3n apareci\u00f3 que **`Hero.java` ten\u00eda una segunda copia** del mismo
+bloque en `processHeros()`, que corre al arrancar — arregl\u00e9 una y me falt\u00f3 la
+hermana. M\u00e1s `ClanHallTable.setFree()` y la consulta de alianza del due\u00f1o del
+castillo en `Siege`. Todos los dem\u00e1s sitios ya asignaban a variable y chequeaban.
+
+**16 — Un chequeo de null puesto despu\u00e9s de lo que deb\u00eda proteger.** Las dos
+ramas de `Hero.loadFights()` hacen
+`ClassListData.getClass(id).getClassName()` y **despu\u00e9s** preguntan
+`if ((name != null) && (cls != null))`. `getClass(int)` documenta que devuelve
+null para un id desconocido, as\u00ed que la dereferencia ocurr\u00eda antes de que el
+chequeo pudiera correr: nunca pudo hacer nada.
+
+**17 — \u00cdndice de arena de espectador.** Tres m\u00e9todos hermanos indexan `STADIUMS`:
+`removeSpectator` atrapa `ArrayIndexOutOfBoundsException`, `getSpectators` la
+atrapa y devuelve null, y `addSpectator` indexaba directo. Sus dos llamadores le
+pasan un valor crudo de un bypass. `bypassChangeArena` adem\u00e1s **saca al jugador
+de su arena actual antes** de llamarlo, y nada lo deshace si falla.
+
+**18 — Recompensa de temporada borrada sin entregarse.** `claimSeasonReward`
+agregaba el \u00edtem y despu\u00e9s borraba la variable que lo registra, sin condici\u00f3n.
+`addItem` devuelve null cuando el id ya no resuelve a una plantilla, as\u00ed que una
+recompensa cuyo \u00edtem hab\u00eda sido removido o renombrado se borraba de las variables
+del jugador sin haberse entregado nunca.
+
+**19 — Un noble que no se guarda nunca m\u00e1s.** `saveNobleData` elige entre INSERT y
+UPDATE seg\u00fan el flag `to_save`, y pon\u00eda el flag en false **mientras cargaba los
+par\u00e1metros del INSERT**, antes de `execute()`. Un INSERT fallido se loguea por
+noble, pero el flag ya hab\u00eda cambiado: el siguiente guardado tomaba el camino del
+UPDATE sobre una fila que nunca se cre\u00f3, y el UPDATE no matcheaba nada. Nunca
+m\u00e1s. El noble exist\u00eda solo en memoria y desaparec\u00eda al reiniciar, con sus puntos,
+combates y ELO.
+
+**20 — Banderas de coordinaci\u00f3n sin publicar.** Tres `static boolean` coordinan la
+olimpiada entre hilos y ninguna era `volatile`. `_inCompPeriod` es **la condici\u00f3n
+del `while` del hilo del `OlympiadManager`**, que corre en un `Thread` crudo
+mientras las tareas que la escriben corren en el pool. `_battleStarted` es la
+condici\u00f3n de un **bucle de espera** de la tarea que cierra el per\u00edodo.
+
+### La sospecha que revert\u00ed
+
+**`cleanEffects()` sale temprano si cualquiera de los dos se desconect\u00f3**, as\u00ed
+que no limpia los efectos de **ninguno**. Al lado, `PlayersStatusBack()` —que
+corre una l\u00ednea antes en la misma tarea— trata a cada jugador por separado. Lo
+cambi\u00e9 para que hiciera lo mismo, compil\u00e9, y despu\u00e9s **lo revert\u00ed**.
+
+El espejo correcto de `cleanEffects()` no es `PlayersStatusBack()` sino
+**`removals()`**, que arma lo que el otro desarma — y `removals()` tiene los
+**mismos tres retornos tempranos**. Son un par: si el armado se saltea, el
+desarme tambi\u00e9n. Con mi cambio, un jugador cuyo rival se desconecta antes de
+entrar al estadio hubiera perdido los buffs que tra\u00eda de afuera, en un combate
+que nunca ocurri\u00f3.
+
+**Queda anotado el residuo real**: si la desconexi\u00f3n pasa *durante* el combate,
+`removals()` ya corri\u00f3 pero `cleanEffects()` sale temprano igual, y el que
+sobrevive se lleva puestos los efectos del combate — incluidos los buffs previos,
+ahora que el hallazgo 11 los hace aplicarse de verdad. Arreglar eso bien exige
+distinguir "el armado corri\u00f3" de "no corri\u00f3", o sea estado nuevo, y no lo hago a
+ojo en un camino de desconexi\u00f3n.
+
+### M\u00e1s descartadas
+
+- **`RequestWriteHeroWords` sin l\u00edmite de longitud.** S\u00ed valida: `isHero()` y
+  `length() > 300`, que coincide exacto con el `varchar(300)` de la columna.
+- **`character_variables` con inserciones duplicadas.** La tabla no tiene clave
+  \u00fanica, solo dos \u00edndices no \u00fanicos, as\u00ed que el INSERT pelado no falla.
+- **`Hero.shutdown()` sin cablear**, lo que dejar\u00eda los mensajes de h\u00e9roe sin
+  persistir. Est\u00e1 cableado en `Shutdown.java:488`.
+- **`OlympiadStadium._freeToUse` sin `volatile`.** Sus cuatro accesos est\u00e1n todos
+  dentro de `OlympiadManager`, y `run()` es `synchronized`. `removeGame`, que s\u00ed
+  llega del hilo de la tarea, no toca esa bandera.
+- **`_olympiadInstances`** es `ConcurrentHashMap`, y lo tocan los dos hilos.
+- **`sortHerosToBe`, rama Soulhound**: reemplaza su `StatSet` por
+  `NOBLES.get(charId)` y lo dereferencia enseguida. `NOBLES` se carga de la misma
+  tabla que lee la consulta y nunca se hace `remove`, solo `clear` y repoblado, y
+  la consulta hace join con `characters`. Sin camino demostrable a null.
+- **`_compStarted`** aparece solo dentro de c\u00f3digo comentado en tres archivos.
+  No se toca.
+- **`getWaitingList()` devuelve null** fuera del per\u00edodo de competencia. Su \u00fanico
+  llamador chequea null.
+
+### Cierre de `model/olympiad`
+
+Los 7 archivos le\u00eddos. **Veinte defectos arreglados**, en trece commits, m\u00e1s un
+barrido transversal de \u00edndices de p\u00e1gina y otro de `getClan()` encadenado que
+salieron del \u00e1rea y tocaron `SchemeBuffer`, `DropSearchBoard`, `AdminSearch`,
+`ClanHallTable`, `Siege` y dos quests.
