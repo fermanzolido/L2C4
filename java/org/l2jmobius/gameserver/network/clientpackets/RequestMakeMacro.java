@@ -52,6 +52,10 @@ public class RequestMakeMacro extends ClientPacket
 		}
 		
 		final List<MacroCmd> commands = new ArrayList<>(count);
+		// The bound comes from the enum rather than a literal. The literal happens to be
+		// right for MacroType's seven constants, but the same line copied into
+		// RequestShortcutReg indexed past the end of the shorter ShortcutType.
+		final MacroType[] types = MacroType.values();
 		for (int i = 0; i < count; i++)
 		{
 			final int entry = readByte();
@@ -60,7 +64,7 @@ public class RequestMakeMacro extends ClientPacket
 			final int d2 = readByte();
 			final String command = readString();
 			_commandsLength += command.length();
-			commands.add(new MacroCmd(entry, MacroType.values()[(type < 1) || (type > 6) ? 0 : type], d1, d2, command));
+			commands.add(new MacroCmd(entry, ((type < 1) || (type >= types.length)) ? types[0] : types[type], d1, d2, command));
 		}
 		
 		_macro = new Macro(id, icon, name, desc, acronym, commands);

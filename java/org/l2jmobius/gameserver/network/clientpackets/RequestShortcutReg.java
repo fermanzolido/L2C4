@@ -35,8 +35,12 @@ public class RequestShortcutReg extends ClientPacket
 	@Override
 	protected void readImpl()
 	{
+		// The bound comes from the enum, not a literal. This used "typeId > 6", copied
+		// from RequestMakeMacro, whose MacroType has seven constants; ShortcutType has
+		// six, so a typeId of 6 passed the check and indexed one past the end.
+		final ShortcutType[] types = ShortcutType.values();
 		final int typeId = readInt();
-		_type = ShortcutType.values()[(typeId < 1) || (typeId > 6) ? 0 : typeId];
+		_type = ((typeId < 1) || (typeId >= types.length)) ? types[0] : types[typeId];
 		final int slot = readInt();
 		_id = readInt();
 		readInt(); // level

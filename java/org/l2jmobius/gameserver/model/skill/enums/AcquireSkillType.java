@@ -26,8 +26,17 @@ public enum AcquireSkillType
 	FISHING,
 	PLEDGE;
 	
+	/**
+	 * @param id the type id, which reaches this straight off the wire in
+	 *            RequestAcquireSkill and RequestAcquireSkillInfo
+	 * @return the matching type, or {@link #CLASS} when the id is out of range
+	 */
 	public static AcquireSkillType getAcquireSkillType(int id)
 	{
-		return values()[id];
+		// An unchecked lookup would throw out of readImpl() instead of reaching the two
+		// callers, which already reject a type they do not expect. RequestMakeMacro and
+		// RequestShortcutReg bound their own values()[] lookups the same way.
+		final AcquireSkillType[] values = values();
+		return ((id < 0) || (id >= values.length)) ? CLASS : values[id];
 	}
 }
