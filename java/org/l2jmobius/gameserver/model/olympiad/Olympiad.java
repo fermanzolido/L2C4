@@ -189,7 +189,9 @@ public class Olympiad extends ListenersContainer {
 	protected int _currentSeason;
 	private long _compEnd;
 	private Calendar _compStart;
-	protected static boolean _inCompPeriod;
+	// The OlympiadManager thread loops on this through inCompPeriod(), and the
+	// scheduled tasks that flip it run on the pool, so it has to be published.
+	protected static volatile boolean _inCompPeriod;
 	protected static boolean _compStarted = false;
 	protected ScheduledFuture<?> _scheduledCompStart;
 	protected ScheduledFuture<?> _scheduledCompEnd;

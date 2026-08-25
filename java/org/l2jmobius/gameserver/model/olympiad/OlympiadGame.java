@@ -80,8 +80,10 @@ class OlympiadGame {
 	private static final String COMP_WON = "competitions_won";
 	private static final String COMP_LOST = "competitions_lost";
 	private static final String COMP_DRAWN = "competitions_drawn";
-	protected static boolean _battleStarted;
-	protected static boolean _gameIsStarted;
+	// _battleStarted is the condition of a wait loop in the scheduled task that ends
+	// the competition period, and both are written from the game task threads.
+	protected static volatile boolean _battleStarted;
+	protected static volatile boolean _gameIsStarted;
 
 	protected long _startTime = 0;
 
