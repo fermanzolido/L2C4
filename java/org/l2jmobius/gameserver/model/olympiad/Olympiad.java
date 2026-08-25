@@ -1713,9 +1713,17 @@ public class Olympiad extends ListenersContainer {
 					try {
 						final int itemId = Integer.parseInt(parts[0]);
 						final int count = Integer.parseInt(parts[1]);
-						player.addItem(ItemProcessType.REWARD, itemId, count, player, true);
-						player.getVariables().remove(varName);
-						found = true;
+
+						// The variable is only cleared once the item is actually handed over.
+						// addItem() returns null when the id no longer resolves to a template,
+						// and removing the variable regardless discarded the stored reward.
+						if (player.addItem(ItemProcessType.REWARD, itemId, count, player, true) != null) {
+							player.getVariables().remove(varName);
+							found = true;
+						} else {
+							LOGGER.log(Level.WARNING, "Olympiad System: Could not hand season reward " + itemId
+									+ " to " + player.getName() + "; the variable is kept for a later attempt.");
+						}
 					} catch (NumberFormatException e) {
 						LOGGER.log(Level.WARNING,
 								"Olympiad System: Invalid reward variable format for " + player.getName() + ": " + val);
