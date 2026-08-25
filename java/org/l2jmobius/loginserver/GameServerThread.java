@@ -234,6 +234,17 @@ public class GameServerThread extends Thread
 						// Handle Blowfish key exchange packet.
 						final BlowFishKey blowfishKeyPacket = new BlowFishKey(packetData, _privateKey);
 						_blowfishKey = blowfishKeyPacket.getKey();
+						
+						// BlowFishKey leaves the key null when the RSA step fails, and it logs
+						// and carries on rather than signalling. NewCrypt reads the key's length
+						// straight away, so handing it a null one only turned a rejected key
+						// into an unhandled failure further along.
+						if (_blowfishKey == null)
+						{
+							LOGGER.warning("GameServerThread: Could not read the blowfish key sent by " + _connectionIpAddress + ". Closing connection.");
+							return;
+						}
+						
 						_blowfishCipher = new NewCrypt(_blowfishKey);
 						break;
 					}
