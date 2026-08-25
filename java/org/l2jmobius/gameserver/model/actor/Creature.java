@@ -6300,7 +6300,7 @@ public abstract class Creature extends WorldObject {
 	 *         {@code false} otherwise.
 	 */
 	public boolean isChannelized() {
-		return (_channelized != null) && !_channelized.isChannelized();
+		return (_channelized != null) && _channelized.isChannelized();
 	}
 
 	public SkillChannelized getSkillChannelized() {

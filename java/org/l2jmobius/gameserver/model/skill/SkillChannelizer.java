@@ -173,6 +173,24 @@ public class SkillChannelizer implements Runnable
 					}
 				}
 				
+				// Unregister from the targets that dropped out since the last tick. The
+				// registration above is repeated every tick, but _channelized is replaced
+				// below and stopChanneling() only unregisters whatever it finds there, so a
+				// target that stops being targeted would keep this channelizer registered
+				// for good. That inflates getChannerlizersSize() on it, which is what picks
+				// the level of the channeling effect, and leaves it able to abort the cast
+				// of someone who is no longer channeling on it at all.
+				if (_channelized != null)
+				{
+					for (Creature creature : _channelized)
+					{
+						if (!targetList.contains(creature))
+						{
+							creature.getSkillChannelized().removeChannelizer(skill.getChannelingSkillId(), _channelizer);
+						}
+					}
+				}
+				
 				if (targetList.isEmpty())
 				{
 					return;
