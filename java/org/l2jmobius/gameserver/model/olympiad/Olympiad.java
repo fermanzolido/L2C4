@@ -282,8 +282,7 @@ public class Olympiad extends ListenersContainer {
 				statData.set(CLASS_ID, rset.getInt(CLASS_ID));
 				statData.set(CHAR_NAME, rset.getString(CHAR_NAME));
 				final int compDone = rset.getInt(COMP_DONE);
-				statData.set(POINTS, MathUtil.clamp(rset.getInt(POINTS), 0,
-						(OlympiadConfig.OLYMPIAD_MAX_POINTS * compDone) + (OlympiadConfig.OLYMPIAD_WEEKLY_POINTS * 4)));
+				statData.set(POINTS, MathUtil.clamp(rset.getInt(POINTS), 0, getMaxPoints(compDone)));
 				statData.set(COMP_DONE, compDone);
 				statData.set(COMP_WON, rset.getInt(COMP_WON));
 				statData.set(COMP_LOST, rset.getInt(COMP_LOST));
@@ -985,16 +984,29 @@ public class Olympiad extends ListenersContainer {
 		}, getMillisToWeekChange(), WEEKLY_PERIOD);
 	}
 
+	/**
+	 * The most points a noble could plausibly hold, used to clamp values that may have
+	 * been tampered with: the grant they received on registration, plus the most a
+	 * single match can move for every competition they finished, plus four weeks of the
+	 * weekly grant.<br>
+	 * The starting grant belongs in the total. Without it, a noble who had not competed
+	 * yet was capped below the very value they were created with.
+	 * @param compDone the number of competitions the noble has finished
+	 * @return the ceiling for that noble's points
+	 */
+	private static int getMaxPoints(int compDone) {
+		return OlympiadConfig.OLYMPIAD_START_POINTS + (OlympiadConfig.OLYMPIAD_MAX_POINTS * compDone)
+				+ (OlympiadConfig.OLYMPIAD_WEEKLY_POINTS * 4);
+	}
+
 	protected void addWeeklyPoints() {
 		if (_period == 1) {
 			return;
 		}
 
 		for (StatSet nobleInfo : NOBLES.values()) {
-			nobleInfo.set(POINTS,
-					MathUtil.clamp(nobleInfo.getInt(POINTS, 0) + WEEKLY_POINTS, 0,
-							(nobleInfo.getInt(COMP_DONE, 0) * OlympiadConfig.OLYMPIAD_MAX_POINTS)
-									+ (OlympiadConfig.OLYMPIAD_WEEKLY_POINTS * 4)));
+			nobleInfo.set(POINTS, MathUtil.clamp(nobleInfo.getInt(POINTS, 0) + WEEKLY_POINTS, 0,
+					getMaxPoints(nobleInfo.getInt(COMP_DONE, 0))));
 		}
 	}
 
