@@ -159,9 +159,13 @@ public class Connection<T extends Client<Connection<T>>> {
 	 * Releases the reading buffer back to the resource pool.
 	 */
 	private void releaseReadingBuffer() {
-		if (_readingBuffer != null) {
-			_config.resourcePool.recycleBuffer(_readingBuffer);
+		// The field is cleared before the buffer goes back to the pool. Recycling first left
+		// the buffer available to another connection while this one still pointed at it, so a
+		// read already in flight could keep writing into memory a second connection owned.
+		final ByteBuffer buffer = _readingBuffer;
+		if (buffer != null) {
 			_readingBuffer = null;
+			_config.resourcePool.recycleBuffer(buffer);
 		}
 	}
 
@@ -171,14 +175,17 @@ public class Connection<T extends Client<Connection<T>>> {
 	 * @return {@code true} if any buffers were released, {@code false} otherwise.
 	 */
 	public boolean releaseWritingBuffer() {
+		// Same ordering as releaseReadingBuffer: detach the array first, then recycle. The old
+		// order handed buffers back to the pool while _writingBuffers still referenced them.
+		final ByteBuffer[] buffers = _writingBuffers;
 		boolean released = false;
-		if (_writingBuffers != null) {
-			for (ByteBuffer buffer : _writingBuffers) {
+		if (buffers != null) {
+			_writingBuffers = null;
+
+			for (ByteBuffer buffer : buffers) {
 				_config.resourcePool.recycleBuffer(buffer);
 				released = true;
 			}
-
-			_writingBuffers = null;
 		}
 
 		return released;

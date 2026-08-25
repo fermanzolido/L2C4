@@ -144,7 +144,10 @@ public class BufferPool
 	 */
 	public boolean isFull()
 	{
-		return _buffers.size() >= _maxSize.get();
+		// Reads the estimate rather than walking the queue: ConcurrentLinkedQueue.size() is
+		// O(n), and this is called once per buffer acquisition. It also puts this method and
+		// recycle() back on the same definition of full.
+		return _estimateSize.get() >= _maxSize.get();
 	}
 	
 	/**

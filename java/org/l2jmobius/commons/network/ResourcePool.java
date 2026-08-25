@@ -24,7 +24,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.l2jmobius.commons.network.internal.BufferPool;
 
@@ -37,7 +37,11 @@ public class ResourcePool
 {
 	// private static final Logger LOGGER = Logger.getLogger(ResourcePool.class.getName());
 	
-	private final NavigableMap<Integer, BufferPool> _bufferPools = new TreeMap<>();
+	// Concurrent, not a TreeMap: a single ResourcePool is shared by every connection on the
+	// server, and the async channel group hands completion handlers to an unbounded thread
+	// pool. Both lookups below can insert a pool for a size no configured pool covers, so a
+	// plain red-black tree was being restructured underneath concurrent ceilingEntry walks.
+	private final NavigableMap<Integer, BufferPool> _bufferPools = new ConcurrentSkipListMap<>();
 	private boolean _autoExpandCapacity = true;
 	private boolean _initBufferPools = false;
 	private float _initBufferPoolFactor = 0;
@@ -136,7 +140,7 @@ public class ResourcePool
 					pool.initialize(_initBufferPoolFactor);
 				}
 				
-				_bufferPools.put(size, pool);
+				_bufferPools.putIfAbsent(size, pool);
 			}
 			
 			buffer = ByteBuffer.allocateDirect(size).order(ByteOrder.LITTLE_ENDIAN);
@@ -165,7 +169,7 @@ public class ResourcePool
 			pool.initialize(_initBufferPoolFactor);
 		}
 		
-		_bufferPools.put(size, pool);
+		_bufferPools.putIfAbsent(size, pool);
 		
 		return size;
 	}
