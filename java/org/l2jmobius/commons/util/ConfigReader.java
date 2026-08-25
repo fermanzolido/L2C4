@@ -107,17 +107,24 @@ public class ConfigReader
 	 */
 	public boolean getBoolean(String config, boolean defaultValue)
 	{
-		final String value = _properties.getProperty(config);
+		final String value = getTrimmedValue(config);
 		if (value != null)
 		{
-			try
+			// Not Boolean.parseBoolean: it never throws and answers false for anything that is not
+			// "true", so a misspelled value silently became false rather than falling back to the
+			// default, and the warning below could never print. This was the one getter in the class
+			// whose failure was silent.
+			if ("true".equalsIgnoreCase(value))
 			{
-				return Boolean.parseBoolean(value);
+				return true;
 			}
-			catch (Exception e)
+			
+			if ("false".equalsIgnoreCase(value))
 			{
-				LOGGER.warning("Invalid boolean for config '" + config + "' in file '" + _file.getName() + "', using default: " + defaultValue + ".");
+				return false;
 			}
+			
+			LOGGER.warning("Invalid boolean for config '" + config + "' in file '" + _file.getName() + "', using default: " + defaultValue + ".");
 		}
 		else
 		{
@@ -135,7 +142,7 @@ public class ConfigReader
 	 */
 	public byte getByte(String config, byte defaultValue)
 	{
-		final String value = _properties.getProperty(config);
+		final String value = getTrimmedValue(config);
 		if (value != null)
 		{
 			try
@@ -163,7 +170,7 @@ public class ConfigReader
 	 */
 	public short getShort(String config, short defaultValue)
 	{
-		final String value = _properties.getProperty(config);
+		final String value = getTrimmedValue(config);
 		if (value != null)
 		{
 			try
@@ -191,7 +198,7 @@ public class ConfigReader
 	 */
 	public int getInt(String config, int defaultValue)
 	{
-		final String value = _properties.getProperty(config);
+		final String value = getTrimmedValue(config);
 		if (value != null)
 		{
 			try
@@ -219,7 +226,7 @@ public class ConfigReader
 	 */
 	public long getLong(String config, long defaultValue)
 	{
-		final String value = _properties.getProperty(config);
+		final String value = getTrimmedValue(config);
 		if (value != null)
 		{
 			try
@@ -247,7 +254,7 @@ public class ConfigReader
 	 */
 	public float getFloat(String config, float defaultValue)
 	{
-		final String value = _properties.getProperty(config);
+		final String value = getTrimmedValue(config);
 		if (value != null)
 		{
 			try
@@ -275,7 +282,7 @@ public class ConfigReader
 	 */
 	public double getDouble(String config, double defaultValue)
 	{
-		final String value = _properties.getProperty(config);
+		final String value = getTrimmedValue(config);
 		if (value != null)
 		{
 			try
@@ -323,7 +330,7 @@ public class ConfigReader
 	 */
 	public <T extends Enum<T>> T getEnum(String config, Class<T> clazz, T defaultValue)
 	{
-		final String value = _properties.getProperty(config);
+		final String value = getTrimmedValue(config);
 		if (value != null)
 		{
 			try
@@ -351,7 +358,7 @@ public class ConfigReader
 	 */
 	public Duration getDuration(String config, String defaultValue)
 	{
-		final String value = _properties.getProperty(config);
+		final String value = getTrimmedValue(config);
 		if (value != null)
 		{
 			try
@@ -407,5 +414,22 @@ public class ConfigReader
 		}
 		
 		return new int[0];
+	}
+	
+	/**
+	 * Reads a property and trims it.
+	 * <p>
+	 * Properties.load keeps trailing whitespace on a value, and an ini file carries it
+	 * invisibly -- two of the files shipped in dist do. Every numeric parse in this class
+	 * rejects it outright, and getBoolean used to answer false for it. getIntArray was the only
+	 * getter that trimmed anything, and it trims each element rather than the value, which is
+	 * the tell that someone hit this once and fixed the call in front of them.
+	 * @param config the property name
+	 * @return the trimmed value, or {@code null} when the property is absent
+	 */
+	private String getTrimmedValue(String config)
+	{
+		final String value = _properties.getProperty(config);
+		return value == null ? null : value.trim();
 	}
 }
