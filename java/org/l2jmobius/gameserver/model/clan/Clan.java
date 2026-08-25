@@ -835,7 +835,7 @@ public class Clan
 	}
 	
 	/**
-	 * Store current Bloood Alliances count in database.
+	 * Store current Blood Oath count in database.
 	 */
 	public void updateBloodOathCountInDB()
 	{
@@ -848,7 +848,7 @@ public class Clan
 		}
 		catch (Exception e)
 		{
-			LOGGER.log(Level.WARNING, "Exception on updateBloodAllianceCountInDB(): " + e.getMessage(), e);
+			LOGGER.log(Level.WARNING, "Exception on updateBloodOathCountInDB(): " + e.getMessage(), e);
 		}
 	}
 	
@@ -1058,7 +1058,7 @@ public class Clan
 		
 		if (notice.length() > MAX_NOTICE_LENGTH)
 		{
-			notice = notice.substring(0, MAX_NOTICE_LENGTH - 1);
+			notice = notice.substring(0, MAX_NOTICE_LENGTH);
 		}
 		
 		try (Connection con = DatabaseFactory.getConnection();
@@ -1758,6 +1758,13 @@ public class Clan
 		
 		broadcastToOnlineAllyMembers(new SystemMessage(SystemMessageId.THE_ALLIANCE_HAS_DISSOLVED));
 		
+		// The crest has to be cleared while the alliance is still intact: changeAllyCrest
+		// resolves the clans to update from _allyId, so running it after the members have
+		// been detached deletes the crest from CrestTable while leaving every clan of the
+		// alliance still pointing at it. updateClanInDB() does not write ally_crest_id,
+		// so for the leader clan that stale id would also survive a restart.
+		changeAllyCrest(0, false);
+		
 		final long currentTime = System.currentTimeMillis();
 		for (Clan clan : ClanTable.getInstance().getClanAllies(getAllyId()))
 		{
@@ -1772,7 +1779,6 @@ public class Clan
 		
 		setAllyId(0);
 		setAllyName(null);
-		changeAllyCrest(0, false);
 		setAllyPenaltyExpiryTime(currentTime + (PlayerConfig.ALT_CREATE_ALLY_DAYS_WHEN_DISSOLVED * 86400000), PENALTY_TYPE_DISSOLVE_ALLY); // 24*60*60*1000 = 86400000
 		updateClanInDB();
 	}
@@ -1918,14 +1924,24 @@ public class Clan
 		if (_leader.isOnline())
 		{
 			final Player leader = _leader.getPlayer();
-			if (level > 4)
+			
+			// Siege skills follow SiegeClanMinLevel, the rule Player uses when it adds
+			// clan skills on login. With the shipped value of 4, the hardcoded 5 made a
+			// clan that reached level 4 lose the siege skills it had just earned, until
+			// the leader relogged and Player granted them again.
+			if (level >= SiegeManager.getInstance().getSiegeClanMinLevel())
 			{
 				SiegeManager.getInstance().addSiegeSkills(leader);
-				leader.sendMessage("Now that your clan level is above Level 5, it can accumulate clan reputation points.");
 			}
-			else if (level < 5)
+			else
 			{
 				SiegeManager.getInstance().removeSiegeSkills(leader);
+			}
+			
+			// Reputation is a separate level 5 threshold, unrelated to siege skills.
+			if (level > 4)
+			{
+				leader.sendMessage("Now that your clan level is above Level 5, it can accumulate clan reputation points.");
 			}
 		}
 		

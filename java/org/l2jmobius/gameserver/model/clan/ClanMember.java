@@ -122,7 +122,10 @@ public class ClanMember
 		
 		if (player != null)
 		{
-			if ((_clan.getLevel() > 3) && player.isClanLeader())
+			// Same rule Player applies when it adds clan skills on login: the threshold
+			// is SiegeClanMinLevel, not a fixed level. Hardcoding it here let this path
+			// grant siege skills that the configured minimum denies.
+			if ((_clan.getLevel() >= SiegeManager.getInstance().getSiegeClanMinLevel()) && player.isClanLeader())
 			{
 				SiegeManager.getInstance().addSiegeSkills(player);
 			}
