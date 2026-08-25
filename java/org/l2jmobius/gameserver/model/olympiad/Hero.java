@@ -43,6 +43,7 @@ import org.l2jmobius.gameserver.managers.CastleManager;
 import org.l2jmobius.gameserver.model.StatSet;
 import org.l2jmobius.gameserver.model.World;
 import org.l2jmobius.gameserver.model.actor.Player;
+import org.l2jmobius.gameserver.model.actor.holders.player.ClassInfoHolder;
 import org.l2jmobius.gameserver.model.actor.templates.NpcTemplate;
 import org.l2jmobius.gameserver.model.clan.Clan;
 import org.l2jmobius.gameserver.model.item.enums.ItemProcessType;
@@ -317,9 +318,14 @@ public class Hero
 					if (charId == charOneId)
 					{
 						final String name = CharInfoTable.getInstance().getNameById(charTwoId);
-						final String cls = ClassListData.getInstance().getClass(charTwoClass).getClassName();
-						if ((name != null) && (cls != null))
+						
+						// getClass(int) is documented to return null for an id it does not
+						// know. The null test below was written but sat after the call it
+						// was meant to protect, so it could never run.
+						final ClassInfoHolder classInfo = ClassListData.getInstance().getClass(charTwoClass);
+						if ((name != null) && (classInfo != null))
 						{
+							final String cls = classInfo.getClassName();
 							final StatSet fight = new StatSet();
 							fight.set("oponent", name);
 							fight.set("oponentclass", cls);
@@ -350,9 +356,12 @@ public class Hero
 					else if (charId == charTwoId)
 					{
 						final String name = CharInfoTable.getInstance().getNameById(charOneId);
-						final String cls = ClassListData.getInstance().getClass(charOneClass).getClassName();
-						if ((name != null) && (cls != null))
+						
+						// Same as the branch above.
+						final ClassInfoHolder classInfo = ClassListData.getInstance().getClass(charOneClass);
+						if ((name != null) && (classInfo != null))
 						{
+							final String cls = classInfo.getClassName();
 							final StatSet fight = new StatSet();
 							fight.set("oponent", name);
 							fight.set("oponentclass", cls);
