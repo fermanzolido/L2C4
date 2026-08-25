@@ -772,7 +772,7 @@ class OlympiadGame {
 							new OnOlympiadMatchResult(_playerOne, _playerTwo, _type), Olympiad.getInstance());
 				}
 			} catch (Exception e) {
-				// Ignore.
+				LOGGER.log(Level.WARNING, "Exception while rewarding the olympiad winner: " + e.getMessage(), e);
 			}
 		} else if ((_playerOne == null) || !_playerOne.isOnline() || ((playerOneHp == 0) && (playerTwoHp != 0))
 				|| ((_damageP2 > _damageP1) && (playerOneHp != 0) && (playerTwoHp != 0))) {
@@ -818,7 +818,7 @@ class OlympiadGame {
 							new OnOlympiadMatchResult(_playerTwo, _playerOne, _type), Olympiad.getInstance());
 				}
 			} catch (Exception e) {
-				// Ignore.
+				LOGGER.log(Level.WARNING, "Exception while rewarding the olympiad winner: " + e.getMessage(), e);
 			}
 		} else {
 			// Save Fight Result
