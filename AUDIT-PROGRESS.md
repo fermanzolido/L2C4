@@ -17,7 +17,7 @@ hallazgos aunque no hayas terminado el área.
 
 | Área | Archivos | Líneas | Estado |
 |---|---:|---:|---|
-| **`model/clan`** | **5** | **3.110** | **en curso — 2 bugs arreglados** |
+| ~~`model/clan`~~ | 5 | 3.110 | **TERMINADA** |
 | ~~`model/itemcontainer`~~ | 10 | 3.727 | **TERMINADA** |
 | `model/skill` | 19 | 3.869 | pendiente |
 | `model/olympiad` | 7 | 4.554 | pendiente |
@@ -168,163 +168,200 @@ que `getOwnerId` en el mismo archivo sí. Inconsistente, pero solo se llama desd
 
 ---
 
-## `model/clan` — en curso
+## `model/clan` — TERMINADA
 
-Son **5** archivos, no 6, y **3.110** líneas: `Clan.java` (2095),
-`ClanMember.java` (727), `ClanPrivileges.java` (182), `ClanAccess.java` (57),
-`ClanInfo.java` (49).
-
-**Leído:** `ClanPrivileges` y `ClanAccess` completos; de `ClanMember` el vínculo
-con el jugador (`setPlayer`, `isOnline`, `getPowerGrade`), constructores,
-`setPledgeType`/`setPowerGrade` y sus escrituras a base; de `Clan.java` el cambio
-de líder, los campos, el sistema de rangos completo (`initializePrivs`,
-`restoreRankPrivs`, `getRankPrivs`, `setRankPrivs`), alta y baja de miembros
-(`addClanMember`, `updateClanMember`, `removeClanMember`,
-`removeMemberInDatabase`), `getMaxNrOfMembers`, `getSubPledgeMembersCount` y
-`checkClanJoinCondition`. Además, por seguir el hilo del pledgeType, los 32
-paquetes de cliente de clan/alianza/pledge.
-
-**Pendiente:** el resto de `Clan.java` (alianzas, crests, level up, guerras), el
-resto de `ClanMember.java`, y `ClanInfo.java`.
+Son **5** archivos y **3.110** líneas: `Clan.java` (2095), `ClanMember.java`
+(727), `ClanPrivileges.java` (182), `ClanAccess.java` (57), `ClanInfo.java` (49).
+**Leídos los cinco de punta a punta.**
 
 ### Hallazgos
 
-Dos bugs arreglados. Los dos salieron del mismo hilo: seguir de dónde viene el
-`pledgeType` de un miembro.
+Nueve defectos arreglados, en cuatro commits. Ocho de los nueve salieron de
+comparar caminos que deberían ser espejo; ninguno de leer un método aislado.
 
 | # | Archivo | Defecto | Severidad |
 |---|---|---|---|
-| 1 | `Clan.java:1338` `restoreRankPrivs` | `_privs.get(rank).setPrivs(...)` sin chequeo de null | alta |
-| 2 | `RequestPledgeReorganizeMember.java:85` | `_newPledgeType` del cliente se escribe sin validar | media |
+| 1 | `Clan.restoreRankPrivs` | `_privs.get(rank)` sin null-check borra los privilegios del clan | alta |
+| 2 | `Clan.setNewLeader` | `_leader.getPlayer()` sin guard aborta el traspaso semanal de liderazgo | alta |
+| 3 | `RequestPledgeReorganizeMember` | tipo de subunidad tomado del cliente sin validar | media |
+| 4 | `Clan.changeLevel` + `ClanMember.setPlayer` | tres umbrales distintos para la misma regla de skills de asedio | media |
+| 5 | `Clan.dissolveAlly` | crest de alianza borrado con la alianza ya desarmada | media |
+| 6 | `Clan.changeLevel` | `_leader.isOnline()` sin guard corta los broadcasts | media |
+| 7 | `Clan` y 12 archivos más | `int * 86400000` y `int * 3600000` desbordan | media |
+| 8 | `Clan.storeNotice` | corta en `MAX - 1` con un guard que admite `MAX` | cosmética |
+| 9 | `Clan.updateBloodOathCountInDB` | el log de error nombra al otro método | cosmética |
 
-**1 — NPE al restaurar privilegios de rango que borra los privilegios del clan.**
-`initializePrivs()` puebla exactamente los rangos 1..9 y corre **antes** de
-`restore()`. `restoreRankPrivs()` después recorre las filas de `clan_privs` y
-hace `_privs.get(rank).setPrivs(privileges)` sin chequear null. Cualquier fila
-con un rango fuera de 1..9 tira `NullPointerException`, que la cortan el `catch`
-de la propia función — y con eso **se aborta el `while` entero**: todos los
-rangos que venían después de la fila mala se quedan con la `ClanPrivileges()`
-vacía que dejó `initializePrivs()`.
+**1 — NPE al restaurar privilegios de rango.** `initializePrivs()` crea
+exactamente los rangos 1..9 y corre **antes** de `restore()`.
+`restoreRankPrivs()` hacía `_privs.get(rank).setPrivs(privileges)` sin chequear
+null: cualquier fila de `clan_privs` con un rango fuera de ese conjunto tiraba
+NPE, y como el `catch` está en la propia función, **abortaba el `while` entero**.
+Todos los rangos posteriores a la fila mala se quedaban con la `ClanPrivileges()`
+vacía. Los miembros de ese clan perdían todos sus privilegios al reiniciar, en
+silencio. Que ocurre está probado por el propio código: el `if (rank == -1)
+continue;` existe porque alguien se topó con esas filas y parcheó el valor
+puntual, no la clase. El rango 0 —el `DEFAULT` de la columna— no estaba cubierto.
 
-Consecuencia: los miembros de ese clan pierden todos los privilegios de rango al
-reiniciar el servidor, en silencio, con una sola línea de log. Se recupera
-recién si alguien limpia la fila a mano.
+**2 — NPE con clanes sin líder.** `ClanTable` instancia un `Clan` por cada fila
+de `clan_data` sin verificar que `leader_id` resuelva a un personaje, y
+`restore()` solo asigna `_leader` si encuentra la fila. Un clan cuyo líder fue
+borrado queda con `_leader` en null — estado que el propio código conoce, porque
+`getLeaderName()` lo loguea como "Clan X without clan leader!".
+`DailyResetManager.clanLeaderApply()` corre cada miércoles sobre **todos** los
+clanes con `new_leader_id` pendiente y no verifica que haya líder actual. Un solo
+clan sin líder abortaba el loop: ningún clan posterior recibía su cambio, y el
+resto de `onReset()` no corría ese día. Se repite semana a semana porque nada
+repara el dato. Verificado que el `RunnableWrapper` de `ThreadPool` captura
+`Throwable` sin relanzar, así que la tarea recurrente sí sobrevive.
 
-Que esto pasa está probado por el propio código: la línea `if (rank == -1)
-continue;` existe porque alguien se topó con filas de rango -1. Parchearon el
-valor puntual que vieron, no la clase de problema. -1 quedaba cubierto; 0 —que es
-el `DEFAULT` de la columna— y 10 en adelante, no.
+**3 — Tipo de subunidad sin validar.** `RequestPledgeReorganizeMember`
+intercambia dos miembros entre subunidades, pero `_newPledgeType` es un
+`readInt()` crudo que nunca se contrastaba con la subunidad real de `member2`.
+Un miembro en una subunidad inexistente deja de contar en
+`getSubPledgeMembersCount(0)`, que es lo que `checkClanJoinCondition` compara
+contra el límite: **el clan puede superar su máximo de miembros**. Y mandando
+`-1` el miembro quedaba en el tipo "academia", la rama que `removeClanMember`
+exime del penalty, así que un líder podía mover a alguien y echarlo sin los 5
+días de penalización.
 
-Arreglo: chequeo de null con log de warning. Para `rank == -1` el comportamiento
-queda **idéntico** (se sigue saltando en silencio, sin ensuciar el log al
-arrancar); para el resto, se saltea la fila mala y los rangos siguientes sí se
-cargan.
+**4 — Tres umbrales para la misma regla.** Las skills de asedio se otorgan según
+`SiegeClanMinLevel`, que es lo que usan `Player` al loguear y `Siege` para gatear
+el registro. `Clan.changeLevel` tenía 5 hardcodeado y `ClanMember.setPlayer`
+tenía 4. Con el `SiegeClanMinLevel = 4` que trae el repo, un clan que llegaba a
+nivel 4 **perdía** las skills que acababa de ganar hasta que el líder relogueara.
+`setNewLeader` ya usaba el config correctamente, lo que confirma cuál era la
+intención. `changeLevel` además mezclaba el chequeo de asedio con el mensaje de
+reputación de nivel 5; son umbrales distintos y quedaron separados.
 
-**2 — El tipo de subunidad se toma del cliente sin validar.**
-`RequestPledgeReorganizeMember` intercambia dos miembros entre subunidades:
-`member1` va a `_newPledgeType` y `member2` va al viejo de `member1`. Pero
-`_newPledgeType` es un `readInt()` crudo del cliente, y nunca se contrasta con la
-subunidad en la que `member2` realmente está. Único control previo:
-`hasAccess(MODIFY_RANKS)`.
+**5 — Crest de alianza borrado a destiempo.** `dissolveAlly` llamaba a
+`changeAllyCrest(0, false)` **después** de `setAllyId(0)`. Ese método resuelve a
+qué clanes afectar desde `_allyId`, así que con la alianza ya desarmada el
+`UPDATE` no matcheaba nada y `getClanAllies(0)` devolvía lista vacía (`ClanTable`
+tiene un guard `allianceId != 0`). El crest igual se borraba del `CrestTable`,
+dejando a todos los clanes de la alianza apuntando a un crest inexistente. Para
+el clan líder el id viejo además sobrevivía al reinicio, porque `updateClanInDB`
+no escribe `ally_crest_id` y `changeAllyCrest` es su único escritor.
 
-El intercambio solo es coherente si `_newPledgeType == member2.getPledgeType()`.
-Con cualquier otro valor no es un swap: la subunidad de `member2` pierde un
-miembro que nadie reemplaza, y `member1` cae en una subunidad que puede no
-existir. Los tipos válidos son 0, -1, 100, 200, 1001, 1002, 2001 y 2002
-(`getMaxNrOfMembers`); cualquier otro cae en el `default` y devuelve límite 0.
-
-Dos consecuencias concretas:
-
-- Un miembro en una subunidad inexistente deja de contar en
-  `getSubPledgeMembersCount(0)`, que es lo que `checkClanJoinCondition` compara
-  contra `getMaxNrOfMembers(0)`. **El clan puede superar su límite de miembros**,
-  uno por cada miembro escondido así.
-- Mandando `_newPledgeType = -1` el miembro queda en el tipo "academia", que es
-  justo la rama que `removeClanMember` exime del penalty: un líder puede mover a
-  alguien a -1 y después echarlo **sin los 5 días de penalización** para entrar a
-  otro clan.
-
-Arreglo: rechazar el paquete si `_newPledgeType != member2.getPledgeType()`. El
-cliente legítimo siempre manda la subunidad donde está el miembro seleccionado,
-así que el flujo normal no cambia. De yapa, esto también corta el caso
-`_memberName == _selectedMember`, que hoy hace dos escrituras a base para
-terminar en el mismo estado.
-
-**Interacción entre los dos.** El arreglo 2 es lo que vuelve inalcanzable el
-tercer hallazgo de abajo (la asimetría del penalty). Sin él, esa asimetría es un
-exploit vivo.
+**7 — Desbordamiento de enteros.** `int * 86400000` desborda pasados 24 días;
+`int * 3600000`, pasadas 596 horas. En los 22 sitios la multiplicación se hacía
+en `int` y recién después se ensanchaba a `long`. `GlobalAuctionManager` ya tenía
+la forma correcta con `L`. Los defaults del repo no desbordan, pero cualquier
+admin que suba una penalización arriba de 24 días o ponga un boss a un mes de
+respawn obtenía un valor **negativo**. `Auctioneer` es el único alcanzable sin
+tocar config: parsea los días de un bypass sin validar rango, y con 25 la subasta
+nacía vencida.
 
 ### Anotado sin tocar
 
-- **Asimetría del penalty al echar a un miembro.** Con el jugador online,
-  `removeClanMember` respeta la exención `if (exMember.getPledgeType() != -1)`;
-  con el jugador offline, `removeMemberInDatabase` escribe
-  `clan_join_expiry_time` **siempre**, sin esa condición. Misma acción, resultado
-  distinto según si la víctima está conectada. **No lo toqué** porque en este
-  fork no existe la academia de clan: `RequestJoinPledge` tiene el
-  `readInt()` del pledgeType comentado y el campo fijo en 0, y no hay ninguna
-  constante de academia en todo el repo. Con el hallazgo 2 arreglado, el
-  pledgeType no puede volverse -1, así que la rama es inalcanzable por los dos
-  lados. Emparejarla sería agregar código para un caso imposible.
+- **`calculatePledgeClass`: el valor baja cuando el clan sube de nivel 3 a 4.**
+  El `case 4` tiene `if (player.isClanLeader())` **sin `else`**, así que un
+  miembro común de un clan nivel 4 se queda en `pledgeClass = 0` — que es el
+  valor de "sin clan". Los niveles 0 a 3 caen en el `default` y dan 1. **No lo
+  toqué**: verifiqué que hoy nada distingue el 0 del 1. El único consumidor real
+  es `ConditionPlayerPledgeClass`, y el datapack solo usa los valores `2` y `-1`;
+  `RequestExAskJoinMPCC` pide `>= 5`; y `Skill.getMinPledgeClass()` no tiene
+  ningún consumidor. Sin fuente autoritativa del valor retail para ese caso,
+  cambiarlo sería adivinar.
 
-- **`RequestPledgeSetMemberPowerGrade` acepta cualquier power grade.** Es un
-  `readInt()` sin rango, escrito a `characters.power_grade`. **No es escalada de
-  privilegios**: `getRankPrivs` sí tiene chequeo de null y devuelve
-  `ClanPrivileges()` vacío para un rango desconocido, o sea que degrada a *menos*
-  permisos. El daño es basura en la base y un miembro en un rango que la UI no
-  puede mostrar, auto-infligido por el propio líder y reversible. Validarlo bien
-  requiere API nueva en `Clan` para preguntar si un rango existe; no lo hice para
-  no ampliar el alcance.
+- **Asimetría del penalty al echar a un miembro.** Online, `removeClanMember`
+  respeta la exención `getPledgeType() != -1`; offline, `removeMemberInDatabase`
+  escribe `clan_join_expiry_time` siempre. Misma acción, resultado distinto según
+  si la víctima está conectada. **No lo toqué** porque no existe la academia en
+  este fork: `RequestJoinPledge` tiene el `readInt()` del pledgeType comentado y
+  el campo fijo en 0. Con el hallazgo 3 arreglado el pledgeType ya no puede
+  volverse -1, así que la rama es inalcanzable por los dos lados. Sin ese
+  arreglo, esta asimetría **era un exploit vivo**.
+
+- **`RequestPledgeSetMemberPowerGrade` acepta cualquier power grade.**
+  `readInt()` sin rango, escrito a `characters.power_grade`. **No es escalada**:
+  `getRankPrivs` sí tiene null-check y devuelve privilegios vacíos para un rango
+  desconocido, o sea que degrada a *menos* permisos. Queda basura en la base y un
+  miembro en un rango que la UI no muestra, auto-infligido por el líder y
+  reversible. Validarlo bien pide API nueva en `Clan` para preguntar si un rango
+  existe.
 
 - **`RequestPledgePower` caso 3 no hace nada con miembros offline.** Resuelve el
-  miembro con `getClanMember(id).getPlayer()`, que es null si no está conectado,
-  y sale sin avisar ni escribir a base. El líder cree que asignó privilegios y no
-  pasó nada. Arreglarlo pide un `setClanPrivileges` en `ClanMember` con su
-  escritura a base, que hoy no existe.
+  miembro con `getClanMember(id).getPlayer()`, null si no está conectado, y sale
+  sin avisar ni escribir. El líder cree que asignó privilegios y no pasó nada.
+  Arreglarlo pide un `setClanPrivileges` en `ClanMember` con su escritura a base.
 
-- **`setRankPrivs` no tiene ningún llamador** en `java/` ni en el datapack. Su
-  rama `else` es justamente la que crearía las filas con rango arbitrario que
-  rompen el hallazgo 1. **No la toco** — es exactamente el caso `ClanAccess.NONE`
-  otra vez: parece muerta y podría no serlo.
+- **`setRankPrivs` no tiene ningún llamador.** Su rama `else` es justamente la
+  que crearía las filas de rango arbitrario del hallazgo 1. **No la toco**: mismo
+  caso que `ClanAccess.NONE`.
 
-- **`updateClanMember` no llama a `setPlayer`.** A diferencia de
-  `addClanMember(Player)`, que hace `new ClanMember(...)` y después
-  `setPlayer(player)`. El constructor ya asigna `_player`, así que el campo queda
-  bien; lo que se saltea son los efectos colaterales de `setPlayer` (skills de
-  asedio al líder). Verificado que el constructor asigna `_player` en
-  `ClanMember.java:90`. No es bug en sí, pero es la clase de asimetría que
-  conviene mirar cuando se lea el resto de `ClanMember`.
+- **`Skill.getMinPledgeClass()` y los configs `FRINTEZZA_SPAWN_INTERVAL` y
+  `FRINTEZZA_SPAWN_RANDOM` no tienen consumidores.** Mismo criterio: no se tocan.
+
+- **`getNotice()` usa `toLowerCase()` sin `Locale`.** El filtro anti-bypass
+  compara contra "action" y "bypass"; en un servidor con locale turco la I
+  minúscula sale sin punto y el filtro no matchea. `ClanTable` sí usa
+  `Locale.ENGLISH` para su índice por nombre, así que la convención existe en el
+  repo. Riesgo real pero exótico.
+
+- **`getNotice()` compila una regex por llamada** (`replaceAll` con `<.*?>`), y
+  `incrementHiredGuards()` hace `_hiredGuards++` sin atomicidad sobre un `int`
+  plano, a diferencia de los `AtomicInteger` de kills y deaths.
+
+- **`checkAllyJoinCondition` es un método de instancia que ignora `this`**: usa
+  `player.getClan()` como clan líder. Debería ser estático. Sin efecto.
+
+- **`ClanPrivileges`: `1 << ordinal()` sobre un `int` se rompe a partir de 31
+  valores.** `ClanAccess` tiene 24. Entra, pero queda poco margen.
 
 ### Sospechas evaluadas y descartadas
 
-Cinco sospechas evaluadas, **ninguna resultó bug**:
+Nueve sospechas verificadas que **no** resultaron bug:
 
-- **Desbordamiento de la máscara de privilegios.** `1 << ordinal()` sobre un
-  `int` se rompe a partir de 31 valores. `ClanAccess` tiene 24, ordinales 0 a
-  23. Entra con margen, pero **queda poco margen**: si algún día se agregan más
-  de 31 privilegios, la máscara se corrompe en silencio.
+- **`changeAllyCrest` con `true` no borra el crest viejo del `CrestTable`**, a
+  diferencia de `changeClanCrest` y `changeLargeCrest`. Es **correcto**: los tres
+  llamadores con `true` son clanes miembro adoptando o limpiando el crest *de la
+  alianza*, que no les pertenece — borrarlo se lo rompería a los demás.
 
-- **Skills de asedio sin quitar al desloguear.** Se agregan con
-  `addSkill(sk, false)`, o sea sin persistir, así que no hay filtración.
+- **`broadcastToOnlineAllyMembers` parecía una copia de
+  `broadcastToOnlineMembers` que se olvidó de iterar la alianza.** Sí la itera,
+  vía `getClanAllies(getAllyId())`, y en `dissolveAlly` se llama mientras
+  `_allyId` todavía vale.
 
-- **`removeSiegeSkills` con el clan ya en null.** Lee
-  `character.getClan().getCastleId()` sin chequear. En `Clan.java:415` corre
-  antes de `player.setClan(null)` en la 420. Orden correcto.
+- **`updateClanMember` no llama a `setPlayer`**, a diferencia de
+  `addClanMember(Player)`. El constructor `ClanMember(Clan, Player)` ya asigna
+  `_player` (línea 90), así que el campo queda bien; solo se saltean los efectos
+  colaterales.
 
-- **Privilegios del líder saliente que no se persisten.** Al líder offline se le
-  escribe `clan_privs` directo en la base; al online solo se le hace
-  `disableAll()` en memoria. Pero `UPDATE_CHARACTER` incluye `clan_privs`, así
-  que se persiste en el próximo guardado. Cambia el *cuándo*, no el *si*.
+- **`ClanInfo` captura `_total` y `_online` al construirse.** No se cachea: se
+  construye fresco dentro del constructor de `AllianceInfo` y se envía.
 
-- **Doble lookup en `getRankPrivs`.** `_privs.get(rank) != null ?
-  _privs.get(rank).getPrivs() : ...` es el mismo patrón chequear-y-usar que sí
-  era una carrera en `ClanHallAuction`. Acá **no lo es**: no hay ni un `remove`
-  ni un `clear` sobre `_privs` en todo el archivo, solo `put` y `get`. Anotado
-  sin tocar, igual que los otros casos del mismo patrón.
+- **`levelUpClan`**: los cinco casos son consistentes entre sí — SP más adena
+  para los niveles 0-1, SP más ítem para 2-4, mismo orden de validación y
+  consumo, y el consumo va dentro del `&&`, así que corta antes si falta SP.
 
-### Nota de calidad
+- **`store()`**: los 13 parámetros mapean 1:1 con las 13 columnas de
+  `INSERT_CLAN_DATA`.
 
-Todas las colecciones de `Clan.java` son concurrentes (`ConcurrentHashMap`,
-`newKeySet`), y el cambio de líder maneja los cuatro casos —saliente y entrante,
-online y offline— persistiendo a mano cuando el jugador no está conectado. Es
-código más cuidado que el promedio de lo visto hasta ahora.
+- **`calculatePledgeClass` tiene el bloque `getLeaderSubPledge` comentado** en
+  los niveles 6 a 11. Es un port incompleto **uniforme**, idéntico en todos los
+  casos, no una asimetría entre ellos.
+
+- **`Player` duplica los clamps de noble y héroe** que `calculatePledgeClass` ya
+  hace al final. Los valores coinciden (5 y 8) y el camino de `Player` es el de
+  jugador sin clan, que `calculatePledgeClass` cubre igual.
+
+- **Doble lookup en `getRankPrivs`**: chequear-y-usar, el mismo patrón que sí era
+  carrera en `ClanHallAuction`. Acá no: no hay ni un `remove` ni un `clear` sobre
+  `_privs` en todo el archivo.
+
+Más las cinco de la sesión anterior: desbordamiento de la máscara de privilegios,
+skills de asedio sin quitar al desloguear, `removeSiegeSkills` con el clan en
+null, y privilegios del líder saliente sin persistir.
+
+### Lo que enseñó esta área
+
+El hilo más productivo no fue leer archivo por archivo, sino **seguir un dato**:
+de dónde sale y a dónde va el `pledgeType` de un miembro. Ese solo hilo destapó
+los hallazgos 1, 3 y 4, y de paso la asimetría del penalty. Los datos que cruzan
+la frontera cliente-servidor y terminan en la base son el mejor punto de entrada.
+
+Segundo patrón: **el guard puntual delata la clase**. El `if (rank == -1)` y los
+null-checks de `getLeaderId()` y `getLeaderName()` son cicatrices de bugs reales
+que alguien parcheó en el valor concreto que vio. Cada guard así es una pista de
+que la misma dereferencia está sin proteger en otro lado — y en los dos casos lo
+estaba.
