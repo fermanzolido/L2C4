@@ -301,13 +301,6 @@ class OlympiadGameTask implements Runnable
 			sm.addInt(i);
 			_game.broadcastMessage(sm, true);
 			
-			// Apply buffs at 0 seconds remaining.
-			if (i == 0)
-			{
-				applyBuffs();
-				healplayer();
-			}
-			
 			switch (i)
 			{
 				case 10:
@@ -329,6 +322,13 @@ class OlympiadGameTask implements Runnable
 				// Ignore.
 			}
 		}
+		
+		// The countdown never enters its body with i at zero: it steps 60, 50, 40, 30,
+		// 20, 10, 5, 4, 3, 2, 1 and then exits. The "apply buffs at 0 seconds remaining"
+		// branch used to sit inside it, so it never ran and participants started every
+		// match unbuffed and without being restored. Zero seconds remaining is here.
+		applyBuffs();
+		healplayer();
 		
 		if (!checkBattleStatus())
 		{
