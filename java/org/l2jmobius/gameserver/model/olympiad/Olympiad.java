@@ -1154,8 +1154,6 @@ public class Olympiad extends ListenersContainer {
 						statement.setInt(6, compLost);
 						statement.setInt(7, compDrawn);
 						statement.setInt(8, elo);
-
-						nobleInfo.set("to_save", false);
 					} else {
 						statement.setInt(1, points);
 						statement.setInt(2, compDone);
@@ -1167,7 +1165,14 @@ public class Olympiad extends ListenersContainer {
 					}
 
 					statement.execute();
-					statement.close();
+
+					// Cleared only once the insert has actually run. Doing it beforehand
+					// meant a failed insert still moved the noble onto the update path, and
+					// the update then matched no row, so the record was never written at
+					// all and the noble was lost on the next restart.
+					if (toSave) {
+						nobleInfo.set("to_save", false);
+					}
 				} catch (SQLException e) {
 					LOGGER.log(Level.SEVERE, "Olympiad System: Failed to save noble data for charId " + charId, e);
 				}
