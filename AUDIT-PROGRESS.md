@@ -20,7 +20,7 @@ hallazgos aunque no hayas terminado el área.
 | ~~`model/clan`~~ | 5 | 3.110 | **TERMINADA** |
 | ~~`model/itemcontainer`~~ | 10 | 3.727 | **TERMINADA** |
 | ~~`model/skill`~~ | 19 | 3.869 | **TERMINADA** |
-| `model/olympiad` | 7 | 4.554 | pendiente |
+| **`model/olympiad`** | **7** | **4.554** | **en curso — 5 bugs arreglados** |
 | `loginserver` | 45 | 5.649 | pendiente |
 | `gameserver/ai` | 15 | 7.907 | pendiente |
 | `commons` | 47 | 11.240 | pendiente |
@@ -758,3 +758,134 @@ Descartados en el cierre:
   lugar para llegar a 128.
 - **`AffectObject` tiene una constante `NOE`**, que parece un typo de `NONE`. No
   la toco: es exactamente el caso `ClanAccess.NONE`.
+
+## `model/olympiad` — en curso
+
+Son **7** archivos y **4.554** líneas: `Olympiad.java` (1695), `OlympiadGame.java`
+(1012), `Hero.java` (935), `OlympiadGameTask.java` (414), `OlympiadManager.java`
+(376), `OlympiadStadium.java` (81), `CompetitionType.java` (41).
+
+**Leído:** de `Olympiad.java` todo el ciclo de los puntos (carga, techo, puntos
+semanales, fin de período, `loadNoblesRank`, `getNoblessePasses`, registro); de
+`OlympiadGame.java` el resultado completo del combate; `OlympiadManager.java`
+entero; de `Hero.java` el ciclo de héroe (`resetData`, `computeNewHeroes`,
+`claimHero`, `isHero`, `isUnclaimedHero`). Además, siguiendo el hilo, el script
+`MonumentOfHeroes` y el handler de bypass `ScriptLink`.
+
+**Pendiente:** el resto de `Olympiad.java` y de `Hero.java` (diario, peleas,
+mensajes, persistencia), `OlympiadGameTask.java`, `OlympiadStadium.java`.
+
+### Hallazgos
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 1 | `MonumentOfHeroes` | las ramas que **otorgan** no repiten los chequeos de las que muestran | alta |
+| 2 | `Olympiad.java` | el techo de puntos deja afuera los puntos iniciales | alta |
+| 3 | `Q00631` | índice de recompensa sin acotar, y los ítems se consumen **antes** | alta |
+| 4 | `Q00374` | mismo índice sin acotar (sin pérdida de ítems) | media |
+| 5 | `OlympiadGame` | dos `catch` que descartaban la falla al entregar el premio | media |
+
+**1 — Los chequeos estaban en las ramas equivocadas.** `MonumentOfHeroes` tiene
+eventos que deciden qué página HTML mostrar y llevan las condiciones
+(`HeroClaim` chequea héroe y héroe-sin-reclamar; `HeroWeapon` chequea héroe y si
+ya se llevó un arma), y eventos que **entregan**, que no llevaban ninguna:
+`HeroReceive`, que otorga el estado de héroe, y el `default`, que parsea el
+evento como id de arma y da el ítem.
+
+`Player.processQuestEvent` valida que el script exista, que el evento no esté
+vacío y que el jugador esté a distancia de interacción del NPC. **No** valida que
+el evento sea uno que el script haya ofrecido, así que llegar a una rama que
+otorga nunca requirió pasar por la que muestra. Que las ramas hermanas sí tengan
+el chequeo es lo que delata que faltaba: alguien lo puso donde se dibuja la
+pantalla, no donde se entrega.
+
+El `default` además llamaba `Integer.parseInt` sobre el evento sin manejo, así
+que cualquier evento que este script no define tiraba excepción.
+
+**2 — El techo de puntos deja afuera lo que se regala al empezar.** Los puntos se
+recortan en dos lugares —al cargar de base y al aplicar los puntos semanales— a
+`(OLYMPIAD_MAX_POINTS * competitions_done) + (OLYMPIAD_WEEKLY_POINTS * 4)`. Falta
+el término de los puntos iniciales, y con los defaults del repo ese es **el más
+grande de los tres**: start 18, max 10, weekly 3.
+
+Un noble sin competencias hechas tiene techo `0 + 12 = 12` pero se crea con
+**18**. Pierde seis puntos en el siguiente reinicio, y a partir de ahí
+`addWeeklyPoints()` no hace **nada** para él, porque `12 + 3` se recorta de vuelta
+a 12. Los puntos semanales existen justamente para los nobles que no están
+compitiendo, y el techo los anulaba para exactamente ese grupo. Los puntos además
+gatean el registro (menos de 3 por clase, menos de 5 libre).
+
+La expresión estaba duplicada a setecientas líneas de distancia, que es cómo las
+dos copias pudieron divergir; quedó en un único helper privado que dice qué
+significa el techo.
+
+**3 y 4 — El índice de recompensa sale del evento.** Las dos quests dejan que el
+nombre del evento elija una fila de su tabla de premios y ninguna verificaba que
+la fila exista.
+
+`Q00631` se protegía solo con `StringUtil.isNumeric`, que únicamente comprueba
+que todos los caracteres sean dígitos: acepta un índice más allá de la última de
+las seis filas. Y **el `takeItems` venía antes del lookup**, así que un índice
+fuera de rango consumía los 120 ítems de quest del jugador y después tiraba la
+excepción, antes de entregar nada. `Q00374` lee el dígito que sigue a un prefijo
+fijo con `substring(9, 10)`: un evento que terminaba en el prefijo tiraba en el
+propio `substring`. Ahí el lookup ya venía antes del `takeItems`, así que no
+había pérdida.
+
+### Anotado sin tocar
+
+- **`_playerOneDefaulted` y `_playerTwoDefaulted` se declaran y se leen, pero
+  nunca se asignan.** Son siempre `false`, no hay subclases de `OlympiadGame`, y
+  el bloque entero de "un jugador no se presentó" es código muerto: el camino
+  vivo es `_pOneCrash` / `_pTwoCrash`. Si alguna vez se reactivara tiene además un
+  defecto propio: con los dos jugadores en default, los dos bloques corren y el
+  segundo escribe el ELO usando los valores **originales** capturados arriba,
+  pisando lo que hizo el primero. No lo toco — misma regla que `ClanAccess.NONE`.
+
+- **`Hero.claimHero()` construye un `StatSet` vacío** si el jugador no tiene
+  registro de héroe, y lo persiste: una fila sin nombre, sin clase y con conteo
+  cero. Con el hallazgo 1 arreglado, sus dos llamadores ya no pueden llegar ahí.
+  Endurecerlo también sería defender un camino que ya no existe.
+
+- **Dos caminos de empate con comportamiento distinto.** Si los dos jugadores
+  desaparecieron, se incrementa `COMP_DRAWN` y se avisa, pero no se tocan puntos
+  ni ELO ni se llama a `saveResults`. El empate real sí hace las tres cosas.
+
+- **La rama de doble crash no actualiza ELO ni emite mensaje**, a diferencia de
+  las otras dos ramas de crash. Defendible (ninguno demostró nada), pero es una
+  asimetría dentro de un trío.
+
+- **El tercer `catch` vacío del archivo envuelve `Thread.sleep`** en el bucle de
+  cuenta regresiva. Es manejo de interrupción, no una falla descartada, y pide un
+  tratamiento distinto (restaurar el flag de interrupción).
+
+### Sospechas evaluadas y descartadas
+
+- **Carrera sobre `NOBLES_RANK`, que es un `HashMap` plano** reconstruido con
+  `clear()` + `put` mientras —eso creía— hilos de paquetes lo leían al reclamar
+  recompensas. **Falso, y lo había armado sobre un supuesto sin verificar**:
+  `getNoblessePasses` es `private` y su único llamador está dentro del mismo
+  `loadNoblesRank()` que reconstruye el mapa. Mismo hilo, sin lectura concurrente.
+
+- **La recompensa de fin de temporada ignora los puntos del noble** y sale de
+  `(esHéroe ? HERO_POINTS : 0) * GP_PER_POINT`, así que un no-héroe recibe cero.
+  **Es el diseño de este fork**, no un olvido: el comentario del llamador dice
+  "Store remaining hero reward points to player variables". Casi lo cuento como
+  bug.
+
+- **`clearRegistered()` no tiene ningún llamador**, lo que parecía dejar
+  registros viejos vivos al cambiar de período. No: `init()` reasigna las dos
+  listas con instancias nuevas, que es por qué el método sobra.
+
+- **`nextOpponents` indexa con `Rnd.get(searchScope)`.** Verificados los tamaños
+  1, 10 y 100: `searchScope` nunca supera el tamaño de la lista.
+
+- **`getRandomClassList` puede devolver null.** Sus dos llamadores lo manejan: uno
+  se lo pasa a `existNextOpponents`, que chequea null, y el otro lo compara con
+  null antes de usarlo.
+
+- **`_div` podría ser cero** y dividir por cero en `pointDiff`. El `switch` que lo
+  asigna solo produce 5 o 3.
+
+- **`COMP_DONE` no se incrementa en las ramas de crash.** Sí se incrementa, una
+  sola vez, después de las tres ramas.
