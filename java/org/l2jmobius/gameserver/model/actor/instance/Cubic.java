@@ -88,7 +88,7 @@ public class Cubic
 	private final List<Skill> _skills = new ArrayList<>();
 	
 	private Future<?> _disappearTask;
-	private Future<?> _actionTask;
+	private volatile Future<?> _actionTask;
 	
 	public Cubic(Player owner, int cubicId, int level, int cubicPower, int cubicDelay, int cubicSkillChance, int cubicMaxCount, int cubicDuration, boolean givenByOther)
 	{

@@ -296,7 +296,7 @@ public abstract class Creature extends WorldObject {
 
 	private final Map<Integer, RelationCache> _knownRelations = new ConcurrentHashMap<>();
 
-	private Set<Creature> _seenCreatures = null;
+	private volatile Set<Creature> _seenCreatures = null;
 	private int _seenCreatureRange = PlayerConfig.ALT_PARTY_RANGE;
 
 	/** A list containing the dropped items of this fake player. */

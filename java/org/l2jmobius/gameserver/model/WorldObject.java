@@ -69,7 +69,7 @@ public abstract class WorldObject extends ListenersContainer implements IPositio
 	private InstanceType _instanceType;
 	private boolean _isSpawned;
 	private boolean _isInvisible;
-	private Map<String, Object> _scripts;
+	private volatile Map<String, Object> _scripts;
 	
 	public WorldObject(int objectId)
 	{

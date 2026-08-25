@@ -456,7 +456,7 @@ public class Player extends Playable {
 	/** Vitality recovery task */
 	private ScheduledFuture<?> _vitalityTask;
 
-	private ScheduledFuture<?> _teleportWatchdog;
+	private volatile ScheduledFuture<?> _teleportWatchdog;
 
 	/** The Siege state of the Player */
 	private byte _siegeState = 0;
@@ -552,7 +552,7 @@ public class Player extends Playable {
 
 	private TradeList _activeTradeList;
 	private ItemContainer _activeWarehouse;
-	private Map<Integer, ManufactureItem> _manufactureItems;
+	private volatile Map<Integer, ManufactureItem> _manufactureItems;
 	private String _storeName = "";
 	private TradeList _sellList;
 	private TradeList _buyList;
@@ -5226,7 +5226,12 @@ public class Player extends Playable {
 	public Map<Integer, ManufactureItem> getManufactureItems() {
 		if (_manufactureItems == null) {
 			synchronized (this) {
-				_manufactureItems = Collections.synchronizedMap(new LinkedHashMap<>());
+				// The second check is what makes this safe: without it two callers that
+				// both pass the outer one each build a map, and the second assignment
+				// discards the first along with anything already put into it.
+				if (_manufactureItems == null) {
+					_manufactureItems = Collections.synchronizedMap(new LinkedHashMap<>());
+				}
 			}
 		}
 
@@ -9497,8 +9502,13 @@ public class Player extends Playable {
 		if (teleport) {
 			if ((_teleportWatchdog == null) && (PlayerConfig.TELEPORT_WATCHDOG_TIMEOUT > 0)) {
 				synchronized (this) {
-					_teleportWatchdog = ThreadPool.schedule(new TeleportWatchdogTask(this),
-							PlayerConfig.TELEPORT_WATCHDOG_TIMEOUT * 1000);
+					// Without the second check two callers can each schedule a watchdog and
+					// the field keeps only the last one, so the other is never cancelled and
+					// can still fire during a later teleport and end it early.
+					if (_teleportWatchdog == null) {
+						_teleportWatchdog = ThreadPool.schedule(new TeleportWatchdogTask(this),
+								PlayerConfig.TELEPORT_WATCHDOG_TIMEOUT * 1000);
+					}
 				}
 			}
 		} else if (_teleportWatchdog != null) {

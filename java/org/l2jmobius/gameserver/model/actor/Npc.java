@@ -173,7 +173,7 @@ public class Npc extends Creature {
 	private volatile int _scriptValue = 0;
 
 	/** Map of summoned NPCs by this NPC. */
-	private Map<Integer, Npc> _summonedNpcs = null;
+	private volatile Map<Integer, Npc> _summonedNpcs = null;
 
 	private final List<QuestTimer> _questTimers = new ArrayList<>();
 	private final List<TimerHolder<?>> _timerHolders = new ArrayList<>();

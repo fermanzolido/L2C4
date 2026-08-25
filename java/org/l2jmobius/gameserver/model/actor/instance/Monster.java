@@ -42,7 +42,7 @@ public class Monster extends Attackable
 	protected boolean _enableMinions = true;
 	
 	private Monster _master = null;
-	private MinionList _minionList = null;
+	private volatile MinionList _minionList = null;
 	
 	/**
 	 * Creates a monster.

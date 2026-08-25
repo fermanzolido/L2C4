@@ -107,7 +107,7 @@ public class Attackable extends Npc
 	private Creature _overhitAttacker;
 	
 	// Command channel
-	private CommandChannel _firstCommandChannelAttacked = null;
+	private volatile CommandChannel _firstCommandChannelAttacked = null;
 	private CommandChannelTimer _commandChannelTimer = null;
 	private long _commandChannelLastAttack = 0;
 	
