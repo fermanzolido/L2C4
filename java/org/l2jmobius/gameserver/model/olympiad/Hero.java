@@ -44,6 +44,7 @@ import org.l2jmobius.gameserver.model.StatSet;
 import org.l2jmobius.gameserver.model.World;
 import org.l2jmobius.gameserver.model.actor.Player;
 import org.l2jmobius.gameserver.model.actor.templates.NpcTemplate;
+import org.l2jmobius.gameserver.model.clan.Clan;
 import org.l2jmobius.gameserver.model.item.enums.ItemProcessType;
 import org.l2jmobius.gameserver.model.item.instance.Item;
 import org.l2jmobius.gameserver.model.itemcontainer.Inventory;
@@ -721,14 +722,21 @@ public class Hero
 									String allyName = "";
 									int clanCrest = 0;
 									int allyCrest = 0;
-									if (clanId > 0)
+									// The character row can still name a clan that no longer exists
+									// in clan_data; DatabaseIdManager carries a cleanup query for
+									// exactly that state. getClan() returns null for it, the catch
+									// below only covers SQLException, and OlympiadEndTask has no
+									// catch at all, so the resulting failure aborted the season
+									// transition before ValidationEndTask was ever scheduled.
+									final Clan clan = (clanId > 0) ? ClanTable.getInstance().getClan(clanId) : null;
+									if (clan != null)
 									{
-										clanName = ClanTable.getInstance().getClan(clanId).getName();
-										clanCrest = ClanTable.getInstance().getClan(clanId).getCrestId();
+										clanName = clan.getName();
+										clanCrest = clan.getCrestId();
 										if (allyId > 0)
 										{
-											allyName = ClanTable.getInstance().getClan(clanId).getAllyName();
-											allyCrest = ClanTable.getInstance().getClan(clanId).getAllyCrestId();
+											allyName = clan.getAllyName();
+											allyCrest = clan.getAllyCrestId();
 										}
 									}
 									
