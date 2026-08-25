@@ -330,12 +330,11 @@ public class SchemeBuffer extends Npc
 		}
 		
 		// Calculate page number.
+		// pageValue arrives from a bypass token. Only the upper bound was applied, so a
+		// value below one made the subList start index negative. GlobalAuctioneer clamps
+		// both ends the same way.
 		final int max = HtmlUtil.countPageNumber(skills.size(), PAGE_LIMIT);
-		int page = pageValue;
-		if (page > max)
-		{
-			page = max;
-		}
+		final int page = Math.max(1, Math.min(pageValue, Math.max(1, max)));
 		
 		// Cut skills list up to page number.
 		skills = skills.subList((page - 1) * PAGE_LIMIT, Math.min(page * PAGE_LIMIT, skills.size()));

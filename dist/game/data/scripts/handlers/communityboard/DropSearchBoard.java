@@ -184,6 +184,9 @@ public class DropSearchBoard implements IParseBoardHandler
 					pages++;
 				}
 				
+				// page comes straight from the bypass and neither bound had been applied to
+				// it, so the loop below could start indexing the list from a negative value.
+				page = Math.max(1, Math.min(page, pages));
 				final int start = (page - 1) * 4;
 				final int end = Math.min(list.size() - 1, start + 4);
 				final StringBuilder builder = new StringBuilder();

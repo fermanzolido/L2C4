@@ -104,8 +104,11 @@ public class AdminSearch implements IAdminCommandHandler
 			return;
 		}
 		
+		// max was computed but never applied to page, and there was no lower bound
+		// either, so a mistyped page indexed outside the list.
 		final int max = Math.min(100, HtmlUtil.countPageNumber(items.size(), PAGE_LIMIT));
-		items = items.subList((page - 1) * PAGE_LIMIT, Math.min(page * PAGE_LIMIT, items.size()));
+		final int shownPage = Math.max(1, Math.min(page, Math.max(1, max)));
+		items = items.subList((shownPage - 1) * PAGE_LIMIT, Math.min(shownPage * PAGE_LIMIT, items.size()));
 		
 		final StringBuilder sb = new StringBuilder();
 		for (ItemTemplate item : items)
