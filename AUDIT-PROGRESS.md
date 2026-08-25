@@ -1540,10 +1540,8 @@ defecto acá se multiplica por todo el servidor.
 `database/DatabaseFactory`, la familia de parseo de `util/IXmlReader` y los
 ayudantes de `util/StringUtil`.
 
-**Pendiente:** `ConfigReader`, `time/TimeUtil`, `time/SchedulingPattern`,
-`util/DeadlockWatcher`, `crypt/` (`BlowfishEngine`, `NewCrypt`), `util/BCrypt`,
-`ui/`, y los buffers de escritura (`DynamicPacketBuffer`, `ArrayPacketBuffer`,
-`WritablePacket`, `BaseWritablePacket`).
+**Pendiente:** `crypt/BlowfishEngine` y `util/BCrypt` (implementaciones de
+referencia portadas), `ui/`, y el detalle interno de `DynamicPacketBuffer`.
 
 ### Hallazgos
 
@@ -1650,6 +1648,160 @@ reciclan después.
 - **`RejectedExecutionHandlerImpl` corriendo una tarea diferida de inmediato.**
   `ScheduledThreadPoolExecutor` usa una cola sin cota, así que solo rechaza
   después del apagado, y el handler chequea `isShutdown()` y vuelve.
+
+
+### Segunda vuelta de `commons`: config, tiempo, deadlock y checksum
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 8 | `DeadlockWatcher` | el `sleep` adentro del `try`, así que una excepción deja el hilo girando sin pausa | **crítica** |
+| 9 | `DeadlockWatcher` | un NPE en el reporte se lleva puesto el callback que reacciona al deadlock | alta |
+| 10 | `NewCrypt` | `verifyChecksum` y `appendChecksum` ignoran el `offset` al acotar el bucle | alta |
+| 11 | `ConfigReader` | `getBoolean` devuelve `false` en silencio para cualquier valor inválido | alta |
+| 12 | 5 scripts de evento | el centinela "sin match futuro" se suma a 5000 y arranca el evento | alta |
+| 13 | `ConfigReader` | ningún getter recorta, y `Properties.load` conserva el espacio final | media |
+| 14 | 4 archivos | `toLowerCase()` sin locale alimentando comparaciones | media |
+| 15 | `DeadlockWatcher` | reporte y callback repetidos cada intervalo para el mismo deadlock | media |
+
+**8 y 9 — El vigilante de deadlocks fallando durante el deadlock.** `Server.ini`
+trae `DeadlockWatcher = True` con intervalo de 20 s, así que este hilo corre en
+todo servidor estándar. Tenía tres problemas que se componen exactamente cuando
+hay un deadlock, que es el único momento en que importa.
+
+El `sleep` era la última sentencia **dentro** del `try` que hace la detección y
+el reporte. Cualquier excepción en ese camino saltaba al `catch`, que loguea y
+deja que el bucle vuelva a girar **sin ninguna pausa**.
+
+Y había una excepción disponible: el reporte llama
+`monitor.getLockedStackFrame().getLineNumber()`, y `getLockedStackFrame` está
+documentado para devolver `null` cuando el marco no está disponible. Ese NPE
+abortaba el reporte y, como el callback está después en el mismo bloque, se
+saltaba el callback — la máquina que avisa a los jugadores y arranca el reinicio
+cuando `RestartOnDeadlock` está prendido. O sea: hay deadlock, el reporte tira,
+el reinicio no ocurre, y el vigilante gira a toda velocidad relanzando la misma
+excepción.
+
+Tercero: los hilos en deadlock siguen en deadlock, así que
+`findDeadlockedThreads` devuelve el mismo conjunto en cada pasada y un solo
+incidente producía un reporte completo y otro callback cada 20 segundos.
+
+**10 — Un `offset` que no se respeta.** Los dos métodos reciben `offset` y
+`size`, arrancan el bucle en `offset` y lo acotan con `size - 4`. La región es
+`[offset, offset + size)`, así que la última palabra empieza en
+`offset + size - 4`. `crypt` y `decrypt`, más abajo **en el mismo archivo**,
+escriben `i < (offset + size)`: ese contraste es el delator.
+
+Medido en vez de argumentado: comparando la implementación contra una de
+referencia sobre offsets 0..8 y tamaños 8..96, **115 de 207 combinaciones dan
+distinto**. Todo offset 4 está mal en todo tamaño.
+
+El único llamador con offset no nulo es `LoginServerThread.sendPacket`, con
+offset 2 sobre un payload alineado a 8 bytes. Esa forma **no** está entre las
+115: con el bucle avanzando de a 4 desde el índice 2 y el `count` alineado a 4,
+el primer índice que el bucle rechaza es el mismo bajo cualquiera de las dos
+cotas. El defecto es real en el método e inerte en el único sitio que podía
+exponerlo — y eso es justo lo que vuelve seguro arreglarlo: antes del cambio la
+forma viva ya coincidía con la referencia, y después coinciden las 207, así que
+los bytes del enlace login↔gameserver no cambian.
+
+**11 y 13 — El único getter cuyo fallo era mudo.** `getBoolean` llamaba a
+`Boolean.parseBoolean`, que **nunca lanza** y responde `false` para cualquier
+cosa que no sea `"true"`. Su `catch` no podía dispararse y el warning
+"Invalid boolean" que protege no se imprimió jamás. Un `"True "` —el valor
+correcto con un espacio invisible detrás— se leía como `false`, y lo mismo
+`"yes"`, `"1"` y cualquier typo.
+
+`Properties.load` conserva el espacio final de un valor y un `.ini` lo lleva
+invisible: **dos de los archivos distribuidos lo tenían**. `getIntArray` era el
+único getter que recortaba algo, y recorta cada elemento en vez del valor — el
+delator de que alguien chocó con esto una vez y arregló la llamada que tenía
+adelante. Los nueve getters tipados pasan ahora por un helper que recorta.
+
+Verificado antes de cambiarlo: las 440 claves leídas con `getBoolean` tienen 351
+asignaciones en los `.ini` distribuidos y **las 351 son `true` o `false`
+válidos**, así que el cambio no agrega ni un warning a una instalación estándar.
+
+**12 — Un centinela sumado a un delay.** `SchedulingPattern.next` devuelve `-1`
+cuando no encuentra match dentro de su ventana de cuatro años, y
+`getDelayToNextFromNow` lo pasa tal cual. Los cinco scripts de evento lo tratan
+como duración: `addTimer(..., delay + 5000, ...)`, o sea **4999 ms**. El evento
+arranca cinco segundos después de cargar en vez de nunca, y el mismo bloque en
+`onTimerEvent` lo reprograma igual, así que **se reinicia cada cinco segundos**
+mientras el servidor esté arriba. Corrido de verdad con el build actual:
+
+```
+[0 20 * * *] delay=8982704   addTimer recibiria 8987704 ms
+[0 0 30 2 *] delay=-1        addTimer recibiria 4999 ms
+```
+
+**14 — Plegado de mayúsculas sin locale.** En turco y azerí una `I` mayúscula se
+vuelve `ı` sin punto, así que cualquier palabra clave con `i` deja de calzar
+después del plegado. El repo ya era inconsistente: 19 llamadas pasan locale, 123
+no, y 60 de esas alimentan una comparación, un `switch` o un `valueOf`.
+
+El que falla en una máquina real es `DatabaseBackup`: decide si prefijar la ruta
+de MySQL con
+`System.getProperty("os.name").toLowerCase().contains("win")`. En un Windows con
+locale turco `"Windows"` se pliega a `"wındows"`, el test da falso y el backup no
+corre. `SchedulingPattern` resuelve los alias `jan`-`dec` y `sun`-`sat` que su
+propio javadoc anuncia con un lookup en minúsculas: `"fri"` lleva `i`.
+
+### Anotado sin tocar (segunda vuelta de `commons`)
+
+- **`Client.write` traga toda excepción con un `catch` vacío**, y `Client` no
+  tiene `LOGGER`. Parte es deliberado: `writeDataToBuffer` usa
+  `throw new Exception()` sin mensaje como control de flujo para "este paquete
+  decidió no mandarse". Pero eso vuelve indistinguible un fallo real de
+  serialización de una negativa normal, y los dos son invisibles. Separarlos pide
+  un tipo de excepción propio en el camino más caliente del servidor.
+
+- **`ArrayPacketBuffer.ensureSize` desborda**: `(_data.length + size) * 1.2`
+  suma como `int` antes de promover a `double`, así que una suma por encima de
+  `Integer.MAX_VALUE` da negativo y `Arrays.copyOf` tira
+  `NegativeArraySizeException`. Haría falta un paquete de ~2 GB, y los salientes
+  los genera el servidor.
+
+- **`appendChecksum` no tiene la guarda de tamaño que sí tiene
+  `verifyChecksum`** (`size` múltiplo de 4 y mayor que 4), así que un buffer
+  corto llega como `ArrayIndexOutOfBoundsException`. Ningún llamador puede
+  producirlo hoy.
+
+- **`ConfigReader.getEnum` y `getDuration` tienen cero llamadores.** El primero
+  hace exactamente lo que necesitaban los seis `Enum.valueOf` a mano del paquete
+  de config.
+
+- **~89 claves booleanas se leen sin estar en ningún `.ini` distribuido**, y cada
+  una loguea "not found, using default" en cada arranque. Sumado a los otros
+  tipos, son cientos de warnings por boot.
+
+- **`getOffsettedDelayToNextFromNow` convierte el centinela -1 en 0** con su
+  `Math.max(0, delay - offset)`. Sin llamadores.
+
+- **119 sitios más de `toLowerCase()`/`toUpperCase()` sin locale** fuera de
+  `commons`, 60 de ellos alimentando control de flujo. Se atienden área por área
+  en vez de en un barrido a ciegas.
+
+### Sospechas evaluadas y descartadas (segunda vuelta de `commons`)
+
+- **`toByteBuffer` mandando la capacidad en vez de lo escrito.** `_limit` se pone
+  igual a `_data.length` al crecer el buffer, lo que parecía enviar ceros de cola
+  en cada paquete e inflar el caché `MAXIMUM_PACKET_SIZE`. **Falso:**
+  `writeDataToBuffer` llama a `buffer.mark()` antes de devolver, y `mark()` hace
+  `_limit = _index`.
+
+- **`MAXIMUM_PACKET_SIZE` como mapa estático mutable** escrito desde los hilos de
+  red. Las tres copias son `ConcurrentHashMap`.
+
+- **`handleNotWritten` reintentando el mismo paquete para siempre** tras un fallo
+  silencioso. Llama a `writeFairPacket()`, que toma el **siguiente** de la cola.
+
+- **Doble liberación del buffer de escritura.** Cuando `writeDataToBuffer` libera
+  y lanza, la asignación `buffer = packet.writeData(this)` nunca se completa, así
+  que el `finally` recibe `null` y no vuelve a liberar.
+
+- **`Boolean.parseBoolean` aceptando dígitos no ASCII vía `Character.isDigit`.**
+  `Integer.parseInt` usa `Character.digit`, así que `isNumeric` y el parseo
+  coinciden; la brecha real de `isNumeric` es el desborde, no el alfabeto.
 
 ## `gameserver/config` — TERMINADA
 
