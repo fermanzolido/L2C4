@@ -570,3 +570,55 @@ lisa y llana.
 candado, así que un cancel concurrente con un schedule sigue siendo una carrera
 aparte. Y `Creature.java:3232` se parece pero **no** es este patrón: todo el
 cuerpo ya está adentro del candado.
+
+### Segunda ronda sobre `Skill.java`: descartadas con prueba
+
+- **`applyEffects`, rama `self`: la condición extra `hasEffectType(EffectType.BUFF)`.**
+  La rama principal agrega el `BuffInfo` a la lista de efectos con solo
+  `addContinuousEffects`; la rama `self` exige además que la skill tenga algún
+  efecto de tipo BUFF, con el comentario `// Skill target validation
+  (simplified).` — que sonaba a que alguien había recortado una validación.
+  Parecía que un efecto self continuo que no fuera BUFF nunca se agregaría a la
+  lista y por lo tanto **nunca se inicializaría**.
+
+  **No bloquea nada.** En todo el datapack hay solo **6** bloques
+  `<selfEffects>`, con tres handlers: `Buff` (3) e `ImmobileBuff` (1), que son
+  `EffectType.BUFF` y pasan el guard; y `FocusEnergy` (2, skills 345 y 346), que
+  es `EffectType.NONE` pero **`isInstant()` devuelve true**, así que corre por la
+  rama de instantáneos de `applyEffectScope` y no necesita la lista de efectos.
+  Encima esas dos skills son `operateType = A1`, que no es continuo (solo A2, A4
+  y DA2), ni auto-continuo (A3), ni toggle, así que `addContinuousEffects` ya era
+  false para ellas.
+
+- **`activateSkill` hace `obj.asCreature()` sin chequear `isCreature()`**, a
+  diferencia de `SkillChannelizer.run()` que sí lo chequea, y
+  `WorldObject.asCreature()` devuelve **null** en la clase base. **No es
+  alcanzable**: los 14 target handlers devuelven Creatures —`Unlockable` filtra a
+  puertas y cofres, y `Door extends Creature`, `Chest extends Monster`—, y los 11
+  llamadores de `activateSkill` pasan jugadores, summons u objetivos ya
+  resueltos. El único que pasa algo potencialmente nulo,
+  `SellBuffBypassHandler:535` con `player.getSummon()`, tiene el guard
+  `if ((player.getSummon() == null) || player.getSummon().isDead())` justo antes.
+  Queda como trampa latente: es la asimetría con `SkillChannelizer`, no un bug.
+
+- **`Skill.getEffects(EffectScope)` puede devolver null** (`EnumMap.get` de una
+  clave ausente) y es público. Su único llamador, `applyEffectScope`, lo protege
+  con `hasEffects(...)`, que sí chequea null. Trampa latente para un futuro
+  llamador.
+
+### Anotado sin tocar (segunda ronda)
+
+- **Mensaje engañoso cuando un target handler tira excepción.**
+  `getTargetList(Creature, boolean, Creature)` loguea la excepción y **después
+  cae** en `creature.sendMessage("Target type of skill is not currently
+  handled.")`. El tipo sí está manejado; el handler falló. El jugador recibe un
+  diagnóstico falso.
+
+- **Doble bloque de auto-play en `checkForAreaOffensiveSkills`.** El primero
+  devuelve false si el modo es 1 (Monster) o 3 (NPC). El segundo devuelve false
+  si el modo **no** es 0 (Any) ni 2 (Characters) — o sea, nunca, para los modos
+  documentados, porque el primero ya se llevó el 1 y el 3. Y para cualquier otro
+  valor **contradice** al intérprete autoritativo: `isTargetModeValid` trata su
+  `default` como "Any Target", donde los jugadores sí son objetivos válidos. El
+  modo se toma sin validar de `settings.get(3)` de un comando por voz. Redundante
+  y confuso, sin daño demostrable; cambiarlo es decisión de mecánica.
