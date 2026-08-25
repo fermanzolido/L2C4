@@ -22,7 +22,7 @@ hallazgos aunque no hayas terminado el área.
 | ~~`model/skill`~~ | 19 | 3.869 | **TERMINADA** |
 | ~~`model/olympiad`~~ | 7 | 4.554 | **TERMINADA** |
 | ~~`loginserver`~~ | 45 | 5.649 | **TERMINADA** |
-| `gameserver/ai` | 15 | 7.907 | pendiente |
+| **`gameserver/ai`** | **15** | **7.907** | **en curso — 7 bugs arreglados** |
 | `commons` | 47 | 11.240 | pendiente |
 | datapack `ai/` | 67 | 14.462 | pendiente |
 | `managers` | 44 | 14.636 | pendiente |
@@ -1234,3 +1234,76 @@ registraba sobre el id cero, encima del que ya lo tenía.
   y el `finally` del cliente hace `removeLoginClient(_account)`, lo que podría
   borrar la entrada del cliente legítimo. Es el diseño: `REASON_ACCOUNT_IN_USE` se
   le manda a **los dos**, así que los dos se van.
+
+## `gameserver/ai` — en curso
+
+Son **15** archivos y **7.907** líneas, dominadas por `AttackableAI` (2628),
+`CreatureAI` (1605) y `AbstractAI` (850).
+
+**Leído:** `AbstractAI` (estado compartido, candado e intenciones, y el
+despachador de acciones), de `AttackableAI` la selección de objetivo
+(`thinkAttack`, `checkTarget`, los dos `targetReconsider`, `movementDisable`) y
+los handlers de agresión, de `SiegeGuardAI` la elegibilidad de objetivo y la
+agresión, y los handlers de `CreatureAI` para aturdimiento, parálisis, sueño,
+raíz, silencio y confusión.
+
+### Hallazgos
+
+**1 — `targetReconsider()` no podía reconsiderar nada.** `movementDisable`
+termina con `// If cannot cast nor attack, find a new target.` seguido de
+`targetReconsider()`. Los dos filtros del método descartaban a todo candidato que
+**no** fuera ya el más odiado, así que la única criatura a la que podía llegar era
+el objetivo que acababa de fallar. No buscaba uno nuevo: reelegía el viejo y le
+sumaba su propio odio encima.
+
+Tres cosas de adentro dicen que la comparación estaba invertida:
+
+- El odio que se le entrega al elegido es `actor.getHating(mostHate)`, que es el
+  modismo para volver **a otro** el más odiado. Dárselo al que ya lo tiene no
+  hace nada.
+- El segundo filtro lleva `obj == getAttackTarget()` **al lado**, que descarta el
+  objetivo actual. Eso es lo que el par debía hacer junto, y contradice a una
+  cláusula que exige el objetivo actual.
+- La misma clase ya tiene un `targetReconsider(boolean)` que recorre bien la
+  lista de odio y los alrededores.
+
+Efecto visible: un monstruo que no puede alcanzar ni castear sobre su objetivo
+principal ahora se da vuelta contra alguien que sí puede alcanzar, en vez de
+quedarse trabado mientras el resto le pega gratis.
+
+**2 — Seis acciones de IA que tiraban excepción en cada aplicación.**
+`notifyAction(Action, Object...)` lee `args[0]` en los `case` de las acciones que
+llevan una criatura. **Seis** llamadores las notifican sin ningún argumento, así
+que el `switch` indexaba un array vacío:
+
+| Origen | Acción |
+|---|---|
+| `Creature.startStunning()` | `STUNNED` |
+| `Creature.startParalyze()` | `PARALYZED` |
+| `Confuse` | `CONFUSED` |
+| `Sleep` | `SLEEPING` |
+| `Root` | `ROOTED` |
+| `Mute` y `PhysicalMute` | `MUTED` |
+
+O sea: aturdir, paralizar, dormir, enraizar, silenciar y confundir. Combate
+corriente. Y en `startStunning` la notificación **no** es la última sentencia: la
+excepción salía antes de `setIntention(IDLE)` y `updateAbnormalEffect()`, así que
+la criatura aturdida conservaba su intención anterior y nunca mostraba el efecto.
+
+Toda la cadena tolera un atacante ausente —`addDamageHate` e `isInAggroList`
+cortan con null, `onIntentionAttack` rechaza un objetivo nulo, y
+`CreatureAI.onActionAttacked` ni mira el parámetro—, así que el arreglo es leer
+la criatura solo cuando la hay.
+
+### Error de método propio, y cómo lo encontré
+
+**Arreglé tres de las seis y di el trabajo por terminado.** El grep que las
+encontró lo pasé por `head`, se truncó en diez resultados, y leí salida truncada
+como si fuera la respuesta completa.
+
+Lo que destapó las otras tres fue **no volver a grepear**: construí la aridad que
+el `switch` espera para cada acción y la comparé contra todos los llamadores. Esa
+tabla no se puede truncar sin que se note, porque cada fila tiene que aparearse.
+
+**Regla:** cuando la pregunta es "¿están todos?", el resultado no pasa por `head`,
+y si se puede, se responde con un conteo apareado en vez de una lista.
