@@ -24,6 +24,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.l2jmobius.commons.threads.ThreadPool;
 import org.l2jmobius.commons.util.Rnd;
@@ -109,6 +111,8 @@ public class AttackableAI extends CreatureAI
 			}
 		}
 	}
+	
+	private static final Logger LOGGER = Logger.getLogger(AttackableAI.class.getName());
 	
 	protected static final int FEAR_TICKS = 5;
 	private static final int RANDOM_WALK_RATE = 30; // confirmed
@@ -2383,7 +2387,11 @@ public class AttackableAI extends CreatureAI
 		}
 		catch (Exception e)
 		{
-			// LOGGER.warning(getClass().getSimpleName() + ": " + getActor().getName() + " - onActionThink() failed!");
+			// Logged rather than discarded. SiegeGuardAI and ControllableMobAI both wrap
+			// their think loop in try/finally with no catch at all, so a failure there
+			// reaches the pool's handler and is recorded; this one silently ate every
+			// exception the attackable think loop produced.
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": " + _actor + " failed to think: " + e.getMessage(), e);
 		}
 		finally
 		{
