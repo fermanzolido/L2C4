@@ -58,24 +58,38 @@ public class DeadlockWatcher extends Thread
 	{
 		LOGGER.info("DeadlockWatcher: Thread started.");
 		
+		// Deadlocked threads stay deadlocked, so findDeadlockedThreads returns the same set on
+		// every pass. Reporting and calling back once stops a single incident from producing a
+		// full report and another callback every interval for as long as the server is up.
+		boolean handled = false;
+		
 		while (!isInterrupted())
 		{
 			try
 			{
 				// Detect deadlocks and handle them if found.
 				final long[] deadlockedThreadIds = _threadMXBean.findDeadlockedThreads();
-				if (deadlockedThreadIds != null)
+				if ((deadlockedThreadIds != null) && !handled)
 				{
+					handled = true;
 					LOGGER.warning("DeadlockWatcher: Deadlock detected!");
 					
-					// Build detailed deadlock report.
-					if (deadlockedThreadIds.length > MAX_DEADLOCK_THREADS)
+					// Build detailed deadlock report. Its own try: the report is diagnostics, and a
+					// failure building it must not cost the callback, which is what actually reacts.
+					try
 					{
-						generateMinimalDeadlockReport(deadlockedThreadIds);
+						if (deadlockedThreadIds.length > MAX_DEADLOCK_THREADS)
+						{
+							generateMinimalDeadlockReport(deadlockedThreadIds);
+						}
+						else
+						{
+							generateDeadlockReport(deadlockedThreadIds);
+						}
 					}
-					else
+					catch (Exception e)
 					{
-						generateDeadlockReport(deadlockedThreadIds);
+						LOGGER.log(Level.WARNING, "DeadlockWatcher: Failed to build the deadlock report: ", e);
 					}
 					
 					// Invoke callback if set.
@@ -91,7 +105,16 @@ public class DeadlockWatcher extends Thread
 						}
 					}
 				}
-				
+			}
+			catch (Exception e)
+			{
+				LOGGER.log(Level.WARNING, "DeadlockWatcher: Exception during deadlock check: ", e);
+			}
+			
+			// Outside the block above. The sleep used to be the last statement inside it, so any
+			// exception on the detection path skipped it and the loop spun with no delay at all.
+			try
+			{
 				Thread.sleep(_checkInterval.toMillis());
 			}
 			catch (InterruptedException e)
@@ -99,10 +122,6 @@ public class DeadlockWatcher extends Thread
 				LOGGER.info("DeadlockWatcher: Thread interrupted and will exit.");
 				Thread.currentThread().interrupt();
 				break;
-			}
-			catch (Exception e)
-			{
-				LOGGER.log(Level.WARNING, "DeadlockWatcher: Exception during deadlock check: ", e);
 			}
 		}
 		
@@ -147,7 +166,10 @@ public class DeadlockWatcher extends Thread
 				LOGGER.warning("Locked monitors:");
 				for (MonitorInfo monitor : lockedMonitors)
 				{
-					LOGGER.warning("\t- " + monitor.getClassName() + " at line " + monitor.getLockedStackFrame().getLineNumber());
+					// getLockedStackFrame is documented to return null when the frame is not available,
+					// and the resulting NPE used to abort the whole report and skip the callback.
+					final StackTraceElement frame = monitor.getLockedStackFrame();
+					LOGGER.warning("\t- " + monitor.getClassName() + (frame == null ? "" : " at line " + frame.getLineNumber()));
 				}
 			}
 			
