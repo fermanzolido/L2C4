@@ -67,8 +67,12 @@ public class BuffInfo
 	// Misc
 	/** If {@code true} then this effect has been cancelled. */
 	private volatile SkillFinishType _finishType = SkillFinishType.NORMAL;
-	/** If {@code true} then this effect is in use (or has been stop because an Herb took place). */
-	private boolean _isInUse = true;
+	/**
+	 * If {@code true} then this effect is in use (or has been stop because an Herb took place).<br>
+	 * Volatile because EffectList flips it from whichever thread applies or removes an effect,
+	 * while onTick() reads it from the scheduler thread that runs the effect ticks.
+	 */
+	private volatile boolean _isInUse = true;
 	
 	/**
 	 * Buff Info constructor.
