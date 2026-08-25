@@ -755,7 +755,16 @@ public class PlayerInventory extends Inventory
 	 */
 	public int getNonQuestSize()
 	{
-		return _items.size();
+		int size = 0;
+		for (Item item : _items)
+		{
+			if (!item.isQuestItem())
+			{
+				size++;
+			}
+		}
+
+		return size;
 	}
 	
 	/**
