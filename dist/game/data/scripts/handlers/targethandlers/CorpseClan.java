@@ -113,11 +113,18 @@ public class CorpseClan implements ITargetTypeHandler
 				return targetList;
 			}
 			
+			// getAffectLimit() rolls Rnd.get() on every call, so it has to be read once
+			// before the loop; inside it the cap would be a different number each pass.
+			// It is zero for every skill that does not declare affectLimit, which is why
+			// the comparison needs the same "greater than zero" guard the player branch
+			// above uses: without it the very first pass breaks out and no clan member
+			// is ever added.
+			final int maxTargets = skill.getAffectLimit();
 			for (Npc newTarget : World.getInstance().getVisibleObjectsInRange(creature, Npc.class, skill.getCastRange()))
 			{
 				if (npc.isInMyClan(newTarget))
 				{
-					if (targetList.size() >= skill.getAffectLimit())
+					if ((maxTargets > 0) && (targetList.size() >= maxTargets))
 					{
 						break;
 					}

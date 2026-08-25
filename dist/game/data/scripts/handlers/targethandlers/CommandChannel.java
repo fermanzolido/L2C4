@@ -71,7 +71,12 @@ public class CommandChannel implements ITargetTypeHandler
 			if (Skill.addCharacter(creature, member, radius, false))
 			{
 				targetList.add(member);
-				if (targetList.size() >= maxTargets)
+				
+				// maxTargets is zero for every skill that does not declare affectLimit, so
+				// this needs the same "greater than zero" guard the other target handlers
+				// use: without it the first member added breaks the loop and the rest of
+				// the channel never receives the skill.
+				if ((maxTargets > 0) && (targetList.size() >= maxTargets))
 				{
 					break;
 				}

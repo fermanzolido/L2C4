@@ -118,11 +118,13 @@ public class Clan implements ITargetTypeHandler
 				return targetList;
 			}
 			
+			// getAffectLimit() rolls Rnd.get() on every call, so it has to be read once
+			// before the loop; inside it the cap would be a different number each pass.
+			final int maxTargets = skill.getAffectLimit();
 			for (Npc newTarget : World.getInstance().getVisibleObjectsInRange(creature, Npc.class, skill.getCastRange()))
 			{
 				if (newTarget.isNpc() && npc.isInMyClan(newTarget))
 				{
-					final int maxTargets = skill.getAffectLimit();
 					if ((maxTargets > 0) && (targetList.size() >= maxTargets))
 					{
 						break;
