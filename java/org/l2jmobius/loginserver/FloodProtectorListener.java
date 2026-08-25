@@ -22,6 +22,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -70,12 +71,13 @@ public abstract class FloodProtectorListener extends Thread
 					ForeignConnection fConnection = _floodProtection.get(connection.getInetAddress().getHostAddress());
 					if (fConnection != null) // If there's an existing connection from this IP.
 					{
-						fConnection.connectionNumber += 1;
-						if (((fConnection.connectionNumber > LoginConfig.FAST_CONNECTION_LIMIT) && ((System.currentTimeMillis() - fConnection.lastConnection) < LoginConfig.NORMAL_CONNECTION_TIME)) || ((System.currentTimeMillis() - fConnection.lastConnection) < LoginConfig.FAST_CONNECTION_TIME) || (fConnection.connectionNumber > LoginConfig.MAX_CONNECTION_PER_IP))
+						// Read once, so the three tests below all see the same count.
+						final int connections = fConnection.connectionNumber.incrementAndGet();
+						if (((connections > LoginConfig.FAST_CONNECTION_LIMIT) && ((System.currentTimeMillis() - fConnection.lastConnection) < LoginConfig.NORMAL_CONNECTION_TIME)) || ((System.currentTimeMillis() - fConnection.lastConnection) < LoginConfig.FAST_CONNECTION_TIME) || (connections > LoginConfig.MAX_CONNECTION_PER_IP))
 						{
 							fConnection.lastConnection = System.currentTimeMillis();
 							connection.close();
-							fConnection.connectionNumber -= 1;
+							fConnection.connectionNumber.decrementAndGet();
 							if (!fConnection.isFlooding)
 							{
 								LOGGER.warning("Potential Flood from " + connection.getInetAddress().getHostAddress());
@@ -142,10 +144,14 @@ public abstract class FloodProtectorListener extends Thread
 		{
 			// Initialize a new foreign connection.
 			lastConnection = time;
-			connectionNumber = 1;
+			connectionNumber = new AtomicInteger(1);
 		}
 		
-		public int connectionNumber;
+		// Incremented on the accept thread and decremented from each client's own thread
+		// as it disconnects, so a plain int loses updates: the count drifts up and honest
+		// connections start being refused as flooding, or drifts down and the entry never
+		// reaches zero to be dropped.
+		public final AtomicInteger connectionNumber;
 		public long lastConnection;
 		public boolean isFlooding = false;
 	}
@@ -164,8 +170,9 @@ public abstract class FloodProtectorListener extends Thread
 		final ForeignConnection fConnection = _floodProtection.get(ip);
 		if (fConnection != null)
 		{
-			fConnection.connectionNumber -= 1;
-			if (fConnection.connectionNumber == 0)
+			// At or below zero rather than exactly zero: an exact test leaves the entry
+			// behind for good if the count ever passes it.
+			if (fConnection.connectionNumber.decrementAndGet() <= 0)
 			{
 				_floodProtection.remove(ip);
 			}
