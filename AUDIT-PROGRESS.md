@@ -18,7 +18,7 @@ hallazgos aunque no hayas terminado el área.
 | Área | Archivos | Líneas | Estado |
 |---|---:|---:|---|
 | `model/clan` | 6 | 3.163 | pendiente |
-| **`model/itemcontainer`** | **10** | **3.727** | **en curso** |
+| ~~`model/itemcontainer`~~ | 10 | 3.727 | **TERMINADA** |
 | `model/skill` | 19 | 3.869 | pendiente |
 | `model/olympiad` | 7 | 4.554 | pendiente |
 | `loginserver` | 45 | 5.649 | pendiente |
@@ -39,18 +39,14 @@ la única clase de bug que puede arruinar una economía de forma irreversible.
 
 ---
 
-## `model/itemcontainer` — en curso
+## `model/itemcontainer` — TERMINADA
 
 **Leído:** `ItemContainer.java` completo e `Inventory.java` hasta ~1330:
 integridad de ítems (`dropItem`, `addItem`, `removeItem`), el núcleo del
 paperdoll (`setPaperdollItem`), `equipItem` entero, `BowCrossRodListener` y
 `reloadEquippedItems`.
 
-**Pendiente:** siete archivos chicos (`ClanWarehouse`, `Mail`, `PetInventory`,
-`PlayerFreight`, `PlayerRefund`, `PlayerWarehouse`, `Warehouse`), unas 700
-líneas en total.
-
-`ItemContainer.java`, `Inventory.java` y `PlayerInventory.java` **terminados**.
+**Área completa.** Los diez archivos leídos enteros, 3.727 líneas.
 
 ### Evaluación de la clase base
 
@@ -74,6 +70,7 @@ esperado:
 | **Alto** | `ArmorSetListener.notifyUnequiped` quitaba la skill del escudo al sacar **cualquier** pieza del set, aunque el escudo siguiera equipado. La skill del escudo se gana por llevar el escudo del set, no por completarlo: `notifyEquiped` la otorga desde su propia rama y `containAll()` ni siquiera mira el slot del escudo. Con el set completo se autocorrige al reequipar la pieza, pero **con el set incompleto la skill no vuelve** hasta reequipar el escudo. **Arreglado:** solo se quita si el escudo ya no está puesto. |
 | **Alto** | `PlayerInventory.transferItem` desreferenciaba el resultado de `super.transferItem` sin chequear null, para notificar `ON_PLAYER_ITEM_TRANSFER`. `ItemContainer.transferItem` tiene tres caminos que devuelven null, incluido el re-chequeo dentro del lock que detecta que el ítem dejó de estar. **Alcanzable:** `SendWareHouseDepositList` valida con `checkItemManipulation` y después llama a `transferItem`; entre esas dos llamadas otro hilo puede sacar el ítem. El propio handler loguea "Error depositing a warehouse object (newitem == null)", o sea que el caso estaba previsto — pero el NPE ocurre antes del `return`, así que ese log es inalcanzable. El hermano `destroyItem`, 46 líneas abajo, sí chequea null. **Arreglado.** |
 | **Alto** | `getNonQuestSize()` devolvía `_items.size()`, o sea el total, sin filtrar ítems de quest. Se usa en cinco chequeos de capacidad de inventario. La prueba de que estaba sin terminar está en `Player.java:11526`: `includeQuestInv ? getSize() : getNonQuestSize()` — un ternario que elige entre dos conteos que eran idénticos, así que el parámetro no hacía nada. Los ítems de quest ocupaban slots aunque el llamador pidiera lo contrario. **Arreglado:** ahora filtra por `isQuestItem()`. **Cambia comportamiento:** los límites de inventario se vuelven menos restrictivos para quien lleva ítems de quest, que es lo que los cinco llamadores piden por su nombre. |
+| **Alto** | `ClanWarehouse` repetía el mismo patrón dos veces más. En `transferItem` es peor que en `PlayerInventory`: no llama a `super` primero, hace `getItemByObjectId(objectId)` y desreferencia de una. El almacén de clan es **compartido**, así que dos miembros retirando el mismo ítem a la vez dejan al segundo con la búsqueda vacía y un NPE. En `addItem(process, itemId, ...)` la base devuelve null si el id de ítem no existe. **Arreglados los dos.** |
 | Bajo | `ItemSkillsListener.notifyUnequiped`: al desequipar una armadura, el bucle que restaura las skills que otro ítem equipado también otorgaba tomaba el cooldown de `item` —la pieza que se está sacando— en vez de `itm`, el ítem del que sale la skill restaurada. `notifyEquiped` lo hace bien porque ahí la skill y el delay salen del mismo ítem. **Arreglado.** |
 
 ### Sospechas evaluadas y descartadas
@@ -146,3 +143,25 @@ lo hace. Llamar `contenedorA.destroyItem(ítemDeB, ...)` descontaría de B y
 refrescaría el peso de A. Los dos accesores por id (`destroyItem(objectId...)` y
 `destroyItemByItemId`) buscan primero en el propio contenedor, así que no
 exponen el problema. No se encontró un llamador que pase un ítem ajeno.
+
+### Archivos chicos — anotado sin tocar
+
+**`PlayerRefund.addItem` desaloja al azar.** Cuando el refund pasa de 12
+ítems saca uno con `_items.stream().findFirst().get()`, pero `_items` es un
+`ConcurrentHashMap.newKeySet()`, que **no tiene orden**. En vez de sacar el más
+viejo saca uno arbitrario, así que podés perder la posibilidad de recomprar algo
+que acabás de vender mientras sobrevive una venta anterior. Arreglarlo bien pide
+una estructura ordenada: es un cambio de diseño, no una corrección.
+
+**`Mail.returnToWh` es código muerto.** Cero llamadores. Su rama para
+`wh == null` solo cambia la ubicación en memoria, sin actualizar la base ni
+sacar el ítem del contenedor, a diferencia de la rama que usa `transferItem`.
+Latente porque nada la alcanza. **Candidato para la rutina de limpieza.**
+
+**`PetInventory.getOwnerId` usa `catch (NullPointerException)` como control de
+flujo** para el caso de mascota sin dueño. Funciona, pero un chequeo explícito
+diría lo mismo sin atrapar NPEs que vengan de más adentro.
+
+**`PetInventory.transferItemsToOwner` no se defiende** del dueño nulo, mientras
+que `getOwnerId` en el mismo archivo sí. Inconsistente, pero solo se llama desde
+`Pet.java:653`, donde el dueño existe.

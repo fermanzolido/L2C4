@@ -90,8 +90,8 @@ public class ClanWarehouse extends Warehouse
 	{
 		final Item item = super.addItem(process, itemId, count, actor, reference);
 		
-		// Notify to scripts
-		if (EventDispatcher.getInstance().hasListener(EventType.ON_PLAYER_CLAN_WH_ITEM_ADD, item.getTemplate()))
+		// Notify to scripts. super.addItem returns null for an unknown item id.
+		if ((item != null) && EventDispatcher.getInstance().hasListener(EventType.ON_PLAYER_CLAN_WH_ITEM_ADD, item.getTemplate()))
 		{
 			EventDispatcher.getInstance().notifyEventAsync(new OnPlayerClanWHItemAdd(actor, item, this), item.getTemplate());
 		}
@@ -128,8 +128,10 @@ public class ClanWarehouse extends Warehouse
 	{
 		final Item item = getItemByObjectId(objectId);
 		
-		// Notify to scripts
-		if (EventDispatcher.getInstance().hasListener(EventType.ON_PLAYER_CLAN_WH_ITEM_TRANSFER, item.getTemplate()))
+		// Notify to scripts. The object id comes from the client and the item may
+		// already be gone: a clan warehouse is shared, so two members can
+		// withdraw the same item at once and the second lookup finds nothing.
+		if ((item != null) && EventDispatcher.getInstance().hasListener(EventType.ON_PLAYER_CLAN_WH_ITEM_TRANSFER, item.getTemplate()))
 		{
 			EventDispatcher.getInstance().notifyEventAsync(new OnPlayerClanWHItemTransfer(actor, item, count, target), item.getTemplate());
 		}
