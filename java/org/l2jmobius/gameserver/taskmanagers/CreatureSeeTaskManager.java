@@ -32,7 +32,7 @@ import org.l2jmobius.gameserver.model.actor.Creature;
 public class CreatureSeeTaskManager implements Runnable
 {
 	private static final Set<Creature> CREATURES = ConcurrentHashMap.newKeySet();
-	private static boolean _working = false;
+	private static volatile boolean _working = false;
 	
 	protected CreatureSeeTaskManager()
 	{
@@ -48,13 +48,17 @@ public class CreatureSeeTaskManager implements Runnable
 		}
 		
 		_working = true;
-		
-		for (Creature creature : CREATURES)
+		try
 		{
-			creature.updateSeenCreatures();
+			for (Creature creature : CREATURES)
+			{
+				creature.updateSeenCreatures();
+			}
 		}
-		
-		_working = false;
+		finally
+		{
+			_working = false;
+		}
 	}
 	
 	public void add(Creature creature)

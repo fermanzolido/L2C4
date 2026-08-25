@@ -36,7 +36,7 @@ public class ItemManaTaskManager implements Runnable
 {
 	private static final Map<Item, Long> ITEMS = new ConcurrentHashMap<>();
 	private static final int MANA_CONSUMPTION_RATE = 60000;
-	private static boolean _working = false;
+	private static volatile boolean _working = false;
 	
 	protected ItemManaTaskManager()
 	{
@@ -52,33 +52,37 @@ public class ItemManaTaskManager implements Runnable
 		}
 		
 		_working = true;
-		
-		if (!ITEMS.isEmpty())
+		try
 		{
-			final long currentTime = System.currentTimeMillis();
-			final Iterator<Entry<Item, Long>> iterator = ITEMS.entrySet().iterator();
-			Entry<Item, Long> entry;
-			
-			while (iterator.hasNext())
+			if (!ITEMS.isEmpty())
 			{
-				entry = iterator.next();
-				if (currentTime > entry.getValue())
+				final long currentTime = System.currentTimeMillis();
+				final Iterator<Entry<Item, Long>> iterator = ITEMS.entrySet().iterator();
+				Entry<Item, Long> entry;
+				
+				while (iterator.hasNext())
 				{
-					iterator.remove();
-					
-					final Item item = entry.getKey();
-					final Player player = item.asPlayer();
-					if ((player == null) || player.isInOfflineMode())
+					entry = iterator.next();
+					if (currentTime > entry.getValue())
 					{
-						continue;
+						iterator.remove();
+						
+						final Item item = entry.getKey();
+						final Player player = item.asPlayer();
+						if ((player == null) || player.isInOfflineMode())
+						{
+							continue;
+						}
+						
+						item.decreaseMana(item.isEquipped());
 					}
-					
-					item.decreaseMana(item.isEquipped());
 				}
 			}
 		}
-		
-		_working = false;
+		finally
+		{
+			_working = false;
+		}
 	}
 	
 	public void add(Item item)

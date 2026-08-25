@@ -39,7 +39,7 @@ import org.l2jmobius.gameserver.model.actor.templates.NpcTemplate;
 public class DecayTaskManager implements Runnable
 {
 	private static final Map<Creature, Long> DECAY_SCHEDULES = new ConcurrentHashMap<>();
-	private static boolean _working = false;
+	private static volatile boolean _working = false;
 	
 	protected DecayTaskManager()
 	{
@@ -55,25 +55,29 @@ public class DecayTaskManager implements Runnable
 		}
 		
 		_working = true;
-		
-		if (!DECAY_SCHEDULES.isEmpty())
+		try
 		{
-			final long currentTime = System.currentTimeMillis();
-			final Iterator<Entry<Creature, Long>> iterator = DECAY_SCHEDULES.entrySet().iterator();
-			Entry<Creature, Long> entry;
-			
-			while (iterator.hasNext())
+			if (!DECAY_SCHEDULES.isEmpty())
 			{
-				entry = iterator.next();
-				if (currentTime > entry.getValue())
+				final long currentTime = System.currentTimeMillis();
+				final Iterator<Entry<Creature, Long>> iterator = DECAY_SCHEDULES.entrySet().iterator();
+				Entry<Creature, Long> entry;
+				
+				while (iterator.hasNext())
 				{
-					entry.getKey().onDecay();
-					iterator.remove();
+					entry = iterator.next();
+					if (currentTime > entry.getValue())
+					{
+						entry.getKey().onDecay();
+						iterator.remove();
+					}
 				}
 			}
 		}
-		
-		_working = false;
+		finally
+		{
+			_working = false;
+		}
 	}
 	
 	/**

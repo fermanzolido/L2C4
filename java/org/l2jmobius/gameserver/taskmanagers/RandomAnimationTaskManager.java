@@ -35,7 +35,7 @@ import org.l2jmobius.gameserver.model.actor.Npc;
 public class RandomAnimationTaskManager implements Runnable
 {
 	private static final Map<Npc, Long> PENDING_ANIMATIONS = new ConcurrentHashMap<>();
-	private static boolean _working = false;
+	private static volatile boolean _working = false;
 	
 	protected RandomAnimationTaskManager()
 	{
@@ -51,23 +51,27 @@ public class RandomAnimationTaskManager implements Runnable
 		}
 		
 		_working = true;
-		
-		final long currentTime = System.currentTimeMillis();
-		for (Entry<Npc, Long> entry : PENDING_ANIMATIONS.entrySet())
+		try
 		{
-			if (currentTime > entry.getValue().longValue())
+			final long currentTime = System.currentTimeMillis();
+			for (Entry<Npc, Long> entry : PENDING_ANIMATIONS.entrySet())
 			{
-				final Npc npc = entry.getKey();
-				if (npc.isInActiveRegion() && !npc.isDead() && !npc.isInCombat() && !npc.isMoving() && !npc.isStunned() && !npc.isSleeping() && !npc.isParalyzed())
+				if (currentTime > entry.getValue().longValue())
 				{
-					npc.onRandomAnimation(Rnd.get(2, 3));
+					final Npc npc = entry.getKey();
+					if (npc.isInActiveRegion() && !npc.isDead() && !npc.isInCombat() && !npc.isMoving() && !npc.isStunned() && !npc.isSleeping() && !npc.isParalyzed())
+					{
+						npc.onRandomAnimation(Rnd.get(2, 3));
+					}
+					
+					PENDING_ANIMATIONS.put(npc, currentTime + (Rnd.get((npc.isAttackable() ? GeneralConfig.MIN_MONSTER_ANIMATION : GeneralConfig.MIN_NPC_ANIMATION), (npc.isAttackable() ? GeneralConfig.MAX_MONSTER_ANIMATION : GeneralConfig.MAX_NPC_ANIMATION)) * 1000));
 				}
-				
-				PENDING_ANIMATIONS.put(npc, currentTime + (Rnd.get((npc.isAttackable() ? GeneralConfig.MIN_MONSTER_ANIMATION : GeneralConfig.MIN_NPC_ANIMATION), (npc.isAttackable() ? GeneralConfig.MAX_MONSTER_ANIMATION : GeneralConfig.MAX_NPC_ANIMATION)) * 1000));
 			}
 		}
-		
-		_working = false;
+		finally
+		{
+			_working = false;
+		}
 	}
 	
 	public void add(Npc npc)

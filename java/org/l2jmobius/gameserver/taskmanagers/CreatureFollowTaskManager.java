@@ -38,8 +38,8 @@ public class CreatureFollowTaskManager
 {
 	protected static final Map<Creature, Integer> NORMAL_FOLLOW_CREATURES = new ConcurrentHashMap<>();
 	protected static final Map<Creature, Integer> ATTACK_FOLLOW_CREATURES = new ConcurrentHashMap<>();
-	protected static boolean _workingNormal = false;
-	protected static boolean _workingAttack = false;
+	protected static volatile boolean _workingNormal = false;
+	protected static volatile boolean _workingAttack = false;
 	
 	protected CreatureFollowTaskManager()
 	{
@@ -58,16 +58,20 @@ public class CreatureFollowTaskManager
 			}
 			
 			_workingNormal = true;
-			
-			if (!NORMAL_FOLLOW_CREATURES.isEmpty())
+			try
 			{
-				for (Entry<Creature, Integer> entry : NORMAL_FOLLOW_CREATURES.entrySet())
+				if (!NORMAL_FOLLOW_CREATURES.isEmpty())
 				{
-					follow(entry.getKey(), entry.getValue());
+					for (Entry<Creature, Integer> entry : NORMAL_FOLLOW_CREATURES.entrySet())
+					{
+						follow(entry.getKey(), entry.getValue());
+					}
 				}
 			}
-			
-			_workingNormal = false;
+			finally
+			{
+				_workingNormal = false;
+			}
 		}
 	}
 	
@@ -82,16 +86,20 @@ public class CreatureFollowTaskManager
 			}
 			
 			_workingAttack = true;
-			
-			if (!ATTACK_FOLLOW_CREATURES.isEmpty())
+			try
 			{
-				for (Entry<Creature, Integer> entry : ATTACK_FOLLOW_CREATURES.entrySet())
+				if (!ATTACK_FOLLOW_CREATURES.isEmpty())
 				{
-					follow(entry.getKey(), entry.getValue());
+					for (Entry<Creature, Integer> entry : ATTACK_FOLLOW_CREATURES.entrySet())
+					{
+						follow(entry.getKey(), entry.getValue());
+					}
 				}
 			}
-			
-			_workingAttack = false;
+			finally
+			{
+				_workingAttack = false;
+			}
 		}
 	}
 	

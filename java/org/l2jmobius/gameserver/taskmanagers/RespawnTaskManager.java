@@ -35,7 +35,7 @@ import org.l2jmobius.gameserver.model.actor.Npc;
 public class RespawnTaskManager implements Runnable
 {
 	private static final Map<Npc, Long> PENDING_RESPAWNS = new ConcurrentHashMap<>();
-	private static boolean _working = false;
+	private static volatile boolean _working = false;
 	
 	protected RespawnTaskManager()
 	{
@@ -51,32 +51,36 @@ public class RespawnTaskManager implements Runnable
 		}
 		
 		_working = true;
-		
-		if (!PENDING_RESPAWNS.isEmpty())
+		try
 		{
-			final long currentTime = System.currentTimeMillis();
-			final Iterator<Entry<Npc, Long>> iterator = PENDING_RESPAWNS.entrySet().iterator();
-			Entry<Npc, Long> entry;
-			
-			while (iterator.hasNext())
+			if (!PENDING_RESPAWNS.isEmpty())
 			{
-				entry = iterator.next();
-				if (currentTime > entry.getValue())
+				final long currentTime = System.currentTimeMillis();
+				final Iterator<Entry<Npc, Long>> iterator = PENDING_RESPAWNS.entrySet().iterator();
+				Entry<Npc, Long> entry;
+				
+				while (iterator.hasNext())
 				{
-					iterator.remove();
-					
-					final Npc npc = entry.getKey();
-					final Spawn spawn = npc.getSpawn();
-					if (spawn != null)
+					entry = iterator.next();
+					if (currentTime > entry.getValue())
 					{
-						spawn.respawnNpc(npc);
-						spawn._scheduledCount--;
+						iterator.remove();
+						
+						final Npc npc = entry.getKey();
+						final Spawn spawn = npc.getSpawn();
+						if (spawn != null)
+						{
+							spawn.respawnNpc(npc);
+							spawn._scheduledCount--;
+						}
 					}
 				}
 			}
 		}
-		
-		_working = false;
+		finally
+		{
+			_working = false;
+		}
 	}
 	
 	public void add(Npc npc, long time)

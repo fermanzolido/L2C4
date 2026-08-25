@@ -35,7 +35,7 @@ import org.l2jmobius.gameserver.model.actor.Player;
 public class PlayerAutoSaveTaskManager implements Runnable
 {
 	private static final Map<Player, Long> PLAYER_TIMES = new ConcurrentHashMap<>();
-	private static boolean _working = false;
+	private static volatile boolean _working = false;
 	
 	protected PlayerAutoSaveTaskManager()
 	{
@@ -51,36 +51,40 @@ public class PlayerAutoSaveTaskManager implements Runnable
 		}
 		
 		_working = true;
-		
-		if (!PLAYER_TIMES.isEmpty())
+		try
 		{
-			final long currentTime = System.currentTimeMillis();
-			final Iterator<Entry<Player, Long>> iterator = PLAYER_TIMES.entrySet().iterator();
-			Entry<Player, Long> entry;
-			Player player;
-			Long time;
-			
-			while (iterator.hasNext())
+			if (!PLAYER_TIMES.isEmpty())
 			{
-				entry = iterator.next();
-				player = entry.getKey();
-				time = entry.getValue();
+				final long currentTime = System.currentTimeMillis();
+				final Iterator<Entry<Player, Long>> iterator = PLAYER_TIMES.entrySet().iterator();
+				Entry<Player, Long> entry;
+				Player player;
+				Long time;
 				
-				if (currentTime > time)
+				while (iterator.hasNext())
 				{
-					if ((player != null) && player.isOnline())
-					{
-						player.autoSave();
-						PLAYER_TIMES.put(player, currentTime + GeneralConfig.CHAR_DATA_STORE_INTERVAL);
-						break; // Prevent SQL flood.
-					}
+					entry = iterator.next();
+					player = entry.getKey();
+					time = entry.getValue();
 					
-					iterator.remove();
+					if (currentTime > time)
+					{
+						if ((player != null) && player.isOnline())
+						{
+							player.autoSave();
+							PLAYER_TIMES.put(player, currentTime + GeneralConfig.CHAR_DATA_STORE_INTERVAL);
+							break; // Prevent SQL flood.
+						}
+						
+						iterator.remove();
+					}
 				}
 			}
 		}
-		
-		_working = false;
+		finally
+		{
+			_working = false;
+		}
 	}
 	
 	public void add(Player player)

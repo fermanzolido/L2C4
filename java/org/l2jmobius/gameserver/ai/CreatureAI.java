@@ -103,12 +103,20 @@ public class CreatureAI extends AbstractAI
 		@Override
 		public void run()
 		{
+			if (_creature.isDead())
+			{
+				return;
+			}
+			
 			if (_creature.isAttackingNow())
 			{
 				_creature.abortAttack();
 			}
 			
-			_creature.getAI().changeIntentionToCast(_skill, _target);
+			// Re-enter through onIntentionCast rather than jumping straight to the change, so the
+			// delayed path is gated by the same preamble as the immediate one. The bow timer this
+			// task waited on has expired, so this cannot bounce back into scheduling itself.
+			_creature.getAI().onIntentionCast(_skill, _target);
 		}
 	}
 	
@@ -185,16 +193,18 @@ public class CreatureAI extends AbstractAI
 		// Set the AI Intention to ACTIVE
 		changeIntention(Intention.ACTIVE, null, null);
 		
+		// Init cast and attack target. This happens before the region check below: ACTIVE means
+		// the actor has no target, and an actor whose surroundings went quiet used to keep holding
+		// its former ones because the early return skipped this.
+		setCastTarget(null);
+		setAttackTarget(null);
+		
 		// Check if region and its neighbors are active.
 		final WorldRegion region = _actor.getWorldRegion();
 		if ((region == null) || !region.areNeighborsActive())
 		{
 			return;
 		}
-		
-		// Init cast and attack target
-		setCastTarget(null);
-		setAttackTarget(null);
 		
 		// Stop the actor movement server side AND client side by sending Server->Client packet StopMove/StopRotation (broadcast)
 		clientStopMoving(null);

@@ -34,7 +34,7 @@ import org.l2jmobius.gameserver.model.item.instance.Item;
 public class ItemLifeTimeTaskManager implements Runnable
 {
 	private static final Map<Item, Long> ITEMS = new ConcurrentHashMap<>();
-	private static boolean _working = false;
+	private static volatile boolean _working = false;
 	
 	protected ItemLifeTimeTaskManager()
 	{
@@ -50,25 +50,29 @@ public class ItemLifeTimeTaskManager implements Runnable
 		}
 		
 		_working = true;
-		
-		if (!ITEMS.isEmpty())
+		try
 		{
-			final long currentTime = System.currentTimeMillis();
-			final Iterator<Entry<Item, Long>> iterator = ITEMS.entrySet().iterator();
-			Entry<Item, Long> entry;
-			
-			while (iterator.hasNext())
+			if (!ITEMS.isEmpty())
 			{
-				entry = iterator.next();
-				if (currentTime > entry.getValue())
+				final long currentTime = System.currentTimeMillis();
+				final Iterator<Entry<Item, Long>> iterator = ITEMS.entrySet().iterator();
+				Entry<Item, Long> entry;
+				
+				while (iterator.hasNext())
 				{
-					entry.getKey().endOfLife();
-					iterator.remove();
+					entry = iterator.next();
+					if (currentTime > entry.getValue())
+					{
+						entry.getKey().endOfLife();
+						iterator.remove();
+					}
 				}
 			}
 		}
-		
-		_working = false;
+		finally
+		{
+			_working = false;
+		}
 	}
 	
 	public void add(Item item, long endTime)

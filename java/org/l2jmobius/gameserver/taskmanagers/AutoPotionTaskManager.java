@@ -35,7 +35,7 @@ import org.l2jmobius.gameserver.model.item.instance.Item;
 public class AutoPotionTaskManager implements Runnable
 {
 	private static final Set<Player> PLAYERS = ConcurrentHashMap.newKeySet();
-	private static boolean _working = false;
+	private static volatile boolean _working = false;
 	
 	protected AutoPotionTaskManager()
 	{
@@ -51,83 +51,87 @@ public class AutoPotionTaskManager implements Runnable
 		}
 		
 		_working = true;
-		
-		if (!PLAYERS.isEmpty())
+		try
 		{
-			PLAYER: for (Player player : PLAYERS)
+			if (!PLAYERS.isEmpty())
 			{
-				if ((player == null) || player.isAlikeDead() || (player.isOnlineInt() != 1) || (!AutoPotionsConfig.AUTO_POTIONS_IN_OLYMPIAD && player.isInOlympiadMode()))
+				PLAYER: for (Player player : PLAYERS)
 				{
-					remove(player);
-					continue PLAYER;
-				}
-				
-				boolean success = false;
-				if (AutoPotionsConfig.AUTO_HP_ENABLED)
-				{
-					final boolean restoreHP = ((player.getStatus().getCurrentHp() / player.getMaxHp()) * 100) < AutoPotionsConfig.AUTO_HP_PERCENTAGE;
-					HP: for (int itemId : AutoPotionsConfig.AUTO_HP_ITEM_IDS)
+					if ((player == null) || player.isAlikeDead() || (player.isOnlineInt() != 1) || (!AutoPotionsConfig.AUTO_POTIONS_IN_OLYMPIAD && player.isInOlympiadMode()))
 					{
-						final Item hpPotion = player.getInventory().getItemByItemId(itemId);
-						if ((hpPotion != null) && (hpPotion.getCount() > 0))
+						remove(player);
+						continue PLAYER;
+					}
+					
+					boolean success = false;
+					if (AutoPotionsConfig.AUTO_HP_ENABLED)
+					{
+						final boolean restoreHP = ((player.getStatus().getCurrentHp() / player.getMaxHp()) * 100) < AutoPotionsConfig.AUTO_HP_PERCENTAGE;
+						HP: for (int itemId : AutoPotionsConfig.AUTO_HP_ITEM_IDS)
 						{
-							success = true;
-							if (restoreHP)
+							final Item hpPotion = player.getInventory().getItemByItemId(itemId);
+							if ((hpPotion != null) && (hpPotion.getCount() > 0))
 							{
-								ItemHandler.getInstance().getHandler(hpPotion.getEtcItem()).onItemUse(player, hpPotion, false);
-								player.sendMessage("Auto potion: Restored HP.");
-								break HP;
+								success = true;
+								if (restoreHP)
+								{
+									ItemHandler.getInstance().getHandler(hpPotion.getEtcItem()).onItemUse(player, hpPotion, false);
+									player.sendMessage("Auto potion: Restored HP.");
+									break HP;
+								}
 							}
 						}
 					}
-				}
-				
-				if (AutoPotionsConfig.AUTO_CP_ENABLED)
-				{
-					final boolean restoreCP = ((player.getStatus().getCurrentCp() / player.getMaxCp()) * 100) < AutoPotionsConfig.AUTO_CP_PERCENTAGE;
-					CP: for (int itemId : AutoPotionsConfig.AUTO_CP_ITEM_IDS)
+					
+					if (AutoPotionsConfig.AUTO_CP_ENABLED)
 					{
-						final Item cpPotion = player.getInventory().getItemByItemId(itemId);
-						if ((cpPotion != null) && (cpPotion.getCount() > 0))
+						final boolean restoreCP = ((player.getStatus().getCurrentCp() / player.getMaxCp()) * 100) < AutoPotionsConfig.AUTO_CP_PERCENTAGE;
+						CP: for (int itemId : AutoPotionsConfig.AUTO_CP_ITEM_IDS)
 						{
-							success = true;
-							if (restoreCP)
+							final Item cpPotion = player.getInventory().getItemByItemId(itemId);
+							if ((cpPotion != null) && (cpPotion.getCount() > 0))
 							{
-								ItemHandler.getInstance().getHandler(cpPotion.getEtcItem()).onItemUse(player, cpPotion, false);
-								player.sendMessage("Auto potion: Restored CP.");
-								break CP;
+								success = true;
+								if (restoreCP)
+								{
+									ItemHandler.getInstance().getHandler(cpPotion.getEtcItem()).onItemUse(player, cpPotion, false);
+									player.sendMessage("Auto potion: Restored CP.");
+									break CP;
+								}
 							}
 						}
 					}
-				}
-				
-				if (AutoPotionsConfig.AUTO_MP_ENABLED)
-				{
-					final boolean restoreMP = ((player.getStatus().getCurrentMp() / player.getMaxMp()) * 100) < AutoPotionsConfig.AUTO_MP_PERCENTAGE;
-					MP: for (int itemId : AutoPotionsConfig.AUTO_MP_ITEM_IDS)
+					
+					if (AutoPotionsConfig.AUTO_MP_ENABLED)
 					{
-						final Item mpPotion = player.getInventory().getItemByItemId(itemId);
-						if ((mpPotion != null) && (mpPotion.getCount() > 0))
+						final boolean restoreMP = ((player.getStatus().getCurrentMp() / player.getMaxMp()) * 100) < AutoPotionsConfig.AUTO_MP_PERCENTAGE;
+						MP: for (int itemId : AutoPotionsConfig.AUTO_MP_ITEM_IDS)
 						{
-							success = true;
-							if (restoreMP)
+							final Item mpPotion = player.getInventory().getItemByItemId(itemId);
+							if ((mpPotion != null) && (mpPotion.getCount() > 0))
 							{
-								ItemHandler.getInstance().getHandler(mpPotion.getEtcItem()).onItemUse(player, mpPotion, false);
-								player.sendMessage("Auto potion: Restored MP.");
-								break MP;
+								success = true;
+								if (restoreMP)
+								{
+									ItemHandler.getInstance().getHandler(mpPotion.getEtcItem()).onItemUse(player, mpPotion, false);
+									player.sendMessage("Auto potion: Restored MP.");
+									break MP;
+								}
 							}
 						}
 					}
-				}
-				
-				if (!success)
-				{
-					player.sendMessage("Auto potion: You are out of potions!");
+					
+					if (!success)
+					{
+						player.sendMessage("Auto potion: You are out of potions!");
+					}
 				}
 			}
 		}
-		
-		_working = false;
+		finally
+		{
+			_working = false;
+		}
 	}
 	
 	public void add(Player player)

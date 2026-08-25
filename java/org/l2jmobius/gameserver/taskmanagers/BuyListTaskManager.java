@@ -36,8 +36,8 @@ public class BuyListTaskManager
 {
 	protected static final Map<Product, Long> PRODUCTS = new ConcurrentHashMap<>();
 	protected static final List<Product> PENDING_UPDATES = new ArrayList<>();
-	protected static boolean _workingProducts = false;
-	protected static boolean _workingSaves = false;
+	protected static volatile boolean _workingProducts = false;
+	protected static volatile boolean _workingSaves = false;
 	
 	protected BuyListTaskManager()
 	{
@@ -56,25 +56,29 @@ public class BuyListTaskManager
 			}
 			
 			_workingProducts = true;
-			
-			final long currentTime = System.currentTimeMillis();
-			for (Entry<Product, Long> entry : PRODUCTS.entrySet())
+			try
 			{
-				if (currentTime > entry.getValue().longValue())
+				final long currentTime = System.currentTimeMillis();
+				for (Entry<Product, Long> entry : PRODUCTS.entrySet())
 				{
-					final Product product = entry.getKey();
-					PRODUCTS.remove(product);
-					synchronized (PENDING_UPDATES)
+					if (currentTime > entry.getValue().longValue())
 					{
-						if (!PENDING_UPDATES.contains(product))
+						final Product product = entry.getKey();
+						PRODUCTS.remove(product);
+						synchronized (PENDING_UPDATES)
 						{
-							PENDING_UPDATES.add(product);
+							if (!PENDING_UPDATES.contains(product))
+							{
+								PENDING_UPDATES.add(product);
+							}
 						}
 					}
 				}
 			}
-			
-			_workingProducts = false;
+			finally
+			{
+				_workingProducts = false;
+			}
 		}
 	}
 	
@@ -89,20 +93,24 @@ public class BuyListTaskManager
 			}
 			
 			_workingSaves = true;
-			
-			if (!PENDING_UPDATES.isEmpty())
+			try
 			{
-				final Product product;
-				synchronized (PENDING_UPDATES)
+				if (!PENDING_UPDATES.isEmpty())
 				{
-					product = PENDING_UPDATES.get(0);
-					PENDING_UPDATES.remove(product);
+					final Product product;
+					synchronized (PENDING_UPDATES)
+					{
+						product = PENDING_UPDATES.get(0);
+						PENDING_UPDATES.remove(product);
+					}
+					
+					product.restock();
 				}
-				
-				product.restock();
 			}
-			
-			_workingSaves = false;
+			finally
+			{
+				_workingSaves = false;
+			}
 		}
 	}
 	

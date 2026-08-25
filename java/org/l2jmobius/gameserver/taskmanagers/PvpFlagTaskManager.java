@@ -32,7 +32,7 @@ import org.l2jmobius.gameserver.model.actor.Player;
 public class PvpFlagTaskManager implements Runnable
 {
 	private static final Set<Player> PLAYERS = ConcurrentHashMap.newKeySet();
-	private static boolean _working = false;
+	private static volatile boolean _working = false;
 	
 	protected PvpFlagTaskManager()
 	{
@@ -48,28 +48,32 @@ public class PvpFlagTaskManager implements Runnable
 		}
 		
 		_working = true;
-		
-		if (!PLAYERS.isEmpty())
+		try
 		{
-			final long currentTime = System.currentTimeMillis();
-			for (Player player : PLAYERS)
+			if (!PLAYERS.isEmpty())
 			{
-				if (currentTime > player.getPvpFlagLasts())
+				final long currentTime = System.currentTimeMillis();
+				for (Player player : PLAYERS)
 				{
-					player.stopPvPFlag();
-				}
-				else if (currentTime > (player.getPvpFlagLasts() - 20000))
-				{
-					player.updatePvPFlag(2);
-				}
-				else
-				{
-					player.updatePvPFlag(1);
+					if (currentTime > player.getPvpFlagLasts())
+					{
+						player.stopPvPFlag();
+					}
+					else if (currentTime > (player.getPvpFlagLasts() - 20000))
+					{
+						player.updatePvPFlag(2);
+					}
+					else
+					{
+						player.updatePvPFlag(1);
+					}
 				}
 			}
 		}
-		
-		_working = false;
+		finally
+		{
+			_working = false;
+		}
 	}
 	
 	public void add(Player player)
