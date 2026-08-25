@@ -195,8 +195,14 @@ public class Clan
 	public void setNewLeader(ClanMember member)
 	{
 		final Player newLeader = member.getPlayer();
+		
+		// A clan whose stored leader_id points at a character that no longer exists is
+		// restored with no leader at all, which is why getLeaderId() and getLeaderName()
+		// both guard against it. Assigning a leader to such a clan is exactly what this
+		// method is for, so the missing ex-leader is skipped rather than treated as an
+		// error. Everything below already handles a null exLeader.
 		final ClanMember exMember = _leader;
-		final Player exLeader = exMember.getPlayer();
+		final Player exLeader = exMember != null ? exMember.getPlayer() : null;
 		
 		// Notify to scripts
 		if (EventDispatcher.getInstance().hasListener(EventType.ON_PLAYER_CLAN_LEADER_CHANGE))
@@ -279,7 +285,7 @@ public class Clan
 		broadcastClanStatus();
 		broadcastToOnlineMembers("Clan lord privileges have been transferred to " + member.getName() + ".");
 		
-		LOGGER.log(Level.INFO, "Leader of Clan: " + getName() + " changed to: " + member.getName() + " ex leader: " + exMember.getName());
+		LOGGER.log(Level.INFO, "Leader of Clan: " + getName() + " changed to: " + member.getName() + " ex leader: " + (exMember != null ? exMember.getName() : "none"));
 	}
 	
 	/**
@@ -1921,7 +1927,10 @@ public class Clan
 		setLevel(level);
 		setRank(ClanTable.getInstance().getClanRank(this));
 		
-		if (_leader.isOnline())
+		// _leader is null for a clan whose stored leader_id no longer resolves to a
+		// character; without this guard the level change reached the database but the
+		// broadcasts below never ran, so members kept seeing the old level.
+		if ((_leader != null) && _leader.isOnline())
 		{
 			final Player leader = _leader.getPlayer();
 			
