@@ -124,7 +124,7 @@ public class AttackableAI extends CreatureAI
 	private int _globalAggro;
 	private long _globalAggroLastUpdate;
 	/** The flag used to indicate that a thinking action is in progress, to prevent recursive thinking. */
-	private boolean _thinking;
+	private volatile boolean _thinking;
 	private int _chaosTime = 0;
 	
 	// Fear parameters

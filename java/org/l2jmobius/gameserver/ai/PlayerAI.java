@@ -30,9 +30,9 @@ import org.l2jmobius.gameserver.model.skill.targets.TargetType;
 
 public class PlayerAI extends PlayableAI
 {
-	private boolean _thinking; // to prevent recursive thinking
+	private volatile boolean _thinking; // to prevent recursive thinking
 	
-	private IntentionCommand _nextIntention = null;
+	private volatile IntentionCommand _nextIntention = null;
 	
 	public PlayerAI(Player player)
 	{
@@ -98,11 +98,16 @@ public class PlayerAI extends PlayableAI
 	@Override
 	protected void onActionReadyToAct()
 	{
-		// Launch actions corresponding to the Action Think
-		if (_nextIntention != null)
+		// Launch actions corresponding to the Action Think. The field is snapshotted because
+		// it is written from packet threads and from cast-finish tasks, so the null check and
+		// the three reads that followed it could straddle a clear.
+		final IntentionCommand nextIntention = _nextIntention;
+		if (nextIntention != null)
 		{
-			setIntention(_nextIntention._intention, _nextIntention._arg0, _nextIntention._arg1);
+			// Cleared before the call, not after: changeIntention saves the current intention
+			// back into this field for a toggle cast, and clearing afterwards wiped it.
 			_nextIntention = null;
+			setIntention(nextIntention._intention, nextIntention._arg0, nextIntention._arg1);
 		}
 		
 		super.onActionReadyToAct();
@@ -146,11 +151,12 @@ public class PlayerAI extends PlayableAI
 		if (getIntention() == Intention.CAST)
 		{
 			// run interrupted or next intention
-			if (_nextIntention != null)
+			final IntentionCommand nextIntention = _nextIntention;
+			if (nextIntention != null)
 			{
-				if (_nextIntention._intention != Intention.CAST)
+				if (nextIntention._intention != Intention.CAST)
 				{
-					setIntention(_nextIntention._intention, _nextIntention._arg0, _nextIntention._arg1);
+					setIntention(nextIntention._intention, nextIntention._arg0, nextIntention._arg1);
 				}
 				else
 				{

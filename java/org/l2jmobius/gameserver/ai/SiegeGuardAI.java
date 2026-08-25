@@ -58,7 +58,7 @@ public class SiegeGuardAI extends CreatureAI implements Runnable {
 	private int _globalAggro;
 
 	/** The flag used to indicate that a thinking action is in progress */
-	private boolean _thinking; // to prevent recursive thinking
+	private volatile boolean _thinking; // to prevent recursive thinking
 
 	private final int _attackRange;
 
