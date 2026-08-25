@@ -502,3 +502,34 @@ las llamadas a `getAffectLimit()` del directorio de handlers; eran los únicos d
   `addAbnormalVisualEffects`. La única diferencia es que el alta es condicional
   (`if (update)`) y la baja no, o sea que se quita de más, que es la dirección
   segura.
+
+### Descartadas en el barrido de `Skill.java` (constructor y parseo)
+
+- **Hueco en el override de duración de skills.** El bloque de
+  `ENABLE_MODIFY_SKILL_DURATION` reemplaza la duración si
+  `(_level < 100) || (_level > 140)` y la **suma** si
+  `(_level >= 100) && (_level < 140)`. El nivel exactamente 140 no cae en
+  ninguna de las dos y el override se ignora en silencio. **Inalcanzable**: los
+  niveles que existen son 101-130 y 141-170 (las dos rutas de encantamiento);
+  no hay ningún 131-140.
+
+  Pero el mismo bloque deja algo real anotado: la ruta 1 (101-130) **suma** la
+  duración configurada y la ruta 2 (141-170) la **reemplaza**, siendo las dos
+  rutas de encantamiento. Afecta a las 34 skills de `SkillDurationList`, que
+  vienen activas en `Player.ini`. **No lo toqué**: cambiarlo altera la duración
+  de canciones y danzas encantadas y no tengo fuente autoritativa de cuál es el
+  comportamiento correcto.
+
+- **`parseExtractableSkill` avisa y sigue igual, tres veces.** Si el producto
+  tiene menos de 3 campos loguea "wrong seperator!" y **no** hace `continue`; si
+  el id o la cantidad son `<= 0` loguea y **agrega igual** el `ItemHolder`; y el
+  `catch` se traga la excepción y agrega el producto con `chance` en 0. El
+  constructor hace lo mismo un nivel más arriba: avisa si `capsuled_items` está
+  vacío y después lo parsea igual. **Inalcanzable con los datos del repo**:
+  validadas las 220 tablas `#extractableItems` y sus 720 productos, todos tienen
+  exactamente 3 campos con id y cantidad positivos.
+
+- **`_channelingTickInitialDelay` usa `_channelingTickInterval` como default.**
+  Lo divide por 1000 y lo vuelve a multiplicar, lo cual da vueltas pero es
+  correcto, y el orden de asignación es el correcto: el intervalo se asigna
+  antes de usarse como default.
