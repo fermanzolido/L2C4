@@ -22,8 +22,10 @@ package org.l2jmobius.gameserver.config.custom;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.l2jmobius.commons.util.ConfigReader;
+import org.l2jmobius.commons.util.StringUtil;
 import org.l2jmobius.gameserver.model.skill.AbnormalVisualEffect;
 
 /**
@@ -32,6 +34,8 @@ import org.l2jmobius.gameserver.model.skill.AbnormalVisualEffect;
  */
 public class OfflinePlayConfig
 {
+	private static final Logger LOGGER = Logger.getLogger(OfflinePlayConfig.class.getName());
+	
 	// File
 	private static final String OFFLINE_PLAY_CONFIG_FILE = "./config/Custom/OfflinePlay.ini";
 	
@@ -63,7 +67,22 @@ public class OfflinePlayConfig
 		{
 			for (String ave : offlinePlayAbnormalEffects.split(","))
 			{
-				OFFLINE_PLAY_ABNORMAL_EFFECTS.add(Enum.valueOf(AbnormalVisualEffect.class, ave.trim()));
+				// Checked before it is resolved: Enum.valueOf throws on a name that is not an effect,
+				// and nothing between here and the GameServer constructor catches it, so one typo in
+				// this list stopped the server from starting.
+				final String effect = ave.trim();
+				if (effect.isEmpty())
+				{
+					continue;
+				}
+				
+				if (!StringUtil.isEnum(effect, AbnormalVisualEffect.class))
+				{
+					LOGGER.warning("OfflinePlayConfig: OfflinePlayAbnormalEffect: \"" + effect + "\" is not an abnormal visual effect.");
+					continue;
+				}
+				
+				OFFLINE_PLAY_ABNORMAL_EFFECTS.add(Enum.valueOf(AbnormalVisualEffect.class, effect));
 			}
 		}
 	}

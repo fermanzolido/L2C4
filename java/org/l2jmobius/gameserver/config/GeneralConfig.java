@@ -21,11 +21,12 @@
 package org.l2jmobius.gameserver.config;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.commons.util.ConfigReader;
+import org.l2jmobius.commons.util.StringUtil;
 import org.l2jmobius.gameserver.model.actor.enums.player.ChatBroadcastType;
 import org.l2jmobius.gameserver.model.actor.enums.player.IllegalActionPunishmentType;
 import org.l2jmobius.gameserver.network.enums.ChatType;
@@ -240,8 +241,8 @@ public class GeneralConfig
 		GRID_NEIGHBOR_TURNON_TIME = config.getInt("GridNeighborTurnOnTime", 1);
 		GRID_NEIGHBOR_TURNOFF_TIME = config.getInt("GridNeighborTurnOffTime", 90);
 		PEACE_ZONE_MODE = config.getInt("PeaceZoneMode", 0);
-		DEFAULT_GLOBAL_CHAT = Enum.valueOf(ChatBroadcastType.class, config.getString("GlobalChat", "ON"));
-		DEFAULT_TRADE_CHAT = Enum.valueOf(ChatBroadcastType.class, config.getString("TradeChat", "ON"));
+		DEFAULT_GLOBAL_CHAT = parseChatBroadcastType(config.getString("GlobalChat", "ON"), "GlobalChat");
+		DEFAULT_TRADE_CHAT = parseChatBroadcastType(config.getString("TradeChat", "ON"), "TradeChat");
 		MINIMUM_CHAT_LEVEL = config.getInt("MinimumChatLevel", 20);
 		ALLOW_WAREHOUSE = config.getBoolean("AllowWarehouse", true);
 		ALLOW_REFUND = config.getBoolean("AllowRefund", true);
@@ -268,16 +269,26 @@ public class GeneralConfig
 		CHAT_FILTER_CHARS = config.getString("ChatFilterChars", "^_^");
 		final String[] propertySplit4 = config.getString("BanChatChannels", "GENERAL;SHOUT;WORLD;TRADE;HERO_VOICE").trim().split(";");
 		BAN_CHAT_CHANNELS = new HashSet<>();
-		try
+		// Enum.valueOf throws IllegalArgumentException, and NumberFormatException is a subclass
+		// of it, so the catch that used to sit here could never fire for the one thing in the
+		// block that throws. A misspelled channel took the whole server down at startup rather
+		// than being reported. Each channel is checked on its own now, so a bad one is named and
+		// skipped and the rest of the list still applies.
+		for (String chatId : propertySplit4)
 		{
-			for (String chatId : propertySplit4)
+			final String channel = chatId.trim();
+			if (channel.isEmpty())
 			{
-				BAN_CHAT_CHANNELS.add(Enum.valueOf(ChatType.class, chatId));
+				continue;
 			}
-		}
-		catch (NumberFormatException nfe)
-		{
-			LOGGER.log(Level.WARNING, "There was an error while parsing ban chat channels: ", nfe);
+			
+			if (!StringUtil.isEnum(channel, ChatType.class))
+			{
+				LOGGER.warning("GeneralConfig: BanChatChannels: \"" + channel + "\" is not a chat channel.");
+				continue;
+			}
+			
+			BAN_CHAT_CHANNELS.add(Enum.valueOf(ChatType.class, channel));
 		}
 		ALT_MANOR_REFRESH_TIME = config.getInt("AltManorRefreshTime", 20);
 		ALT_MANOR_REFRESH_MIN = config.getInt("AltManorRefreshMin", 0);
@@ -328,5 +339,25 @@ public class GeneralConfig
 		CORRECT_PRICES = config.getBoolean("CorrectPrices", true);
 		MULTISELL_AMOUNT_LIMIT = config.getLong("MultisellAmountLimit", 10000);
 		ENABLE_FALLING_DAMAGE = config.getBoolean("EnableFallingDamage", true);
+	}
+	
+	/**
+	 * Resolves a {@link ChatBroadcastType} by name, falling back to {@link ChatBroadcastType#ON}
+	 * when the configured value does not name one. Enum.valueOf is case sensitive and used to be
+	 * called directly here, so writing the value in lower case stopped the server from starting.
+	 * @param value the configured value
+	 * @param property the property it came from, for the warning
+	 * @return the matching type, or ON
+	 */
+	private static ChatBroadcastType parseChatBroadcastType(String value, String property)
+	{
+		final String name = value.trim().toUpperCase(Locale.ROOT);
+		if (StringUtil.isEnum(name, ChatBroadcastType.class))
+		{
+			return Enum.valueOf(ChatBroadcastType.class, name);
+		}
+		
+		LOGGER.warning("GeneralConfig: " + property + ": \"" + value + "\" is not a chat mode, using ON.");
+		return ChatBroadcastType.ON;
 	}
 }

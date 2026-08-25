@@ -23,6 +23,7 @@ package org.l2jmobius.gameserver.config;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -435,8 +436,19 @@ public class PlayerConfig {
 		ALT_RECOMMEND = config.getBoolean("AltRecommend", false);
 		DELETE_DAYS = config.getInt("DeleteCharAfterDays", 7);
 		DISCONNECT_AFTER_DEATH = config.getBoolean("DisconnectAfterDeath", true);
-		PARTY_XP_CUTOFF_METHOD = Enum.valueOf(PartyExpType.class,
-				config.getString("PartyXpCutoffMethod", "LEVEL").toUpperCase());
+		// Guarded and pinned to Locale.ROOT: this was the only one of the six Enum.valueOf calls
+		// in the configuration classes that upper-cased its input at all, and it still threw on a
+		// value that is not a cutoff method, which stops the server from starting.
+		final String partyXpCutoffMethod = config.getString("PartyXpCutoffMethod", "LEVEL").trim().toUpperCase(Locale.ROOT);
+		if (StringUtil.isEnum(partyXpCutoffMethod, PartyExpType.class))
+		{
+			PARTY_XP_CUTOFF_METHOD = Enum.valueOf(PartyExpType.class, partyXpCutoffMethod);
+		}
+		else
+		{
+			LOGGER.warning("PlayerConfig: PartyXpCutoffMethod: \"" + partyXpCutoffMethod + "\" is not a cutoff method, using LEVEL.");
+			PARTY_XP_CUTOFF_METHOD = PartyExpType.LEVEL;
+		}
 		PARTY_XP_CUTOFF_PERCENT = config.getDouble("PartyXpCutoffPercent", 3);
 		PARTY_XP_CUTOFF_LEVEL = config.getInt("PartyXpCutoffLevel", 20);
 		final String[] gaps = config.getString("PartyXpCutoffGaps", "0,9;10,14;15,99").split(";");
