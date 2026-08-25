@@ -910,7 +910,10 @@ public class Siege implements Siegable
 			return;
 		}
 		
-		final int allyId = getCastle().getOwnerId() != 0 ? ClanTable.getInstance().getClan(getCastle().getOwnerId()).getAllyId() : 0;
+		// The castle records an owner id that can outlive the clan, and getClan() returns
+		// null for it. With no resolvable owner there is no alliance to be part of.
+		final Clan castleOwner = (getCastle().getOwnerId() != 0) ? ClanTable.getInstance().getClan(getCastle().getOwnerId()) : null;
+		final int allyId = (castleOwner != null) ? castleOwner.getAllyId() : 0;
 		if ((allyId != 0) && (player.getClan().getAllyId() == allyId) && !force)
 		{
 			player.sendPacket(SystemMessageId.YOU_CANNOT_REGISTER_ON_THE_ATTACKING_SIDE_BECAUSE_YOU_ARE_PART_OF_AN_ALLIANCE_WITH_THE_CLAN_THAT_OWNS_THE_CASTLE);

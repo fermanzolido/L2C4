@@ -163,7 +163,15 @@ public class ClanHallTable
 	public synchronized void setFree(int chId)
 	{
 		_freeClanHall.put(chId, _clanHall.get(chId));
-		ClanTable.getInstance().getClan(_freeClanHall.get(chId).getOwnerId()).setHideoutId(0);
+		
+		// The hall records an owner id, which can outlive the clan itself; getClan()
+		// returns null for a clan that is gone. Freeing the hall must not depend on the
+		// owner still being there.
+		final Clan owner = ClanTable.getInstance().getClan(_freeClanHall.get(chId).getOwnerId());
+		if (owner != null)
+		{
+			owner.setHideoutId(0);
+		}
 		_freeClanHall.get(chId).free();
 		_clanHall.remove(chId);
 	}

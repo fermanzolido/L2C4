@@ -163,14 +163,17 @@ public class Hero
 				String allyName = "";
 				int clanCrest = 0;
 				int allyCrest = 0;
-				if (clanId > 0)
+				// Same as updateHeroes(): the row can name a clan that is gone from
+				// clan_data, and getClan() returns null for it.
+				final Clan clan = (clanId > 0) ? ClanTable.getInstance().getClan(clanId) : null;
+				if (clan != null)
 				{
-					clanName = ClanTable.getInstance().getClan(clanId).getName();
-					clanCrest = ClanTable.getInstance().getClan(clanId).getCrestId();
+					clanName = clan.getName();
+					clanCrest = clan.getCrestId();
 					if (allyId > 0)
 					{
-						allyName = ClanTable.getInstance().getClan(clanId).getAllyName();
-						allyCrest = ClanTable.getInstance().getClan(clanId).getAllyCrestId();
+						allyName = clan.getAllyName();
+						allyCrest = clan.getAllyCrestId();
 					}
 				}
 				
