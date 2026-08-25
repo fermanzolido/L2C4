@@ -262,6 +262,21 @@ public abstract class AbstractAI
 	 * @param action The action whose the AI must be notified
 	 * @param args The arguments of the Action
 	 */
+	/**
+	 * Reads the creature an action was notified with, when there is one.<br>
+	 * STUNNED, PARALYZED and CONFUSED are notified with no arguments at all by
+	 * Creature.startStunning(), Creature.startParalyze() and the Confuse effect, which
+	 * left the switch below indexing an empty array. Every handler these three reach
+	 * tolerates a missing attacker: addDamageHate and isInAggroList both return early
+	 * on null, and onIntentionAttack rejects a null target.
+	 * @param args the arguments the action was notified with
+	 * @return the creature at index zero, or {@code null} when there is none
+	 */
+	private static Creature firstCreature(Object[] args)
+	{
+		return (args.length > 0) ? (Creature) args[0] : null;
+	}
+	
 	public void notifyAction(Action action, Object... args)
 	{
 		if ((!_actor.isSpawned() && !_actor.isTeleporting()) || !_actor.hasAI())
@@ -288,12 +303,12 @@ public abstract class AbstractAI
 			}
 			case STUNNED:
 			{
-				onActionStunned((Creature) args[0]);
+				onActionStunned(firstCreature(args));
 				break;
 			}
 			case PARALYZED:
 			{
-				onActionParalyzed((Creature) args[0]);
+				onActionParalyzed(firstCreature(args));
 				break;
 			}
 			case SLEEPING:
@@ -308,7 +323,7 @@ public abstract class AbstractAI
 			}
 			case CONFUSED:
 			{
-				onActionConfused((Creature) args[0]);
+				onActionConfused(firstCreature(args));
 				break;
 			}
 			case MUTED:
