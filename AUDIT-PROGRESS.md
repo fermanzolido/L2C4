@@ -17,7 +17,7 @@ hallazgos aunque no hayas terminado el área.
 
 | Área | Archivos | Líneas | Estado |
 |---|---:|---:|---|
-| `model/clan` | 6 | 3.163 | pendiente |
+| **`model/clan`** | **5** | **3.110** | **en curso** |
 | ~~`model/itemcontainer`~~ | 10 | 3.727 | **TERMINADA** |
 | `model/skill` | 19 | 3.869 | pendiente |
 | `model/olympiad` | 7 | 4.554 | pendiente |
@@ -165,3 +165,52 @@ diría lo mismo sin atrapar NPEs que vengan de más adentro.
 **`PetInventory.transferItemsToOwner` no se defiende** del dueño nulo, mientras
 que `getOwnerId` en el mismo archivo sí. Inconsistente, pero solo se llama desde
 `Pet.java:653`, donde el dueño existe.
+
+---
+
+## `model/clan` — en curso
+
+Son **5** archivos, no 6, y **3.110** líneas: `Clan.java` (2095),
+`ClanMember.java` (727), `ClanPrivileges.java` (182), `ClanAccess.java` (57),
+`ClanInfo.java` (49).
+
+**Leído:** `ClanPrivileges` y `ClanAccess` completos; de `ClanMember` el vínculo
+con el jugador (`setPlayer`, `isOnline`, `getPowerGrade`); de `Clan.java` el
+cambio de líder, los campos y el sistema de rangos.
+
+**Pendiente:** el grueso de `Clan.java` (156 métodos), el resto de
+`ClanMember.java`, y `ClanInfo.java`.
+
+### Sin hallazgos hasta ahora
+
+Cinco sospechas evaluadas, **ninguna resultó bug**:
+
+- **Desbordamiento de la máscara de privilegios.** `1 << ordinal()` sobre un
+  `int` se rompe a partir de 31 valores. `ClanAccess` tiene 24, ordinales 0 a
+  23. Entra con margen, pero **queda poco margen**: si algún día se agregan más
+  de 31 privilegios, la máscara se corrompe en silencio.
+
+- **Skills de asedio sin quitar al desloguear.** Se agregan con
+  `addSkill(sk, false)`, o sea sin persistir, así que no hay filtración.
+
+- **`removeSiegeSkills` con el clan ya en null.** Lee
+  `character.getClan().getCastleId()` sin chequear. En `Clan.java:415` corre
+  antes de `player.setClan(null)` en la 420. Orden correcto.
+
+- **Privilegios del líder saliente que no se persisten.** Al líder offline se le
+  escribe `clan_privs` directo en la base; al online solo se le hace
+  `disableAll()` en memoria. Pero `UPDATE_CHARACTER` incluye `clan_privs`, así
+  que se persiste en el próximo guardado. Cambia el *cuándo*, no el *si*.
+
+- **Doble lookup en `getRankPrivs`.** `_privs.get(rank) != null ?
+  _privs.get(rank).getPrivs() : ...` es el mismo patrón chequear-y-usar que sí
+  era una carrera en `ClanHallAuction`. Acá **no lo es**: no hay ni un `remove`
+  ni un `clear` sobre `_privs` en todo el archivo, solo `put` y `get`. Anotado
+  sin tocar, igual que los otros casos del mismo patrón.
+
+### Nota de calidad
+
+Todas las colecciones de `Clan.java` son concurrentes (`ConcurrentHashMap`,
+`newKeySet`), y el cambio de líder maneja los cuatro casos —saliente y entrante,
+online y offline— persistiendo a mano cuando el jugador no está conectado. Es
+código más cuidado que el promedio de lo visto hasta ahora.
