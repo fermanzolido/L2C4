@@ -533,3 +533,40 @@ las llamadas a `getAffectLimit()` del directorio de handlers; eran los únicos d
   Lo divide por 1000 y lo vuelve a multiplicar, lo cual da vueltas pero es
   correcto, y el orden de asignación es el correcto: el intervalo se asigna
   antes de usarse como default.
+
+### Hallazgo transversal: doble chequeo de bloqueo roto en 12 sitios
+
+Salió de auditar `Skill.hasEffectType()`, que cachea `_effectTypes` con
+double-checked locking. El campo **sí** es `volatile`, o sea que ahí está bien —
+pero el patrón aparece en **15 lugares** del código y solo **3** lo declaran
+`volatile`: `Creature._ai`, `Skill._effectTypes` y `EffectZone._task`.
+
+Los otros doce no. Sin `volatile`, el hilo que lee el campo **fuera** del
+candado no tiene relación happens-before con el constructor que corrió
+**adentro**, así que puede ver una referencia publicada apuntando a un objeto
+cuyos campos todavía no son visibles. `WorldObject.addScript` hasta nombra el
+patrón en un comentario.
+
+Arreglados agregando `volatile` a: `Attackable._firstCommandChannelAttacked`,
+`Creature._seenCreatures`, `ControlTower._guards`, `Cubic._actionTask`,
+`Monster._minionList`, `Npc._summonedNpcs`, `Player._manufactureItems`,
+`Player._teleportWatchdog`, `ListenersContainer._listeners`,
+`Quest._timerExecutor`, `WorldObject._scripts` y `EffectZone._skills`.
+
+**Dos de los doce eran peores**: no tenían el segundo chequeo adentro del
+candado, así que no es un problema de visibilidad sino una pérdida de escritura
+lisa y llana.
+
+- `getManufactureItems()` asignaba un mapa nuevo sin condición. Dos llamadores
+  que pasen el chequeo externo construyen uno cada uno y la segunda asignación
+  **descarta la primera**, junto con lo que ya se le hubiera puesto adentro.
+- El watchdog de teleport agendaba la tarea sin condición y el campo se queda
+  solo con la última, así que la anterior **nunca se cancela**.
+  `TeleportWatchdogTask` sale enseguida si el jugador no está teleportándose,
+  así que disparar de inmediato es inofensivo — pero sobrevive hasta un teleport
+  **posterior** y le llama `onTeleported()`, terminándolo antes de tiempo.
+
+**Anotado sin tocar:** la rama `else` que cancela el watchdog corre **fuera** del
+candado, así que un cancel concurrente con un schedule sigue siendo una carrera
+aparte. Y `Creature.java:3232` se parece pero **no** es este patrón: todo el
+cuerpo ya está adentro del candado.
