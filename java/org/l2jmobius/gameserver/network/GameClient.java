@@ -295,7 +295,7 @@ public class GameClient extends Client<org.l2jmobius.commons.network.Connection<
 					{
 						try (PreparedStatement ps2 = con.prepareStatement("UPDATE characters SET deletetime=? WHERE charId=?"))
 						{
-							ps2.setLong(1, System.currentTimeMillis() + (PlayerConfig.DELETE_DAYS * 86400000)); // 24*60*60*1000 = 86400000
+							ps2.setLong(1, System.currentTimeMillis() + (PlayerConfig.DELETE_DAYS * 86400000L)); // 24*60*60*1000 = 86400000
 							ps2.setInt(2, objectId);
 							ps2.execute();
 						}

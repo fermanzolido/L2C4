@@ -238,8 +238,8 @@ public class Core extends Script
 			addSpawn(TELEPORT_CUBE, 18948, 110166, -6397, 0, false, 900000);
 			GrandBossManager.getInstance().setStatus(CORE, DEAD);
 			
-			final long baseIntervalMillis = GrandBossConfig.CORE_SPAWN_INTERVAL * 3600000;
-			final long randomRangeMillis = GrandBossConfig.CORE_SPAWN_RANDOM * 3600000;
+			final long baseIntervalMillis = GrandBossConfig.CORE_SPAWN_INTERVAL * 3600000L;
+			final long randomRangeMillis = GrandBossConfig.CORE_SPAWN_RANDOM * 3600000L;
 			final long respawnTime = baseIntervalMillis + getRandom(-randomRangeMillis, randomRangeMillis);
 			
 			// Next respawn time.

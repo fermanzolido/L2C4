@@ -386,8 +386,8 @@ public class Valakas extends Script {
 
 		GrandBossManager.getInstance().setStatus(VALAKAS, DEAD);
 
-		final long baseIntervalMillis = GrandBossConfig.VALAKAS_SPAWN_INTERVAL * 3600000;
-		final long randomRangeMillis = GrandBossConfig.VALAKAS_SPAWN_RANDOM * 3600000;
+		final long baseIntervalMillis = GrandBossConfig.VALAKAS_SPAWN_INTERVAL * 3600000L;
+		final long randomRangeMillis = GrandBossConfig.VALAKAS_SPAWN_RANDOM * 3600000L;
 		final long respawnTime = baseIntervalMillis + getRandom(-randomRangeMillis, randomRangeMillis);
 
 		// Next respawn time.

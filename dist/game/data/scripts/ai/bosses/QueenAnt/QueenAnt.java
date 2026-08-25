@@ -348,8 +348,8 @@ public class QueenAnt extends Script
 			npc.broadcastPacket(new PlaySound(1, "BS02_D", 1, npc.getObjectId(), npc.getX(), npc.getY(), npc.getZ()));
 			GrandBossManager.getInstance().setStatus(QUEEN, DEAD);
 			
-			final long baseIntervalMillis = GrandBossConfig.QUEEN_ANT_SPAWN_INTERVAL * 3600000;
-			final long randomRangeMillis = GrandBossConfig.QUEEN_ANT_SPAWN_RANDOM * 3600000;
+			final long baseIntervalMillis = GrandBossConfig.QUEEN_ANT_SPAWN_INTERVAL * 3600000L;
+			final long randomRangeMillis = GrandBossConfig.QUEEN_ANT_SPAWN_RANDOM * 3600000L;
 			final long respawnTime = baseIntervalMillis + getRandom(-randomRangeMillis, randomRangeMillis);
 			
 			// Next respawn time.

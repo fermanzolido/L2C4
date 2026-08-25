@@ -563,8 +563,8 @@ public class Baium extends Script
 			addSpawn(TELEPORT_CUBE, TELEPORT_CUBIC_LOC, false, 900000);
 			ZONE.broadcastPacket(new PlaySound("BS01_D"));
 			
-			final long baseIntervalMillis = GrandBossConfig.BAIUM_SPAWN_INTERVAL * 3600000;
-			final long randomRangeMillis = GrandBossConfig.BAIUM_SPAWN_RANDOM * 3600000;
+			final long baseIntervalMillis = GrandBossConfig.BAIUM_SPAWN_INTERVAL * 3600000L;
+			final long randomRangeMillis = GrandBossConfig.BAIUM_SPAWN_RANDOM * 3600000L;
 			final long respawnTime = baseIntervalMillis + getRandom(-randomRangeMillis, randomRangeMillis);
 			
 			// Next respawn time.
