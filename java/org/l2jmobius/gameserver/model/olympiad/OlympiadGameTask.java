@@ -39,7 +39,8 @@ import org.l2jmobius.gameserver.network.serverpackets.SystemMessage;
 class OlympiadGameTask implements Runnable
 {
 	protected static final Logger _log = Logger.getLogger(OlympiadGameTask.class.getName());
-	public OlympiadGame _game = null;
+	// Written by the task thread, read by the OlympiadManager thread.
+	public volatile OlympiadGame _game = null;
 	protected static final long BATTLE_PERIOD = OlympiadConfig.OLYMPIAD_BATTLE; // 6 mins
 	
 	// Buffs
@@ -54,12 +55,16 @@ class OlympiadGameTask implements Runnable
 		new SkillHolder(1085, 1), // Acumen
 	};
 	
-	private boolean _terminated = false;
-	private boolean _started = false;
+	private volatile boolean _terminated = false;
+	private volatile boolean _started = false;
 	
 	public boolean isTerminated()
 	{
-		return _terminated || _game._aborted;
+		// Read the field once. run() clears it when the match is over and the manager
+		// polls this from its own thread, so a second read could find a different value.
+		// A task that no longer holds a game is finished by definition.
+		final OlympiadGame game = _game;
+		return _terminated || (game == null) || game._aborted;
 	}
 	
 	public boolean isStarted()
@@ -165,6 +170,12 @@ class OlympiadGameTask implements Runnable
 		{
 			if ((_game._playerOne == null) || (_game._playerTwo == null))
 			{
+				// There is nothing to score, but the task still has to hand the stadium
+				// back and report itself finished: the manager waits on isTerminated()
+				// before tearing down at the end of the competition period.
+				OlympiadManager.getInstance().removeGame(_game);
+				_terminated = true;
+				_game = null;
 				return;
 			}
 			
@@ -203,8 +214,12 @@ class OlympiadGameTask implements Runnable
 			
 			_game.clearPlayers();
 			OlympiadManager.getInstance().removeGame(_game);
-			_game = null;
+			
+			// Terminated first, then release: the other order left a window where the
+			// manager could see a null game while the flag still read false, and
+			// isTerminated() dereferenced it.
 			_terminated = true;
+			_game = null;
 		}
 	}
 	

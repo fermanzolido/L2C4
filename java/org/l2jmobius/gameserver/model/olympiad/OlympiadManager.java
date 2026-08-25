@@ -219,8 +219,14 @@ class OlympiadManager implements Runnable {
 			if (gamesQueue.isEmpty()) {
 				allGamesTerminated = true;
 			} else {
+				// A conjunction, not a disjunction: this loop is waiting for every game to
+				// finish. Folding with || let it fall through as soon as any single game
+				// had terminated, so the teardown below ran while the rest were still
+				// being fought. The accumulator has to start true on each pass, since it
+				// is false on the way into this branch.
+				allGamesTerminated = true;
 				for (OlympiadGameTask game : gamesQueue.values()) {
-					allGamesTerminated = allGamesTerminated || game.isTerminated();
+					allGamesTerminated = allGamesTerminated && game.isTerminated();
 				}
 			}
 		}
