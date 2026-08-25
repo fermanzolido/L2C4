@@ -19,7 +19,7 @@ hallazgos aunque no hayas terminado el área.
 |---|---:|---:|---|
 | ~~`model/clan`~~ | 5 | 3.110 | **TERMINADA** |
 | ~~`model/itemcontainer`~~ | 10 | 3.727 | **TERMINADA** |
-| `model/skill` | 19 | 3.869 | pendiente |
+| **`model/skill`** | **19** | **3.869** | **en curso — 5 bugs arreglados** |
 | `model/olympiad` | 7 | 4.554 | pendiente |
 | `loginserver` | 45 | 5.649 | pendiente |
 | `gameserver/ai` | 15 | 7.907 | pendiente |
@@ -365,3 +365,140 @@ null-checks de `getLeaderId()` y `getLeaderName()` son cicatrices de bugs reales
 que alguien parcheó en el valor concreto que vio. Cada guard así es una pista de
 que la misma dereferencia está sin proteger en otro lado — y en los dos casos lo
 estaba.
+
+## `model/skill` — en curso
+
+Son **19** archivos y **3.869** líneas. Los grandes: `Skill.java` (1758),
+`BuffInfo.java` (482), `AbnormalType.java` (381), `SkillChannelizer.java` (245),
+`SkillOperateType.java` (180).
+
+**Leído:** `SkillChannelizer` y `SkillChannelized` completos, `BuffFinishTask`
+completo, de `BuffInfo` el ciclo de vida (`initializeEffects`, `finishEffects`,
+`onTick`, `stopAllEffects`), y de `Skill.java` la familia `getPower` y
+`getAffectLimit`. Además, siguiendo el hilo, los 14 target handlers del datapack.
+
+**Pendiente:** el grueso de `Skill.java` (constructor y parseo del `StatSet`,
+`getTargetList`, `applyEffects`, `activateSkill`), el resto de `BuffInfo`, y los
+enums (`AbnormalType`, `SkillOperateType`, `AbnormalVisualEffect`).
+
+### Hallazgos
+
+Cinco defectos arreglados en dos commits.
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 1 | `Creature.isChannelized` | negación invertida: la canalización nunca se aborta | alta |
+| 2 | `SkillChannelizer.run` | registros de canalizador que nunca se dan de baja | alta |
+| 3 | `CommandChannel` (targethandler) | falta el guard `> 0`: la skill llega a un solo miembro | alta |
+| 4 | `CorpseClan` (targethandler) | rama NPC sin guard ni hoist: la skill no llega a nadie | alta |
+| 5 | `Clan` (targethandler) | `getAffectLimit()` dentro del bucle: tope distinto por iteración | media |
+
+**1 y 2 — había que arreglarlos juntos.** `Creature.isChannelized()` devolvía
+`!_channelized.isChannelized()`, la negación de lo que promete su propio javadoc
+y de lo que reporta el delegado. Su hermano 15 líneas más arriba,
+`isChanneling()`, tiene el javadoc gemelo y no tiene la negación. Los seis
+llamadores usan el mismo guard:
+
+    if (isChannelized()) { getSkillChannelized().abortChannelization(); }
+
+así que el aborto corría solo cuando no había nada que abortar, y nunca cuando sí
+lo había. El efecto visible es sobre el caster: `run()` descuenta
+`getMpPerChanneling()` en cada tick **antes** de mirar la lista de objetivos, así
+que si el objetivo muere el jugador sigue perdiendo MP hasta quedarse en cero, en
+vez de que la canalización se corte. Viene del commit inicial, no de un cambio
+reciente.
+
+En paralelo, `SkillChannelizer.run()` registra al canalizador en los objetivos de
+cada tick, pero `_channelized` se **sobrescribe** con la lista nueva y
+`stopChanneling()` solo da de baja lo que encuentra ahí. Un objetivo que salía de
+rango entre ticks quedaba con el canalizador registrado para siempre. Ese conteo
+es el que devuelve `getChannerlizersSize()`, que es **lo que elige el nivel** del
+efecto de canalización aplicado a ese objetivo.
+
+La trampa: arreglar solo la negación habría hecho que `abortChannelization()`
+empezara a llamar `abortCast()` sobre esos registros viejos, cancelando el casteo
+de jugadores que ya no estaban canalizando sobre ese objetivo. Un arreglo que
+resolvía una cosa y rompía otra.
+
+**3, 4 y 5 — `getAffectLimit()` parece un getter y no lo es.** Devuelve
+`_affectLimit[0] + Rnd.get(_affectLimit[1])`: **cada llamada tira un dado nuevo**.
+Y devuelve **cero** para toda skill que no declare `affectLimit`, que son todas
+menos trece. Doce de los catorce target handlers contemplan las dos cosas; tres
+sitios no.
+
+- `CommandChannel` comparaba contra el tope sin chequear que fuera mayor que
+  cero. Con el cero habitual, el primer miembro agregado cumple `size >= 0` y
+  corta el bucle: la skill llegaba al caster, su summon y **exactamente un**
+  miembro más, en vez de a todo el command channel.
+- `CorpseClan` tiene el mismo código dos veces: su rama de jugador lee el tope
+  una vez antes del bucle y usa el guard; su rama de NPC no hacía ninguna de las
+  dos. Sin guard, la primera pasada cortaba de una, así que una skill de clan de
+  NPC solo afectaba al propio caster.
+- `Clan` tenía el guard pero leía el tope **dentro** del bucle, con un valor
+  distinto en cada pasada.
+
+Los dos sitios dentro de bucles se encontraron revisando el anidamiento de todas
+las llamadas a `getAffectLimit()` del directorio de handlers; eran los únicos dos.
+
+### Anotado sin tocar
+
+- **`onExit` sin su `onStart`.** `initializeEffects` saltea `effect.onStart(...)`
+  cuando `_effected.isDead() && !_skill.isPassive()` —caso real y comentado en el
+  código: el efecto instantáneo mata al objetivo y los continuos se omiten—, pero
+  `finishEffects` llama a `effect.onExit(...)` sin esa condición. O sea que un
+  efecto puede recibir `onExit` sin haber recibido nunca `onStart`.
+
+  **No lo toqué**: probar que hace daño exige auditar los ~200 effect handlers, y
+  eso es del área `handlers/`. Muestreo hecho: `AttackTrait.onExit` tiene un
+  guard explícito `if (count == 0) continue;` —otra cicatriz que confirma que el
+  caso ocurre—, y `CrystalGradeModify.onExit` usa asignación absoluta, así que
+  ambos son inmunes. **Búsqueda concreta a correr al llegar a
+  `handlers/effecthandlers/`:** un `onExit` que mute estado compartido de forma
+  relativa (decrementar, dividir, quitar de una colección) sin verificar que
+  `onStart` haya corrido.
+
+- **`getPower(Creature, Creature, boolean, boolean)` chequea `creature == null`
+  pero no `target`**, y sí dereferencia `target.getCurrentHp()` en la rama
+  `PHYSICAL_ATTACK_HP_LINK`. Los tres llamadores son `calcPhysDam`,
+  `calcMagicDam` y `calcManaDam`, donde `target` es parámetro obligatorio del
+  cálculo de daño. Asimetría real, sin camino nulo demostrable: agregar el
+  chequeo sería especulativo.
+
+- **`SkillChannelized._channelizers` acumula mapas internos vacíos.**
+  `addChannelizer` crea la entrada por skillId con `computeIfAbsent`, y
+  `removeChannelizer` vacía el mapa interno pero nunca borra la entrada. Está
+  acotado por la cantidad de skills canalizables del juego, o sea que es chico.
+
+- **`finishEffects` cancela las tareas de tick pero no limpia `_tasks`.** El
+  `BuffInfo` se descarta después, así que no sobrevive nada.
+
+### Sospechas evaluadas y descartadas
+
+- **`BuffFinishTask.stop()` cancela la tarea pero no pone `_task = null`**, a
+  diferencia de `removeBuffInfo()` que sí lo hace. Como `start()` y
+  `addBuffInfo()` solo reprograman `if (_task == null)`, parecía que después de
+  un `stop()` los buffs no volvían a expirar nunca — y el ciclo existe: `deleteMe()`
+  → `onDecay()` → `decreaseCount()` → `RespawnTaskManager` → `respawnNpc()` →
+  `initializeNpc()` sobre **la misma instancia** → `onSpawn()` → `start()`.
+
+  **No es bug**: `Creature.deleteMe()` hace
+  `_effectList.stopAllEffectsWithoutExclusions(false, false)` **antes** de
+  `_buffFinishTask.stop()`, y eso llega a `removeBuffInfo` por cada buff
+  (`stopAndRemove` → `info.stopAllEffects` → `removeBuffInfoTime`). Al vaciarse
+  el mapa, `removeBuffInfo` ya cancela y anula `_task`, así que para cuando corre
+  `stop()` el campo ya está en null. La asimetría queda como **trampa latente**:
+  cualquier futuro llamador de `stop()` que no vacíe `_buffInfos` primero dejaría
+  la expiración de buffs muerta para siempre en esa criatura.
+
+- **`removeChannelizer` sobre un skillId desconocido.** `getChannelizers` devuelve
+  `Collections.emptyMap()`, y llamarle `remove()` a un mapa inmutable parecía
+  `UnsupportedOperationException`. **Verificado corriéndolo** con Java 25:
+  `Collections.emptyMap().remove(k)` devuelve null sin tirar nada, porque hereda
+  `AbstractMap.remove`, que sobre un mapa vacío nunca llega a `iterator.remove()`.
+
+- **`finishEffects` no espeja a `initializeEffects`.** Sí lo hace en las tres
+  operaciones que importan: cancela las tareas de tick, `removeStats()` espeja a
+  `addStatFuncs`, y `removeAbnormalVisualEffects` espeja a
+  `addAbnormalVisualEffects`. La única diferencia es que el alta es condicional
+  (`if (update)`) y la baja no, o sea que se quita de más, que es la dirección
+  segura.
