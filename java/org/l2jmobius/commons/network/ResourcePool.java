@@ -100,12 +100,11 @@ public class ResourcePool
 	private ByteBuffer getSizedBuffer(int size)
 	{
 		ByteBuffer buffer = null;
-		BufferPool pool = null;
 		
 		final Entry<Integer, BufferPool> entry = _bufferPools.ceilingEntry(size);
 		if (entry != null)
 		{
-			pool = entry.getValue();
+			final BufferPool pool = entry.getValue();
 			if (pool != null)
 			{
 				if (_autoExpandCapacity)
@@ -129,20 +128,13 @@ public class ResourcePool
 			}
 		}
 		
+		// No configured pool covers this size, so hand out a one-off buffer instead of
+		// registering a pool for it. The size traces back to a length the remote peer declared
+		// in the packet header, and registering made that input grow this map permanently.
+		// recycleBuffer finds no pool for the capacity and drops the buffer, so it is simply
+		// collected. Sizes the deployment actually expects belong in Network.ini.
 		if (buffer == null)
 		{
-			if (pool == null)
-			{
-				// LOGGER.warning("ResourcePool: There is no buffer pool handling buffer size " + size + ". Creating a new pool.");
-				pool = new BufferPool(10, size);
-				if (_initBufferPools)
-				{
-					pool.initialize(_initBufferPoolFactor);
-				}
-				
-				_bufferPools.putIfAbsent(size, pool);
-			}
-			
 			buffer = ByteBuffer.allocateDirect(size).order(ByteOrder.LITTLE_ENDIAN);
 		}
 		
@@ -157,21 +149,10 @@ public class ResourcePool
 	private int determineBufferSize(int size)
 	{
 		final Entry<Integer, BufferPool> entry = _bufferPools.ceilingEntry(size);
-		if (entry != null)
-		{
-			return entry.getKey();
-		}
 		
-		// LOGGER.warning("ResourcePool: There is no buffer pool handling buffer size " + size + ". Creating a new pool.");
-		final BufferPool pool = new BufferPool(10, size);
-		if (_initBufferPools)
-		{
-			pool.initialize(_initBufferPoolFactor);
-		}
-		
-		_bufferPools.putIfAbsent(size, pool);
-		
-		return size;
+		// Falls back to the exact size rather than registering a pool for it, for the reason
+		// given in getSizedBuffer.
+		return entry != null ? entry.getKey() : size;
 	}
 	
 	/**
