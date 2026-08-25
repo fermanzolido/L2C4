@@ -91,6 +91,19 @@ public class MonumentOfHeroes extends Script
 			}
 			case "HeroReceive":
 			{
+				// "HeroClaim" above only decides which page to show. This is the branch that
+				// actually grants the status, so it has to repeat the same checks: reaching
+				// it does not require having gone through the other one.
+				if (Hero.getInstance().isHero(player.getObjectId()))
+				{
+					return "already_hero_status.htm";
+				}
+				
+				if (!Hero.getInstance().isUnclaimedHero(player.getObjectId()))
+				{
+					return "no_hero_status.htm";
+				}
+				
 				Hero.getInstance().claimHero(player);
 				return null;
 			}
@@ -124,7 +137,30 @@ public class MonumentOfHeroes extends Script
 			}
 			default:
 			{
-				final int weaponId = Integer.parseInt(event);
+				// Same reasoning as "HeroReceive": "HeroWeapon" above only picks a page, and
+				// this is where the weapon is handed over, so it repeats both of that
+				// branch's conditions rather than assuming the player came through it.
+				if (!player.isHero())
+				{
+					return "not_a_hero.htm";
+				}
+				
+				if (hasAtLeastOneQuestItem(player, WEAPONS))
+				{
+					return "already_have_weapon.htm";
+				}
+				
+				final int weaponId;
+				try
+				{
+					weaponId = Integer.parseInt(event);
+				}
+				catch (NumberFormatException e)
+				{
+					// Any event this script does not define lands here.
+					break;
+				}
+				
 				if (ArrayUtil.contains(WEAPONS, weaponId))
 				{
 					giveItems(player, weaponId, 1);
