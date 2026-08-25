@@ -398,7 +398,12 @@ public class LoginController
 				failedCount = failedConnects.intValue() + 1;
 			}
 			
-			if (password != lastPassword)
+			// Compared by value. This read "password != lastPassword", which compares
+			// references: the attempt comes off the wire as a fresh String and the stored
+			// one comes out of the map, so they are never the same instance and the test
+			// was always true. The exemption the surrounding code describes, not counting
+			// a user who retypes the same wrong password, therefore never applied.
+			if ((lastPassword == null) || !lastPassword.equals(password))
 			{
 				_hackProtection.put(address.getHostAddress(), failedCount);
 				_lastPassword.put(address.getHostAddress(), password);
