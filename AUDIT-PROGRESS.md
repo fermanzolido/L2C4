@@ -25,7 +25,7 @@ hallazgos aunque no hayas terminado el área.
 | ~~`gameserver/config`~~ | 55 | 5.554 | **TERMINADA** |
 | ~~`loginserver`~~ | 45 | 5.649 | **TERMINADA** |
 | ~~`gameserver/ai`~~ | 15 | 7.907 | **TERMINADA** |
-| **`commons`** | **47** | **11.240** | **en curso** |
+| ~~`commons`~~ | 47 | 11.240 | **TERMINADA** |
 | datapack `ai/` | 67 | 14.462 | pendiente |
 | `managers` | 44 | 14.636 | pendiente |
 | `data` | 71 | 14.922 | pendiente |
@@ -1529,7 +1529,7 @@ pregunta que lo convirtió en 14 no fue "¿hay más?" sino la tabla explícita d
 declaraciones, 0 `volatile`, 0 `finally`. Uniforme. Un grep por `_working` habría
 mostrado los sitios sin mostrar que **ninguno** estaba protegido.
 
-## `commons` — en curso
+## `commons` — TERMINADA
 
 Son **47** archivos y **11.240** líneas. Es infraestructura compartida: cada
 defecto acá se multiplica por todo el servidor.
@@ -1540,8 +1540,9 @@ defecto acá se multiplica por todo el servidor.
 `database/DatabaseFactory`, la familia de parseo de `util/IXmlReader` y los
 ayudantes de `util/StringUtil`.
 
-**Pendiente:** `crypt/BlowfishEngine` y `util/BCrypt` (implementaciones de
-referencia portadas), `ui/`, y el detalle interno de `DynamicPacketBuffer`.
+**No leido linea por linea:** `ui/` (3 archivos Swing, sin logica de juego) y el
+detalle interno de `DynamicPacketBuffer`, cuyo control de limites se comprobo
+desde afuera.
 
 ### Hallazgos
 
@@ -1802,6 +1803,53 @@ propio javadoc anuncia con un lookup en minúsculas: `"fri"` lleva `i`.
 - **`Boolean.parseBoolean` aceptando dígitos no ASCII vía `Character.isDigit`.**
   `Integer.parseInt` usa `Character.digit`, así que `isNumeric` y el parseo
   coinciden; la brecha real de `isNumeric` es el desborde, no el alfabeto.
+
+
+### `crypt/` y `BCrypt` — verificados corriéndolos, no leyéndolos
+
+Son 2.219 líneas entre `BlowfishEngine` (1.468) y `BCrypt` (751), casi todo
+tablas S-box y constantes. Leerlas línea por línea rinde poco; lo que rinde es
+comprobar que **produzcan la salida correcta**.
+
+**`BlowfishEngine` es Blowfish estándar.** Contra los nueve vectores publicados
+por Schneier, la primera corrida dio **0 de 9**. Pero el patrón delataba la
+causa: `4EF997456198DD78` esperado contra `4597F94E78DD9861` obtenido es la misma
+salida con **cada palabra de 32 bits invertida en bytes**. Las filas que no
+calzaban ese patrón eran justo aquellas cuyo texto plano no es invariante bajo
+esa inversión.
+
+Reformulada la hipótesis —Blowfish estándar con E/S little-endian por palabra,
+que es la convención del cliente L2— y vuelta a correr alimentando el texto plano
+invertido y desinvirtiendo el cifrado: **9 de 9 exactos**. El round-trip
+cifrar→descifrar da 9/9 también. No es un defecto, es la convención del
+protocolo, y quedó demostrado sin leer las tablas.
+
+**`BCrypt` es jBCrypt canónico y funciona.** Los dos puntos donde las copias
+viejas de jBCrypt fallan están bien acá: usa `getBytes("UTF-8")` —no el charset
+de la plataforma, así que el hash no depende del host— y `gensalt` usa
+`SecureRandom`. Comprobado corriéndolo:
+
+- round-trip 6/6 sobre contraseñas vacías, ASCII, con espacios, con símbolos y
+  **con acentos y ñ**, que es lo que prueba el UTF-8;
+- rechazo de contraseña incorrecta 6/6;
+- dos hashes de la misma contraseña difieren y los dos verifican;
+- el coste queda embebido y se respeta (`$2a$04$`, `$2a$06$`, `$2a$08$`);
+- el truncado a 72 bytes es el comportamiento estándar de bcrypt, no un defecto;
+- un hash malformado lanza, y el `catch (Exception)` que envuelve
+  `isLoginValid` lo convierte en login rechazado más warning.
+
+### Anotado sin tocar (`crypt`)
+
+- **`BCrypt.checkpw` compara con `String.compareTo`**, que corta en el primer
+  carácter distinto. `isLoginValid` usa `MessageDigest.isEqual` —de tiempo
+  constante— para el camino legacy SHA en el **mismo método**. La asimetría es
+  real, pero el beneficio práctico es despreciable y no toco una implementación
+  vendorizada canónica por una ganancia teórica; misma regla que con
+  `Arrays.equals` sobre el hex id en `loginserver`.
+
+- **Solo se aceptan `$2$` y `$2a$`.** Un hash `$2y$` o `$2b$` migrado desde otro
+  sistema lanza. Como `gensalt` solo produce `$2a$`, es internamente consistente,
+  y el `catch` lo degrada a login rechazado.
 
 ## `gameserver/config` — TERMINADA
 
