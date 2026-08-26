@@ -236,8 +236,16 @@ public class CastleChamberlain extends Script {
 		return ratio;
 	}
 
+	/**
+	 * @param type the door group
+	 * @param level the requested upgrade level
+	 * @return the price, or -1 when this level is not one the table lists. It used to answer
+	 *         zero for an unlisted level, and zero passes any "can the player afford it"
+	 *         test, so a level the table had never heard of was applied for free and
+	 *         persisted.
+	 */
 	private final int getDoorUpgradePrice(int type, int level) {
-		int price = 0;
+		int price = -1;
 		switch (type) {
 			case 1: // Outer Door
 			{
@@ -349,8 +357,13 @@ public class CastleChamberlain extends Script {
 		return taxLimit;
 	}
 
+	/**
+	 * @param level the requested upgrade level
+	 * @return the price, or -1 when this level is not one the table lists. See
+	 *         {@link #getDoorUpgradePrice(int, int)} for why zero was the wrong answer.
+	 */
 	private final int getTrapUpgradePrice(int level) {
-		int price = 0;
+		int price = -1;
 		switch (level) {
 			case 1: {
 				price = FeatureConfig.TRAP_UPGRADE_PRICE1;
@@ -458,8 +471,12 @@ public class CastleChamberlain extends Script {
 						final int type = Integer.parseInt(st.nextToken());
 						final int level = Integer.parseInt(st.nextToken());
 						final int price = getDoorUpgradePrice(type, level);
+						// countTokens() shrinks as nextToken() consumes, so comparing it against a
+						// growing index was a moving bound over a fixed array: four or more trailing
+						// tokens ran off the end of it, and none at all reached nextToken with nothing
+						// left to give.
 						final int[] doors = new int[2];
-						for (int i = 0; i <= st.countTokens(); i++) {
+						for (int i = 0; (i < doors.length) && st.hasMoreTokens(); i++) {
 							doors[i] = Integer.parseInt(st.nextToken());
 						}
 
@@ -470,7 +487,7 @@ public class CastleChamberlain extends Script {
 								final NpcHtmlMessage html = getHtmlPacket(player, npc, "chamberlain-15.html");
 								html.replace("%doorlevel%", Integer.toString(currentLevel));
 								player.sendPacket(html);
-							} else if (player.getAdena() >= price) {
+							} else if ((price >= 0) && (player.getAdena() >= price)) {
 								takeItems(player, Inventory.ADENA_ID, price);
 								for (int doorId : doors) {
 									castle.setDoorUpgrade(doorId, level, true);
@@ -534,7 +551,7 @@ public class CastleChamberlain extends Script {
 							final NpcHtmlMessage html = getHtmlPacket(player, npc, "chamberlain-19.html");
 							html.replace("%dmglevel%", Integer.toString(currentLevel));
 							player.sendPacket(html);
-						} else if (player.getAdena() >= price) {
+						} else if ((price >= 0) && (player.getAdena() >= price)) {
 							takeItems(player, Inventory.ADENA_ID, price);
 							castle.setTrapUpgrade(trapIndex, level, true);
 							htmltext = "chamberlain-20.html";
@@ -672,7 +689,11 @@ public class CastleChamberlain extends Script {
 			case "withdraw": {
 				if (isOwner(player, npc) && player.hasAccess(ClanAccess.CASTLE_VAULT)) {
 					final int amount = (st.hasMoreTokens()) ? Integer.parseInt(st.nextToken()) : 0;
-					if (amount <= castle.getTreasury()) {
+					// The sibling deposit branch bounds its amount and this one did not. A negative
+					// value satisfied the test below and then reached addToTreasuryNoTax as its own
+					// negation, which that method reads as a deposit, so it grew the treasury; the
+					// matching giveAdena returned early on the non-positive count and gave nothing.
+					if ((amount > 0) && (amount <= castle.getTreasury())) {
 						castle.addToTreasuryNoTax((-1) * amount);
 						giveAdena(player, amount, false);
 						htmltext = "chamberlain-01.html";

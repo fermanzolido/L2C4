@@ -115,9 +115,12 @@ public class VarkaSilenosSupport extends Script
 	public String onEvent(String event, Npc npc, Player player)
 	{
 		String htmltext = null;
-		if (StringUtil.isNumeric(event) && BUFF.containsKey(Integer.parseInt(event)))
+		// One parse instead of two, and through StringUtil.parseInt rather than isNumeric:
+		// isNumeric only proves every character is a digit, so a long run of them passed the
+		// test and then threw from Integer.parseInt. A miss now simply yields a null buff.
+		final BuffsData buff = BUFF.get(StringUtil.parseInt(event, -1));
+		if (buff != null)
 		{
-			final BuffsData buff = BUFF.get(Integer.parseInt(event));
 			if (getQuestItemsCount(player, SEED) >= buff.getCost())
 			{
 				takeItems(player, SEED, buff.getCost());

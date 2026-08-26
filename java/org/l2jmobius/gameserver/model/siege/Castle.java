@@ -1022,8 +1022,27 @@ public class Castle extends AbstractResidence
 	
 	public int getTrapUpgradeLevel(int towerIndex)
 	{
-		final TowerSpawn spawn = SiegeManager.getInstance().getFlameTowers(getResidenceId()).get(towerIndex);
+		// getFlameTowers returns null for a castle with no configured towers, and the index
+		// reaches here from a client bypass, so neither the null nor the range was safe to
+		// assume before indexing.
+		final TowerSpawn spawn = getFlameTower(towerIndex);
 		return (spawn != null) ? spawn.getUpgradeLevel() : 0;
+	}
+	
+	/**
+	 * @param towerIndex the index of the flame tower
+	 * @return the tower spawn, or {@code null} when this castle has none or the index is
+	 *         outside the list
+	 */
+	private TowerSpawn getFlameTower(int towerIndex)
+	{
+		final List<TowerSpawn> towers = SiegeManager.getInstance().getFlameTowers(getResidenceId());
+		if ((towers == null) || (towerIndex < 0) || (towerIndex >= towers.size()))
+		{
+			return null;
+		}
+		
+		return towers.get(towerIndex);
 	}
 	
 	public void setTrapUpgrade(int towerIndex, int level, boolean save)
@@ -1044,7 +1063,7 @@ public class Castle extends AbstractResidence
 			}
 		}
 		
-		final TowerSpawn spawn = SiegeManager.getInstance().getFlameTowers(getResidenceId()).get(towerIndex);
+		final TowerSpawn spawn = getFlameTower(towerIndex);
 		if (spawn != null)
 		{
 			spawn.setUpgradeLevel(level);
