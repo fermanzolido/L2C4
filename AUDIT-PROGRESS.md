@@ -26,7 +26,7 @@ hallazgos aunque no hayas terminado el área.
 | ~~`loginserver`~~ | 45 | 5.649 | **TERMINADA** |
 | ~~`gameserver/ai`~~ | 15 | 7.907 | **TERMINADA** |
 | ~~`commons`~~ | 47 | 11.240 | **TERMINADA** |
-| datapack `ai/` | 67 | 14.462 | pendiente |
+| **datapack `ai/`** | **67** | **14.462** | **en curso** |
 | `managers` | 44 | 14.636 | pendiente |
 | `data` | 71 | 14.922 | pendiente |
 | `network/serverpackets` | 259 | 19.900 | pendiente |
@@ -1528,6 +1528,106 @@ pregunta que lo convirtió en 14 no fue "¿hay más?" sino la tabla explícita d
 *declaración × `volatile` × `finally`* sobre los 12 archivos del paquete: 14
 declaraciones, 0 `volatile`, 0 `finally`. Uniforme. Un grep por `_working` habría
 mostrado los sitios sin mostrar que **ninguno** estaba protegido.
+
+
+## datapack `ai/` — en curso
+
+Son **67** archivos y **14.462** líneas, repartidas en `others` (45), `areas`
+(13) y `bosses` (9).
+
+**Leído:** los nueve `bosses/` en su máquina de estados, muerte y persistencia
+del respawn; `ClassMaster` (1.112) y `CastleChamberlain` (1.109) enteros en sus
+caminos de bypass; `KetraOrcSupport` y `VarkaSilenosSupport`.
+
+**Pendiente:** el resto de `others/` y de `areas/`, sobre todo `FourSepulchers`
+(704) y `OracleTeleport` (409).
+
+### Hallazgos
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 1 | `CastleChamberlain` | `withdraw` sin la cota inferior que sí tiene `deposit` | alta |
+| 2 | `CastleChamberlain` | las tablas de precio devuelven 0 para un nivel que no conocen | alta |
+| 3 | `CastleChamberlain` | el bucle de puertas compara un índice creciente con un contador decreciente | media |
+| 4 | `Castle` | el índice de torre de llama se usa sin acotar sobre una lista que puede ser nula | media |
+| 5 | `KetraOrcSupport` / `VarkaSilenosSupport` | la clave del buff se parsea dos veces detrás de un `isNumeric` | baja |
+
+**1 — La rama hermana tenía el chequeo.** `withdraw` solo comprobaba que el monto
+no superara el tesoro; `deposit`, diez líneas más arriba, lo acota de los dos
+lados. Un valor negativo pasaba ese test y llegaba a `addToTreasuryNoTax` como su
+propia negación, que ese método lee como un depósito, así que el tesoro **crecía**;
+el `giveAdena` correspondiente retornaba temprano con el conteo no positivo y no
+le daba nada al jugador.
+
+**2 — Cero como respuesta a "no sé".** Las dos tablas de precio son `switch`
+sobre los niveles que conocen, inicializados en `0` y devolviendo ese valor
+inicial para cualquier otro. **Cero pasa cualquier test de "¿le alcanza?"**, así
+que un nivel de puerta o de torre que la tabla nunca oyó nombrar se aplicaba
+gratis, se escribía en `castle_doorupgrade` o `castle_trapupgrade` y quedaba ahí.
+Ni el ratio de HP de la puerta ni el nivel de la trampa tienen techo propio. Las
+dos tablas contestan ahora `-1` y las dos ramas de confirmación lo rechazan, lo
+que deja funcionando un precio configurado en cero de verdad.
+
+**3 — Una cota móvil.** `for (int i = 0; i <= st.countTokens(); i++)` sobre
+`final int[] doors = new int[2]`: `countTokens()` **decrece** a medida que
+`nextToken()` consume, así que el índice crecía contra un tope que bajaba. Con
+cuatro o más tokens sobrantes se salía del array; con ninguno, `nextToken()`
+llegaba sin nada que dar.
+
+### Anotado sin tocar (datapack `ai/`)
+
+- **`ClassMaster` parsea dos tokens del bypass sin guarda** y desreferencia
+  `ClassListData.getClass(classId)` sin chequear. El despachador de eventos
+  atrapa y loguea, así que queda contenido, pero es una vía fácil de ensuciar el
+  log. Su `canChange` **sí** valida categoría y nivel en la rama que otorga.
+
+- **`onPlayerBypass` hace `substring(18)` sobre un prefijo de 19 caracteres**, así
+  que el evento que pasa empieza con un espacio. Funciona porque
+  `StringTokenizer` se lo saltea; `substring(19)` sería lo correcto.
+
+- **178 sitios en 57 scripts parsean un token del bypass sin guarda.** Barridos
+  buscando la forma que sí hizo daño en `Q00631` —el valor parseado usado como
+  índice— quedan dos, y los dos estaban bien protegidos con `containsKey`.
+
+- **`QuestGuard` despacha `new OnAttackableKill(null, this, false)`**, o sea con
+  atacante nulo, mientras `Attackable.doDie` solo despacha cuando hay un `Player`.
+  Cualquier `onKill` registrado para un id de `QuestGuard` recibe `killer == null`.
+
+- **El respawn de grand boss sale de `intervalo + getRandom(-rango, +rango)`.** Un
+  rango configurado mayor que el intervalo daría un delay negativo, que
+  `validateDelay` aplasta a cero: el boss reviviría al instante y con un
+  `respawn_time` en el pasado. Con los valores distribuidos (intervalo ≥ 36 h,
+  rango 8) no se alcanza.
+
+### Sospechas evaluadas y descartadas (datapack `ai/`)
+
+- **`ClassMaster` permitiendo tercera clase a nivel 40.** Los nombres de las
+  categorías van corridos uno respecto de la terminología de "primer/segundo/tercer
+  cambio de clase": `THIRD_CLASS_GROUP` es lo que se obtiene en el **segundo**
+  cambio, a nivel 40. El propio `case "thirdclass"` del archivo, que exige
+  `THIRD_CLASS_GROUP` y nivel > 75, confirma la semántica desde adentro.
+
+- **`ClassMaster` cargando su XML de una ruta equivocada.** Hace
+  `parseDatapackFile("config/ClassMaster.xml")` y el archivo está en
+  `dist/game/config/`, no bajo `data/`. `parseDatapackFile` resuelve con
+  `new File(".", path)`, o sea contra el directorio de trabajo del proceso, que
+  para el gameserver es `dist/game/`. Ruta correcta, y los otros cinco llamadores
+  del mismo patrón cargan archivos de ese mismo directorio.
+
+- **Bosses que no vuelven de la muerte tras un reinicio.** Los cuatro que usan el
+  modelo ALIVE/DEAD (`Core`, `Orfen`, `QueenAnt`, `Zaken`) comparan el
+  `respawn_time` guardado contra el reloj y, si ya venció, spawnean en el acto y
+  ponen el estado en ALIVE. Los cuatro.
+
+- **`Valakas` sin ninguna transición a ALIVE.** Usa otro vocabulario —DORMANT,
+  WAITING, FIGHTING, DEAD— igual que `Antharas` y `Baium`. El grep medía la
+  palabra equivocada.
+
+- **`onKill` de los bosses con `killer` nulo**, que reventaría en
+  `ZONE.isCharacterInZone(killer)` porque ese método hace `getObjectId()` sin
+  chequear null, dejando al boss en IN_FIGHT sin respawn agendado.
+  `Attackable.doDie` solo despacha el evento cuando el matador existe **y** es un
+  `Player`.
 
 ## `commons` — TERMINADA
 
