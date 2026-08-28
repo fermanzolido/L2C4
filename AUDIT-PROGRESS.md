@@ -28,7 +28,7 @@ hallazgos aunque no hayas terminado el área.
 | ~~`commons`~~ | 47 | 11.240 | **TERMINADA** |
 | ~~datapack `ai/`~~ | 67 | 14.462 | **TERMINADA** |
 | ~~`managers`~~ | 44 | 14.636 | **TERMINADA** |
-| `data` | 71 | 14.922 | pendiente |
+| **`data`** | **71** | **14.922** | **en curso** |
 | `network/serverpackets` | 259 | 19.900 | pendiente |
 | `network/clientpackets` | 201 | 21.727 | pendiente |
 | datapack `handlers/` | 375 | 51.203 | pendiente |
@@ -1529,6 +1529,82 @@ pregunta que lo convirtió en 14 no fue "¿hay más?" sino la tabla explícita d
 declaraciones, 0 `volatile`, 0 `finally`. Uniforme. Un grep por `_working` habría
 mostrado los sitios sin mostrar que **ninguno** estaba protegido.
 
+
+## `data` — en curso
+
+Son **71** archivos y **14.922** líneas: los cargadores XML (41), las tablas SQL
+(10), los holders (12) y algunos sueltos.
+
+**Leído:** `SchemeBufferTable` entero, y de los cargadores todo lo que el comando
+`//reload` toca. **Pendiente:** `sql/` (`OfflineTraderTable` 627, `ClanTable` 606,
+`OfflinePlayTable` 417, `ClanHallTable` 325) y los cargadores grandes
+(`SkillTreeData` 969, `NpcData` 847, `SpawnData` 817).
+
+### Hallazgos
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 1 | `WalkingManager` | cuatro colecciones planas mutadas desde varios hilos, con un solo método `synchronized` | **crítica** |
+| 2 | 5 cargadores | `//reload` vacía y rellena `HashMap` planos que los hilos de paquetes están leyendo | alta |
+| 3 | `SchemeBufferTable` | el guardado del apagado itera colecciones que los jugadores modifican | alta |
+| 4 | `SevenSignsFestival` | siete colecciones planas con `put`, iteración y `clear` simultáneos | alta |
+| 5 | `AdminData` | `hasAccess` hace un `put` estructural desde hilos de paquetes | alta |
+| 6 | `SchemeBuffer` | se hace `add` sobre la lista inmutable que devuelve `getScheme` | media |
+| 7 | `DoorData` | `addDoorGroup` lee, testea y escribe para armar sus conjuntos | media |
+| 8 | `SchemeBuffer` | el id de skill del bypass va a `isDance()` sin chequear null | media |
+
+**1 — Un `synchronized` solitario que delata a toda la clase.** `_activeRoutes`
+es un `HashMap` plano con una entrada por NPC que camina. `cancelMoving` le hace
+`remove` **y lleva `synchronized`**; `startMoving` le hace `put` y **no**, y
+tampoco lo llevan `isOnWalk`, `isRegistered`, `getRouteName`, `resumeMoving` ni
+`stopMoving`, que lo leen. Un escritor tomando el monitor y otro sin tomarlo no
+es exclusión mutua: es un `HashMap` plano reestructurado concurrentemente —desde
+las tareas de caminata, desde `ArrivedTask` y desde hilos de paquetes— de forma
+continua, para cada NPC que camina en el servidor. Un `put` que redimensiona
+mientras otro hilo recorre un bucket es la forma clásica de dejar un `get`
+girando.
+
+Ese `synchronized` único es el delator: alguien vio la concurrencia y candó uno
+de los seis métodos que tocan el mapa.
+
+**2 — Datos que se reescriben mientras se leen.** `//reload` deja recargar la
+mayoría de las tablas en caliente, y cada `load()` es un `clear()` seguido de un
+bucle que repuebla, mientras los hilos de paquetes leen sin parar.
+
+La división entre esas clases es el delator otra vez: las que más se recargan
+—`NpcData`, `SkillData`, `MultisellData`, `BuyListData`, `TeleporterData`— ya son
+`ConcurrentHashMap`. `ItemData`, `DoorData`, `AdminData`, `EnchantItemData` y
+`EnchantItemGroupsData` eran planas, y están en el mismo menú de `//reload`. Los
+tres mapas de `ItemData` cargan la lectura más caliente del servidor, porque cada
+operación con ítems pasa por `getTemplate`.
+
+**5 — `AdminData` lo dice solo.** `_gmList`, el campo justo debajo de los dos que
+se cambiaron, ya era `ConcurrentHashMap`. Y su `_adminCommandAccessRights` es
+peor que una ventana de recarga: `hasAccess` —llamado desde
+`AdminCommandHandler` para **cada comando de GM**, en hilo de paquetes— le hace
+`put` cuando encuentra un comando sin derechos definidos. Ese mapa se modifica
+estructuralmente en caliente por los mismos hilos que lo leen.
+
+**3 — Un jugador editando, los esquemas de todos perdidos.** `saveSchemes` corre
+desde `Shutdown`, y la cuenta regresiva del apagado deja a los jugadores
+conectados y clickeando. Recorre el mapa de esquemas de cada jugador y la lista
+de skills de cada esquema para armar un solo batch. Solo el mapa exterior era
+concurrente: los esquemas de cada jugador eran un `TreeMap` plano y las skills de
+cada esquema un `ArrayList` plano, y el NPC del buffer muta los dos desde hilos
+de paquetes. Un solo jugador editando durante la cuenta regresiva puede tirar una
+modificación concurrente fuera del bucle, y el `catch` que lo envuelve **abandona
+el `executeBatch` entero**: no los esquemas de ese jugador, los de todos.
+
+### Método
+
+El hallazgo 1 salió de convertir el hallazgo 1 del área anterior en un barrido:
+**una clase con uno o dos métodos `synchronized`, campos de colección planos, y
+métodos sin sincronizar que mutan esos mismos campos**. El `synchronized`
+solitario es lo que marca la clase como una donde alguien notó la concurrencia y
+cubrió un método. Diez clases en todo el core; `SevenSignsFestival` tiene siete
+campos así, el máximo. `Olympiad.NOBLES_RANK` también aparece y **ya estaba
+verificado y descartado** en la pasada de olimpiada: su único lector es privado y
+corre dentro del mismo método que reconstruye el mapa.
 
 ## `managers` — TERMINADA
 
