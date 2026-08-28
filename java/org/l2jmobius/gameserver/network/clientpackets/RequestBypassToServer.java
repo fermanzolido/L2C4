@@ -20,7 +20,6 @@
  */
 package org.l2jmobius.gameserver.network.clientpackets;
 
-import java.util.StringTokenizer;
 
 import org.l2jmobius.commons.util.StringUtil;
 import org.l2jmobius.commons.util.TraceUtil;
@@ -150,9 +149,10 @@ public class RequestBypassToServer extends ClientPacket
 					id = _command.substring(4);
 				}
 				
-				if (StringUtil.isNumeric(id))
+				final int objectId = bypassInt(id);
+				if (objectId >= 0)
 				{
-					final WorldObject object = World.getInstance().findObject(Integer.parseInt(id));
+					final WorldObject object = World.getInstance().findObject(objectId);
 					if ((object != null) && object.isNpc() && (endOfId > 0) && player.isInsideRadius2D(object, Npc.INTERACTION_DISTANCE))
 					{
 						object.asNpc().onBypassFeedback(player, _command.substring(endOfId + 1));
@@ -174,43 +174,44 @@ public class RequestBypassToServer extends ClientPacket
 					id = _command.substring(5);
 				}
 				
-				try
+				final int objectId = bypassInt(id);
+				if (objectId >= 0)
 				{
-					final Item item = player.getInventory().getItemByObjectId(Integer.parseInt(id));
+					final Item item = player.getInventory().getItemByObjectId(objectId);
 					if ((item != null) && (endOfId > 0))
 					{
 						item.onBypassFeedback(player, _command.substring(endOfId + 1));
 					}
-					
-					player.sendPacket(ActionFailed.STATIC_PACKET);
 				}
-				catch (NumberFormatException nfe)
-				{
-					PacketLogger.warning("NFE for command [" + _command + "] " + nfe.getMessage());
-				}
+				
+				player.sendPacket(ActionFailed.STATIC_PACKET);
 			}
 			else if (_command.startsWith("_match"))
 			{
 				final String params = _command.substring(_command.indexOf('?') + 1);
-				final StringTokenizer st = new StringTokenizer(params, "&");
-				final int heroclass = Integer.parseInt(st.nextToken().split("=")[1]);
-				final int heropage = Integer.parseInt(st.nextToken().split("=")[1]);
-				final int heroid = Hero.getInstance().getHeroByClass(heroclass);
-				if (heroid > 0)
+				final int heroclass = bypassInt(bypassParameter(params, 0));
+				final int heropage = bypassInt(bypassParameter(params, 1));
+				if ((heroclass >= 0) && (heropage >= 0))
 				{
-					Hero.getInstance().showHeroFights(player, heroclass, heroid, heropage);
+					final int heroid = Hero.getInstance().getHeroByClass(heroclass);
+					if (heroid > 0)
+					{
+						Hero.getInstance().showHeroFights(player, heroclass, heroid, heropage);
+					}
 				}
 			}
 			else if (_command.startsWith("_diary"))
 			{
 				final String params = _command.substring(_command.indexOf('?') + 1);
-				final StringTokenizer st = new StringTokenizer(params, "&");
-				final int heroclass = Integer.parseInt(st.nextToken().split("=")[1]);
-				final int heropage = Integer.parseInt(st.nextToken().split("=")[1]);
-				final int heroid = Hero.getInstance().getHeroByClass(heroclass);
-				if (heroid > 0)
+				final int heroclass = bypassInt(bypassParameter(params, 0));
+				final int heropage = bypassInt(bypassParameter(params, 1));
+				if ((heroclass >= 0) && (heropage >= 0))
 				{
-					Hero.getInstance().showHeroDiary(player, heroclass, heroid, heropage);
+					final int heroid = Hero.getInstance().getHeroByClass(heroclass);
+					if (heroid > 0)
+					{
+						Hero.getInstance().showHeroDiary(player, heroclass, heroid, heropage);
+					}
 				}
 			}
 			else if (_command.startsWith("OlympiadArenaChange"))
@@ -222,11 +223,14 @@ public class RequestBypassToServer extends ClientPacket
 				final Npc lastNpc = player.getLastFolkNPC();
 				if (GeneralConfig.ALLOW_MANOR && (lastNpc != null) && lastNpc.canInteract(player) && EventDispatcher.getInstance().hasListener(EventType.ON_NPC_MANOR_BYPASS, lastNpc))
 				{
-					final String[] split = _command.substring(_command.indexOf('?') + 1).split("&");
-					final int ask = Integer.parseInt(split[0].split("=")[1]);
-					final int state = Integer.parseInt(split[1].split("=")[1]);
-					final boolean time = split[2].split("=")[1].equals("1");
-					EventDispatcher.getInstance().notifyEventAsync(new OnNpcManorBypass(player, lastNpc, ask, state, time), lastNpc);
+					final String params = _command.substring(_command.indexOf('?') + 1);
+					final int ask = bypassInt(bypassParameter(params, 0));
+					final int state = bypassInt(bypassParameter(params, 1));
+					final String timeParam = bypassParameter(params, 2);
+					if ((ask >= 0) && (state >= 0) && (timeParam != null))
+					{
+						EventDispatcher.getInstance().notifyEventAsync(new OnNpcManorBypass(player, lastNpc, ask, state, timeParam.equals("1")), lastNpc);
+					}
 				}
 			}
 			else if (_command.startsWith("report"))
@@ -289,6 +293,43 @@ public class RequestBypassToServer extends ClientPacket
 		{
 			EventDispatcher.getInstance().notifyEventAsync(new OnPlayerBypass(player, _command), player);
 		}
+	}
+	
+	/**
+	 * Reads one positional key=value pair out of a bypass query. Three of the branches
+	 * above are in the list that skips html action validation, so the query is whatever
+	 * the client sent: a missing pair or a missing '=' used to throw out of the method.
+	 * @param params the part of the bypass command after the '?'
+	 * @param index which pair to read
+	 * @return the value, or {@code null} when the query has none there
+	 */
+	private static String bypassParameter(String params, int index)
+	{
+		final String[] pairs = params.split("&");
+		if (index >= pairs.length)
+		{
+			return null;
+		}
+		
+		final String[] pair = pairs[index].split("=");
+		return pair.length < 2 ? null : pair[1];
+	}
+	
+	/**
+	 * @param value the text to read a number out of
+	 * @return the number, or -1 when the text is not one that fits in an int. isNumeric
+	 *         alone was not enough: it accepts a run of digits of any length, and
+	 *         Integer.parseInt does not take all of them.
+	 */
+	private static int bypassInt(String value)
+	{
+		if (!StringUtil.isNumeric(value) || (value.length() > 10))
+		{
+			return -1;
+		}
+		
+		final long parsed = Long.parseLong(value);
+		return parsed > Integer.MAX_VALUE ? -1 : (int) parsed;
 	}
 	
 	/**
