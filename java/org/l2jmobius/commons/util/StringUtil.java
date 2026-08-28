@@ -282,6 +282,28 @@ public class StringUtil
 	 * @param defaultValue the value to return if parsing fails or if there are no more tokens
 	 * @return the parsed integer, or the default value if parsing fails or if there are no tokens
 	 */
+	/**
+	 * @param text the text to read a number out of
+	 * @param defaultValue what to answer when the text does not hold one
+	 * @return the number the text holds, or {@code defaultValue}
+	 */
+	public static double parseDouble(String text, double defaultValue)
+	{
+		if (text == null)
+		{
+			return defaultValue;
+		}
+		
+		try
+		{
+			return Double.parseDouble(text);
+		}
+		catch (NumberFormatException e)
+		{
+			return defaultValue;
+		}
+	}
+	
 	public static int parseNextInt(StringTokenizer tokenizer, int defaultValue)
 	{
 		if (tokenizer.hasMoreTokens())

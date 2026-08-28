@@ -22,8 +22,10 @@ package org.l2jmobius.gameserver.config.custom;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.l2jmobius.commons.util.ConfigReader;
+import org.l2jmobius.commons.util.StringUtil;
 import org.l2jmobius.gameserver.model.item.holders.ItemHolder;
 
 /**
@@ -32,6 +34,8 @@ import org.l2jmobius.gameserver.model.item.holders.ItemHolder;
  */
 public class ChampionMonstersConfig
 {
+	private static final Logger LOGGER = Logger.getLogger(ChampionMonstersConfig.class.getName());
+	
 	// File
 	private static final String CHAMPION_MONSTERS_CONFIG_FILE = "./config/Custom/ChampionMonsters.ini";
 	
@@ -83,11 +87,31 @@ public class ChampionMonstersConfig
 		CHAMPION_REWARD_ITEMS.clear();
 		for (String s : config.getString("ChampionRewardItems", "4356,10").split(";"))
 		{
-			if (s.isEmpty())
+			final String entry = s.trim();
+			if (entry.isEmpty())
 			{
 				continue;
 			}
-			CHAMPION_REWARD_ITEMS.add(new ItemHolder(Integer.parseInt(s.split(",")[0]), Integer.parseInt(s.split(",")[1])));
+			
+			// An entry without its comma, or with something that is not a number in it, used
+			// to throw out of the config load and take the whole startup with it, naming
+			// neither the property nor the entry.
+			final String[] reward = entry.split(",");
+			if (reward.length != 2)
+			{
+				LOGGER.warning("ChampionMonstersConfig: ChampionRewardItems: expected itemId,count but found \"" + entry + "\".");
+				continue;
+			}
+			
+			final int itemId = StringUtil.parseInt(reward[0].trim(), -1);
+			final int count = StringUtil.parseInt(reward[1].trim(), -1);
+			if ((itemId < 1) || (count < 1))
+			{
+				LOGGER.warning("ChampionMonstersConfig: ChampionRewardItems: \"" + entry + "\" is not itemId,count.");
+				continue;
+			}
+			
+			CHAMPION_REWARD_ITEMS.add(new ItemHolder(itemId, count));
 		}
 		
 		CHAMPION_ENABLE_VITALITY = config.getBoolean("ChampionEnableVitality", false);

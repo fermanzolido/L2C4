@@ -229,11 +229,33 @@ public class RatesConfig
 		BOSS_DROP_LIST.clear();
 		for (String s : config.getString("BossDropList", "").trim().split(";"))
 		{
-			if (s.isEmpty())
+			final String entry = s.trim();
+			if (entry.isEmpty())
 			{
 				continue;
 			}
-			BOSS_DROP_LIST.add(new DropHolder(DropType.DROP, Integer.parseInt(s.split(",")[0]), Integer.parseInt(s.split(",")[1]), Integer.parseInt(s.split(",")[2]), (Double.parseDouble(s.split(",")[3]))));
+			
+			// An entry short of its four fields, or with something that is not a number in
+			// one of them, used to throw out of the config load and take the whole startup
+			// with it, naming neither the property nor the entry.
+			final String[] drop = entry.split(",");
+			if (drop.length != 4)
+			{
+				LOGGER.warning("RatesConfig: BossDropList: expected itemId,min,max,chance but found \"" + entry + "\".");
+				continue;
+			}
+			
+			final int itemId = StringUtil.parseInt(drop[0].trim(), -1);
+			final int min = StringUtil.parseInt(drop[1].trim(), -1);
+			final int max = StringUtil.parseInt(drop[2].trim(), -1);
+			final double chance = StringUtil.parseDouble(drop[3].trim(), -1);
+			if ((itemId < 1) || (min < 0) || (max < 0) || (chance < 0))
+			{
+				LOGGER.warning("RatesConfig: BossDropList: \"" + entry + "\" is not itemId,min,max,chance.");
+				continue;
+			}
+			
+			BOSS_DROP_LIST.add(new DropHolder(DropType.DROP, itemId, min, max, chance));
 		}
 	}
 }

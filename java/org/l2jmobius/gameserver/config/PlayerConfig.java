@@ -454,15 +454,24 @@ public class PlayerConfig {
 		final String[] gaps = config.getString("PartyXpCutoffGaps", "0,9;10,14;15,99").split(";");
 		PARTY_XP_CUTOFF_GAPS = new int[gaps.length][2];
 		for (int i = 0; i < gaps.length; i++) {
+			// A gap without its comma, or with something that is not a number in it, used to
+			// throw out of the config load and take the whole startup with it, naming neither
+			// the property nor the entry. The array is already zero filled.
+			final String[] gap = gaps[i].split(",");
+			if (gap.length != 2) {
+				LOGGER.warning("PlayerConfig: PartyXpCutoffGaps: expected min,max but found \"" + gaps[i] + "\".");
+				continue;
+			}
+
 			PARTY_XP_CUTOFF_GAPS[i] = new int[] {
-					Integer.parseInt(gaps[i].split(",")[0]),
-					Integer.parseInt(gaps[i].split(",")[1])
+					StringUtil.parseInt(gap[0].trim(), 0),
+					StringUtil.parseInt(gap[1].trim(), 0)
 			};
 		}
 		final String[] percents = config.getString("PartyXpCutoffGapPercent", "100;30;0").split(";");
 		PARTY_XP_CUTOFF_GAP_PERCENTS = new int[percents.length];
 		for (int i = 0; i < percents.length; i++) {
-			PARTY_XP_CUTOFF_GAP_PERCENTS[i] = Integer.parseInt(percents[i]);
+			PARTY_XP_CUTOFF_GAP_PERCENTS[i] = StringUtil.parseInt(percents[i].trim(), 0);
 		}
 		DISABLE_TUTORIAL = config.getBoolean("DisableTutorial", false);
 		EXPERTISE_PENALTY = config.getBoolean("ExpertisePenalty", true);
