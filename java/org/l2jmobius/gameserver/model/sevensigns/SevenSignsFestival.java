@@ -766,14 +766,18 @@ public class SevenSignsFestival {
 	private Npc _dawnChatGuide;
 	private Npc _duskChatGuide;
 
-	protected Map<Integer, List<Integer>> _dawnFestivalParticipants = new HashMap<>();
-	protected Map<Integer, List<Integer>> _duskFestivalParticipants = new HashMap<>();
+	// Concurrent, because setParticipants is reached from the festival bypass handler on a
+	// packet thread and puts into these, while isParticipant walks their values from other
+	// packet threads and the festival manager task clears them between cycles. Plain HashMaps
+	// being put into and iterated and cleared at the same time.
+	protected Map<Integer, List<Integer>> _dawnFestivalParticipants = new ConcurrentHashMap<>();
+	protected Map<Integer, List<Integer>> _duskFestivalParticipants = new ConcurrentHashMap<>();
 
-	protected Map<Integer, List<Integer>> _dawnPreviousParticipants = new HashMap<>();
-	protected Map<Integer, List<Integer>> _duskPreviousParticipants = new HashMap<>();
+	protected Map<Integer, List<Integer>> _dawnPreviousParticipants = new ConcurrentHashMap<>();
+	protected Map<Integer, List<Integer>> _duskPreviousParticipants = new ConcurrentHashMap<>();
 
-	private final Map<Integer, Long> _dawnFestivalScores = new HashMap<>();
-	private final Map<Integer, Long> _duskFestivalScores = new HashMap<>();
+	private final Map<Integer, Long> _dawnFestivalScores = new ConcurrentHashMap<>();
+	private final Map<Integer, Long> _duskFestivalScores = new ConcurrentHashMap<>();
 
 	/**
 	 * _festivalData is essentially an instance of the seven_signs_festival table
@@ -784,7 +788,7 @@ public class SevenSignsFestival {
 	 * festivals, thus: offset = FESTIVAL_COUNT + festivalId (Data for Dawn is
 	 * always accessed by offset > FESTIVAL_COUNT)
 	 */
-	private final Map<Integer, Map<Integer, StatSet>> _festivalData = new HashMap<>();
+	private final Map<Integer, Map<Integer, StatSet>> _festivalData = new ConcurrentHashMap<>();
 
 	protected SevenSignsFestival() {
 		restoreFestivalData();
