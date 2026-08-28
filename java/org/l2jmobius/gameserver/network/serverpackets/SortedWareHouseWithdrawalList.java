@@ -317,6 +317,18 @@ public class SortedWareHouseWithdrawalList extends ServerPacket
 				{
 					final RecipeList rp1 = rd.getRecipeByItemId(o1.getItemId());
 					final RecipeList rp2 = rd.getRecipeByItemId(o2.getItemId());
+					// Both missing has to answer equal. Testing rp1 first and returning meant
+					// compare(a, b) and compare(b, a) both came back with the same sign when neither
+					// item had a recipe, which is a broken comparator: Collections.sort uses TimSort,
+					// and TimSort throws IllegalArgumentException when it detects that. 68 of the 849
+					// recipe items in the shipped data have no entry in Recipes.xml, so two of them in
+					// one warehouse is all it takes. Equal is also the right answer here, since the
+					// caller sorts by name first and this sort is stable.
+					if ((rp1 == null) && (rp2 == null))
+					{
+						return 0;
+					}
+					
 					if (rp1 == null)
 					{
 						return (order == A2Z ? A2Z : Z2A);
