@@ -3080,6 +3080,88 @@ El otro lector del mismo valor está bien: `RequestPrivateStoreBuy` rechaza
 cualquier conteo por ítem menor a uno al leer el paquete, así que el cero solo
 puede salir del recorte contra la tienda.
 
+### Quinta vuelta: texto del cliente que se convierte en número
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 11 | `PlayerTemplateData` | `ConcurrentHashMap.get(null)` lanza en vez de contestar null | **alta** |
+| 12 | `Say2` | el analizador de ítems del chat se sale de la cadena | media |
+| 13 | `RequestBypassToServer` | cinco ramas convierten sin validar | media |
+| 14 | `HomeBoard` | los buffs se cobran antes de resolverse | **alta** |
+| 15 | `PlayerConfig`, `RatesConfig`, `ChampionMonstersConfig` | una entrada mal escrita mata el arranque sin decir cuál | media |
+| 16 | `PlayerConfig` | dos listas emparejadas por índice sin comprobar largos | media |
+
+**11 — Un null que no llega a comprobarse.** `getTemplate(int)` es
+`_playerTemplates.get(PlayerClass.getPlayerClass(classId))`, y `_playerTemplates`
+es un `ConcurrentHashMap`, que **lanza** con clave null en vez de contestar null.
+El id de clase entra derecho del paquete de creación de personaje sin validar, y
+el enum cubre 89 valores en el rango 0..118 —del 58 al 77 hay un hueco, y afuera
+del rango también—. `CharacterCreate` ya prueba la plantilla contra null y
+contesta `CREATION_FAILED`; el throw pasaba **antes** de que esa prueba corriera,
+así que el cliente no recibía nada en vez de un rechazo.
+
+La misma vía de carga indexa el mismo mapa igual, pero está bien como se
+distribuye: los **89** archivos de plantilla declaran 89 ids distintos y todos
+están en el enum. Se deja como está.
+
+Es la misma forma que ya había arreglado en `ClanHallTable.setFree`. Barrida
+entera —mapa concurrente indexado con el resultado de otra búsqueda—: afinando a
+claves que de verdad pueden ser null quedan cinco sitios, los dos de la carga de
+arriba y tres de `SkillTreeData` cuya clave es un hash primitivo.
+
+**12 — Tres formas de salirse de una cadena.** `parseAndPublishItem` busca `"ID="`
+en el mensaje y camina los dígitos que siguen. El mensaje es lo que el jugador
+tipeó: `"ID="` al final del texto hacía que `charAt` caminara más allá del final,
+`"ID="` sin dígito atrás dejaba la cadena vacía para `parseInt`, y una corrida de
+dígitos suficientemente larga quedaba fuera del rango de un int.
+
+**13 — La rama que sí tenía la guarda.** De las cinco ramas del despacho de
+bypass que convierten números, `item_` es **la única** que traía `try/catch`, y
+eso es lo que delata al resto: `npc_` se apoya en `isNumeric`, que acepta una
+corrida de dígitos de cualquier largo mientras `parseInt` no los toma todos;
+`_match` y `_diary` llaman `nextToken` y `split("=")[1]` y `parseInt` sin
+comprobar nada; `manor_menu_select` indexa tres pares posicionales igual.
+
+`_match`, `_diary`, `manor_menu_select` y `report` están en la lista que
+**saltea** la validación de acción html, así que el texto que llega a esas
+conversiones es el que mandó el cliente.
+
+**14 — Cobrar antes de resolver.** El tablero de buffs toma el precio y después
+recorre las opciones. Cada una se partía por coma y las dos mitades iban a
+`parseInt`, y la habilidad que nombran se buscaba y se le leía el id **antes** de
+que nada comprobara que la búsqueda encontró algo. Una opción sin coma, una que
+no es número, y una que nombra una habilidad inexistente lanzaban las tres — con
+el pago ya hecho, así que el jugador quedaba cobrado y sin nada.
+
+Ahora se resuelven primero y el precio sale de lo que sobrevive, así que un buff
+no permitido ya no se saltea y se cobra igual, y se aplican solo si el cobro
+efectivamente salió. El precio se calcula en long porque la cantidad viene del
+bypass.
+
+**15 y 16 — La misma clase, en la configuración.** Tres parsers parten una
+propiedad e indexan las piezas de una: `PartyXpCutoffGaps` y
+`PartyXpCutoffGapPercent`, `BossDropList`, `ChampionRewardItems`. Una entrada a
+la que le falta un campo, o con algo que no es número, lanzaba fuera de la carga
+y se llevaba el arranque entero puesto, sin nombrar ni la propiedad ni la
+entrada. Es exactamente la forma que ya había arreglado una vez en
+`ClassBalanceConfig`, y éstas son el resto. `StringUtil` gana el `parseDouble`
+del que `parseInt` no tenía par.
+
+Y `Party` recorre `PARTY_XP_CUTOFF_GAPS` indexando `PARTY_XP_CUTOFF_GAP_PERCENTS`
+con el mismo contador: dos propiedades separadas que tienen que tener el mismo
+largo, sin nada que lo garantice. Rellenar con cero hace que los tramos sin par
+no den nada, y el warning nombra los dos largos.
+
+### Barrido: resultado de un split indexado directo
+
+Sobre el núcleo y el datapack: **41** sitios. Repartidos así — 20 en comandos de
+administración, 7 en `DocumentBase` (datos de skills), 4 en configuración, 3 en el
+tablero comunitario, y el resto sueltos.
+
+Los alcanzables desde el cliente son el 14 y dos de `ClanBoard`, y esos dos ya
+están adentro de un `try/catch` con fallback. Los de configuración son el 15. Los
+de comandos de administración quedan para el área `handlers/`.
+
 ### Sospechas de la cuarta vuelta, evaluadas y descartadas
 
 - **`RequestActionUse`, el archivo más grande del área (758 líneas).** Los casos
