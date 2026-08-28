@@ -162,7 +162,16 @@ public class ClanHallTable
 	 */
 	public synchronized void setFree(int chId)
 	{
-		_freeClanHall.put(chId, _clanHall.get(chId));
+		// A hall that is not owned is not in _clanHall, and putting the null that get returns
+		// into a ConcurrentHashMap throws. Reachable from //siege on a hall that is already
+		// free.
+		final AuctionableHall hall = _clanHall.get(chId);
+		if (hall == null)
+		{
+			return;
+		}
+		
+		_freeClanHall.put(chId, hall);
 		
 		// The hall records an owner id, which can outlive the clan itself; getClan()
 		// returns null for a clan that is gone. Freeing the hall must not depend on the
@@ -183,18 +192,30 @@ public class ClanHallTable
 	 */
 	public synchronized void setOwner(int chId, Clan clan)
 	{
-		if (!_clanHall.containsKey(chId))
+		AuctionableHall hall = _clanHall.get(chId);
+		if (hall == null)
 		{
-			_clanHall.put(chId, _freeClanHall.get(chId));
+			// Same null as setFree: a hall in neither map cannot be handed over, and moving it
+			// between the maps first meant the throw landed with the hall already relocated.
+			hall = _freeClanHall.get(chId);
+			if (hall == null)
+			{
+				return;
+			}
+			
+			_clanHall.put(chId, hall);
 			_freeClanHall.remove(chId);
 		}
 		else
 		{
-			_clanHall.get(chId).free();
+			hall.free();
 		}
 		
-		ClanTable.getInstance().getClan(clan.getId()).setHideoutId(chId);
-		_clanHall.get(chId).setOwner(clan);
+		// The clan is already in hand. Looking it up again by id and dereferencing the answer
+		// meant a clan disbanded between winning the auction and the auction closing threw
+		// here, after the hall had been moved.
+		clan.setHideoutId(chId);
+		hall.setOwner(clan);
 	}
 	
 	/**
