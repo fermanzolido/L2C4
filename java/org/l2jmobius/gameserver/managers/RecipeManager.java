@@ -507,6 +507,16 @@ public class RecipeManager
 				}
 			}
 			
+			// The divisor gets the same clamp the quotient already had two lines below. _itemGrab
+			// starts as the crafting skill level, which getSkillLevel answers as zero for a skill
+			// the player does not know, and a GIM altStatChange then multiplies it -- by a value
+			// read from Recipes.xml, which that file documents as a supported knob. Either a
+			// craftLevel of zero or a GIM value of zero left this line dividing by it.
+			if (_itemGrab < 1)
+			{
+				_itemGrab = 1;
+			}
+			
 			// determine number of creation passes needed
 			_creationPasses = (_totalItems / _itemGrab) + ((_totalItems % _itemGrab) != 0 ? 1 : 0);
 			if (_creationPasses < 1)

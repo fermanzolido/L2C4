@@ -70,7 +70,18 @@ public class RaceManager extends Npc
 				return;
 			}
 			
-			int val = Integer.parseInt(command.substring(10));
+			// Parsed and bounded before anything indexes with it. This used to be a bare
+			// substring and parseInt on text straight off the wire: a command with nothing after
+			// "BuyTicket " threw from substring, a non numeric one threw from parseInt, and the
+			// value itself went unchecked into two arrays of eight. val picks a lane and val - 10
+			// picks a ticket price, so 9 and 19 both index one past the end.
+			int val = (command.length() > 10) ? StringUtil.parseInt(command.substring(10), -1) : -1;
+			if ((val < 0) || (val == 9) || (val == 19) || (val > 20))
+			{
+				super.onBypassFeedback(player, "Chat 0");
+				return;
+			}
+			
 			if (val == 0)
 			{
 				player.setRaceTicket(0, 0);
@@ -159,8 +170,18 @@ public class RaceManager extends Npc
 					return;
 				}
 				
-				int ticket = player.getRaceTicket(0);
-				int priceId = player.getRaceTicket(1);
+				final int ticket = player.getRaceTicket(0);
+				final int priceId = player.getRaceTicket(1);
+				
+				// Both come off the player and were last written by the branches above, but they
+				// also survive a relog, so a value stored before the bound above existed would
+				// still reach the arrays here.
+				if ((ticket < 1) || (ticket > 8) || (priceId < 1) || (priceId > TICKET_PRICES.length))
+				{
+					super.onBypassFeedback(player, "Chat 0");
+					return;
+				}
+				
 				if (!player.reduceAdena(ItemProcessType.FEE, TICKET_PRICES[priceId - 1], this, true))
 				{
 					return;
@@ -207,7 +228,8 @@ public class RaceManager extends Npc
 				html.replace("Mob" + n, MonsterRaceManager.getInstance().getMonsters()[i].getTemplate().getName());
 				
 				// Odd
-				final double odd = MonsterRaceManager.getInstance().getOdds().get(i);
+				final List<Double> odds = MonsterRaceManager.getInstance().getOdds();
+				final double odd = (i < odds.size()) ? odds.get(i) : 0D;
 				html.replace("Odd" + n, (odd > 0D) ? String.format(Locale.ENGLISH, "%.1f", odd) : "&$804;");
 			}
 			

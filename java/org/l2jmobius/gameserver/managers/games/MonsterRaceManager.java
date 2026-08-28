@@ -82,7 +82,11 @@ public class MonsterRaceManager
 	protected final List<Integer> _npcTemplates = new ArrayList<>(); // List holding npc templates, shuffled on a new race.
 	protected final List<HistoryInfo> _history = new ArrayList<>(); // List holding old race records.
 	protected final Map<Integer, Long> _betsPerLane = new ConcurrentHashMap<>(); // Map holding all bets for each lane ; values setted to 0 after every race.
-	protected final List<Double> _odds = new ArrayList<>(); // List holding sorted odds per lane ; cleared at new odds calculation.
+	// Replaced wholesale rather than cleared and refilled: RaceManager reads this from a
+	// packet thread while the race task rebuilds it, and a reader arriving between the clear
+	// and the adds saw a list that was shorter than the eight lanes it indexes. It also
+	// starts empty, so the odds page threw until the first race calculated any.
+	protected volatile List<Double> _odds = List.of(); // List holding sorted odds per lane.
 	
 	protected int _raceNumber = 1;
 	protected int _finalCountdown = 0;
@@ -327,7 +331,10 @@ public class MonsterRaceManager
 					final HistoryInfo info = _history.get(_history.size() - 1);
 					info.setFirst(getFirstPlace());
 					info.setSecond(getSecondPlace());
-					info.setOddRate(_odds.get(getFirstPlace()));
+					// The list is empty until the first calculation and holds one entry per lane that
+					// carried a bet, so it does not always reach the winning lane.
+					final List<Double> odds = _odds;
+					info.setOddRate((getFirstPlace() < odds.size()) ? odds.get(getFirstPlace()) : 0D);
 					
 					saveHistory(info);
 					clearBets();
@@ -546,9 +553,11 @@ public class MonsterRaceManager
 	 */
 	public void setBetOnLane(int lane, long amount, boolean saveOnDb)
 	{
-		final long sum = (_betsPerLane.containsKey(lane)) ? _betsPerLane.get(lane) + amount : amount;
-		
-		_betsPerLane.put(lane, sum);
+		// merge rather than get-then-put. The map is a ConcurrentHashMap because bets arrive
+		// from several packet threads at once, but a read followed by a write is not atomic
+		// just because each half is: two bets on the same lane could both read the old sum and
+		// the second write would drop the first bet from the pot the odds are computed from.
+		final long sum = _betsPerLane.merge(lane, amount, Long::sum);
 		
 		if (saveOnDb)
 		{
@@ -561,9 +570,6 @@ public class MonsterRaceManager
 	 */
 	protected void calculateOdds()
 	{
-		// Clear previous List holding old odds.
-		_odds.clear();
-		
 		// Sort bets lanes per lane.
 		final Map<Integer, Long> sortedLanes = new TreeMap<>(_betsPerLane);
 		
@@ -575,10 +581,15 @@ public class MonsterRaceManager
 		}
 		
 		// As we get the sum, we can now calculate the odd rate of each lane.
+		final List<Double> odds = new ArrayList<>(sortedLanes.size());
 		for (long amount : sortedLanes.values())
 		{
-			_odds.add((amount == 0) ? 0D : Math.max(1.25, (sumOfAllLanes * 0.7) / amount));
+			odds.add((amount == 0) ? 0D : Math.max(1.25, (sumOfAllLanes * 0.7) / amount));
 		}
+		
+		// One assignment, so a reader sees either the previous odds or these, never a half
+		// built list.
+		_odds = List.copyOf(odds);
 	}
 	
 	public Npc[] getMonsters()
