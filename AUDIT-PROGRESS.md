@@ -28,7 +28,7 @@ hallazgos aunque no hayas terminado el área.
 | ~~`commons`~~ | 47 | 11.240 | **TERMINADA** |
 | ~~datapack `ai/`~~ | 67 | 14.462 | **TERMINADA** |
 | ~~`managers`~~ | 44 | 14.636 | **TERMINADA** |
-| **`data`** | **71** | **14.922** | **en curso** |
+| ~~`data`~~ | 71 | 14.922 | **TERMINADA** |
 | `network/serverpackets` | 259 | 19.900 | pendiente |
 | `network/clientpackets` | 201 | 21.727 | pendiente |
 | datapack `handlers/` | 375 | 51.203 | pendiente |
@@ -1530,16 +1530,13 @@ declaraciones, 0 `volatile`, 0 `finally`. Uniforme. Un grep por `_working` habr�
 mostrado los sitios sin mostrar que **ninguno** estaba protegido.
 
 
-## `data` — en curso
+## `data` — TERMINADA
 
 Son **71** archivos y **14.922** líneas: los cargadores XML (41), las tablas SQL
 (10), los holders (12) y algunos sueltos.
 
 **Leído:** `SchemeBufferTable` entero, y de los cargadores todo lo que el comando
-`//reload` toca. **Pendiente:** `OfflinePlayTable` (417) y los cargadores grandes
-(`SkillTreeData` 969, `NpcData` 847), sobre los que ya corrieron los cinco
-barridos mecanicos pero que no se leyeron linea por linea.
-
+`//reload` toca. 
 ### Hallazgos
 
 | # | Archivo | Defecto | Severidad |
@@ -1594,6 +1591,71 @@ cada esquema un `ArrayList` plano, y el NPC del buffer muta los dos desde hilos
 de paquetes. Un solo jugador editando durante la cuenta regresiva puede tirar una
 modificación concurrente fuera del bucle, y el `catch` que lo envuelve **abandona
 el `executeBatch` entero**: no los esquemas de ese jugador, los de todos.
+
+### Quinta vuelta: el barrido de parseo paralelo
+
+`IXmlReader.parseDirectory` reparte los archivos de un directorio sobre un pool de
+hilos cuando `ThreadsForLoading` está prendido — y `Threads.ini` lo distribuye
+**prendido**. Eso convierte cualquier lectura-seguida-de-escritura dentro de un
+`parseDocument` en una carrera. Barrido sobre todos los cargadores que parsean un
+directorio: **cuatro archivos con la forma, cinco defectos**.
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 13 | `NpcData` | el id de clan de NPC se deriva del tamaño del mapa | alta |
+| 14 | `NpcData` | dos hilos con el mismo id de NPC pierden una definición entera | alta |
+| 15 | `SpawnData` | el id de plantilla de spawn se deriva del tamaño del mapa | media |
+| 16 | `SkillTreeData` | dos archivos que definen la misma clase pierden un árbol | media |
+| 17 | `SkillTreeData` | `_parentClassMap` es un `LinkedHashMap` plano escrito en paralelo | media |
+
+**13 y 15 — Un id sacado del tamaño del mapa.** Los dos escriben la misma forma:
+
+```java
+final int newId = _mapa.size();
+_mapa.put(newId, valor);
+```
+
+Dos hilos con **nombres distintos** leen el mismo tamaño y escriben el mismo id.
+En `NpcData` eso da dos clanes de NPC sin relación compartiendo un id, y
+`AttackableAI` usa esos ids para decidir a qué vecinos llama un NPC cuando lo
+atacan: un choque hace que NPCs de un clan respondan a los llamados de otro. Los
+datos distribuidos definen **105 nombres de clan repartidos en 77 archivos**. En
+`SpawnData` da dos archivos de spawn compartiendo una plantilla y un nombre de
+archivo perdido. Los dos ids salen ahora de un `AtomicInteger`.
+
+**14 y 16 — La rama de fusión que nunca corre.** Los dos escriben
+`get` → `if (null) crear y poner` → `else fusionar`. Dos hilos que se encuentran
+con la misma clave **los dos ven null**, los dos construyen, y un `put` pisa al
+otro: la definición perdedora se descarta entera en vez de fusionarse por la rama
+que existe justamente para eso.
+
+Que importe se puede medir: **29 de los ids de NPC distribuidos están definidos en
+más de un archivo**, que es por qué la rama `else` está escrita.
+
+### Cómo se cubrió el área
+
+De los 71 archivos se leyeron línea por línea `SchemeBufferTable`, los cinco
+cargadores que `//reload` reescribe, los cuatro de `sql/`, y las partes de
+`NpcData`, `SpawnData` y `SkillTreeData` donde se construye y se consulta el
+estado compartido — más `MultiSellChoose`, `RequestAcquireSkill`, `SkillList`,
+`TradeList` y `SchemeBuffer`, que están fuera del paquete pero son el otro extremo
+de éstos.
+
+Sobre los **71** se corrieron seis barridos mecánicos, cada uno derivado de un
+defecto ya encontrado:
+
+1. **operación compuesta sobre colección concurrente** — 5 candidatos;
+2. **`containsKey` seguido de `get`** — 12 candidatos;
+3. **división o módulo por variable** — 4 candidatos, los dos de geometría con su
+   denominador cero ya chequeado;
+4. **colección plana mutada en caliente** — 23 archivos, cruzados contra la lista
+   de `//reload`;
+5. **producto ensanchado tarde** — 2 aciertos en todo el core y el datapack;
+6. **parseo paralelo con lectura-luego-escritura** — 4 archivos, 5 defectos.
+
+El sexto es el que más rindió, y salió de preguntar por qué `ZoneManager.addZone`
+podía perder una zona: la respuesta —que los XML se parsean en paralelo por
+defecto— aplicaba a todos los cargadores, no solo a ése.
 
 ### Cuarta vuelta: el aprendizaje de skills
 
