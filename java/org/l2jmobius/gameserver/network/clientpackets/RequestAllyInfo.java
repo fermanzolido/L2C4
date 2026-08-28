@@ -20,6 +20,7 @@
  */
 package org.l2jmobius.gameserver.network.clientpackets;
 
+import org.l2jmobius.gameserver.data.sql.ClanTable;
 import org.l2jmobius.gameserver.model.actor.Player;
 import org.l2jmobius.gameserver.model.clan.ClanInfo;
 import org.l2jmobius.gameserver.network.SystemMessageId;
@@ -47,7 +48,10 @@ public class RequestAllyInfo extends ClientPacket
 		
 		SystemMessage sm;
 		final int allianceId = player.getAllyId();
-		if (allianceId > 0)
+		
+		// The id has to resolve to a clan, not merely be positive. AllianceInfo's constructor
+		// looks it up and dereferences the answer on the next line.
+		if ((allianceId > 0) && (ClanTable.getInstance().getClan(allianceId) != null))
 		{
 			final AllianceInfo ai = new AllianceInfo(allianceId);
 			player.sendPacket(ai);

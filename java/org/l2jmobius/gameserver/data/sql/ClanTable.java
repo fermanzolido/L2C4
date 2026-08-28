@@ -250,6 +250,26 @@ public class ClanTable
 		}
 		
 		clan.broadcastToOnlineMembers(new SystemMessage(SystemMessageId.CLAN_HAS_DISPERSED));
+		
+		// Detach the alliance before the clan goes. Clan.dissolveAlly clears ally_id on every
+		// member clan, but this path never called it, so destroying the clan that led an
+		// alliance left each of its allies holding an ally id that resolves to nothing -- in
+		// memory and in clan_data, so it survives a restart. AllianceInfo looks that id up and
+		// dereferences the result, which is how it surfaces.
+		if (clan.getAllyId() == clanId)
+		{
+			for (Clan ally : getClanAllies(clanId))
+			{
+				if (ally.getId() != clanId)
+				{
+					ally.setAllyId(0);
+					ally.setAllyName(null);
+					ally.setAllyPenaltyExpiryTime(0, 0);
+					ally.updateClanInDB();
+				}
+			}
+		}
+		
 		final int castleId = clan.getCastleId();
 		if (castleId == 0)
 		{
