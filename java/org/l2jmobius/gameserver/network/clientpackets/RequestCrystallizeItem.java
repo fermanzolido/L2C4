@@ -103,7 +103,9 @@ public class RequestCrystallizeItem extends ClientPacket
 			
 			if (_count > item.getCount())
 			{
-				_count = player.getInventory().getItemByObjectId(_objectId).getCount();
+				// This was a second lookup of the item just tested above, which reopened the
+				// window for it to be gone by now.
+				_count = item.getCount();
 			}
 		}
 		

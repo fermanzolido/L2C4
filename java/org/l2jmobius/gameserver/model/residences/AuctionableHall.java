@@ -156,8 +156,15 @@ public class AuctionableHall extends ClanHall
 					return;
 				}
 				
+				// The clan was already in hand, and looked up twice more below. Each lookup was
+				// a fresh chance for it to be gone, and none of them tested the answer.
 				final Clan clan = ClanTable.getInstance().getClan(getOwnerId());
-				if (ClanTable.getInstance().getClan(getOwnerId()).getWarehouse().getAdena() >= getLease())
+				if (clan == null)
+				{
+					return;
+				}
+				
+				if (clan.getWarehouse().getAdena() >= getLease())
 				{
 					if (_paidUntil != 0)
 					{
@@ -171,7 +178,7 @@ public class AuctionableHall extends ClanHall
 						_paidUntil = _time + CH_RATE;
 					}
 					
-					ClanTable.getInstance().getClan(getOwnerId()).getWarehouse().destroyItemByItemId(ItemProcessType.FEE, Inventory.ADENA_ID, getLease(), null, null);
+					clan.getWarehouse().destroyItemByItemId(ItemProcessType.FEE, Inventory.ADENA_ID, getLease(), null, null);
 					ThreadPool.schedule(new FeeTask(), _paidUntil - _time);
 					_paid = true;
 					updateDb();

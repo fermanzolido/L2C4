@@ -39,6 +39,7 @@ import org.l2jmobius.commons.util.StringUtil;
 import org.l2jmobius.gameserver.communitybbs.Manager.ForumsBBSManager;
 import org.l2jmobius.gameserver.config.GeneralConfig;
 import org.l2jmobius.gameserver.managers.CHSiegeManager;
+import org.l2jmobius.gameserver.managers.CastleManager;
 import org.l2jmobius.gameserver.managers.ClanHallAuctionManager;
 import org.l2jmobius.gameserver.managers.IdManager;
 import org.l2jmobius.gameserver.managers.SiegeManager;
@@ -53,7 +54,9 @@ import org.l2jmobius.gameserver.model.events.holders.actor.player.clan.OnPlayerC
 import org.l2jmobius.gameserver.model.events.holders.clan.OnClanWarFinish;
 import org.l2jmobius.gameserver.model.events.holders.clan.OnClanWarStart;
 import org.l2jmobius.gameserver.model.item.enums.ItemProcessType;
+import org.l2jmobius.gameserver.model.residences.ClanHall;
 import org.l2jmobius.gameserver.model.residences.ClanHallAuction;
+import org.l2jmobius.gameserver.model.siege.Castle;
 import org.l2jmobius.gameserver.model.siege.Siege;
 import org.l2jmobius.gameserver.model.siege.clanhalls.SiegableHall;
 import org.l2jmobius.gameserver.network.SystemMessageId;
@@ -270,12 +273,24 @@ public class ClanTable
 			}
 		}
 		
+		// Both of these only unregistered the clan from what it did not own. What it did
+		// own was left pointing at a clan that no longer exists: the castle kept its owner
+		// id and the hall kept its owner id with isFree still false, which is the state the
+		// recurring fee tasks look up the owner clan from.
 		final int castleId = clan.getCastleId();
 		if (castleId == 0)
 		{
 			for (Siege siege : SiegeManager.getInstance().getSieges())
 			{
 				siege.removeSiegeClan(clan);
+			}
+		}
+		else
+		{
+			final Castle castle = CastleManager.getInstance().getCastleById(castleId);
+			if (castle != null)
+			{
+				castle.removeOwner(clan);
 			}
 		}
 		
@@ -285,6 +300,20 @@ public class ClanTable
 			for (SiegableHall hall : CHSiegeManager.getInstance().getConquerableHalls().values())
 			{
 				hall.removeAttacker(clan);
+			}
+		}
+		else if (ClanHallTable.getInstance().getAuctionableHallById(hallId) != null)
+		{
+			// Moves the hall back to the free map, clears the owner and frees it.
+			ClanHallTable.getInstance().setFree(hallId);
+		}
+		else
+		{
+			// A siegable hall is in neither of those maps, so setFree would do nothing.
+			final ClanHall hall = ClanHallTable.getInstance().getClanHallById(hallId);
+			if (hall != null)
+			{
+				hall.free();
 			}
 		}
 		
