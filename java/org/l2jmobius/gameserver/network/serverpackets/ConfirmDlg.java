@@ -72,7 +72,18 @@ public class ConfirmDlg extends ServerPacket
 		buffer.writeInt(_systemMessage.getId());
 		if ((params != null) && (params.length > 0))
 		{
-			buffer.writeInt(params.length);
+			// Counted rather than taken from the array length, for the reason in SystemMessage:
+			// the loop skips nulls after the count has already promised them.
+			int paramCount = 0;
+			for (SMParam param : params)
+			{
+				if (param != null)
+				{
+					paramCount++;
+				}
+			}
+			
+			buffer.writeInt(paramCount);
 			for (SMParam param : params)
 			{
 				if (param == null)

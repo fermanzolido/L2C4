@@ -41,7 +41,18 @@ public class NewCharacterSuccess extends ServerPacket
 	public void writeImpl(GameClient client, WritableBuffer buffer)
 	{
 		ServerPackets.CHAR_TEMPLATES.writeId(this, buffer);
-		buffer.writeInt(_chars.size());
+		// Counted rather than taken from the collection size, for the reason in SystemMessage:
+		// the loop skips nulls after the count has already promised them.
+		int templateCount = 0;
+		for (PlayerTemplate chr : _chars)
+		{
+			if (chr != null)
+			{
+				templateCount++;
+			}
+		}
+		
+		buffer.writeInt(templateCount);
 		for (PlayerTemplate chr : _chars)
 		{
 			if (chr == null)

@@ -373,7 +373,22 @@ public class SystemMessage extends ServerPacket
 		}
 		
 		buffer.writeInt(_smId.getId());
-		buffer.writeInt(_params.length);
+		// The count is what will actually be written, not the length of the array. That array
+		// is sized to the parameter count the SystemMessageId declares and filled as addString,
+		// addInt and the rest are called, so a caller that supplies fewer than the message
+		// declares leaves nulls in the tail -- which the loop below skips, after the count has
+		// already promised them. The localisation branch fifteen lines above gets this right:
+		// it iterates _paramIndex, the number actually appended.
+		int paramCount = 0;
+		for (SMParam param : _params)
+		{
+			if (param != null)
+			{
+				paramCount++;
+			}
+		}
+		
+		buffer.writeInt(paramCount);
 		for (SMParam param : _params)
 		{
 			if (param == null)
