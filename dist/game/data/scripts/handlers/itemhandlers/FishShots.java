@@ -79,8 +79,13 @@ public class FishShots implements IItemHandler
 			return false;
 		}
 		
+		// Same ordering as the recipe handler: consume first, grant second.
+		if (!player.destroyItem(ItemProcessType.NONE, item.getObjectId(), 1, null, false))
+		{
+			return false;
+		}
+		
 		player.setChargedShot(ShotType.FISH_SOULSHOTS, true);
-		player.destroyItem(ItemProcessType.NONE, item.getObjectId(), 1, null, false);
 		final WorldObject oldTarget = player.getTarget();
 		player.setTarget(player);
 		

@@ -126,8 +126,17 @@ public class MercTicket implements IItemHandler
 			return false;
 		}
 		
+		// Taken from the inventory first, and the mercenary placed only if it actually went.
+		// destroyItem answers false when the item is no longer there -- a second use of the same
+		// ticket arriving alongside the first, for one -- and that answer was being discarded
+		// after the mercenary had already been hired and its world ticket created, so one ticket
+		// could stand up two mercenaries.
+		if (!player.destroyItem(ItemProcessType.NONE, item.getObjectId(), 1, null, false))
+		{
+			return false;
+		}
+		
 		MercTicketManager.getInstance().addTicket(item.getId(), player);
-		player.destroyItem(ItemProcessType.NONE, item.getObjectId(), 1, null, false); // Remove item from char's inventory
 		final SystemMessage sm = new SystemMessage(SystemMessageId.PLACE_S1_IN_THE_CURRENT_LOCATION_AND_DIRECTION_DO_YOU_WISH_TO_CONTINUE);
 		sm.addItemName(item.getId());
 		player.sendPacket(sm);

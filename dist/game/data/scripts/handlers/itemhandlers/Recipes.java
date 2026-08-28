@@ -102,6 +102,15 @@ public class Recipes implements IItemHandler
 			return false;
 		}
 		
+		// Taken from the inventory before the recipe is learned, and learned only if the book
+		// actually went. destroyItem answers false when the item is no longer there, and that
+		// answer was being discarded after the registration, so a player could end up holding
+		// both the book and the recipe it teaches.
+		if (!player.destroyItem(ItemProcessType.NONE, item.getObjectId(), 1, null, false))
+		{
+			return false;
+		}
+		
 		if (rp.isDwarvenRecipe())
 		{
 			player.registerDwarvenRecipeList(rp, true);
@@ -110,8 +119,6 @@ public class Recipes implements IItemHandler
 		{
 			player.registerCommonRecipeList(rp, true);
 		}
-		
-		player.destroyItem(ItemProcessType.NONE, item.getObjectId(), 1, null, false);
 		final SystemMessage sm = new SystemMessage(SystemMessageId.S1_HAS_BEEN_ADDED);
 		sm.addItemName(item);
 		player.sendPacket(sm);
