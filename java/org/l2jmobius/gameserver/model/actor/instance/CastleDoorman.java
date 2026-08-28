@@ -42,11 +42,13 @@ public class CastleDoorman extends Doorman
 		final StringTokenizer st = new StringTokenizer(command.substring(10), ", ");
 		st.nextToken();
 		
+		// A spatial search on every call, run twice per door; the hall does not move.
+		final SiegableHall hall = getConquerableHall();
 		while (st.hasMoreTokens())
 		{
-			if (getConquerableHall() != null)
+			if (hall != null)
 			{
-				getConquerableHall().openCloseDoor(Integer.parseInt(st.nextToken()), true);
+				hall.openCloseDoor(Integer.parseInt(st.nextToken()), true);
 			}
 			else
 			{
@@ -61,11 +63,13 @@ public class CastleDoorman extends Doorman
 		final StringTokenizer st = new StringTokenizer(command.substring(11), ", ");
 		st.nextToken();
 		
+		// A spatial search on every call, run twice per door; the hall does not move.
+		final SiegableHall hall = getConquerableHall();
 		while (st.hasMoreTokens())
 		{
-			if (getConquerableHall() != null)
+			if (hall != null)
 			{
-				getConquerableHall().openCloseDoor(Integer.parseInt(st.nextToken()), false);
+				hall.openCloseDoor(Integer.parseInt(st.nextToken()), false);
 			}
 			else
 			{

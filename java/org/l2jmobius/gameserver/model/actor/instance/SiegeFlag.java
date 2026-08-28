@@ -32,6 +32,7 @@ import org.l2jmobius.gameserver.model.actor.status.SiegeFlagStatus;
 import org.l2jmobius.gameserver.model.actor.templates.NpcTemplate;
 import org.l2jmobius.gameserver.model.clan.Clan;
 import org.l2jmobius.gameserver.model.siege.Siegable;
+import org.l2jmobius.gameserver.model.siege.clanhalls.SiegableHall;
 import org.l2jmobius.gameserver.model.siege.SiegeClan;
 import org.l2jmobius.gameserver.model.skill.Skill;
 import org.l2jmobius.gameserver.network.SystemMessageId;
@@ -169,7 +170,9 @@ public class SiegeFlag extends Npc
 	public void reduceCurrentHp(double damage, Creature attacker, Skill skill)
 	{
 		super.reduceCurrentHp(damage, attacker, skill);
-		if (canTalk() && (((getCastle() != null) && getCastle().getSiege().isInProgress()) || ((getConquerableHall() != null) && getConquerableHall().isInSiege())) && (_clan != null))
+		// getConquerableHall is a spatial search on every call; it was run twice here.
+		final SiegableHall hall = getConquerableHall();
+		if (canTalk() && (((getCastle() != null) && getCastle().getSiege().isInProgress()) || ((hall != null) && hall.isInSiege())) && (_clan != null))
 		{
 			// send warning to owners of headquarters that theirs base is under attack
 			_clan.broadcastToOnlineMembers(new SystemMessage(SystemMessageId.YOUR_BASE_IS_BEING_ATTACKED));

@@ -24,6 +24,7 @@ import org.l2jmobius.gameserver.config.custom.ClassBalanceConfig;
 import org.l2jmobius.gameserver.data.xml.ExperienceData;
 import org.l2jmobius.gameserver.data.xml.PetDataTable;
 import org.l2jmobius.gameserver.model.actor.Creature;
+import org.l2jmobius.gameserver.model.item.instance.Item;
 import org.l2jmobius.gameserver.model.actor.instance.Pet;
 import org.l2jmobius.gameserver.model.skill.Skill;
 import org.l2jmobius.gameserver.model.stats.Stat;
@@ -98,9 +99,12 @@ public class PetStat extends SummonStat
 		// Send a Server->Client packet PetInfo to the Player
 		pet.updateAndBroadcastStatus(1);
 		
-		if (pet.getControlItem() != null)
+		// getControlItem looks the item up in the owner's inventory every call, so the
+		// second one need not answer what the first did.
+		final Item controlItem = pet.getControlItem();
+		if (controlItem != null)
 		{
-			pet.getControlItem().setEnchantLevel(getLevel());
+			controlItem.setEnchantLevel(getLevel());
 		}
 		
 		return levelIncreased;
@@ -156,9 +160,12 @@ public class PetStat extends SummonStat
 		
 		pet.startFeed();
 		
-		if (pet.getControlItem() != null)
+		// getControlItem looks the item up in the owner's inventory every call, so the
+		// second one need not answer what the first did.
+		final Item controlItem = pet.getControlItem();
+		if (controlItem != null)
 		{
-			pet.getControlItem().setEnchantLevel(getLevel());
+			controlItem.setEnchantLevel(getLevel());
 		}
 	}
 	

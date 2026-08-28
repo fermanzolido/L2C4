@@ -491,7 +491,8 @@ public class ClanHallManager extends Merchant
 									val = st.nextToken();
 									final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 									html.setFile(player, "data/html/clanHallManager/functions-apply_confirmed.htm");
-									if ((getClanHall().getFunction(ClanHall.FUNC_RESTORE_HP) != null) && (getClanHall().getFunction(ClanHall.FUNC_RESTORE_HP).getLevel() == Integer.parseInt(val)))
+									final ClanHallFunction appliedRestoreHp = getClanHall().getFunction(ClanHall.FUNC_RESTORE_HP);
+									if ((appliedRestoreHp != null) && (appliedRestoreHp.getLevel() == Integer.parseInt(val)))
 									{
 										html.setFile(player, "data/html/clanHallManager/functions-used.htm");
 										html.replace("%val%", val + "%");
@@ -597,7 +598,8 @@ public class ClanHallManager extends Merchant
 									val = st.nextToken();
 									final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 									html.setFile(player, "data/html/clanHallManager/functions-apply_confirmed.htm");
-									if ((getClanHall().getFunction(ClanHall.FUNC_RESTORE_MP) != null) && (getClanHall().getFunction(ClanHall.FUNC_RESTORE_MP).getLevel() == Integer.parseInt(val)))
+									final ClanHallFunction appliedRestoreMp = getClanHall().getFunction(ClanHall.FUNC_RESTORE_MP);
+									if ((appliedRestoreMp != null) && (appliedRestoreMp.getLevel() == Integer.parseInt(val)))
 									{
 										html.setFile(player, "data/html/clanHallManager/functions-used.htm");
 										html.replace("%val%", val + "%");
@@ -663,7 +665,8 @@ public class ClanHallManager extends Merchant
 									val = st.nextToken();
 									final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 									html.setFile(player, "data/html/clanHallManager/functions-apply_confirmed.htm");
-									if ((getClanHall().getFunction(ClanHall.FUNC_RESTORE_EXP) != null) && (getClanHall().getFunction(ClanHall.FUNC_RESTORE_EXP).getLevel() == Integer.parseInt(val)))
+									final ClanHallFunction appliedRestoreExp = getClanHall().getFunction(ClanHall.FUNC_RESTORE_EXP);
+									if ((appliedRestoreExp != null) && (appliedRestoreExp.getLevel() == Integer.parseInt(val)))
 									{
 										html.setFile(player, "data/html/clanHallManager/functions-used.htm");
 										html.replace("%val%", val + "%");
@@ -1096,7 +1099,8 @@ public class ClanHallManager extends Merchant
 									val = st.nextToken();
 									final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 									html.setFile(player, "data/html/clanHallManager/functions-apply_confirmed.htm");
-									if ((getClanHall().getFunction(ClanHall.FUNC_ITEM_CREATE) != null) && (getClanHall().getFunction(ClanHall.FUNC_ITEM_CREATE).getLevel() == Integer.parseInt(val)))
+									final ClanHallFunction appliedItemCreate = getClanHall().getFunction(ClanHall.FUNC_ITEM_CREATE);
+									if ((appliedItemCreate != null) && (appliedItemCreate.getLevel() == Integer.parseInt(val)))
 									{
 										html.setFile(player, "data/html/clanHallManager/functions-used.htm");
 										html.replace("%val%", "Stage " + val);
@@ -1153,7 +1157,8 @@ public class ClanHallManager extends Merchant
 									val = st.nextToken();
 									final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 									html.setFile(player, "data/html/clanHallManager/functions-apply_confirmed.htm");
-									if ((getClanHall().getFunction(ClanHall.FUNC_TELEPORT) != null) && (getClanHall().getFunction(ClanHall.FUNC_TELEPORT).getLevel() == Integer.parseInt(val)))
+									final ClanHallFunction appliedTeleport = getClanHall().getFunction(ClanHall.FUNC_TELEPORT);
+									if ((appliedTeleport != null) && (appliedTeleport.getLevel() == Integer.parseInt(val)))
 									{
 										html.setFile(player, "data/html/clanHallManager/functions-used.htm");
 										html.replace("%val%", "Stage " + val);
@@ -1204,7 +1209,8 @@ public class ClanHallManager extends Merchant
 									val = st.nextToken();
 									final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 									html.setFile(player, "data/html/clanHallManager/functions-apply_confirmed.htm");
-									if ((getClanHall().getFunction(ClanHall.FUNC_SUPPORT) != null) && (getClanHall().getFunction(ClanHall.FUNC_SUPPORT).getLevel() == Integer.parseInt(val)))
+									final ClanHallFunction appliedSupport = getClanHall().getFunction(ClanHall.FUNC_SUPPORT);
+									if ((appliedSupport != null) && (appliedSupport.getLevel() == Integer.parseInt(val)))
 									{
 										html.setFile(player, "data/html/clanHallManager/functions-used.htm");
 										html.replace("%val%", "Stage " + val);
@@ -1468,7 +1474,8 @@ public class ClanHallManager extends Merchant
 									val = st.nextToken();
 									final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 									html.setFile(player, "data/html/clanHallManager/functions-apply_confirmed.htm");
-									if ((getClanHall().getFunction(ClanHall.FUNC_DECO_CURTAINS) != null) && (getClanHall().getFunction(ClanHall.FUNC_DECO_CURTAINS).getLevel() == Integer.parseInt(val)))
+									final ClanHallFunction appliedCurtains = getClanHall().getFunction(ClanHall.FUNC_DECO_CURTAINS);
+									if ((appliedCurtains != null) && (appliedCurtains.getLevel() == Integer.parseInt(val)))
 									{
 										html.setFile(player, "data/html/clanHallManager/functions-used.htm");
 										html.replace("%val%", "Stage " + val);
@@ -1519,7 +1526,8 @@ public class ClanHallManager extends Merchant
 									val = st.nextToken();
 									final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 									html.setFile(player, "data/html/clanHallManager/functions-apply_confirmed.htm");
-									if ((getClanHall().getFunction(ClanHall.FUNC_DECO_FRONTPLATEFORM) != null) && (getClanHall().getFunction(ClanHall.FUNC_DECO_FRONTPLATEFORM).getLevel() == Integer.parseInt(val)))
+									final ClanHallFunction appliedFrontPlatform = getClanHall().getFunction(ClanHall.FUNC_DECO_FRONTPLATEFORM);
+									if ((appliedFrontPlatform != null) && (appliedFrontPlatform.getLevel() == Integer.parseInt(val)))
 									{
 										html.setFile(player, "data/html/clanHallManager/functions-used.htm");
 										html.replace("%val%", "Stage " + val);

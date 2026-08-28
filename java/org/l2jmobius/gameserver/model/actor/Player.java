@@ -259,6 +259,7 @@ import org.l2jmobius.gameserver.model.zone.type.BossZone;
 import org.l2jmobius.gameserver.model.zone.type.WaterZone;
 import org.l2jmobius.gameserver.network.Disconnection;
 import org.l2jmobius.gameserver.network.GameClient;
+import org.l2jmobius.gameserver.network.holders.ClientHardwareInfoHolder;
 import org.l2jmobius.gameserver.network.SystemMessageId;
 import org.l2jmobius.gameserver.network.enums.ChatType;
 import org.l2jmobius.gameserver.network.enums.HtmlActionScope;
@@ -10537,9 +10538,24 @@ public class Player extends Playable {
 						PunishmentType.JAIL) //
 				|| PunishmentManager.getInstance().hasPunishment(getIPAddress(), PunishmentAffect.IP,
 						PunishmentType.JAIL) //
-				|| ((_client != null) && (_client.getHardwareInfo() != null)
-						&& PunishmentManager.getInstance().hasPunishment(_client.getHardwareInfo().getMacAddress(),
-								PunishmentAffect.HWID, PunishmentType.JAIL));
+				|| hasHardwarePunishment(PunishmentType.JAIL);
+	}
+
+	/**
+	 * @param type the punishment to look for
+	 * @return {@code true} when this character's hardware carries it. The client is read
+	 *         once: it is cleared when the player disconnects, and the expression that
+	 *         used to do this read it three times.
+	 */
+	private boolean hasHardwarePunishment(PunishmentType type) {
+		final GameClient client = _client;
+		if (client == null) {
+			return false;
+		}
+
+		final ClientHardwareInfoHolder hwInfo = client.getHardwareInfo();
+		return (hwInfo != null)
+				&& PunishmentManager.getInstance().hasPunishment(hwInfo.getMacAddress(), PunishmentAffect.HWID, type);
 	}
 
 	/**
@@ -10552,9 +10568,7 @@ public class Player extends Playable {
 						PunishmentType.CHAT_BAN) //
 				|| PunishmentManager.getInstance().hasPunishment(getIPAddress(), PunishmentAffect.IP,
 						PunishmentType.CHAT_BAN) //
-				|| ((_client != null) && (_client.getHardwareInfo() != null)
-						&& PunishmentManager.getInstance().hasPunishment(_client.getHardwareInfo().getMacAddress(),
-								PunishmentAffect.HWID, PunishmentType.CHAT_BAN));
+				|| hasHardwarePunishment(PunishmentType.CHAT_BAN);
 	}
 
 	public void startFameTask(long delay, int fameFixRate) {
