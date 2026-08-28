@@ -18,7 +18,9 @@ package handlers.effecthandlers;
 
 import org.l2jmobius.gameserver.managers.MapRegionManager;
 import org.l2jmobius.gameserver.model.StatSet;
+import org.l2jmobius.gameserver.model.Spawn;
 import org.l2jmobius.gameserver.model.actor.Creature;
+import org.l2jmobius.gameserver.model.actor.Player;
 import org.l2jmobius.gameserver.model.actor.enums.player.TeleportWhereType;
 import org.l2jmobius.gameserver.model.actor.instance.Guard;
 import org.l2jmobius.gameserver.model.conditions.Condition;
@@ -63,13 +65,25 @@ public class Escape extends AbstractEffect
 		
 		if (effected instanceof Guard)
 		{
-			effected.teleToLocation(effected.asNpc().getSpawn());
-			effected.setHeading(effected.asNpc().getSpawn().getHeading());
+			final Spawn spawn = effected.asNpc().getSpawn();
+			if (spawn != null)
+			{
+				effected.teleToLocation(spawn);
+				effected.setHeading(spawn.getHeading());
+			}
 		}
 		else
 		{
 			effected.teleToLocation(MapRegionManager.getInstance().getTeleToLocation(effected, _escapeType), true);
-			effected.asPlayer().setIn7sDungeon(false);
+			
+			// This branch took the effected for a player. asPlayer answers null for anything
+			// else, and the teleport above has already happened by the time it does.
+			final Player player = effected.asPlayer();
+			if (player != null)
+			{
+				player.setIn7sDungeon(false);
+			}
+			
 			effected.setInstanceId(0);
 		}
 	}

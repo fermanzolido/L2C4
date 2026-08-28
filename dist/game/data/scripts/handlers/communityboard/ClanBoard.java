@@ -326,7 +326,16 @@ public class ClanBoard implements IWriteBoardHandler
 	
 	private void clanHome(Player player)
 	{
-		clanHome(player, player.getClan().getId());
+		// The _bbsclan_clanhome branch reaches this with no clan check of its own, unlike
+		// the _bbsclan branch above it, which sends a clanless player to the clan list.
+		final Clan clan = player.getClan();
+		if (clan == null)
+		{
+			clanList(player, 1);
+			return;
+		}
+		
+		clanHome(player, clan.getId());
 	}
 	
 	private void clanHome(Player player, int clanId)

@@ -130,8 +130,10 @@ public class NpcActionShift implements IActionShiftHandler
 					html.replace("%resp%", (target.asNpc().getSpawn().getRespawnMinDelay() / 1000) + " sec");
 				}
 				
+				// The template id is not necessarily one SpawnData knows, and its answer for
+				// one it does not know is null.
 				final String spawnFile = SpawnData.getInstance().getSpawnFile(target.asNpc().getSpawn().getNpcSpawnTemplateId());
-				html.replace("%spawnfile%", spawnFile.substring(spawnFile.lastIndexOf('\\') + 1));
+				html.replace("%spawnfile%", spawnFile == null ? "None" : spawnFile.substring(spawnFile.lastIndexOf('\\') + 1));
 			}
 			else
 			{
