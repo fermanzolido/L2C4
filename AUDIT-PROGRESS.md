@@ -1536,9 +1536,8 @@ Son **71** archivos y **14.922** líneas: los cargadores XML (41), las tablas SQ
 (10), los holders (12) y algunos sueltos.
 
 **Leído:** `SchemeBufferTable` entero, y de los cargadores todo lo que el comando
-`//reload` toca. **Pendiente:** `sql/` (`OfflineTraderTable` 627, `ClanTable` 606,
-`OfflinePlayTable` 417, `ClanHallTable` 325) y los cargadores grandes
-(`SkillTreeData` 969, `NpcData` 847, `SpawnData` 817).
+`//reload` toca. **Pendiente:** `OfflinePlayTable` (417) y los cargadores grandes
+(`SkillTreeData` 969, `NpcData` 847, `SpawnData` 817, `MultisellData` 472).
 
 ### Hallazgos
 
@@ -1594,6 +1593,66 @@ cada esquema un `ArrayList` plano, y el NPC del buffer muta los dos desde hilos
 de paquetes. Un solo jugador editando durante la cuenta regresiva puede tirar una
 modificación concurrente fuera del bucle, y el `catch` que lo envuelve **abandona
 el `executeBatch` entero**: no los esquemas de ese jugador, los de todos.
+
+### Segunda vuelta: `data/sql`
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 9 | `ClanHallTable` | `setOwner` mueve el hall entre mapas y **después** desreferencia un clan que puede no existir | alta |
+| 10 | `ClanHallTable` | `setFree` mete en un `ConcurrentHashMap` el null que devuelve un `get` | media |
+
+**9 — Tirar con el hall ya movido.** `setOwner` recibe el `Clan` como parámetro y
+sin embargo escribe:
+
+```java
+ClanTable.getInstance().getClan(clan.getId()).setHideoutId(chId);
+```
+
+Volver a buscarlo por id y desreferenciar la respuesta significa que un clan
+disuelto entre ganar la subasta y el cierre de ésta **tira acá** — y para ese
+momento el hall ya salió de `_freeClanHall` y entró en `_clanHall`. El hall queda
+registrado como poseído sin dueño puesto. Ahora se resuelve el hall antes de
+mover nada y se usa el clan que ya está en la mano.
+
+**10 — Un null que el mapa rechaza.** `setFree` empezaba metiendo
+`_clanHall.get(chId)` en `_freeClanHall`. Un hall que no está poseído no está en
+`_clanHall`, así que ese `get` da null, y un `ConcurrentHashMap` **rechaza
+valores nulos**. Alcanzable con `//siege` sobre un hall que ya está libre.
+
+### Sospechas evaluadas y descartadas (`data/sql`)
+
+- **La tienda privada listando ítems que no son del vendedor.**
+  `SetPrivateStoreListSell` va del id de objeto que manda el cliente directo a
+  `TradeList.addItem(objectId, ...)` **sin** `validateItemManipulation` — mientras
+  que `AddTradeItem`, el camino hermano de la ventana de intercambio, **sí** lo
+  llama. Y `addItem` busca con `World.findObject(objectId)`, que encuentra
+  cualquier ítem del mundo, y su chequeo de manipulación es por id de plantilla,
+  no de instancia.
+
+  Parecía duplicación. **No lo es:** `privateStoreBuy` llama a `validate()` antes
+  de mover nada, y `validate()` corre `_owner.checkItemManipulation` sobre cada
+  ítem listado. Un listado con un objeto ajeno pasa el armado y falla en la
+  compra, que además cierra la tienda con `lock()`. La puerta de pertenencia está
+  río abajo.
+
+- **`OfflineTraderTable` guardando la instancia en un caso y la plantilla en
+  otro.** En `SELL` persiste `i.getObjectId()` y en `BUY` `i.getItem().getId()`.
+  Es deliberado y simétrico: la restauración usa `addItem(objectId, ...)` para uno
+  y `addItemByItemId(itemId, ...)` para el otro.
+
+- **Filas huérfanas en `character_offline_trade_items`.** El `catch` por jugador
+  está dentro del bucle, así que una excepción después de batchear ítems pero
+  antes de batchear la fila de dueño deja ítems sin dueño. La restauración lee
+  desde la tabla de dueños y filtra por `charId`, así que nunca los ve, y el
+  siguiente guardado limpia las dos tablas.
+
+- **El `continue` dentro de los `case` de `storeOffliners`**, que saltea el
+  `addBatch` de la fila de dueño. Está colocado **antes** del bucle que batchea
+  ítems en los tres casos, así que no deja ítems sin dueño.
+
+- **`ClanTable` y las otras tablas SQL.** `_clans` y `_clansByName` ya son
+  `ConcurrentHashMap`; `_allAuctionableClanHalls` es plano pero solo se escribe en
+  la carga.
 
 ### Método
 
