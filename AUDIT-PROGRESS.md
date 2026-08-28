@@ -3415,3 +3415,117 @@ porque es lo que impide volver a correrlo.
 El hallazgo 6 no salió de leer `ClanTable`: salió de que un barrido del área
 llegó hasta `RequestSetAllyCrest`, que resultó guardado, y al mirar por qué
 apareció la pregunta de qué pasa con un clan destruido que era dueño de algo.
+
+---
+
+## datapack `handlers/` — EN CURSO
+
+375 archivos, 51.203 líneas, repartidos en doce carpetas. Las dos grandes son
+`admincommandhandlers` (75 archivos, 19.522 líneas) y `effecthandlers` (145,
+12.156).
+
+### La medición que decidió treinta candidatos de una
+
+Antes de tocar nada había que contestar: **¿cuánto texto tecleado por el jugador
+llega de verdad a estos manejadores?** Porque los bypasses pasan por
+`validateHtmlAction`, y de eso depende si un `Integer.parseInt` sin guarda es un
+defecto o está parseando texto que escribió el propio servidor.
+
+`validateHtmlAction` es **coincidencia exacta**, salvo cuando la acción cacheada
+termina en el carácter de parámetro variable (`$`), donde pasa a ser coincidencia
+de **prefijo** — o sea, texto arbitrario detrás.
+
+Sobre el html distribuido: de **7.746** bypasses, **297** terminan en parámetro
+variable. **286 de ésos son de administración**, y `AdminCommandHandler` envuelve
+cada manejador en un `catch (RuntimeException)` que le informa al GM el comando
+que falló. Quedan **once** sitios donde texto de un jugador común llega a un
+manejador, y los once **ya guardan**: `SevenSigns` envuelve sus dos montos
+tecleados con página de error, `Auctioneer` tiene la puja en `try/catch`
+anidados.
+
+Eso descarta de una los **20** sitios de `split` indexado de los comandos de
+administración y los **27** parses de los manejadores de bypass.
+
+### Pero la misma medición destapó lo contrario
+
+**`_bbs` está en la lista de prefijos que saltean la validación entera.** Todo el
+tablero comunitario recibe lo que el cliente mandó, campo por campo.
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 1 | `HomeBoard` | cuatro servicios pagos que cobran con la respuesta descartada | **alta** |
+| 2 | `Loto` | paga el premio antes de tomar el boleto | **alta** |
+| 3 | `DropSearchBoard` | id, página y caché sin comprobar | media |
+| 4 | `FriendsBoard`, `MailBoard` | el token de acción de un tokenizador que puede no tenerlo | media |
+| 5 | `HomeBoard`, `ClanBoard`, `FavoriteBoard` | tres conversiones más sin acotar | media |
+| 6 | `ClanBoard` | una rama llega a leer el id del clan sin comprobarlo | media |
+| 7 | `RebalanceHP` | cero sobre cero hacia `setCurrentHp` | media |
+| 8 | `Escape` | la rama del jugador asume que el afectado lo es | media |
+| 9 | `NpcActionShift` | el archivo de spawn de una plantilla desconocida | baja |
+| 10 | `AdminDebug` | dos búsquedas que la tarea puede sobrevivir | baja |
+| 11 | `AdminSkill` | el guardado de un GM en una única ranura estática | media |
+| 12 | `AutoPlay`, `ClanHandler`, `ChatAdmin` | ocho parámetros tecleados sin comprobar | media |
+
+**1 y 2 — El orden del cobro.** Cinco ramas del tablero (buffs, teleport, heal,
+delevel, premium) tomaban la tarifa con la respuesta **descartada** y entregaban
+igual. La de teleport además bajaba las habilidades del jugador y mandaba el
+paquete del tablero *antes* de intentar el cobro. Y `Loto` paga el premio antes
+de tomar el boleto, descartando si lo tomó.
+
+Arreglada primero la de buffs, dejar las otras cuatro era la inconsistencia; cada
+una otorga ahora dentro del resultado del propio cobro.
+
+**11 — Una ranura para todos.** `AdminSkill` guarda las habilidades propias de un
+GM mientras lleva puestas las de otro jugador. El campo es estático: dos GMs
+usándolo a la vez se intercambian los conjuntos, y el que restaura primero vacía
+la ranura y deja al otro con el aviso de que nunca tomó nada.
+
+**12 — Uno de siete lo hacía bien.** `AutoPlay` lee siete números de lo que el
+jugador tecleó; el del porcentaje de poción prueba con `isNumeric` y los otros
+seis van derecho a `parseInt`. Ése es el delator. Y `isNumeric` sola tampoco
+alcanza en ningún lado: prueba que los caracteres son dígitos, no que el número
+entre en un int. `ClanHandler` prueba `startsWith("privileges")` —diez
+caracteres— y corta con `substring(11)`.
+
+### El pendiente arrastrado desde `serverpackets`, cerrado
+
+`BuffInfo.initializeEffects` saltea `onStart` cuando el objetivo está muerto y la
+habilidad no es pasiva; `finishEffects` llama `onExit` **sin condición**. La
+premisa era exacta.
+
+Pero no cuesta nada: barridos los **145** manejadores de efecto buscando un campo
+escrito en `onStart` y leído en `onExit` —**cero**— y `onExit` que mute de forma
+relativa —**dos**, `Disarm` y `Distrust`, y los dos guardan—. El hilo no vuelve.
+
+### Sospechas evaluadas y descartadas, con lo que las descarta
+
+- **La división por defensa** (`EnergyDamage`). No es una guarda faltante sino
+  cómo este código calcula daño en todos lados: `Formulas` sola divide por
+  `defence` en ocho lugares. Se descarta como clase, no se parchea en un
+  manejador suelto.
+
+- **Los arreglos de `ClassBalanceConfig` indexados por id de clase.** Los **37**
+  miden **119**, y el id más alto del enum `PlayerClass` es **118**. El tamaño
+  está elegido a propósito; el índice entra por construcción.
+
+- **Duplicar una cosecha.** `Attackable.takeHarvest()` es `getAndSet(null)`, y
+  `takeSweep()` igual: la segunda llamada recibe null y la guarda de arriba hace
+  el resto.
+
+- **Los 18 productos que el barrido de ensanchamiento marcó en los efectos.** Son
+  todos `double` por `double`: `_power` está declarado `double` en
+  `AbstractEffect`.
+
+- **El orden en `itemhandlers`.** De los 25, uno solo toma y da, y consume
+  primero con el retorno comprobado.
+
+- **El `SimpleDateFormat` estático de `AdminPunishment`** —la versión clásica de
+  este problema— ya se usa dentro de un `synchronized` sobre sí mismo.
+
+- **La aritmética de `substring` de `ChatGeneral`.** Parece frágil y es segura por
+  construcción: el primer token arranca en el índice cero porque la línea empieza
+  con el punto, y la rama solo corre cuando hay un segundo token, así que el corte
+  siempre cae dentro.
+
+- **Los cuatro `containsKey` seguidos de `get`** son el modismo de conteo sobre
+  mapas locales de un método.
