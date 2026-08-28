@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 import org.w3c.dom.Document;
@@ -63,6 +64,7 @@ import org.l2jmobius.gameserver.util.ArrayUtil;
 public class NpcData implements IXmlReader {
 	private final Map<Integer, NpcTemplate> _npcs = new ConcurrentHashMap<>();
 	private final Map<String, Integer> _clans = new ConcurrentHashMap<>();
+	private final AtomicInteger _clanIdFactory = new AtomicInteger();
 	private static final Collection<Integer> _masterMonsterIDs = ConcurrentHashMap.newKeySet();
 	private static Integer _genericClanId = null;
 
@@ -548,12 +550,22 @@ public class NpcData implements IXmlReader {
 							continue;
 						}
 
-						NpcTemplate template = _npcs.get(npcId);
-						if (template == null) {
-							template = new NpcTemplate(set);
-							_npcs.put(template.getId(), template);
-						} else {
-							template.set(set);
+						// Locked on the map, because npc files are parsed in parallel when ThreadsForLoading
+						// is on and Threads.ini ships it on. Get, create and put as three steps let two
+						// threads meeting the same npc id both find nothing, both build a template, and one
+						// put overwrite the other -- losing that definition entirely rather than merging it.
+						// 29 of the shipped npc ids are defined in more than one file, so this is exercised.
+						// Reads elsewhere go through the ConcurrentHashMap and do not take this lock.
+						final NpcTemplate template;
+						synchronized (_npcs) {
+							final NpcTemplate existing = _npcs.get(npcId);
+							if (existing == null) {
+								template = new NpcTemplate(set);
+								_npcs.put(template.getId(), template);
+							} else {
+								template = existing;
+								template.set(set);
+							}
 						}
 
 						template.setParameters(parameters != null ? new StatSet(Collections.unmodifiableMap(parameters))
@@ -697,13 +709,12 @@ public class NpcData implements IXmlReader {
 	 * @return the clan id for the given clan name
 	 */
 	private int getOrCreateClanId(String clanName) {
-		Integer id = _clans.get(clanName);
-		if (id == null) {
-			id = _clans.size();
-			_clans.put(clanName, id);
-		}
-
-		return id;
+		// One atomic step, and the new id comes from a counter rather than from the map size.
+		// NPC files are parsed in parallel when ThreadsForLoading is on, which Threads.ini ships
+		// as True, so two threads meeting two different clan names could both read the same size
+		// and both store it -- giving two unrelated NPC clans one id. AttackableAI uses these
+		// ids to decide which neighbours an NPC calls for help.
+		return _clans.computeIfAbsent(clanName, key -> _clanIdFactory.getAndIncrement()).intValue();
 	}
 
 	/**
