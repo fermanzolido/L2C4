@@ -38,6 +38,11 @@ public class RequestPledgePowerGradeList extends ClientPacket
 	protected void runImpl()
 	{
 		final Player player = getPlayer();
+		if (player == null)
+		{
+			return;
+		}
+		
 		final Clan clan = player.getClan();
 		if (clan != null)
 		{

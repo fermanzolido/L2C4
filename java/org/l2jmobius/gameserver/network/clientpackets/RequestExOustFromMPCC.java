@@ -38,8 +38,13 @@ public class RequestExOustFromMPCC extends ClientPacket
 	@Override
 	protected void runImpl()
 	{
-		final Player target = World.getInstance().getPlayer(_name);
 		final Player player = getPlayer();
+		if (player == null)
+		{
+			return;
+		}
+		
+		final Player target = World.getInstance().getPlayer(_name);
 		if ((target != null) && target.isInParty() && player.isInParty() && player.getParty().isInCommandChannel() && target.getParty().isInCommandChannel() && player.getParty().getCommandChannel().getLeader().equals(player) && player.getParty().getCommandChannel().equals(target.getParty().getCommandChannel()))
 		{
 			if (player.equals(target))
