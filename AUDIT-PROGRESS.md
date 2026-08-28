@@ -3035,6 +3035,77 @@ La tarea de tasa de `AuctionableHall` buscaba al dueño tres veces, guardaba la
 primera en una variable que no usaba, y no probaba ninguna de las tres. Ahora usa
 la que ya tiene.
 
+### Cuarta vuelta: lectura dirigida de los archivos más grandes
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 7 | `EnterWorld` | mapa estático al que solo se le pone | media |
+| 8 | `EnterWorld` | la instancia buscada sin comprobar | media |
+| 9 | `RequestEnchantItem` | el nivel se loguea después de ponerlo en cero | media |
+| 10 | `TradeList` | la compra de tienda privada divide por un conteo que puede ser cero | **alta** |
+
+**7 — Un caché sin desalojo.** `TRACE_HWINFO` es un `ConcurrentHashMap` estático
+con clave la IP del cliente, y **nada** lo saca: crecía por toda la vida del
+servidor, una entrada por cada IP distinta vista alguna vez. Es un atajo de
+búsqueda cuyo fallo ya está resuelto —la variable de cuenta unas líneas abajo es
+la copia durable—, así que quedó acotado. La función está detrás de
+`EnableHardwareInfo`, que no está en ningún `.ini` distribuido y por código
+arranca en `false`.
+
+**8 — Dos llamadas, una carrera.** `getPlayer(objId)` recorre las instancias
+vivas buscando la que contiene al jugador, así que el id que devuelve existía una
+sentencia antes; `getInstance` sobre una destruida en el medio devolvía null.
+Importa más acá que en cualquier otro paquete porque `ClientPacket.run()` trata a
+`EnterWorld` distinto: una excepción **echa al jugador** en vez de quedar
+logueada y tragada.
+
+**9 — Leer después de escribir.** En el fallo bendito, `item.setEnchantLevel(0)`
+y **después** `if (item.getEnchantLevel() > 0)` para decidir si el log lleva el
+nivel. La rama con nivel estaba muerta: todo fallo bendito quedó registrado como
+si el ítem hubiera sido +0. Sus ramas hermanas —el fallo seguro y el fallo
+normal— leen el nivel antes de mutar. El registro de encantamientos es
+justamente la herramienta forense contra las duplicaciones.
+
+**10 — El hermano de quinientas líneas más abajo.** `privateStoreBuy` recorta el
+conteo pedido a lo que la tienda todavía tiene y después pone `found = true` sin
+condición. `privateStoreSell`, el método casi idéntico del mismo archivo, escribe
+`found = item.getCount() > 0`: pliega el caso vacío dentro de la bandera. La vía
+de compra después divide `MAX_ADENA` por ese conteo.
+
+La vía de compra no puede copiar la forma de la de venta: su rama de "no
+encontrado" **castiga** al jugador por trampa de paquete, que una entrada agotada
+no es. Así que la entrada vacía se saltea sola.
+
+El otro lector del mismo valor está bien: `RequestPrivateStoreBuy` rechaza
+cualquier conteo por ítem menor a uno al leer el paquete, así que el cero solo
+puede salir del recorte contra la tienda.
+
+### Sospechas de la cuarta vuelta, evaluadas y descartadas
+
+- **`RequestActionUse`, el archivo más grande del área (758 líneas).** Los casos
+  de mascota que no llaman `validateSummon` no lo necesitan: `useSkill` valida
+  adentro, en sus dos sobrecargas. `mountPlayer` arranca con `pet != null`.
+
+- **Los datos de mascota faltantes.** `getPetData` **detecta** que faltan, lo
+  loguea, y devuelve el null igual a llamadores que lo desreferencian —incluido
+  uno dentro de la tarea periódica de comida—. Pero está fuera de alcance: las
+  **12** mascotas están definidas en `data/stats/pets`, los dos ids de montura
+  fijos del datapack (12526 y 12621) están entre ellas, y el efecto `Ride`, que
+  tomaría un id arbitrario con default 0, no se usa en ningún dato de skill
+  distribuido.
+
+- **Borrar mientras se itera el inventario.** La protección contra sobre-encantado
+  de `EnterWorld` destruye ítems dentro de un `for` sobre `getItems()`, y
+  `updateItems` de `TradeList` quita elementos dentro de un `for` sobre `_items`.
+  Los dos contenedores son `ConcurrentHashMap.newKeySet()`.
+
+- **SQL armado por concatenación.** Ninguno en los 201 archivos.
+
+- **Barrido de lectura rancia**: un setter a valor neutro seguido de una lectura
+  de lo mismo, en todo el núcleo y el datapack. **12** candidatos, **1 defecto**
+  (el 9). Los otros once los salva un `return`, un `continue`, o son ramas
+  excluyentes, o leen el valor nuevo a propósito.
+
 ### Sospechas evaluadas y descartadas, con lo que las descarta
 
 - **El producto de la finca.** `getPrice()` es `count * price` en int. El peor
