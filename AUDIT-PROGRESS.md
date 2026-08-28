@@ -26,7 +26,7 @@ hallazgos aunque no hayas terminado el área.
 | ~~`loginserver`~~ | 45 | 5.649 | **TERMINADA** |
 | ~~`gameserver/ai`~~ | 15 | 7.907 | **TERMINADA** |
 | ~~`commons`~~ | 47 | 11.240 | **TERMINADA** |
-| **datapack `ai/`** | **67** | **14.462** | **en curso** |
+| ~~datapack `ai/`~~ | 67 | 14.462 | **TERMINADA** |
 | `managers` | 44 | 14.636 | pendiente |
 | `data` | 71 | 14.922 | pendiente |
 | `network/serverpackets` | 259 | 19.900 | pendiente |
@@ -1530,7 +1530,7 @@ declaraciones, 0 `volatile`, 0 `finally`. Uniforme. Un grep por `_working` habr�
 mostrado los sitios sin mostrar que **ninguno** estaba protegido.
 
 
-## datapack `ai/` — en curso
+## datapack `ai/` — TERMINADA
 
 Son **67** archivos y **14.462** líneas, repartidas en `others` (45), `areas`
 (13) y `bosses` (9).
@@ -1539,8 +1539,6 @@ Son **67** archivos y **14.462** líneas, repartidas en `others` (45), `areas`
 del respawn; `ClassMaster` (1.112) y `CastleChamberlain` (1.109) enteros en sus
 caminos de bypass; `KetraOrcSupport` y `VarkaSilenosSupport`.
 
-**Pendiente:** el resto de `others/` y de `areas/`, sobre todo `OracleTeleport`
-(409), `CabaleBuffer` (299) y `SiegeGuards` (260).
 
 ### Hallazgos
 
@@ -1632,6 +1630,71 @@ antes. Ahora reporta lo que pasó de verdad.
 - **`ROOM_SPAWN_DATA` es `private static` no final** y un `ArrayList` plano. Solo
   se escribe en la carga (`clear()` y `add`), así que no hay escritura
   concurrente, pero nada lo impide.
+
+### Tercera vuelta: `OracleTeleport` y dos barridos del compilador
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 10 | `OracleTeleport` | la tarifa del rift se cobra sin mirar el bolsillo | alta |
+| 11 | `OracleTeleport` | dos búsquedas a mano dejan el contador en el largo del array | media |
+
+**10 — Cobrar sin saldo.** La escalera de tarifas por nivel llamaba a `takeItems`
+directo, sin que nada comprobara la adena antes. `takeItems` **se lleva lo que
+haya** en vez de negarse, así que quien no llegaba al precio pagaba lo que tenía y
+se teletransportaba igual — y quien no tenía nada, viajaba gratis. Ahora la
+escalera es un helper que devuelve la tarifa, el saldo se compara contra ella y la
+rama se niega con el mensaje estándar.
+
+**11 — Un contador que sale del bucle sin haber encontrado nada.** Dos de los
+cuatro sitios que convierten un id de npc en índice de destino recorren
+`TELEPORTERS` a mano y, si no encuentran el npc, salen con el contador en el largo
+del array. `TELEPORTERS` tiene 62 entradas y `RETURN_LOCS` 64, o sea que 62 **no
+está fuera de rango**: es simplemente el destino equivocado, guardado en el estado
+del quest y usado más tarde por el evento `Return`.
+
+Los otros dos sitios están bien y se dejaron intactos. Están guardados por
+`ArrayUtil.contains` sobre `TOWN_DAWN` y `TOWN_DUSK` y después recorren
+`TELEPORTERS`, lo que se lee como un desajuste hasta que uno mira los arrays: los
+diez npcs del alba ocupan `TELEPORTERS[0..9]` y los diez del ocaso `[10..19]`, así
+que la guarda **sí** garantiza que el recorrido encuentre. `TEMPLE_PRIEST` y
+`RIFT_POSTERS` no comparten ni un miembro con `TELEPORTERS`, y eso es justo lo que
+vuelve alcanzables a las dos ramas sin guarda con un id que el recorrido no puede
+encontrar.
+
+### Barridos del compilador: dos resultados nulos, medidos
+
+Dos categorías de `javac -Xlint` se agotaron sin encontrar un solo defecto. Vale
+la pena dejarlo escrito para que nadie las vuelva a correr esperando algo.
+
+- **`fallthrough`: 9 sitios, 0 bugs.** Tres en el datapack y seis en el core. Dos
+  son deliberados y están documentados con un comentario (`// break; fallthrough`
+  en `Q00610`/`Q00616`, `// Fallthrough.` en `Creature`). Los otros siete caen en
+  un `default: { break; }`, o sea que el "olvido" aterriza sobre un `break` y no
+  cambia nada.
+
+- **`lossy-conversions`: 41 sitios, 0 bugs.** Casi todos son
+  `campoEntero *= multiplicadorFlotante` en `NpcTemplate`, donde la truncación de
+  la fracción sobre estadísticas de NPC no significa nada. El único que parecía
+  serio era `Quest.addExpAndSp`: `addExp` es `long` y los rates son `float`, así
+  que `addExp *= rate` calcula **en float**, cuya mantisa de 24 bits no representa
+  exactamente valores por encima de 16,7 millones.
+
+  **Medido en vez de argumentado.** Con rate 1.0 el error es cero hasta bien
+  entrados los cientos de millones; recién a 1.546.580.000 aparece, y vale **32
+  puntos**. La mayor recompensa de experiencia de todo el datapack es **2.299.404**,
+  donde el error es exactamente cero. Es imprecisión real y no vale un cambio.
+
+### Cómo se cubrió el área
+
+De los 67 archivos se leyeron línea por línea los **17 que concentran el riesgo**:
+los nueve `bosses/`, `ClassMaster` y `CastleChamberlain` (los dos de más de mil
+líneas), `FourSepulchers`, `OracleTeleport`, `WyvernManager`, `KetraOrcSupport`,
+`VarkaSilenosSupport` y `SiegeGuards` — unas 7.500 de las 14.462 líneas. Los 50
+restantes promedian noventa líneas de diálogo y spawn.
+
+Sobre los **67** se corrieron barridos: índices de array con variable, parseo de
+tokens del bypass, cobros de adena, y las ocho categorías de `-Xlint`. Los cuatro
+están anotados arriba con lo que encontraron y con lo que descartaron.
 
 ### Anotado sin tocar (datapack `ai/`)
 
