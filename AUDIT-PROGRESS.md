@@ -1571,6 +1571,55 @@ y ninguna respuesta, pero el estado de abajo sigue mal. Se arregló el origen �
 `dissolveAlly`— y el síntoma, porque los `clan_data` de un servidor que ya está
 corriendo pueden traerlos.
 
+### Segunda vuelta: el barrido de conteo declarado
+
+El bug característico de un paquete saliente es prometer N elementos y escribir
+otra cantidad: el cliente lee un paquete malformado, no un campo faltante.
+Barrido sobre los 259: **una cantidad escrita desde el tamaño de una colección,
+seguida de un bucle sobre esa colección que contiene un `continue`**. Siete
+candidatos, **tres defectos**.
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 2 | `SystemMessage` | promete los parámetros declarados y escribe solo los que existen | alta |
+| 3 | `ConfirmDlg` | la misma forma | media |
+| 4 | `NewCharacterSuccess` | la misma forma | media |
+
+**2 — Un array construido para quedar incompleto.**
+
+```java
+_params = _smId.getParamCount() > 0 ? new SMParam[_smId.getParamCount()] : EMPTY_PARAM_ARRAY;
+```
+
+Se dimensiona con la cantidad de parámetros que **declara** el id de mensaje, y
+se va llenando a medida que se llaman `addString`, `addInt` y compañía. Un
+llamador que aporte menos de los declarados deja nulos en la cola. Y el bucle **ya
+lo sabe**: loguea *"Found null parameter for SystemMessageId"* antes de saltearlo,
+o sea que el caso se observó — y el conteo de arriba se dejó prometiéndolos igual.
+
+La clase además **ya tiene el número correcto**: quince líneas más arriba, la
+rama de localización recorre `_paramIndex`, la cantidad realmente agregada, en
+vez del largo del array. Dos lecturas del mismo array en el mismo método, una
+correcta.
+
+Importa porque `SystemMessage` está entre los paquetes más enviados del servidor.
+
+### Sospechas evaluadas y descartadas (segunda vuelta)
+
+- **Los otros cuatro candidatos del barrido**, cada uno por su propia razón.
+  `QuestList` y `GmViewQuestInfo` hacen `continue` **después** de escribir un
+  relleno equivalente, así que todo elemento cuesta los mismos bytes.
+  `PledgeShowMemberListAll` y `PledgeReceiveMemberInfo` escriben `size() - 1` y
+  saltean al jugador que mira, lo que se sostiene porque los seis sitios que los
+  construyen pasan un jugador que **es** miembro del clan listado — incluido el
+  camino de aceptar invitación, que agrega al miembro antes de enviar el paquete.
+
+- **El caché de difusión.** `WritablePacket` escribe una vez y reusa el buffer
+  para todos los destinatarios, lo que sería incorrecto para cualquier paquete
+  cuyo contenido dependa de quién lo recibe. `sendInBroadcast()`, el único método
+  que enciende esa bandera, **no tiene ningún llamador**: el mecanismo existe
+  entero y está muerto.
+
 ### Sospechas evaluadas y descartadas (`serverpackets`)
 
 - **Ocho paquetes dividen por `_moveMultiplier`.** `getMovementSpeedMultiplier()`
