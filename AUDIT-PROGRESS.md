@@ -29,7 +29,7 @@ hallazgos aunque no hayas terminado el área.
 | ~~datapack `ai/`~~ | 67 | 14.462 | **TERMINADA** |
 | ~~`managers`~~ | 44 | 14.636 | **TERMINADA** |
 | ~~`data`~~ | 71 | 14.922 | **TERMINADA** |
-| `network/serverpackets` | 259 | 19.900 | pendiente |
+| **`network/serverpackets`** | **259** | **19.900** | **en curso** |
 | `network/clientpackets` | 201 | 21.727 | pendiente |
 | datapack `handlers/` | 375 | 51.203 | pendiente |
 | `model/actor` | 166 | 53.236 | pendiente |
@@ -1529,6 +1529,68 @@ pregunta que lo convirtió en 14 no fue "¿hay más?" sino la tabla explícita d
 declaraciones, 0 `volatile`, 0 `finally`. Uniforme. Un grep por `_working` habría
 mostrado los sitios sin mostrar que **ninguno** estaba protegido.
 
+
+## `network/serverpackets` — en curso
+
+Son **259** archivos y **19.900** líneas: los escritores de paquetes salientes.
+
+**Leído:** `AllianceInfo`, `CharInfo`, `AbstractNpcInfo`, `Die`, y los sitios que
+marcaron los barridos. **Pendiente:** `SortedWareHouseWithdrawalList` (744),
+`ExServerPrimitive` (534), `SystemMessage` (430), `SSQStatus` (400),
+`CharSelectionInfo` (358).
+
+### Hallazgos
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 1 | `ClanTable` / `AllianceInfo` | destruir el clan líder de una alianza deja a sus aliados con un id que no resuelve | alta |
+
+**1 — Una alianza que sobrevive a su líder.** `Clan.dissolveAlly` recorre cada clan
+miembro y le limpia el id de alianza, el nombre y la penalidad. `destroyClan`
+**nunca lo llama**, y sin embargo maneja todo lo demás: asedios, clan halls, una
+puja de subasta pendiente, el almacén, los miembros, los dos mapas de búsqueda y
+seis tablas de la base.
+
+Así que disolver el clan que lidera una alianza deja a cada aliado con un id de
+alianza que no resuelve a ningún clan. Y no solo en memoria: a esos aliados
+tampoco se les llama `updateClanInDB`, así que `clan_data` conserva el id viejo y
+vuelve después de reiniciar.
+
+Donde se manifiesta es `AllianceInfo`, cuyo constructor son dos líneas:
+
+```java
+final Clan leader = ClanTable.getInstance().getClan(allianceId);
+_name = leader.getAllyName();
+```
+
+`RequestAllyInfo` solo comprueba que el id sea positivo antes de construir eso,
+así que un aliado de un líder disuelto recibe un NPE en vez de su ventana de
+alianza. El ejecutor de paquetes lo atrapa, o sea que cuesta una traza en el log
+y ninguna respuesta, pero el estado de abajo sigue mal. Se arregló el origen —
+`destroyClan` desengancha la alianza con los mismos tres campos que usa
+`dissolveAlly`— y el síntoma, porque los `clan_data` de un servidor que ya está
+corriendo pueden traerlos.
+
+### Sospechas evaluadas y descartadas (`serverpackets`)
+
+- **Ocho paquetes dividen por `_moveMultiplier`.** `getMovementSpeedMultiplier()`
+  es `getMoveSpeed() * (1. / baseSpeed)`, así que un NPC con velocidad base cero
+  da `Infinity` o `NaN`. Medidos los 5.739 bloques `<speed>` de los datos: **4
+  NPCs** tienen andar y correr en cero, y para ellos el multiplicador es `NaN` —
+  que en `Math.round(velocidad / NaN)` da **0**, la velocidad correcta para un NPC
+  estático. Degrada al resultado justo. Los únicos consumidores del multiplicador
+  son esos paquetes y `Pet`, que nunca es estático.
+
+- **Encadenamientos sin chequear en los paquetes de información.** Barridos los
+  `.getClan()`, `.getPet()`, `.getParty()`, `.getInventory()` y compañía sin
+  guarda: la enorme mayoría son `getInventory()` sobre un `Player`, que nunca es
+  nulo. Los de `AllianceInfo` en `writeImpl` se construyen desde
+  `getClanAllies()`, así que tampoco pueden serlo — el problema estaba en el
+  constructor, no en la escritura.
+
+- **Los cinco `containsKey` seguidos de `get`** (`ExShowCropSetting`,
+  `ExShowSeedSetting`, `ExShowSellCropList`). Los mapas son locales del paquete,
+  armados en su propio constructor y no compartidos.
 
 ## `data` — TERMINADA
 
