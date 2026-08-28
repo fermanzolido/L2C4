@@ -388,15 +388,15 @@ public class AdminEffects implements IAdminCommandHandler
 			try
 			{
 				final Team team = Team.valueOf(st.nextToken().toUpperCase());
-				Creature target = null;
-				if (activeChar.getTarget().isCreature())
-				{
-					target = activeChar.getTarget().asCreature();
-				}
-				else
+				// Every other command in this folder tests the target for null before reading
+				// anything off it; these two did not.
+				final WorldObject targetObject = activeChar.getTarget();
+				if ((targetObject == null) || !targetObject.isCreature())
 				{
 					return false;
 				}
+				
+				final Creature target = targetObject.asCreature();
 				
 				target.setTeam(team);
 			}

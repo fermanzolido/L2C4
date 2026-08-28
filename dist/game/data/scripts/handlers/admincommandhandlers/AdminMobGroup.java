@@ -21,6 +21,7 @@ import org.l2jmobius.gameserver.handler.IAdminCommandHandler;
 import org.l2jmobius.gameserver.model.MobGroup;
 import org.l2jmobius.gameserver.model.MobGroupTable;
 import org.l2jmobius.gameserver.model.World;
+import org.l2jmobius.gameserver.model.WorldObject;
 import org.l2jmobius.gameserver.model.actor.Creature;
 import org.l2jmobius.gameserver.model.actor.Player;
 import org.l2jmobius.gameserver.model.actor.templates.NpcTemplate;
@@ -94,10 +95,10 @@ public class AdminMobGroup implements IAdminCommandHandler
 		}
 		else if (command.startsWith("admin_mobgroup_attack"))
 		{
-			if (activeChar.getTarget().isCreature())
+			final WorldObject targetObject = activeChar.getTarget();
+			if ((targetObject != null) && targetObject.isCreature())
 			{
-				final Creature target = activeChar.getTarget().asCreature();
-				attack(command, activeChar, target);
+				attack(command, activeChar, targetObject.asCreature());
 			}
 		}
 		else if (command.startsWith("admin_mobgroup_rnd"))
