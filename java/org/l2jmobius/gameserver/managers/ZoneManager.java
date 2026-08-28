@@ -504,13 +504,12 @@ public class ZoneManager implements IXmlReader
 	@SuppressWarnings("unchecked")
 	private <T extends ZoneType> void addZone(Integer id, T zone)
 	{
-		ConcurrentHashMap<Integer, T> map = (ConcurrentHashMap<Integer, T>) _classZones.get(zone.getClass());
-		if (map == null)
-		{
-			_classZones.put(zone.getClass(), new ConcurrentHashMap<>());
-			map = (ConcurrentHashMap<Integer, T>) _classZones.get(zone.getClass());
-		}
-		
+		// computeIfAbsent, because zone files are parsed in parallel when ThreadsForLoading is
+		// on -- and Threads.ini ships it on. The get, null test, put, get again sequence let two
+		// threads adding the first zone of the same class each install their own map, and
+		// whichever one re-read the older reference then dropped its zone into a map no longer
+		// reachable from _classZones. A silently missing zone.
+		final ConcurrentHashMap<Integer, T> map = (ConcurrentHashMap<Integer, T>) _classZones.computeIfAbsent(zone.getClass(), k -> new ConcurrentHashMap<>());
 		map.put(id, zone);
 	}
 	

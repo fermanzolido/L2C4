@@ -284,24 +284,30 @@ public class WalkingManager implements IXmlReader
 					
 					npc.getAI().setIntention(Intention.MOVE_TO, node);
 					
-					final ScheduledFuture<?> task = _repeatMoveTasks.get(npc);
-					if ((task == null) || task.isCancelled() || task.isDone())
+					// compute rather than get, test and put. startMoving is reached both from
+					// ArrivedTask and from the repeating task installed right here, on different pool
+					// threads, so two callers could each find the task finished and each schedule a
+					// replacement. This map is the only handle on them, so the one whose put lost
+					// kept running at a fixed rate with nothing left able to cancel it.
+					_repeatMoveTasks.compute(npc, (key, current) ->
 					{
+						if ((current != null) && !current.isCancelled() && !current.isDone())
+						{
+							return current;
+						}
+						
 						final ScheduledFuture<?> newTask = ThreadPool.scheduleAtFixedRate(() -> startMoving(npc, routeName), 10000, 10000);
-						_repeatMoveTasks.put(npc, newTask);
 						walk.setWalkCheckTask(newTask); // start walk check task, for resuming walk after fight
-					}
+						return newTask;
+					});
 					
 					npc.setWalker();
 					_activeRoutes.put(npc.getObjectId(), walk); // register route
 				}
 				else
 				{
-					final ScheduledFuture<?> task = _startMoveTasks.get(npc);
-					if ((task == null) || task.isCancelled() || task.isDone())
-					{
-						_startMoveTasks.put(npc, ThreadPool.schedule(() -> startMoving(npc, routeName), 10000));
-					}
+					// Same swap as above.
+					_startMoveTasks.compute(npc, (key, current) -> ((current != null) && !current.isCancelled() && !current.isDone()) ? current : ThreadPool.schedule(() -> startMoving(npc, routeName), 10000));
 				}
 			}
 			else // walk was stopped due to some reason (arrived to node, script action, fight or something else), resume it
@@ -348,11 +354,28 @@ public class WalkingManager implements IXmlReader
 		final WalkInfo walk = _activeRoutes.remove(npc.getObjectId());
 		if (walk != null)
 		{
-			final ScheduledFuture<?> task = walk.getWalkCheckTask();
-			if (task != null)
-			{
-				task.cancel(true);
-			}
+			cancelTask(walk.getWalkCheckTask());
+		}
+		
+		// The three task maps are keyed by Npc and nothing ever took an entry out of them, so
+		// every NPC that had walked once stayed pinned in all three for the life of the server.
+		// The start and arrive tasks were not cancelled here either -- only the repeat task was,
+		// and only because WalkInfo happens to hold the same future -- so a pending arrival still
+		// fired for an NPC that had just died.
+		cancelTask(_repeatMoveTasks.remove(npc));
+		cancelTask(_startMoveTasks.remove(npc));
+		cancelTask(_arriveTasks.remove(npc));
+	}
+	
+	/**
+	 * Cancels a task if there is one.
+	 * @param task the task, may be {@code null}
+	 */
+	private static void cancelTask(ScheduledFuture<?> task)
+	{
+		if (task != null)
+		{
+			task.cancel(true);
 		}
 	}
 	
@@ -443,11 +466,8 @@ public class WalkingManager implements IXmlReader
 			npc.broadcastSay(ChatType.NPC_GENERAL, node.getChatText());
 		}
 		
-		final ScheduledFuture<?> task = _arriveTasks.get(npc);
-		if ((task == null) || task.isCancelled() || task.isDone())
-		{
-			_arriveTasks.put(npc, ThreadPool.schedule(new ArrivedTask(npc, walk), 100 + (node.getDelay() * 1000)));
-		}
+		// Same swap as the two in startMoving.
+		_arriveTasks.compute(npc, (key, current) -> ((current != null) && !current.isCancelled() && !current.isDone()) ? current : ThreadPool.schedule(new ArrivedTask(npc, walk), 100 + (node.getDelay() * 1000)));
 	}
 	
 	/**
