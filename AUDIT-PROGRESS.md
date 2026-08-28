@@ -3152,6 +3152,91 @@ con el mismo contador: dos propiedades separadas que tienen que tener el mismo
 largo, sin nada que lo garantice. Rellenar con cero hace que los tramos sin par
 no den nada, y el warning nombra los dos largos.
 
+### Sexta vuelta: productos en int hacia acumuladores que no lo son
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 17 | `RequestBuyItem` | el chequeo antidesborde corre sobre el precio sin impuesto | **alta** |
+| 18 | `RequestSellItem` | suma al total antes de probarlo, y en int | **alta** |
+| 19 | `TradeList.validate` | el producto no se ensancha, así que el recorte no puede dispararse | media |
+| 20 | `TradeList.privateStoreBuy` | acumula el peso en int, sin recorte | media |
+| 21 | `Inventory.refreshWeight` | ídem 19 | media |
+| 22 | `PetInventory.validateWeight` | una asignación compuesta estrecha un long en silencio | media |
+| 23 | `SendWareHouseWithDrawList` | los dos totales en int hacia llamadas que toman long | media |
+
+**17 — El precio crece después del chequeo.** `RequestBuyItem` acota
+`cuenta * precio` por ítem, pero sobre el precio **antes** del impuesto, y en la
+línea siguiente multiplica el precio por `(1 + castleTax + baseTax)`. El total
+corría en `int`, así que el total con impuesto podía dar la vuelta, y un total
+dado vuelta pasa el test de `MAX_ADENA` que está justo para eso.
+
+Lo que lo delata está veinte líneas más abajo, en el mismo método: el test del
+peso dice `weight > Integer.MAX_VALUE`, una condición que **solo** puede ser
+cierta si el producto que alimenta ese long se ensancha primero — y no se
+ensanchaba.
+
+Medido en vez de supuesto: `MaxAdena` se distribuye en 2.000.000.000 y el
+producto más caro de las **6357** entradas con precio de las listas de compra
+vale 10.000.000, así que el chequeo por ítem admite cuentas cuyo total con el
+`baseTax` de 10–15 % que traen los datos de mercaderes no entra en un int.
+
+**18 — Sumar y después preguntar.** `RequestSellItem` agrega al total antes de
+probarlo, y tanto el producto como el total eran `int`. Su test por ítem atrapa
+un ítem que solo valga más que el límite, pero no la suma de varios. Ahora el
+test corre primero, lo que además evita que la mercadería se mueva para el ítem
+que rompe el límite.
+
+**19, 20 y 21 — Un recorte que no podía dispararse.** Tres lugares acumulan el
+peso cargado como `cuenta * peso` por ítem. Dos —`TradeList.validate` e
+`Inventory.refreshWeight`— toman el total en `long` y cierran con
+`Math.min(weight, Integer.MAX_VALUE)`. **Ese recorte es el delator**: solo puede
+hacer algo si el producto que llega al long se calcula en long, y se calculaba en
+int, así que daba la vuelta antes de que el recorte lo viera y `Math.min`
+devolvía el valor dado vuelta tan campante.
+
+El tercero, `privateStoreBuy`, tomaba el total en `int` sin recorte ninguno,
+mientras su hermano cincuenta líneas más arriba lo toma en `long`.
+
+Medido: la adena no pesa, y el apilable más pesado de los datos distribuidos pesa
+**1000**, así que el producto int da la vuelta a las **2.147.484** unidades. Pasada
+esa línea el peso informado se vuelve negativo y el límite de carga deja de
+significar nada para ese personaje — que es exactamente el estado que el recorte
+estaba escrito para evitar.
+
+**22 — Un estrechamiento sin una palabra del compilador.**
+`PetInventory.validateWeight` recibe una cuenta `long`, la multiplica por el peso
+—producto `long`— y lo acumula en un `int` local. Una asignación compuesta
+estrecha en silencio, y el resultado va después a una sobrecarga que toma `long`.
+Su contraparte `ItemContainer.validateWeightByItemId` pasa el producto long
+derecho.
+
+### Sospechas de la sexta vuelta, con lo que las descarta
+
+- **El total de la compra de tienda privada** (`TradeList:656`). No puede caer en
+  ningún lado más que en negativo cuando da la vuelta: el total corriente y el
+  producto por ítem están los dos acotados por `MAX_ADENA`, y el doble de eso
+  todavía no completa una vuelta entera. Y el negativo se prueba.
+
+- **`RequestBuySeed`.** Tiene el mismo `(totalPrice < 0)` treinta líneas debajo de
+  donde está su chequeo de desborde. Y el peor producto que los datos permiten
+  —`limit_seed * seedMaxPrice` sobre las 198 semillas— vale **3.936.000**.
+
+- **`RequestPreviewItem`.** Acumula `WearPrice`, que se distribuye en **10**, sobre
+  a lo sumo 100 ítems.
+
+- **`RateSiegeGuardsPrice`** se distribuye en **1**, así que el escalado de precio
+  de los guardias es un no-op.
+
+- **`Party`** eleva al cuadrado el nivel de cada miembro: a lo sumo 65.025 para un
+  grupo lleno.
+
+- **Los dos índices del multisell no acotados.** `getAllItemsByItemId` devuelve un
+  `ArrayList` nuevo —una foto, no una vista viva— y el conteo ya está validado
+  contra el mismo filtro, así que los dos son seguros por construcción.
+
+- **`RequestAcquireSkill`, `UseItem`, `MultiSellChoose`, `CharacterCreate`.**
+  Leídos línea por línea sin hallazgos propios más allá del 11.
+
 ### Barrido: resultado de un split indexado directo
 
 Sobre el núcleo y el datapack: **41** sitios. Repartidos así — 20 en comandos de
