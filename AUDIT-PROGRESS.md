@@ -27,7 +27,7 @@ hallazgos aunque no hayas terminado el área.
 | ~~`gameserver/ai`~~ | 15 | 7.907 | **TERMINADA** |
 | ~~`commons`~~ | 47 | 11.240 | **TERMINADA** |
 | ~~datapack `ai/`~~ | 67 | 14.462 | **TERMINADA** |
-| `managers` | 44 | 14.636 | pendiente |
+| **`managers`** | **44** | **14.636** | **en curso** |
 | `data` | 71 | 14.922 | pendiente |
 | `network/serverpackets` | 259 | 19.900 | pendiente |
 | `network/clientpackets` | 201 | 21.727 | pendiente |
@@ -1529,6 +1529,97 @@ pregunta que lo convirtió en 14 no fue "¿hay más?" sino la tabla explícita d
 declaraciones, 0 `volatile`, 0 `finally`. Uniforme. Un grep por `_working` habría
 mostrado los sitios sin mostrar que **ninguno** estaba protegido.
 
+
+## `managers` — en curso
+
+Son **44** archivos y **14.636** líneas. Se empezó por los que mueven dinero, que
+es donde vienen apareciendo los defectos.
+
+**Leído:** `GlobalAuctionManager` entero, `MonsterRaceManager` en apuestas, cuotas
+y ciclo de carrera, `RecipeManager` en el cálculo de pasadas, `LotteryManager` en
+el reparto de premios, y `RaceManager` (que es `model/actor/instance` pero es el
+NPC de las carreras) en su bypass.
+
+**Pendiente:** `ZoneManager` (912), `CastleManorManager` (862), `CaptchaManager`
+(514), `SellBuffsManager` (510), `RaidBossSpawnManager` (498),
+`DimensionalRiftManager` (492), `WalkingManager` (487) y el resto.
+
+### Hallazgos
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 1 | `GlobalAuctionManager` | el saldo se pone en cero **antes** de pagarlo, y se trunca a `int` | alta |
+| 2 | `RaceManager` | el número del bypass se parsea y se indexa sin validar | alta |
+| 3 | `MonsterRaceManager` | `_odds` se vacía y se rellena mientras otro hilo lo indexa | alta |
+| 4 | `MonsterRaceManager` | la apuesta por calle es una lectura-modificación-escritura no atómica | media |
+| 5 | `RecipeManager` | se divide y se modula por un valor que los datos pueden dejar en cero | baja |
+
+**1 — Cobrar el propio pago.** `collectFunds` ponía el saldo en cero, en memoria y
+en base, y **después** intentaba acreditarlo. Lo que el tope de adena rechace se
+pierde; el comentario que estaba ahí lo admitía: *"Rollback logic would be complex
+here, assume DB works"*.
+
+Y el saldo es un `long` que se acumula a lo largo de varias ventas, mientras
+`addAdena` toma un `int`. Un vendedor con más de dos mil millones acumulados
+recibía ese `long` casteado a un `int` **negativo** —que por ser negativo tampoco
+entra en el clampeo del tope— y el método devolvía la cifra completa igual, o sea
+que reportaba un número que el jugador nunca recibió.
+
+Ahora calcula cuánto lugar tiene realmente el jugador, entrega eso, y descuenta
+solo eso del saldo; el resto queda para cobrar después.
+
+**2 — Un número del cable indexando dos arrays de ocho.**
+`int val = Integer.parseInt(command.substring(10));` sin nada en el medio. `val`
+elige calle vía `getMonsters()[val - 1]` y `val - 10` elige tarifa vía
+`TICKET_PRICES[val - 11]`, así que **9 y 19 indexan uno más allá del final** de
+arrays de ocho, y un negativo indexa por debajo de cero. Además un comando sin
+nada después de `"BuyTicket "` revienta en el `substring` y uno no numérico en el
+`parseInt`.
+
+**3 y 4 — Concurrencia a medias, otra vez.** `_betsPerLane` es un
+`ConcurrentHashMap` **y su declaración lleva un comentario explicando que las
+apuestas llegan concurrentes** — que es justo el delator, porque una lectura
+seguida de una escritura no es atómica por más que cada mitad lo sea. Dos apuestas
+a la misma calle podían leer el mismo total y la segunda escritura descartaba la
+primera del pozo con el que se calculan las cuotas.
+
+Y `_odds` era un `ArrayList` que la tarea de carrera vaciaba y rellenaba en el
+lugar mientras `RaceManager` lo indexa desde un hilo de paquetes, calle por calle.
+Un lector que llegue entre el `clear()` y los `add` ve una lista más corta que el
+índice que va a usar. Además arranca **vacía** hasta la primera carrera. Ahora se
+arma aparte y se publica en una sola asignación a un campo `volatile`, y los dos
+lectores chequean el tamaño.
+
+### Anotado sin tocar (`managers`)
+
+- **57 sitios hacen `Integer.parseInt` sobre un trozo del comando de bypass**, casi
+  ninguno con guarda. Medido adónde va la excepción: `RequestBypassToServer`
+  envuelve todo el camino en un `catch (Exception)` que loguea el mensaje y el
+  stack. O sea que están **contenidos** — un cliente puede ensuciar el log, no
+  tirar el servidor. Por eso no se barrieron los 57; se arregló el de
+  `RaceManager`, donde el valor fuera de rango además deja el ticket guardado en un
+  estado del que el jugador no sale.
+
+### Sospechas evaluadas y descartadas (`managers`)
+
+- **`purchaseItem` truncando el precio a `int`.** El casteo está, pero el test de
+  saldo que tiene arriba compara contra `getAdena()`, que devuelve `int`, así que
+  un precio por encima del tope se rechaza antes de llegar al casteo.
+
+- **`addFunds` con `getOrDefault` + `put` sobre un `ConcurrentHashMap`**, que sería
+  una actualización perdida. Todos los métodos que tocan `_funds` son
+  `synchronized` sobre el manager.
+
+- **`RecipeManager` dividiendo por `_creationPasses`.** Está clampeado a ≥ 1 en la
+  línea siguiente a donde se calcula.
+
+- **Las tres divisiones del reparto de la lotería** (`/ count1`, `/ count2`,
+  `/ count3`). Las tres están dentro de su `if (countN > 0)`.
+
+- **`_odds` modificado durante la carrera desde dos hilos.** `calculateOdds()` y el
+  `_odds.get(getFirstPlace())` están en dos `case` del **mismo** switch de la tarea
+  de carrera, o sea secuenciales. El cruce de hilos real es con `RaceManager`, que
+  es el que se arregló.
 
 ## datapack `ai/` — TERMINADA
 
