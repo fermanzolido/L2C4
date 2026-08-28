@@ -33,6 +33,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import org.l2jmobius.commons.database.DatabaseFactory;
+import org.l2jmobius.commons.util.StringUtil;
 import org.l2jmobius.commons.threads.ThreadPool;
 import org.l2jmobius.gameserver.cache.HtmCache;
 import org.l2jmobius.gameserver.config.custom.CommunityBoardConfig;
@@ -208,38 +209,58 @@ public class HomeBoard implements IParseBoardHandler
 			final String[] buypassOptions = fullBypass.split(";");
 			final int buffCount = buypassOptions.length - 1;
 			final String page = buypassOptions[buffCount];
-			if (player.getInventory().getInventoryItemCount(CommunityBoardConfig.COMMUNITYBOARD_CURRENCY, -1) < (CommunityBoardConfig.COMMUNITYBOARD_BUFF_PRICE * buffCount))
+			// Every option is text the client chose, and the price was taken before any of it
+			// was resolved: an option with no comma, one that is not a number, and one naming
+			// a skill that does not exist each threw after the payment had gone through.
+			// Resolving first also matches the price to the buffs actually applied -- a
+			// disallowed one used to be skipped and paid for anyway.
+			final List<Skill> buffs = new ArrayList<>();
+			for (int i = 0; i < buffCount; i++)
 			{
-				player.sendMessage("Not enough currency!");
-			}
-			else
-			{
-				player.destroyItemByItemId(ItemProcessType.FEE, CommunityBoardConfig.COMMUNITYBOARD_CURRENCY, CommunityBoardConfig.COMMUNITYBOARD_BUFF_PRICE * buffCount, player, true);
-				final Summon pet = player.getSummon();
-				final List<Creature> targets = new ArrayList<>(4);
-				targets.add(player);
-				if (pet != null)
+				final String[] option = buypassOptions[i].split(",");
+				if ((option.length < 2) || !isSmallNumber(option[0]) || !isSmallNumber(option[1]))
 				{
-					targets.add(pet);
+					continue;
 				}
 				
-				for (int i = 0; i < buffCount; i++)
+				final Skill skill = SkillData.getInstance().getSkill(Integer.parseInt(option[0]), Integer.parseInt(option[1]));
+				if ((skill != null) && CommunityBoardConfig.COMMUNITY_AVAILABLE_BUFFS.contains(skill.getId()))
 				{
-					final Skill skill = SkillData.getInstance().getSkill(Integer.parseInt(buypassOptions[i].split(",")[0]), Integer.parseInt(buypassOptions[i].split(",")[1]));
-					if (!CommunityBoardConfig.COMMUNITY_AVAILABLE_BUFFS.contains(skill.getId()))
+					buffs.add(skill);
+				}
+			}
+			
+			// The count comes from the bypass, so the price is taken in long; an int product
+			// could wrap past the check below.
+			final long price = (long) CommunityBoardConfig.COMMUNITYBOARD_BUFF_PRICE * buffs.size();
+			if (!buffs.isEmpty())
+			{
+				if (player.getInventory().getInventoryItemCount(CommunityBoardConfig.COMMUNITYBOARD_CURRENCY, -1) < price)
+				{
+					player.sendMessage("Not enough currency!");
+				}
+				else if (player.destroyItemByItemId(ItemProcessType.FEE, CommunityBoardConfig.COMMUNITYBOARD_CURRENCY, (int) price, player, true))
+				{
+					final Summon pet = player.getSummon();
+					final List<Creature> targets = new ArrayList<>(4);
+					targets.add(player);
+					if (pet != null)
 					{
-						continue;
+						targets.add(pet);
 					}
 					
-					for (Creature target : targets)
+					for (Skill skill : buffs)
 					{
-						skill.applyEffects(player, target);
-						if (CommunityBoardConfig.COMMUNITYBOARD_CAST_ANIMATIONS)
+						for (Creature target : targets)
 						{
-							player.sendPacket(new MagicSkillUse(player, target, skill.getId(), skill.getLevel(), skill.getHitTime(), skill.getReuseDelay()));
-							
-							// not recommend broadcast
-							// player.broadcastPacket(new MagicSkillUse(player, target, skill.getId(), skill.getLevel(), skill.getHitTime(), skill.getReuseDelay()));
+							skill.applyEffects(player, target);
+							if (CommunityBoardConfig.COMMUNITYBOARD_CAST_ANIMATIONS)
+							{
+								player.sendPacket(new MagicSkillUse(player, target, skill.getId(), skill.getLevel(), skill.getHitTime(), skill.getReuseDelay()));
+								
+								// not recommend broadcast
+								// player.broadcastPacket(new MagicSkillUse(player, target, skill.getId(), skill.getLevel(), skill.getHitTime(), skill.getReuseDelay()));
+							}
 						}
 					}
 				}
@@ -337,6 +358,15 @@ public class HomeBoard implements IParseBoardHandler
 	 * @param player the player
 	 * @return the favorite links count
 	 */
+	/**
+	 * @param value one field of a bypass option
+	 * @return {@code true} when it is a run of digits short enough for parseInt to take
+	 */
+	private static boolean isSmallNumber(String value)
+	{
+		return StringUtil.isNumeric(value) && (value.length() <= 9);
+	}
+	
 	private static int getFavoriteCount(Player player)
 	{
 		int count = 0;
