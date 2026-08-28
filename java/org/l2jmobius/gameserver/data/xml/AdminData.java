@@ -23,8 +23,6 @@ package org.l2jmobius.gameserver.data.xml;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -50,8 +48,14 @@ public class AdminData implements IXmlReader
 {
 	private static final Logger LOGGER = Logger.getLogger(AdminData.class.getName());
 	
-	private final Map<Integer, AccessLevel> _accessLevels = new HashMap<>();
-	private final Map<String, AdminCommandAccessRight> _adminCommandAccessRights = new LinkedHashMap<>();
+	// Concurrent, like _gmList directly below, which is the one field in this class that
+	// already was. hasAccess runs on packet threads for every admin command and puts into
+	// _adminCommandAccessRights when it meets a command with no rights defined, so that map
+	// is structurally modified at runtime and not only by //reload access. Nothing consumes
+	// the insertion order the LinkedHashMap gave it -- getAdminCommandAccessRights has no
+	// callers.
+	private final Map<Integer, AccessLevel> _accessLevels = new ConcurrentHashMap<>();
+	private final Map<String, AdminCommandAccessRight> _adminCommandAccessRights = new ConcurrentHashMap<>();
 	private final Map<Player, Boolean> _gmList = new ConcurrentHashMap<>();
 	private int _highestLevel = 0;
 	

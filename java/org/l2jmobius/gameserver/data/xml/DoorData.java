@@ -18,10 +18,9 @@ package org.l2jmobius.gameserver.data.xml;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -43,9 +42,10 @@ import org.l2jmobius.gameserver.model.instancezone.Instance;
  */
 public class DoorData implements IXmlReader
 {
-	private static final Map<String, Set<Integer>> _groups = new HashMap<>();
-	private final Map<Integer, Door> _doors = new HashMap<>();
-	private final Map<Integer, StatSet> _templates = new HashMap<>();
+	// Same reason as ItemData: //reload doors clears and refills these underneath readers.
+	private static final Map<String, Set<Integer>> _groups = new ConcurrentHashMap<>();
+	private final Map<Integer, Door> _doors = new ConcurrentHashMap<>();
+	private final Map<Integer, StatSet> _templates = new ConcurrentHashMap<>();
 	
 	protected DoorData()
 	{
@@ -139,14 +139,9 @@ public class DoorData implements IXmlReader
 	
 	public static void addDoorGroup(String groupName, int doorId)
 	{
-		Set<Integer> set = _groups.get(groupName);
-		if (set == null)
-		{
-			set = new HashSet<>();
-			_groups.put(groupName, set);
-		}
-		
-		set.add(doorId);
+		// computeIfAbsent rather than get, test and put, and a concurrent set inside, since
+		// getDoorsByGroup hands this out to readers while a reload is refilling it.
+		_groups.computeIfAbsent(groupName, key -> ConcurrentHashMap.newKeySet()).add(doorId);
 	}
 	
 	public static Set<Integer> getDoorsByGroup(String groupName)

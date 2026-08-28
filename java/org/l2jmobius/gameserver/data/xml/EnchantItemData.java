@@ -18,8 +18,8 @@ package org.l2jmobius.gameserver.data.xml;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 import org.w3c.dom.Document;
@@ -37,7 +37,8 @@ import org.l2jmobius.gameserver.model.item.instance.Item;
  */
 public class EnchantItemData implements IXmlReader
 {
-	private final Map<Integer, EnchantScroll> _scrolls = new HashMap<>();
+	// Reloadable at runtime through //reload enchant, same as ItemData above.
+	private final Map<Integer, EnchantScroll> _scrolls = new ConcurrentHashMap<>();
 	
 	/**
 	 * Instantiates a new enchant item data.

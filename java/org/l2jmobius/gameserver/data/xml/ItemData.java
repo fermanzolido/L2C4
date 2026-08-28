@@ -23,7 +23,6 @@ package org.l2jmobius.gameserver.data.xml;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,9 +48,14 @@ public class ItemData
 	private static final Logger LOGGER = Logger.getLogger(ItemData.class.getName());
 	
 	private ItemTemplate[] _allTemplates;
-	private final Map<Integer, EtcItem> _etcItems = new HashMap<>();
-	private final Map<Integer, Armor> _armors = new HashMap<>();
-	private final Map<Integer, Weapon> _weapons = new HashMap<>();
+	// Concurrent because //reload items clears and repopulates these while packet threads
+	// are reading them, and a plain HashMap being restructured under a concurrent get can
+	// answer null for an entry that exists or, on a resize, leave the reader looping. The
+	// data classes that get reloaded most -- NpcData, SkillData, MultisellData, BuyListData,
+	// TeleporterData -- were already concurrent for this reason.
+	private final Map<Integer, EtcItem> _etcItems = new ConcurrentHashMap<>();
+	private final Map<Integer, Armor> _armors = new ConcurrentHashMap<>();
+	private final Map<Integer, Weapon> _weapons = new ConcurrentHashMap<>();
 	private final List<File> _itemFiles = new ArrayList<>();
 	
 	protected ItemData()
