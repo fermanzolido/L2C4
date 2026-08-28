@@ -343,6 +343,13 @@ public class Loto implements IBypassHandler
 			
 			final int[] check = LotteryManager.getInstance().checkTicket(item);
 			
+			// The prize was paid before the ticket was taken, and the take's answer was
+			// thrown away. A ticket already gone by then left the prize paid for nothing.
+			if (!player.destroyItem(ItemProcessType.FEE, item, npc, false))
+			{
+				return;
+			}
+			
 			sm = new SystemMessage(SystemMessageId.S1_HAS_DISAPPEARED);
 			sm.addItemName(4442);
 			player.sendPacket(sm);
@@ -353,7 +360,6 @@ public class Loto implements IBypassHandler
 				player.addAdena(ItemProcessType.REWARD, adena, npc, true);
 			}
 			
-			player.destroyItem(ItemProcessType.FEE, item, npc, false);
 			return;
 		}
 		

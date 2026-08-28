@@ -47,6 +47,7 @@ import org.l2jmobius.gameserver.handler.IParseBoardHandler;
 import org.l2jmobius.gameserver.managers.PcCafePointsManager;
 import org.l2jmobius.gameserver.managers.PremiumManager;
 import org.l2jmobius.gameserver.model.actor.Creature;
+import org.l2jmobius.gameserver.model.Location;
 import org.l2jmobius.gameserver.model.actor.Player;
 import org.l2jmobius.gameserver.model.actor.Summon;
 import org.l2jmobius.gameserver.model.item.enums.ItemProcessType;
@@ -188,18 +189,20 @@ public class HomeBoard implements IParseBoardHandler
 		else if (command.startsWith("_bbsteleport"))
 		{
 			final String teleBuypass = command.replace("_bbsteleport;", "");
+			final Location teleportLocation = CommunityBoardConfig.COMMUNITY_AVAILABLE_TELEPORTS.get(teleBuypass);
 			if (player.getInventory().getInventoryItemCount(CommunityBoardConfig.COMMUNITYBOARD_CURRENCY, -1) < CommunityBoardConfig.COMMUNITYBOARD_TELEPORT_PRICE)
 			{
 				player.sendMessage("Not enough currency!");
 			}
-			else if (CommunityBoardConfig.COMMUNITY_AVAILABLE_TELEPORTS.get(teleBuypass) != null)
+			// The fee's answer was thrown away and the teleport went ahead either way, with
+			// the skills already taken down before the payment was even attempted.
+			else if ((teleportLocation != null) && player.destroyItemByItemId(ItemProcessType.FEE, CommunityBoardConfig.COMMUNITYBOARD_CURRENCY, CommunityBoardConfig.COMMUNITYBOARD_TELEPORT_PRICE, player, true))
 			{
 				player.disableAllSkills();
 				player.sendPacket(new ShowBoard());
-				player.destroyItemByItemId(ItemProcessType.FEE, CommunityBoardConfig.COMMUNITYBOARD_CURRENCY, CommunityBoardConfig.COMMUNITYBOARD_TELEPORT_PRICE, player, true);
 				player.setIn7sDungeon(false);
 				player.setInstanceId(0);
-				player.teleToLocation(CommunityBoardConfig.COMMUNITY_AVAILABLE_TELEPORTS.get(teleBuypass), 0);
+				player.teleToLocation(teleportLocation, 0);
 				ThreadPool.schedule(player::enableAllSkills, 3000);
 			}
 		}
@@ -275,9 +278,8 @@ public class HomeBoard implements IParseBoardHandler
 			{
 				player.sendMessage("Not enough currency!");
 			}
-			else
+			else if (player.destroyItemByItemId(ItemProcessType.FEE, CommunityBoardConfig.COMMUNITYBOARD_CURRENCY, CommunityBoardConfig.COMMUNITYBOARD_HEAL_PRICE, player, true))
 			{
-				player.destroyItemByItemId(ItemProcessType.FEE, CommunityBoardConfig.COMMUNITYBOARD_CURRENCY, CommunityBoardConfig.COMMUNITYBOARD_HEAL_PRICE, player, true);
 				player.setCurrentHp(player.getMaxHp());
 				player.setCurrentMp(player.getMaxMp());
 				player.setCurrentCp(player.getMaxCp());
@@ -304,9 +306,8 @@ public class HomeBoard implements IParseBoardHandler
 			{
 				player.sendMessage("You are at minimum level!");
 			}
-			else
+			else if (player.destroyItemByItemId(ItemProcessType.FEE, CommunityBoardConfig.COMMUNITYBOARD_CURRENCY, CommunityBoardConfig.COMMUNITYBOARD_DELEVEL_PRICE, player, true))
 			{
-				player.destroyItemByItemId(ItemProcessType.FEE, CommunityBoardConfig.COMMUNITYBOARD_CURRENCY, CommunityBoardConfig.COMMUNITYBOARD_DELEVEL_PRICE, player, true);
 				final int newLevel = player.getLevel() - 1;
 				player.setExp(ExperienceData.getInstance().getExpForLevel(newLevel));
 				player.getStat().setLevel((byte) newLevel);
@@ -321,14 +322,14 @@ public class HomeBoard implements IParseBoardHandler
 		{
 			final String fullBypass = command.replace("_bbspremium;", "");
 			final String[] buypassOptions = fullBypass.split(",");
-			final int premiumDays = Integer.parseInt(buypassOptions[0]);
+			// The day count is whatever the client put in the bypass; parseInt took it raw.
+			final int premiumDays = isSmallNumber(buypassOptions[0]) ? Integer.parseInt(buypassOptions[0]) : 0;
 			if ((premiumDays < 1) || (premiumDays > 30) || (player.getInventory().getInventoryItemCount(CommunityBoardConfig.COMMUNITY_PREMIUM_COIN_ID, -1) < (CommunityBoardConfig.COMMUNITY_PREMIUM_PRICE_PER_DAY * premiumDays)))
 			{
 				player.sendMessage("Not enough currency!");
 			}
-			else
+			else if (player.destroyItemByItemId(ItemProcessType.FEE, CommunityBoardConfig.COMMUNITY_PREMIUM_COIN_ID, CommunityBoardConfig.COMMUNITY_PREMIUM_PRICE_PER_DAY * premiumDays, player, true))
 			{
-				player.destroyItemByItemId(ItemProcessType.FEE, CommunityBoardConfig.COMMUNITY_PREMIUM_COIN_ID, CommunityBoardConfig.COMMUNITY_PREMIUM_PRICE_PER_DAY * premiumDays, player, true);
 				PremiumManager.getInstance().addPremiumTime(player.getAccountName(), premiumDays, TimeUnit.DAYS);
 				player.sendMessage("Your account will now have premium status until " + new SimpleDateFormat("dd.MM.yyyy HH:mm").format(PremiumManager.getInstance().getPremiumExpiration(player.getAccountName())) + ".");
 				if (PremiumSystemConfig.PC_CAFE_RETAIL_LIKE)
