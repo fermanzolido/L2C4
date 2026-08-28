@@ -1537,7 +1537,8 @@ Son **71** archivos y **14.922** líneas: los cargadores XML (41), las tablas SQ
 
 **Leído:** `SchemeBufferTable` entero, y de los cargadores todo lo que el comando
 `//reload` toca. **Pendiente:** `OfflinePlayTable` (417) y los cargadores grandes
-(`SkillTreeData` 969, `NpcData` 847, `SpawnData` 817, `MultisellData` 472).
+(`SkillTreeData` 969, `NpcData` 847), sobre los que ya corrieron los cinco
+barridos mecanicos pero que no se leyeron linea por linea.
 
 ### Hallazgos
 
@@ -1593,6 +1594,60 @@ cada esquema un `ArrayList` plano, y el NPC del buffer muta los dos desde hilos
 de paquetes. Un solo jugador editando durante la cuenta regresiva puede tirar una
 modificación concurrente fuera del bucle, y el `catch` que lo envuelve **abandona
 el `executeBatch` entero**: no los esquemas de ese jugador, los de todos.
+
+### Tercera vuelta: multisell y el barrido de ensanchado tardío
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 11 | `MultiSellChoose` | el peso de lo que se va a recibir se suma en `int` y se valida contra un parámetro `long` | media |
+
+**11 — El rango se tiraba antes de la llamada.** `MultiSellChoose` totaliza lo que
+el jugador está por recibir en `int slots` e `int weight`, y se lo pasa a
+`inv.validateWeight` y `inv.validateCapacity`, **que las dos toman `long`**. O sea
+que el rango se perdía acá, en aritmética de `int`, antes de llegar a la
+validación que sí podía sostenerlo.
+
+Sesenta líneas más abajo, el bucle de **ingredientes** guarda exactamente este
+peligro y lo hace bien:
+`((long) e.getItemCount() * _amount) > Integer.MAX_VALUE`, y rechaza el
+intercambio. El de **productos**, arriba, no. Esa asimetría es lo que lo vuelve
+hallazgo.
+
+Medido antes de cambiarlo: `MultisellAmountLimit` viene en 10.000, y entre los 74
+archivos de multisell distribuidos y sus 7.119 producciones el peor caso es
+**109.800.000** contra un techo de 2.147.483.647 — diecinueve veces libre, y nada
+de lo distribuido desborda. Pero el umbral es `count × weight > 214.748`, y el
+ítem más pesado del juego pesa 10.980: **una producción custom de veinte de esos
+lo cruza**. Los archivos de multisell están entre los más editados en un servidor
+privado, y un peso que envuelve a negativo **pasa** el chequeo que debería
+fallar.
+
+### Anotado sin tocar (tercera vuelta)
+
+- **El conteo de producto en el bucle que entrega** (`e.getItemCount() * _amount`)
+  no tiene el guard simétrico. Desbordarlo pide un `count` de producción por
+  encima de 214.748 y el mayor de los datos distribuidos es **700** — tres órdenes
+  de magnitud. Agregar la guarda ahí sería código muerto.
+
+- **`Spawn.setRespawnDelay` hace `Math.max(1, minDelay) * 1000`**, o sea `int` por
+  mil. Un delay configurado por encima de 24,9 días desborda a negativo, y
+  `_doRespawn = _respawnMinDelay > 0` daría `false`: el NPC no vuelve nunca. El
+  mayor de los 20.727 atributos `respawnDelay` distribuidos es **604.800 segundos**
+  (siete días).
+
+- **`Spawn.setRespawnDelay` con un delay negativo solo loguea y sigue.** El
+  `Math.max(1, ...)` que viene después lo clampea a un segundo, así que el NPC
+  reaparece cada segundo en vez de romperse.
+
+### Sospechas evaluadas y descartadas (tercera vuelta)
+
+- **El barrido de ensanchado tardío sobre todo el core y el datapack.** Buscando
+  acumuladores `int` cuyo lado derecho multiplica dos o más términos no
+  constantes, sin `(long)` a la vista: **dos aciertos**, los dos cálculos de
+  recompensa de quest (`Q00325`, `Q00360`) que necesitarían millones de ítems de
+  quest acumulados para desbordar. El barrido saliendo casi vacío es lo que
+  confirma que el tesoro del manor y el peso del multisell eran los casos reales y
+  no una clase difusa.
 
 ### Segunda vuelta: `data/sql`
 
