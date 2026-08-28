@@ -1540,9 +1540,9 @@ y ciclo de carrera, `RecipeManager` en el cálculo de pasadas, `LotteryManager` 
 el reparto de premios, y `RaceManager` (que es `model/actor/instance` pero es el
 NPC de las carreras) en su bypass.
 
-**Pendiente:** `ZoneManager` (912), `CastleManorManager` (862), `CaptchaManager`
-(514), `SellBuffsManager` (510), `RaidBossSpawnManager` (498),
-`DimensionalRiftManager` (492), `WalkingManager` (487) y el resto.
+**Pendiente:** `SellBuffsManager` (510), `RaidBossSpawnManager` (498),
+`DimensionalRiftManager` (492), `MapRegionManager` (458), `PetitionManager` (444),
+`InstanceManager` (440), `MercTicketManager` (430) y el resto.
 
 ### Hallazgos
 
@@ -1589,6 +1589,113 @@ Un lector que llegue entre el `clear()` y los `add` ve una lista más corta que 
 índice que va a usar. Además arranca **vacía** hasta la primera carrera. Ahora se
 arma aparte y se publica en una sola asignación a un campo `volatile`, y los dos
 lectores chequean el tamaño.
+
+### Segunda vuelta: el barrido de operaciones compuestas
+
+Después de que el patrón rindiera tres veces —una colección hecha concurrente a
+propósito, con una operación compuesta no atómica escrita al lado— se barrieron
+los 44 archivos buscando exactamente eso: una lectura sobre un `ConcurrentHashMap`
+seguida de un `put` sobre el mismo mapa dentro de cinco líneas. Salieron **siete
+candidatos**; cinco resultaron defectos.
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 6 | `WalkingManager` | `cancelMoving` no saca nada de los tres mapas de tareas | alta |
+| 7 | `WalkingManager` | tres `get`-chequeo-`put` sobre futuros, uno de tasa fija | alta |
+| 8 | `CaptchaManager` | `containsKey` y después `get` sobre un mapa del que borra un timeout | alta |
+| 9 | `CastleManorManager` | tres multiplicaciones que ensanchan a `long` **después** de multiplicar | media |
+| 10 | `CaptchaManager` | el contador de intentos anti-bot se incrementa sin atomicidad | media |
+| 11 | `CaptchaManager` | se cancela una tarea que puede no estar, sin chequear | media |
+| 12 | `ZoneManager` | registro de zona con `get`, null, `put`, `get` otra vez | media |
+
+**6 y 7 — Tareas que corren para siempre sin nadie que las pueda parar.**
+`WalkingManager` guarda tres mapas de futuros indexados por `Npc`, y los tres
+tenían la misma forma `get` → chequeo → `put`. `startMoving` se alcanza desde
+`ArrivedTask` **y** desde la tarea repetitiva que se instala en esa misma línea,
+en hilos distintos del pool, así que dos llamadores pueden encontrar la tarea
+terminada y agendar cada uno un reemplazo. **Esos mapas son el único asidero de
+esos futuros**, así que aquel cuyo `put` perdió quedó corriendo a tasa fija cada
+diez segundos, sin nada capaz de cancelarlo.
+
+Y `cancelMoving` no sacaba nada de esos mapas. Saca la ruta de `_activeRoutes` y
+cancela la tarea de chequeo de `WalkInfo` —que da la casualidad de ser el mismo
+futuro que la entrada repetitiva, así que **esa** sí paraba—, pero las entradas
+quedaban y las tareas de arranque y de llegada no se cancelaban en absoluto. Dos
+consecuencias: todo NPC que hubiera caminado una vez quedaba anclado en tres
+mapas por una clave fuerte, y una llegada pendiente seguía disparándose para un
+NPC recién muerto.
+
+**8, 10 y 11 — Tres carreras en el control que debería atrapar bots.**
+`analyseBypass` abría con `containsKey` y después hacía dos `get` más sobre la
+misma clave. El captcha tiene una tarea de timeout que borra esa entrada, así que
+una respuesta que llega mientras el timer dispara pasa el `containsKey` y después
+desreferencia el null que devuelven los `get`.
+
+El contador de intentos era `getOrDefault` + 1 + `put`. Dos respuestas juntas leen
+el mismo número y la segunda escritura repone el mismo valor, o sea que **una
+respuesta incorrecta no cuesta nada**. En un control anti-bot esa es la dirección
+equivocada para fallar.
+
+Y los dos sitios que paran el timer escribían
+`BEGIN_VALIDATION.get(...).cancel(true)` seguido de un `remove`. La entrada no
+está garantizada —el timer se borra solo al vencer— así que el `get` daba null y
+el `cancel` tiraba; en `banPunishment` eso cae **entre** borrar la validación y
+aplicar el castigo.
+
+**9 — Ensanchar después de multiplicar.** Tres sitios multiplican precio por
+cantidad y entregan el resultado a algo que toma un `long`. `SeedProduction`
+declara los dos como `int`, así que el producto se calculaba en aritmética de
+`int` y recién el resultado ya desbordado se ensanchaba. El que cuesta dinero es
+`castle.addToTreasuryNoTax(crop.getAmount() * crop.getPrice())`, porque
+`addToTreasuryNoTax` **lee un monto negativo como un retiro**: un desborde ahí no
+solo pierde el depósito, saca la misma suma del tesoro.
+
+Se calculó cuán lejos está el dato distribuido del borde en vez de suponerlo.
+`RequestSetCrop` valida el precio contra `getCropMaxPrice()` (precio de referencia
+del cultivo × 10) y la cantidad contra `getCropLimit()` (`limit_crops` ×
+`RateDropManor`). En las 198 filas de `Seeds.xml` el `limit_crops` mayor es 9.000
+y entre los 54 ítems de cultivo el precio de referencia mayor es 2.750, así que
+con el `RateDropManor = 1` distribuido el peor caso es **247.500.000**, cómodo
+dentro de `int`. Pero ese rate escala el límite, y el umbral es
+`2147483647 / (9000 × 27500)` = **8,67**: un servidor con `RateDropManor` en 9 o
+más desborda, y las tasas altas están muy por encima de eso.
+
+### Anotado sin tocar (segunda vuelta de `managers`)
+
+- **`RequestBuySeed` acumula en un `totalPrice` de tipo `int`** y lo compara con
+  `MAX_ADENA` después de cada suma. Cada término está acotado por un
+  pre-chequeo de desborde explícito arriba, pero dos términos cerca del tope de
+  2.000.000.000 suman por encima de `Integer.MAX_VALUE` y envuelven a negativo, lo
+  que **pasa** el chequeo en vez de fallarlo. No cuesta nada: el `reduceAdena` por
+  ítem del bucle de compra cobra el precio positivo correcto y saltea lo que el
+  jugador no puede pagar, así que solo se evade el castigo anti-trampa, y los
+  precios de manor necesarios para llegar ahí están muy por encima de lo que
+  permiten los datos.
+
+- **`RETRIES` de `CaptchaManager` nunca se limpia.** Solo se pone en cero. Está
+  indexado por object id, así que no ancla objetos `Player`, pero crece con cada
+  jugador que alguna vez vio un captcha.
+
+- **`ZoneBuildManager.PLAYER_LOCATIONS` está indexado por `Player`** y solo se
+  limpia al terminar de construir la zona. Un GM que se desconecta a mitad deja su
+  `Player` anclado. Herramienta de GM, impacto bajo.
+
+### Sospechas evaluadas y descartadas (segunda vuelta)
+
+- **`ZoneManager.addZone` perdiendo zonas en el arranque.** El defecto es real y
+  se arregló, pero **no es alcanzable con los datos distribuidos**, y la razón vale
+  la pena: `load()` pre-puebla `_classZones` con un mapa para 28 clases de zona
+  antes de parsear, así que la rama del null solo corre para una clase que esa
+  lista se haya salteado. Comparada contra las subclases de `ZoneType` queda
+  exactamente una, `NoPvPZone`, y los 37 archivos de zonas distribuidos no
+  contienen ni una zona `NoPvP`.
+
+- **`GlobalAuctionManager.addFunds` con `getOrDefault` + `put`.** Todos los métodos
+  que tocan `_funds` son `synchronized` sobre el manager.
+
+- **El barrido de multiplicaciones de dinero ensanchadas tarde** sobre todo el core
+  dejó un solo sitio más, `RequestBuySeed:180`, y está cubierto por el
+  pre-chequeo de desborde que tiene arriba.
 
 ### Anotado sin tocar (`managers`)
 
