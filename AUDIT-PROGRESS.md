@@ -29,8 +29,8 @@ hallazgos aunque no hayas terminado el área.
 | ~~datapack `ai/`~~ | 67 | 14.462 | **TERMINADA** |
 | ~~`managers`~~ | 44 | 14.636 | **TERMINADA** |
 | ~~`data`~~ | 71 | 14.922 | **TERMINADA** |
-| **`network/serverpackets`** | **259** | **19.900** | **en curso** |
-| `network/clientpackets` | 201 | 21.727 | pendiente |
+| ~~`network/serverpackets`~~ | 259 | 19.900 | **TERMINADA** |
+| **`network/clientpackets`** | **201** | **21.727** | **en curso** |
 | datapack `handlers/` | 375 | 51.203 | pendiente |
 | `model/actor` | 166 | 53.236 | pendiente |
 | datapack `quests/` | 298 | 79.342 | pendiente |
@@ -1530,14 +1530,10 @@ declaraciones, 0 `volatile`, 0 `finally`. Uniforme. Un grep por `_working` habr�
 mostrado los sitios sin mostrar que **ninguno** estaba protegido.
 
 
-## `network/serverpackets` — en curso
+## `network/serverpackets` — TERMINADA
 
 Son **259** archivos y **19.900** líneas: los escritores de paquetes salientes.
 
-**Leido:** `AllianceInfo`, `CharInfo`, `AbstractNpcInfo`, `Die`, `SystemMessage`,
-`ConfirmDlg`, `NewCharacterSuccess`, `SortedWareHouseWithdrawalList`, y los sitios
-que marcaron los barridos. **Pendiente:** `ExServerPrimitive` (534), `SSQStatus`
-(400), `CharSelectionInfo` (358).
 
 ### Hallazgos
 
@@ -1666,6 +1662,29 @@ Importa porque `SystemMessage` está entre los paquetes más enviados del servid
   cuyo contenido dependa de quién lo recibe. `sendInBroadcast()`, el único método
   que enciende esa bandera, **no tiene ningún llamador**: el mecanismo existe
   entero y está muerto.
+
+### Cómo se cubrió el área
+
+De los 259 archivos se leyeron línea por línea los que los barridos señalaron más
+`SystemMessage`, `SortedWareHouseWithdrawalList`, `CharSelectionInfo`,
+`AllianceInfo`, `CharInfo` y `AbstractNpcInfo`. El resto son escritores de buffer
+mecánicos, y sobre los **259** corrieron siete barridos:
+
+1. **operación compuesta sobre colección concurrente** — 0 candidatos;
+2. **`containsKey` seguido de `get`** — 5, todos sobre mapas locales del paquete;
+3. **división por variable** — 32, todos el mismo `_moveMultiplier`, descartado
+   midiendo los datos;
+4. **encadenamientos sin guarda** — casi todos `getInventory()` sobre un `Player`;
+   el único real estaba en el constructor de `AllianceInfo`, no en la escritura;
+5. **conteo declarado contra elementos escritos** — 7 candidatos, **3 defectos**;
+6. **comparadores que rompen su contrato** — 1 acierto en todo el repo;
+7. **índices de array sin acotar** — 0.
+
+Dos mecanismos quedaron descartados enteros: el **caché de difusión** de
+`WritablePacket`, que sería incorrecto para cualquier paquete cuyo contenido
+dependa del destinatario y cuyo único activador —`sendInBroadcast()`— no tiene
+llamadores; y **`writeString(null)`**, que escribe solo el terminador en vez de
+lanzar, junto con `writeSizedString`, que chequea el null.
 
 ### Sospechas evaluadas y descartadas (`serverpackets`)
 
