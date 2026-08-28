@@ -209,15 +209,14 @@ public class OracleTeleport extends Script
 				htmltext = "5a.htm";
 			}
 			
-			int i = 0;
-			for (int id1 : TELEPORTERS)
+			// The two loops below the guarded ones are reached on the event name alone. A walk
+			// that never found its npc used to fall out with the counter at the array length,
+			// and that number is still a valid index into RETURN_LOCS, so the player was sent
+			// somewhere else entirely instead of being refused.
+			final int i = indexOfTeleporter(npcId);
+			if (i < 0)
 			{
-				if (id1 == npcId)
-				{
-					break;
-				}
-				
-				i++;
+				return htmltext;
 			}
 			
 			qs.set("id", Integer.toString(i));
@@ -231,41 +230,27 @@ public class OracleTeleport extends Script
 		}
 		else if (event.equalsIgnoreCase("zigurratDimensional"))
 		{
-			final int playerLevel = player.getLevel();
-			if ((playerLevel >= 20) && (playerLevel < 30))
+			// Same unguarded walk as in the "5.htm" branch above.
+			final int i = indexOfTeleporter(npcId);
+			if (i < 0)
 			{
-				takeItems(player, Inventory.ADENA_ID, 2000);
-			}
-			else if ((playerLevel >= 30) && (playerLevel < 40))
-			{
-				takeItems(player, Inventory.ADENA_ID, 4500);
-			}
-			else if ((playerLevel >= 40) && (playerLevel < 50))
-			{
-				takeItems(player, Inventory.ADENA_ID, 8000);
-			}
-			else if ((playerLevel >= 50) && (playerLevel < 60))
-			{
-				takeItems(player, Inventory.ADENA_ID, 12500);
-			}
-			else if ((playerLevel >= 60) && (playerLevel < 70))
-			{
-				takeItems(player, Inventory.ADENA_ID, 18000);
-			}
-			else if (playerLevel >= 70)
-			{
-				takeItems(player, Inventory.ADENA_ID, 24500);
+				return htmltext;
 			}
 			
-			int i = 0;
-			for (int ziggurat : TELEPORTERS)
+			// The fee used to be handed straight to takeItems with nothing checking the purse.
+			// takeItems removes whatever is there rather than refusing, so a player short of the
+			// price paid what they had and was teleported anyway -- and one with none at all rode
+			// for free.
+			final int price = getZigguratPrice(player.getLevel());
+			if (player.getAdena() < price)
 			{
-				if (ziggurat == npcId)
-				{
-					break;
-				}
-				
-				i++;
+				player.sendPacket(SystemMessageId.YOU_DO_NOT_HAVE_ENOUGH_ADENA);
+				return htmltext;
+			}
+			
+			if (price > 0)
+			{
+				takeItems(player, Inventory.ADENA_ID, price);
 			}
 			
 			qs.set("id", Integer.toString(i));
@@ -402,6 +387,66 @@ public class OracleTeleport extends Script
 		return htmltext;
 	}
 	
+	
+	/**
+	 * @param npcId the npc that received the event
+	 * @return the index of that npc in {@link #TELEPORTERS}, or -1 when it is not one. The two
+	 *         branches that call this are reached on the event name alone, and the hand written
+	 *         walks they used to carry fell out with the counter at the array length, which is
+	 *         still a valid index into RETURN_LOCS.
+	 */
+	private static int indexOfTeleporter(int npcId)
+	{
+		for (int i = 0; i < TELEPORTERS.length; i++)
+		{
+			if (TELEPORTERS[i] == npcId)
+			{
+				return i;
+			}
+		}
+		
+		return -1;
+	}
+	
+	/**
+	 * @param playerLevel the level of the traveller
+	 * @return the ziggurat rift fee for that level, or zero below level twenty
+	 */
+	private static int getZigguratPrice(int playerLevel)
+	{
+		if (playerLevel >= 70)
+		{
+			return 24500;
+		}
+		
+		if (playerLevel >= 60)
+		{
+			return 18000;
+		}
+		
+		if (playerLevel >= 50)
+		{
+			return 12500;
+		}
+		
+		if (playerLevel >= 40)
+		{
+			return 8000;
+		}
+		
+		if (playerLevel >= 30)
+		{
+			return 4500;
+		}
+		
+		if (playerLevel >= 20)
+		{
+			return 2000;
+		}
+		
+		return 0;
+	}
+
 	public static void main(String[] args)
 	{
 		new OracleTeleport();
