@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.StringJoiner;
 
 import org.l2jmobius.commons.threads.ThreadPool;
+import org.l2jmobius.commons.util.StringUtil;
 import org.l2jmobius.gameserver.cache.HtmCache;
 import org.l2jmobius.gameserver.config.RatesConfig;
 import org.l2jmobius.gameserver.config.custom.PremiumSystemConfig;
@@ -174,10 +175,19 @@ public class DropSearchBoard implements IParseBoardHandler
 			}
 			case "_bbs_search_drop":
 			{
+				// The board is one of the commands that skip html action validation, so every
+				// one of these fields is text the client chose. The id and the page went straight
+				// to parseInt, and an item nothing drops answers null from the cache before a
+				// size is read off it.
+				final int itemId = bypassInt(params, 1);
+				final List<CBDropHolder> list = itemId < 0 ? null : DROP_INDEX_CACHE.get(itemId);
+				if (list == null)
+				{
+					break;
+				}
+				
 				final DecimalFormat chanceFormat = new DecimalFormat("0.00##");
-				final int itemId = Integer.parseInt(params[1]);
-				int page = Integer.parseInt(params[2]);
-				final List<CBDropHolder> list = DROP_INDEX_CACHE.get(itemId);
+				int page = bypassInt(params, 2);
 				int pages = list.size() / 4;
 				if (pages == 0)
 				{
@@ -369,8 +379,8 @@ public class DropSearchBoard implements IParseBoardHandler
 			case "_bbs_npc_trace":
 			{
 				final StringBuilder builder = new StringBuilder();
-				final int npcId = Integer.parseInt(params[1]);
-				final Spawn spawn = SpawnTable.getInstance().getAnySpawn(npcId);
+				final int npcId = bypassInt(params, 1);
+				final Spawn spawn = npcId < 0 ? null : SpawnTable.getInstance().getAnySpawn(npcId);
 				if (spawn == null)
 				{
 					builder.append("<tr><td width=100 align=CENTER>Cannot find any spawn. Maybe dropped by a boss or instance monster.</td></tr>");
@@ -489,6 +499,23 @@ public class DropSearchBoard implements IParseBoardHandler
 	 * @param params
 	 * @return
 	 */
+	/**
+	 * @param params the fields of the bypass, split on spaces
+	 * @param index which field to read a number out of
+	 * @return the number the field holds, or -1 when there is no such field or it is not
+	 *         a number that fits in an int
+	 */
+	private static int bypassInt(String[] params, int index)
+	{
+		if (index >= params.length)
+		{
+			return -1;
+		}
+		
+		final String value = params[index];
+		return StringUtil.isNumeric(value) && (value.length() <= 9) ? Integer.parseInt(value) : -1;
+	}
+	
 	private String buildItemName(String[] params)
 	{
 		final StringJoiner joiner = new StringJoiner(" ");

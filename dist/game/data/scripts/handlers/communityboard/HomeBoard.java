@@ -166,6 +166,13 @@ public class HomeBoard implements IParseBoardHandler
 		{
 			final String fullBypass = command.replace("_bbsmultisell;", "");
 			final String[] buypassOptions = fullBypass.split(",");
+			// Both fields are text the client chose: the id went straight to parseInt and the
+			// page was indexed without checking it is there.
+			if ((buypassOptions.length < 2) || !isSmallNumber(buypassOptions[0]))
+			{
+				return false;
+			}
+			
 			final int multisellId = Integer.parseInt(buypassOptions[0]);
 			final String page = buypassOptions[1];
 			returnHtml = HtmCache.getInstance().getHtm(player, "data/html/CommunityBoard/Custom/" + page + ".html");
@@ -175,6 +182,13 @@ public class HomeBoard implements IParseBoardHandler
 		{
 			final String fullBypass = command.replace("_bbsexcmultisell;", "");
 			final String[] buypassOptions = fullBypass.split(",");
+			// Both fields are text the client chose: the id went straight to parseInt and the
+			// page was indexed without checking it is there.
+			if ((buypassOptions.length < 2) || !isSmallNumber(buypassOptions[0]))
+			{
+				return false;
+			}
+			
 			final int multisellId = Integer.parseInt(buypassOptions[0]);
 			final String page = buypassOptions[1];
 			returnHtml = HtmCache.getInstance().getHtm(player, "data/html/CommunityBoard/Custom/" + page + ".html");

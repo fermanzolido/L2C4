@@ -33,6 +33,7 @@ import org.l2jmobius.gameserver.handler.CommunityBoardHandler;
 import org.l2jmobius.gameserver.handler.IParseBoardHandler;
 import org.l2jmobius.gameserver.model.BlockList;
 import org.l2jmobius.gameserver.model.World;
+import org.l2jmobius.commons.util.StringUtil;
 import org.l2jmobius.gameserver.model.actor.Player;
 import org.l2jmobius.gameserver.network.SystemMessageId;
 import org.l2jmobius.gameserver.network.serverpackets.FriendList;
@@ -72,15 +73,23 @@ public class FriendsBoard implements IParseBoardHandler
 		{
 			final StringTokenizer st = new StringTokenizer(command, ";");
 			st.nextToken();
+			
+			// The board skips html action validation, so the command is whatever the client
+			// sent, and one without its action field threw out of nextToken.
+			if (!st.hasMoreTokens())
+			{
+				return false;
+			}
+			
 			final String action = st.nextToken();
 			if (action.equals("select"))
 			{
-				player.selectFriend((st.hasMoreTokens()) ? Integer.parseInt(st.nextToken()) : 0);
+				player.selectFriend(StringUtil.parseNextInt(st, 0));
 				showFriendsList(player, false);
 			}
 			else if (action.equals("deselect"))
 			{
-				player.deselectFriend((st.hasMoreTokens()) ? Integer.parseInt(st.nextToken()) : 0);
+				player.deselectFriend(StringUtil.parseNextInt(st, 0));
 				showFriendsList(player, false);
 			}
 			else if (action.equals("delall"))
@@ -173,15 +182,23 @@ public class FriendsBoard implements IParseBoardHandler
 		{
 			final StringTokenizer st = new StringTokenizer(command, ";");
 			st.nextToken();
+			
+			// The board skips html action validation, so the command is whatever the client
+			// sent, and one without its action field threw out of nextToken.
+			if (!st.hasMoreTokens())
+			{
+				return false;
+			}
+			
 			final String action = st.nextToken();
 			if (action.equals("select"))
 			{
-				player.selectBlock((st.hasMoreTokens()) ? Integer.parseInt(st.nextToken()) : 0);
+				player.selectBlock(StringUtil.parseNextInt(st, 0));
 				showBlockList(player, false);
 			}
 			else if (action.equals("deselect"))
 			{
-				player.deselectBlock((st.hasMoreTokens()) ? Integer.parseInt(st.nextToken()) : 0);
+				player.deselectBlock(StringUtil.parseNextInt(st, 0));
 				showBlockList(player, false);
 			}
 			else if (action.equals("delall"))

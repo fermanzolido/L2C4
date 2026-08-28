@@ -117,7 +117,9 @@ public class FavoriteBoard implements IParseBoardHandler
 		else if (command.startsWith("_bbsdelfav_"))
 		{
 			final String favId = command.replace("_bbsdelfav_", "");
-			if (!StringUtil.isNumeric(favId))
+			// isNumeric alone only proves every character is a digit, not that the number
+			// fits in an int, and parseInt below does not take all of them.
+			if (!StringUtil.isNumeric(favId) || (favId.length() > 9))
 			{
 				LOG.warning(FavoriteBoard.class.getSimpleName() + ": Couldn't delete favorite link, " + favId + " it's not a valid ID!");
 				return false;

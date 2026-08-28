@@ -125,6 +125,13 @@ public class MailBoard implements IWriteBoardHandler
 		{
 			final StringTokenizer st = new StringTokenizer(command, ";");
 			st.nextToken();
+			
+			// Outside the try below, so a command without its action field threw from here.
+			if (!st.hasMoreTokens())
+			{
+				return false;
+			}
+			
 			final String action = st.nextToken().toLowerCase();
 			
 			try

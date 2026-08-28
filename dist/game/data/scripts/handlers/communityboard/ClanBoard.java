@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import org.l2jmobius.gameserver.data.sql.ClanTable;
 import org.l2jmobius.gameserver.handler.CommunityBoardHandler;
 import org.l2jmobius.gameserver.handler.IWriteBoardHandler;
+import org.l2jmobius.commons.util.StringUtil;
 import org.l2jmobius.gameserver.model.actor.Player;
 import org.l2jmobius.gameserver.model.clan.Clan;
 import org.l2jmobius.gameserver.model.clan.ClanMember;
@@ -582,7 +583,7 @@ public class ClanBoard implements IWriteBoardHandler
 		}
 		else if (arg1.equalsIgnoreCase("mail"))
 		{
-			if (Integer.parseInt(arg2) != player.getClanId())
+			if (StringUtil.parseInt(arg2, -1) != player.getClanId())
 			{
 				return true;
 			}
