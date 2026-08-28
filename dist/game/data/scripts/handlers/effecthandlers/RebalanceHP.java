@@ -84,6 +84,15 @@ public class RebalanceHP extends AbstractEffect
 			}
 		}
 		
+		// The two loops each ask the skill for its target list again and test the same
+		// conditions, so the second can act on someone the first did not count. With
+		// nobody counted fullHP is still zero, and zero over zero is NaN, which every
+		// setCurrentHp below would have been handed.
+		if (fullHP <= 0)
+		{
+			return;
+		}
+		
 		final double percentHP = currentHPs / fullHP;
 		for (WorldObject object : skill.getTargetList(effector, false))
 		{

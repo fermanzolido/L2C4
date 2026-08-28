@@ -237,7 +237,10 @@ public class AdminDebug implements IAdminCommandHandler
 				{
 					if (player.isOnline())
 					{
-						if (LocationUtil.calculateDistance(player, PLAYER_DOOR_LOCATIONS.get(player), false, false) > 15)
+						// Toggling the debug off cancels this task without interrupting a run in
+						// progress and then drops the entry, so the lookup can answer null here.
+						final Location lastLocation = PLAYER_DOOR_LOCATIONS.get(player);
+						if ((lastLocation != null) && (LocationUtil.calculateDistance(player, lastLocation, false, false) > 15))
 						{
 							PLAYER_DOOR_LOCATIONS.put(player, new Location(player));
 							AdminCommandHandler.getInstance().onCommand(player, "admin_showdoors", false);
@@ -279,7 +282,8 @@ public class AdminDebug implements IAdminCommandHandler
 				{
 					if (player.isOnline())
 					{
-						if (!PLAYER_MOVE_PATHS.containsKey(player) && (LocationUtil.calculateDistance(player, PLAYER_GEO_LOCATIONS.get(player), false, false) > 15))
+						final Location lastLocation = PLAYER_GEO_LOCATIONS.get(player);
+						if (!PLAYER_MOVE_PATHS.containsKey(player) && (lastLocation != null) && (LocationUtil.calculateDistance(player, lastLocation, false, false) > 15))
 						{
 							PLAYER_GEO_LOCATIONS.put(player, new Location(player));
 							AdminCommandHandler.getInstance().onCommand(player, "admin_geogrid", false);
