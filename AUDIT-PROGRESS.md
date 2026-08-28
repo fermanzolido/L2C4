@@ -1539,8 +1539,8 @@ Son **67** archivos y **14.462** líneas, repartidas en `others` (45), `areas`
 del respawn; `ClassMaster` (1.112) y `CastleChamberlain` (1.109) enteros en sus
 caminos de bypass; `KetraOrcSupport` y `VarkaSilenosSupport`.
 
-**Pendiente:** el resto de `others/` y de `areas/`, sobre todo `FourSepulchers`
-(704) y `OracleTeleport` (409).
+**Pendiente:** el resto de `others/` y de `areas/`, sobre todo `OracleTeleport`
+(409), `CabaleBuffer` (299) y `SiegeGuards` (260).
 
 ### Hallazgos
 
@@ -1573,6 +1573,65 @@ que deja funcionando un precio configurado en cero de verdad.
 `nextToken()` consume, así que el índice crecía contra un tope que bajaba. Con
 cuatro o más tokens sobrantes se salía del array; con ninguno, `nextToken()`
 llegaba sin nada que dar.
+
+### Segunda vuelta: `FourSepulchers`, `WyvernManager` y `takeItems`
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 6 | `FourSepulchers` | el id de tumba 0 se usa como clave de mapa en cinco sitios | alta |
+| 7 | `FourSepulchers` | `STORED_PROGRESS` es un `HashMap` plano con lectura-modificación-escritura | media |
+| 8 | `WyvernManager` | se cobra antes de montar y se descarta el booleano de `mount()` | media |
+| 9 | `Quest.takeItems` | devuelve `true` incondicionalmente | baja |
+
+**6 — La guarda estaba escrita, en el lugar equivocado.** `getSepulcherId`
+recorre las cuatro zonas y devuelve **0** para un jugador que no está en ninguna.
+`STORED_PROGRESS` y `STORED_MONSTER_SPAWNS` están indexados de 1 a 4, así que con
+id 0 el `get` devuelve `null` y los cinco sitios que usan el id como clave lo
+desempaquetan o lo iteran.
+
+El archivo **ya sabe** que el id puede ser cero: dos ramas testean
+`sepulcherId > 0`, y en el caso de la muerte del boss ese test está **tres
+sentencias después** del `get` que debía proteger. Ese es el delator: la guarda
+se escribió por la razón correcta y se puso en el lugar equivocado.
+
+Los dos que importan:
+
+- `WAVE_DEFEATED_CHECK` se reagenda **cada cinco segundos** mientras la oleada
+  vive, así que un jugador que sale de la zona —murió y volvió a pueblo, se
+  teleportó, terminó el evento— deja un disparo pendiente, y ese disparo indexaba
+  los dos mapas con cero antes de llegar al chequeo veinte líneas más abajo.
+- `OPEN_GATE` **consumía la llave de capilla y marcaba el portero como usado**
+  antes de resolver la tumba, así que la excepción caía con la llave ya gastada.
+
+**8 — Descartar la respuesta de quien sabe si funcionó.** `player.mount(...)`
+devuelve `false` cuando `disarmWeapons` no puede desequipar el arma en mano, que
+es lo que significa `isForceEquip`: un arma maldita. El script cobraba los
+cristales, desmontaba el strider, llamaba a `mount` **ignorando el resultado** y
+devolvía la página de éxito. Un líder de clan con un arma maldita pagaba, perdía
+el strider y no recibía nada.
+
+**9 — Un booleano que nunca significó nada.** `takeItems` termina en un
+`return true` incondicional: ignora lo que le devuelve `takeItem` —que es la
+respuesta de `destroyItemByItemId`, y puede ser `false`— y además reporta éxito
+cuando el jugador simplemente tenía menos de lo pedido, porque el bucle se lleva
+lo que haya y sale.
+
+Arreglarlo no rompe nada porque **nadie lo lee**: 1806 llamadores en el datapack
+y ni uno usa el retorno. Por eso es higiene de API y no un arreglo de
+comportamiento vivo — todos los llamadores chequean la cantidad por su cuenta
+antes. Ahora reporta lo que pasó de verdad.
+
+### Anotado sin tocar (segunda vuelta)
+
+- **El par `getQuestItemsCount(...) >= N` seguido de `takeItems(..., N)` es la
+  forma dominante en el datapack**, y entre el chequeo y el cobro hay una ventana:
+  si los ítems se van en el medio, `takeItems` se lleva lo que quede y —hasta este
+  cambio— reportaba éxito igual. Cerrarlo de verdad exige que los 1806 llamadores
+  consulten el retorno, que no es un cambio que se pueda hacer a ciegas.
+
+- **`ROOM_SPAWN_DATA` es `private static` no final** y un `ArrayList` plano. Solo
+  se escribe en la carga (`clear()` y `add`), así que no hay escritura
+  concurrente, pero nada lo impide.
 
 ### Anotado sin tocar (datapack `ai/`)
 
