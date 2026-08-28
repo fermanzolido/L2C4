@@ -228,27 +228,33 @@ public class ClanHallManager extends Merchant
 				{
 					final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 					html.setFile(player, "data/html/clanHallManager/functions.htm");
-					if (getClanHall().getFunction(ClanHall.FUNC_RESTORE_EXP) != null)
+					// Each of these is looked up again to be used after being tested. ClanHall's
+					// fee task removes functions from a scheduled task, so what answered the test
+					// need not still be there for the dereference.
+					final ClanHallFunction expRegen = getClanHall().getFunction(ClanHall.FUNC_RESTORE_EXP);
+					if (expRegen != null)
 					{
-						html.replace("%xp_regen%", String.valueOf(getClanHall().getFunction(ClanHall.FUNC_RESTORE_EXP).getLevel()));
+						html.replace("%xp_regen%", String.valueOf(expRegen.getLevel()));
 					}
 					else
 					{
 						html.replace("%xp_regen%", "0");
 					}
 					
-					if (getClanHall().getFunction(ClanHall.FUNC_RESTORE_HP) != null)
+					final ClanHallFunction hpRegen = getClanHall().getFunction(ClanHall.FUNC_RESTORE_HP);
+					if (hpRegen != null)
 					{
-						html.replace("%hp_regen%", String.valueOf(getClanHall().getFunction(ClanHall.FUNC_RESTORE_HP).getLevel()));
+						html.replace("%hp_regen%", String.valueOf(hpRegen.getLevel()));
 					}
 					else
 					{
 						html.replace("%hp_regen%", "0");
 					}
 					
-					if (getClanHall().getFunction(ClanHall.FUNC_RESTORE_MP) != null)
+					final ClanHallFunction mpRegen = getClanHall().getFunction(ClanHall.FUNC_RESTORE_MP);
+					if (mpRegen != null)
 					{
-						html.replace("%mp_regen%", String.valueOf(getClanHall().getFunction(ClanHall.FUNC_RESTORE_MP).getLevel()));
+						html.replace("%mp_regen%", String.valueOf(mpRegen.getLevel()));
 					}
 					else
 					{
@@ -741,10 +747,11 @@ public class ClanHallManager extends Merchant
 						final String mp_grade1 = "[<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 5\">5%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 15\">15%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 25\">25%</a>]";
 						final String mp_grade2 = "[<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 5\">5%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 15\">15%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 30\">30%</a>]";
 						final String mp_grade3 = "[<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 5\">5%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 15\">15%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 30\">30%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 40\">40%</a>]";
-						if (getClanHall().getFunction(ClanHall.FUNC_RESTORE_HP) != null)
+						final ClanHallFunction hpRecovery = getClanHall().getFunction(ClanHall.FUNC_RESTORE_HP);
+						if (hpRecovery != null)
 						{
-							html.replace("%hp_recovery%", getClanHall().getFunction(ClanHall.FUNC_RESTORE_HP).getLevel() + "%</font> (<font color=\"FFAABB\">" + getClanHall().getFunction(ClanHall.FUNC_RESTORE_HP).getLease() + "</font>Adena /" + (FeatureConfig.CH_HPREG_FEE_RATIO / 1000 / 60 / 60 / 24) + " Day)");
-							html.replace("%hp_period%", "Withdraw the fee for the next time at " + format.format(getClanHall().getFunction(ClanHall.FUNC_RESTORE_HP).getEndTime()));
+							html.replace("%hp_recovery%", hpRecovery.getLevel() + "%</font> (<font color=\"FFAABB\">" + hpRecovery.getLease() + "</font>Adena /" + (FeatureConfig.CH_HPREG_FEE_RATIO / 1000 / 60 / 60 / 24) + " Day)");
+							html.replace("%hp_period%", "Withdraw the fee for the next time at " + format.format(hpRecovery.getEndTime()));
 							final int grade = getClanHall().getGrade();
 							switch (grade)
 							{
@@ -800,10 +807,11 @@ public class ClanHallManager extends Merchant
 							}
 						}
 						
-						if (getClanHall().getFunction(ClanHall.FUNC_RESTORE_EXP) != null)
+						final ClanHallFunction expRecovery = getClanHall().getFunction(ClanHall.FUNC_RESTORE_EXP);
+						if (expRecovery != null)
 						{
-							html.replace("%exp_recovery%", getClanHall().getFunction(ClanHall.FUNC_RESTORE_EXP).getLevel() + "%</font> (<font color=\"FFAABB\">" + getClanHall().getFunction(ClanHall.FUNC_RESTORE_EXP).getLease() + "</font>Adena /" + (FeatureConfig.CH_EXPREG_FEE_RATIO / 1000 / 60 / 60 / 24) + " Day)");
-							html.replace("%exp_period%", "Withdraw the fee for the next time at " + format.format(getClanHall().getFunction(ClanHall.FUNC_RESTORE_EXP).getEndTime()));
+							html.replace("%exp_recovery%", expRecovery.getLevel() + "%</font> (<font color=\"FFAABB\">" + expRecovery.getLease() + "</font>Adena /" + (FeatureConfig.CH_EXPREG_FEE_RATIO / 1000 / 60 / 60 / 24) + " Day)");
+							html.replace("%exp_period%", "Withdraw the fee for the next time at " + format.format(expRecovery.getEndTime()));
 							final int grade = getClanHall().getGrade();
 							switch (grade)
 							{
@@ -859,10 +867,11 @@ public class ClanHallManager extends Merchant
 							}
 						}
 						
-						if (getClanHall().getFunction(ClanHall.FUNC_RESTORE_MP) != null)
+						final ClanHallFunction mpRecovery = getClanHall().getFunction(ClanHall.FUNC_RESTORE_MP);
+						if (mpRecovery != null)
 						{
-							html.replace("%mp_recovery%", getClanHall().getFunction(ClanHall.FUNC_RESTORE_MP).getLevel() + "%</font> (<font color=\"FFAABB\">" + getClanHall().getFunction(ClanHall.FUNC_RESTORE_MP).getLease() + "</font>Adena /" + (FeatureConfig.CH_MPREG_FEE_RATIO / 1000 / 60 / 60 / 24) + " Day)");
-							html.replace("%mp_period%", "Withdraw the fee for the next time at " + format.format(getClanHall().getFunction(ClanHall.FUNC_RESTORE_MP).getEndTime()));
+							html.replace("%mp_recovery%", mpRecovery.getLevel() + "%</font> (<font color=\"FFAABB\">" + mpRecovery.getLease() + "</font>Adena /" + (FeatureConfig.CH_MPREG_FEE_RATIO / 1000 / 60 / 60 / 24) + " Day)");
+							html.replace("%mp_period%", "Withdraw the fee for the next time at " + format.format(mpRecovery.getEndTime()));
 							final int grade = getClanHall().getGrade();
 							switch (grade)
 							{
@@ -1278,10 +1287,11 @@ public class ClanHallManager extends Merchant
 						final String support_grade2 = "[<a action=\"bypass -h npc_%objectId%_manage other edit_support 3\">Level 3</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 4\">Level 4</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 5\">Level 5</a>]";
 						final String support_grade3 = "[<a action=\"bypass -h npc_%objectId%_manage other edit_support 3\">Level 3</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 5\">Level 5</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 7\">Level 7</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 8\">Level 8</a>]";
 						final String item = "[<a action=\"bypass -h npc_%objectId%_manage other edit_item 1\">Level 1</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_item 2\">Level 2</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_item 3\">Level 3</a>]";
-						if (getClanHall().getFunction(ClanHall.FUNC_TELEPORT) != null)
+						final ClanHallFunction teleportFunction = getClanHall().getFunction(ClanHall.FUNC_TELEPORT);
+						if (teleportFunction != null)
 						{
-							html.replace("%tele%", "Stage " + getClanHall().getFunction(ClanHall.FUNC_TELEPORT).getLevel() + "</font> (<font color=\"FFAABB\">" + getClanHall().getFunction(ClanHall.FUNC_TELEPORT).getLease() + "</font>Adena /" + (FeatureConfig.CH_TELE_FEE_RATIO / 1000 / 60 / 60 / 24) + " Day)");
-							html.replace("%tele_period%", "Withdraw the fee for the next time at " + format.format(getClanHall().getFunction(ClanHall.FUNC_TELEPORT).getEndTime()));
+							html.replace("%tele%", "Stage " + teleportFunction.getLevel() + "</font> (<font color=\"FFAABB\">" + teleportFunction.getLease() + "</font>Adena /" + (FeatureConfig.CH_TELE_FEE_RATIO / 1000 / 60 / 60 / 24) + " Day)");
+							html.replace("%tele_period%", "Withdraw the fee for the next time at " + format.format(teleportFunction.getEndTime()));
 							html.replace("%change_tele%", "[<a action=\"bypass -h npc_%objectId%_manage other tele_cancel\">Deactivate</a>]" + tele);
 						}
 						else
@@ -1291,10 +1301,11 @@ public class ClanHallManager extends Merchant
 							html.replace("%change_tele%", tele);
 						}
 						
-						if (getClanHall().getFunction(ClanHall.FUNC_SUPPORT) != null)
+						final ClanHallFunction supportFunction = getClanHall().getFunction(ClanHall.FUNC_SUPPORT);
+						if (supportFunction != null)
 						{
-							html.replace("%support%", "Stage " + getClanHall().getFunction(ClanHall.FUNC_SUPPORT).getLevel() + "</font> (<font color=\"FFAABB\">" + getClanHall().getFunction(ClanHall.FUNC_SUPPORT).getLease() + "</font>Adena /" + (FeatureConfig.CH_SUPPORT_FEE_RATIO / 1000 / 60 / 60 / 24) + " Day)");
-							html.replace("%support_period%", "Withdraw the fee for the next time at " + format.format(getClanHall().getFunction(ClanHall.FUNC_SUPPORT).getEndTime()));
+							html.replace("%support%", "Stage " + supportFunction.getLevel() + "</font> (<font color=\"FFAABB\">" + supportFunction.getLease() + "</font>Adena /" + (FeatureConfig.CH_SUPPORT_FEE_RATIO / 1000 / 60 / 60 / 24) + " Day)");
+							html.replace("%support_period%", "Withdraw the fee for the next time at " + format.format(supportFunction.getEndTime()));
 							final int grade = getClanHall().getGrade();
 							switch (grade)
 							{
@@ -1350,10 +1361,11 @@ public class ClanHallManager extends Merchant
 							}
 						}
 						
-						if (getClanHall().getFunction(ClanHall.FUNC_ITEM_CREATE) != null)
+						final ClanHallFunction itemCreateFunction = getClanHall().getFunction(ClanHall.FUNC_ITEM_CREATE);
+						if (itemCreateFunction != null)
 						{
-							html.replace("%item%", "Stage " + getClanHall().getFunction(ClanHall.FUNC_ITEM_CREATE).getLevel() + "</font> (<font color=\"FFAABB\">" + getClanHall().getFunction(ClanHall.FUNC_ITEM_CREATE).getLease() + "</font>Adena /" + (FeatureConfig.CH_ITEM_FEE_RATIO / 1000 / 60 / 60 / 24) + " Day)");
-							html.replace("%item_period%", "Withdraw the fee for the next time at " + format.format(getClanHall().getFunction(ClanHall.FUNC_ITEM_CREATE).getEndTime()));
+							html.replace("%item%", "Stage " + itemCreateFunction.getLevel() + "</font> (<font color=\"FFAABB\">" + itemCreateFunction.getLease() + "</font>Adena /" + (FeatureConfig.CH_ITEM_FEE_RATIO / 1000 / 60 / 60 / 24) + " Day)");
+							html.replace("%item_period%", "Withdraw the fee for the next time at " + format.format(itemCreateFunction.getEndTime()));
 							html.replace("%change_item%", "[<a action=\"bypass -h npc_%objectId%_manage other item_cancel\">Deactivate</a>]" + item);
 						}
 						else
@@ -1556,10 +1568,11 @@ public class ClanHallManager extends Merchant
 						html.setFile(player, "data/html/clanHallManager/deco.htm");
 						final String curtains = "[<a action=\"bypass -h npc_%objectId%_manage deco edit_curtains 1\">Level 1</a>][<a action=\"bypass -h npc_%objectId%_manage deco edit_curtains 2\">Level 2</a>]";
 						final String fixtures = "[<a action=\"bypass -h npc_%objectId%_manage deco edit_fixtures 1\">Level 1</a>][<a action=\"bypass -h npc_%objectId%_manage deco edit_fixtures 2\">Level 2</a>]";
-						if (getClanHall().getFunction(ClanHall.FUNC_DECO_CURTAINS) != null)
+						final ClanHallFunction curtainsFunction = getClanHall().getFunction(ClanHall.FUNC_DECO_CURTAINS);
+						if (curtainsFunction != null)
 						{
-							html.replace("%curtain%", "Stage " + getClanHall().getFunction(ClanHall.FUNC_DECO_CURTAINS).getLevel() + "</font> (<font color=\"FFAABB\">" + getClanHall().getFunction(ClanHall.FUNC_DECO_CURTAINS).getLease() + "</font>Adena /" + (FeatureConfig.CH_CURTAIN_FEE_RATIO / 1000 / 60 / 60 / 24) + " Day)");
-							html.replace("%curtain_period%", "Withdraw the fee for the next time at " + format.format(getClanHall().getFunction(ClanHall.FUNC_DECO_CURTAINS).getEndTime()));
+							html.replace("%curtain%", "Stage " + curtainsFunction.getLevel() + "</font> (<font color=\"FFAABB\">" + curtainsFunction.getLease() + "</font>Adena /" + (FeatureConfig.CH_CURTAIN_FEE_RATIO / 1000 / 60 / 60 / 24) + " Day)");
+							html.replace("%curtain_period%", "Withdraw the fee for the next time at " + format.format(curtainsFunction.getEndTime()));
 							html.replace("%change_curtain%", "[<a action=\"bypass -h npc_%objectId%_manage deco curtains_cancel\">Deactivate</a>]" + curtains);
 						}
 						else
@@ -1569,10 +1582,11 @@ public class ClanHallManager extends Merchant
 							html.replace("%change_curtain%", curtains);
 						}
 						
-						if (getClanHall().getFunction(ClanHall.FUNC_DECO_FRONTPLATEFORM) != null)
+						final ClanHallFunction frontPlatformFunction = getClanHall().getFunction(ClanHall.FUNC_DECO_FRONTPLATEFORM);
+						if (frontPlatformFunction != null)
 						{
-							html.replace("%fixture%", "Stage " + getClanHall().getFunction(ClanHall.FUNC_DECO_FRONTPLATEFORM).getLevel() + "</font> (<font color=\"FFAABB\">" + getClanHall().getFunction(ClanHall.FUNC_DECO_FRONTPLATEFORM).getLease() + "</font>Adena /" + (FeatureConfig.CH_FRONT_FEE_RATIO / 1000 / 60 / 60 / 24) + " Day)");
-							html.replace("%fixture_period%", "Withdraw the fee for the next time at " + format.format(getClanHall().getFunction(ClanHall.FUNC_DECO_FRONTPLATEFORM).getEndTime()));
+							html.replace("%fixture%", "Stage " + frontPlatformFunction.getLevel() + "</font> (<font color=\"FFAABB\">" + frontPlatformFunction.getLease() + "</font>Adena /" + (FeatureConfig.CH_FRONT_FEE_RATIO / 1000 / 60 / 60 / 24) + " Day)");
+							html.replace("%fixture_period%", "Withdraw the fee for the next time at " + format.format(frontPlatformFunction.getEndTime()));
 							html.replace("%change_fixture%", "[<a action=\"bypass -h npc_%objectId%_manage deco fixtures_cancel\">Deactivate</a>]" + fixtures);
 						}
 						else

@@ -31,9 +31,12 @@ import org.l2jmobius.gameserver.model.actor.enums.player.TeleportWhereType;
 import org.l2jmobius.gameserver.model.events.EventType;
 import org.l2jmobius.gameserver.model.events.listeners.AbstractEventListener;
 import org.l2jmobius.gameserver.model.item.enums.ItemProcessType;
+import org.l2jmobius.gameserver.model.residences.AuctionableHall;
 import org.l2jmobius.gameserver.model.residences.ClanHall;
+import org.l2jmobius.gameserver.model.residences.ClanHall.ClanHallFunction;
 import org.l2jmobius.gameserver.model.script.Event;
 import org.l2jmobius.gameserver.model.siege.Castle;
+import org.l2jmobius.gameserver.model.siege.Castle.CastleFunction;
 import org.l2jmobius.gameserver.model.siege.SiegeClan;
 import org.l2jmobius.gameserver.model.siege.clanhalls.SiegableHall;
 import org.l2jmobius.gameserver.network.PacketLogger;
@@ -148,9 +151,14 @@ public class RequestRestartPoint extends ClientPacket
 				}
 				
 				loc = MapRegionManager.getInstance().getTeleToLocation(player, TeleportWhereType.CLANHALL);
-				if ((ClanHallTable.getInstance().getClanHallByOwner(player.getClan()) != null) && (ClanHallTable.getInstance().getClanHallByOwner(player.getClan()).getFunction(ClanHall.FUNC_RESTORE_EXP) != null))
+				// Three lookups of the hall and two of the function, tested on one call and
+				// dereferenced on the next. The hall's fee task removes functions from a
+				// scheduled task, and a throw here leaves the player dead.
+				final AuctionableHall ownedHall = ClanHallTable.getInstance().getClanHallByOwner(player.getClan());
+				final ClanHallFunction hallRestoreExp = ownedHall == null ? null : ownedHall.getFunction(ClanHall.FUNC_RESTORE_EXP);
+				if (hallRestoreExp != null)
 				{
-					player.restoreExp(ClanHallTable.getInstance().getClanHallByOwner(player.getClan()).getFunction(ClanHall.FUNC_RESTORE_EXP).getLevel());
+					player.restoreExp(hallRestoreExp.getLevel());
 				}
 				break;
 			}
@@ -184,9 +192,11 @@ public class RequestRestartPoint extends ClientPacket
 					loc = MapRegionManager.getInstance().getTeleToLocation(player, TeleportWhereType.CASTLE);
 				}
 				
-				if ((CastleManager.getInstance().getCastleByOwner(player.getClan()) != null) && (CastleManager.getInstance().getCastleByOwner(player.getClan()).getFunction(Castle.FUNC_RESTORE_EXP) != null))
+				final Castle ownedCastle = CastleManager.getInstance().getCastleByOwner(player.getClan());
+				final CastleFunction castleRestoreExp = ownedCastle == null ? null : ownedCastle.getFunction(Castle.FUNC_RESTORE_EXP);
+				if (castleRestoreExp != null)
 				{
-					player.restoreExp(CastleManager.getInstance().getCastleByOwner(player.getClan()).getFunction(Castle.FUNC_RESTORE_EXP).getLvl());
+					player.restoreExp(castleRestoreExp.getLvl());
 				}
 				break;
 			}
