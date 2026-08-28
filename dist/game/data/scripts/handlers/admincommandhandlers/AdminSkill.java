@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -75,7 +76,10 @@ public class AdminSkill implements IAdminCommandHandler
 		"admin_setskill"
 	};
 	
-	private static Skill[] adminSkills;
+	// One slot shared by every GM on the server: two of them borrowing skills at the
+	// same time swapped each other's sets, and whichever reset first left the other
+	// with nothing to restore. Keyed by the GM instead.
+	private static final Map<Integer, Skill[]> ADMIN_SKILLS = new ConcurrentHashMap<>();
 	
 	@Override
 	public boolean onCommand(String commandValue, Player activeChar)
@@ -503,8 +507,9 @@ public class AdminSkill implements IAdminCommandHandler
 		else
 		{
 			final Skill[] skills = player.getAllSkills().toArray(new Skill[player.getAllSkills().size()]);
-			adminSkills = activeChar.getAllSkills().toArray(new Skill[activeChar.getAllSkills().size()]);
-			for (Skill skill : adminSkills)
+			final Skill[] ownSkills = activeChar.getAllSkills().toArray(new Skill[activeChar.getAllSkills().size()]);
+			ADMIN_SKILLS.put(activeChar.getObjectId(), ownSkills);
+			for (Skill skill : ownSkills)
 			{
 				activeChar.removeSkill(skill);
 			}
@@ -531,7 +536,8 @@ public class AdminSkill implements IAdminCommandHandler
 		}
 		
 		final Player player = target.asPlayer();
-		if (adminSkills == null)
+		final Skill[] ownSkills = ADMIN_SKILLS.get(activeChar.getObjectId());
+		if (ownSkills == null)
 		{
 			activeChar.sendSysMessage("You must get the skills of someone in order to do this.");
 		}
@@ -553,14 +559,14 @@ public class AdminSkill implements IAdminCommandHandler
 				activeChar.removeSkill(skill);
 			}
 			
-			for (Skill skill : adminSkills)
+			for (Skill skill : ownSkills)
 			{
 				activeChar.addSkill(skill, true);
 			}
 			
 			player.sendMessage("[GM]" + activeChar.getName() + " updated your skills.");
 			activeChar.sendSysMessage("You now have all your skills back.");
-			adminSkills = null;
+			ADMIN_SKILLS.remove(activeChar.getObjectId());
 			activeChar.sendSkillList();
 			player.sendSkillList();
 		}
