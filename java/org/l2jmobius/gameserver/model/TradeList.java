@@ -569,7 +569,10 @@ public class TradeList
 				continue;
 			}
 			
-			weight += item.getCount() * template.getWeight();
+			// The clamp below is only reachable if the product is widened first: taken in
+			// int it wraps before it ever gets to the long, and Math.min returns the wrapped
+			// value happily.
+			weight += (long) item.getCount() * template.getWeight();
 		}
 		
 		return (int) Math.min(weight, Integer.MAX_VALUE);
@@ -647,7 +650,9 @@ public class TradeList
 		}
 		
 		int slots = 0;
-		int weight = 0;
+		// validate() fifty lines up takes this in long and clamps it. This one took it in
+		// int, with the product in int as well, and nothing clamping the result.
+		long weight = 0;
 		int totalPrice = 0;
 		
 		final PlayerInventory ownerInventory = _owner.getInventory();
@@ -727,7 +732,7 @@ public class TradeList
 				continue;
 			}
 			
-			weight += item.getCount() * template.getWeight();
+			weight += (long) item.getCount() * template.getWeight();
 			if (!template.isStackable())
 			{
 				slots += item.getCount();
@@ -744,7 +749,7 @@ public class TradeList
 			return 1;
 		}
 		
-		if (!playerInventory.validateWeight(weight))
+		if (!playerInventory.validateWeight((int) Math.min(weight, Integer.MAX_VALUE)))
 		{
 			player.sendPacket(SystemMessageId.YOU_HAVE_EXCEEDED_THE_WEIGHT_LIMIT);
 			return 1;

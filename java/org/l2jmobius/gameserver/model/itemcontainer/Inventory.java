@@ -1225,7 +1225,10 @@ public abstract class Inventory extends ItemContainer {
 		long weight = 0;
 		for (Item item : _items) {
 			if ((item != null) && (item.getTemplate() != null)) {
-				weight += item.getTemplate().getWeight() * item.getCount();
+				// Math.min below only means something if the product is widened first: taken
+				// in int it wraps before it reaches the long, and a wrapped total reports the
+				// character as carrying less than nothing.
+				weight += (long) item.getTemplate().getWeight() * item.getCount();
 			}
 		}
 
