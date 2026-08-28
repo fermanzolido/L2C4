@@ -1595,6 +1595,72 @@ de paquetes. Un solo jugador editando durante la cuenta regresiva puede tirar un
 modificación concurrente fuera del bucle, y el `catch` que lo envuelve **abandona
 el `executeBatch` entero**: no los esquemas de ese jugador, los de todos.
 
+### Cuarta vuelta: el aprendizaje de skills
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 12 | `SkillList` (bypass) | el id de clase del bypass llega a `canTeach` sin validar | baja |
+
+**12 — Un id que no nombra ninguna clase.** El camino de aprendizaje alternativo
+toma el id de clase directo del bypass:
+
+```java
+Folk.showSkillList(player, target.asNpc(), PlayerClass.getPlayerClass(Integer.parseInt(id)));
+```
+
+`getPlayerClass` es un lookup de mapa y devuelve **null** para un id que no nombra
+ninguna clase. Ese null va a `showSkillList`, que llama a `canTeach` sobre él, y
+lo primero que hace `canTeach` es `playerClass.level()`. Un id no numérico revienta
+un paso antes, en el `parseInt`. Los dos quedan atrapados por el `catch` del
+manejador de bypass, así que cuestan un stack trace en el log y nada peor, pero
+ninguno debería ser alcanzable desde texto arbitrario del cliente.
+
+### La cadena que parecía un exploit de progresión y no lo es
+
+Vale la pena dejarla escrita entera, porque cada eslabón se lee mal y la
+conclusión igual es que no hay defecto.
+
+1. `SkillList` deja que el **cliente elija la clase** cuyo árbol de skills se va a
+   mostrar, con un id que manda el bypass.
+2. `Folk.showSkillList` hace `player.setLearningClass(playerClass)` con esa clase.
+3. `RequestAcquireSkill` resuelve qué skill se puede aprender con
+   `getClassSkill(id, lvl, player.getLearningClass())` — la clase **de
+   aprendizaje**, no la real.
+4. `getAvailableSkills` filtra **solo** por nivel del jugador y por progresión de
+   la skill. **No verifica en ningún momento que la clase del jugador sea esa
+   clase ni descendiente de ella.**
+5. La única puerta es `npc.getTemplate().canTeach(playerClass)`, que comprueba
+   que **el entrenador** enseñe esa clase — no que el jugador tenga algo que ver
+   con ella.
+6. Y los entrenadores enseñan líneas enteras: medido sobre los 201 del
+   `SkillLearn.xml` distribuido, van de 3 a 22 clases cada uno, y el primero
+   —Auron— cubre Human Fighter, Warrior, Gladiator, Warlord, Knight, Paladin,
+   Dark Avenger, Rogue y Treasure Hunter.
+
+Leído así, un Human Fighter de nivel suficiente podría aprender skills de
+Gladiator sin haber cambiado de clase nunca.
+
+**Pero el paso 1 está entero adentro de `if (PlayerConfig.ALT_GAME_SKILL_LEARN)`**,
+que es la función "alternative skill learn" de L2J: existe justamente para eso. El
+código la define en `false` y el `Player.ini` distribuido trae
+`AltGameSkillLearn = False`. Apagada, el `else` de ese mismo bloque pasa
+`player.getPlayerClass()` y la pregunta no llega a plantearse. Encendida, toda la
+cadena es la función funcionando como se anunció.
+
+Lo único mal en ese camino era el id sin validar del hallazgo 12.
+
+### Sospechas evaluadas y descartadas (cuarta vuelta)
+
+- **`RequestAcquireSkill` cobrando antes de otorgar.** El orden es correcto:
+  chequea nivel, SP e ítems requeridos —los ítems en dos pasadas, verificando
+  todos antes de consumir ninguno—, después descuenta SP, y recién ahí
+  `addSkill`. El retorno de `destroyItemByItemId` se chequea.
+
+- **Un `destroyItemByItemId` fallido en el bucle de consumo otorgando la skill
+  igual.** Ocurre, y está deliberado: llama a `handleIllegalPlayerAction` con
+  `IllegalActionPunishmentType.NONE`, o sea loguear sin castigar, después de que
+  una pre-verificación completa ya pasó. Un fallo ahí es genuinamente anómalo.
+
 ### Tercera vuelta: multisell y el barrido de ensanchado tardío
 
 | # | Archivo | Defecto | Severidad |
