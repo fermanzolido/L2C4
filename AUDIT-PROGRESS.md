@@ -1534,10 +1534,10 @@ mostrado los sitios sin mostrar que **ninguno** estaba protegido.
 
 Son **259** archivos y **19.900** líneas: los escritores de paquetes salientes.
 
-**Leído:** `AllianceInfo`, `CharInfo`, `AbstractNpcInfo`, `Die`, y los sitios que
-marcaron los barridos. **Pendiente:** `SortedWareHouseWithdrawalList` (744),
-`ExServerPrimitive` (534), `SystemMessage` (430), `SSQStatus` (400),
-`CharSelectionInfo` (358).
+**Leido:** `AllianceInfo`, `CharInfo`, `AbstractNpcInfo`, `Die`, `SystemMessage`,
+`ConfirmDlg`, `NewCharacterSuccess`, `SortedWareHouseWithdrawalList`, y los sitios
+que marcaron los barridos. **Pendiente:** `ExServerPrimitive` (534), `SSQStatus`
+(400), `CharSelectionInfo` (358).
 
 ### Hallazgos
 
@@ -1570,6 +1570,53 @@ y ninguna respuesta, pero el estado de abajo sigue mal. Se arregló el origen �
 `destroyClan` desengancha la alianza con los mismos tres campos que usa
 `dissolveAlly`— y el síntoma, porque los `clan_data` de un servidor que ya está
 corriendo pueden traerlos.
+
+### Tercera vuelta: un comparador que rompe su contrato
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 5 | `SortedWareHouseWithdrawalList` | el comparador de recetas dice que `a > b` y `b > a` a la vez | alta |
+
+**5 — Un test unilateral sobre dos argumentos.** `WarehouseItemRecipeComparator`
+resuelve los dos ítems a un `RecipeList` y después los prueba de a uno:
+
+```java
+if (rp1 == null) { return (order == A2Z ? A2Z : Z2A); }
+if (rp2 == null) { return (order == A2Z ? Z2A : A2Z); }
+```
+
+Cuando **ninguno** de los dos tiene receta, el primer test dispara en las dos
+direcciones, así que `compare(a, b)` y `compare(b, a)` vuelven con el mismo signo.
+
+Medido de tres maneras en vez de afirmado.
+
+*La asimetría*: con dos ítems sin receta la lógica vieja contesta `1` en las dos
+direcciones; la nueva contesta `0` en las dos.
+
+*Que es alcanzable*: de los **849** ítems de tipo receta en los datos
+distribuidos, **68** no tienen entrada en `Recipes.xml`. Dos de ésos en un mismo
+almacén es toda la precondición.
+
+*Que cuesta algo*: `Collections.sort` es TimSort, que detecta comparadores rotos y
+lanza `IllegalArgumentException`. Sobre **43.314** ordenamientos generados,
+**17.371 lanzaron** — el 40 %. El caso más chico que lanza es **32 ítems con 2 sin
+receta**, que es exactamente el umbral de TimSort: por debajo de 32 usa inserción
+binaria y no lo nota. Un almacén de 32 ítems es corriente, y la excepción sale de
+`writeImpl`, así que el jugador no recibe ninguna lista.
+
+Devolver "iguales" es además la respuesta correcta por sí sola: el llamador ordena
+por nombre primero y este ordenamiento es estable, así que dos ítems sin receta
+conservan su orden por nombre.
+
+### Sospechas evaluadas y descartadas (tercera vuelta)
+
+- **El resto de los comparadores del archivo** (nombre, grado, tipo, parte del
+  cuerpo). Ninguno desreferencia nada opcional; sus reglas para el dinero son
+  antisimétricas porque `A2Z` y `Z2A` son `1` y `-1`.
+
+- **Comparadores rotos en otra parte.** Barrido todo el core y el datapack
+  buscando cuerpos de `compare()` con un test unilateral que devuelve una
+  constante: **un solo acierto**, el que se arregló acá.
 
 ### Segunda vuelta: el barrido de conteo declarado
 
