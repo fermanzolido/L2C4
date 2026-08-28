@@ -377,9 +377,14 @@ public class RaidBossSpawnManager
 	public String getRaidBossStatus(int bossId)
 	{
 		String msg = "RaidBoss Status..." + System.lineSeparator();
-		if (_bosses.containsKey(bossId))
+		
+		// One lookup rather than containsKey and then get. _bosses is removed from and cleared
+		// while this is read, so the two calls could straddle a removal and the second answer
+		// null where the first said yes. The loop further up this class already reads it this
+		// way, with the null test the other two lookups were missing.
+		final RaidBoss boss = _bosses.get(bossId);
+		if (boss != null)
 		{
-			final RaidBoss boss = _bosses.get(bossId);
 			msg += boss.getName() + ": " + boss.getRaidStatus().name();
 		}
 		
@@ -393,9 +398,11 @@ public class RaidBossSpawnManager
 	 */
 	public RaidBossStatus getRaidBossStatusId(int bossId)
 	{
-		if (_bosses.containsKey(bossId))
+		// Same single lookup as getRaidBossStatus above.
+		final RaidBoss boss = _bosses.get(bossId);
+		if (boss != null)
 		{
-			return _bosses.get(bossId).getRaidStatus();
+			return boss.getRaidStatus();
 		}
 		else if (_schedules.containsKey(bossId))
 		{
