@@ -570,10 +570,17 @@ public class AdminEditChar implements IAdminCommandHandler
 				player = World.getInstance().getPlayer(playerName);
 				if (player == null)
 				{
-					final Connection con = DatabaseFactory.getConnection();
-					final PreparedStatement ps = con.prepareStatement("UPDATE characters SET " + (changeCreateExpiryTime ? "clan_create_expiry_time" : "clan_join_expiry_time") + " WHERE char_name=? LIMIT 1");
-					ps.setString(1, playerName);
-					ps.execute();
+					// The connection was opened outside a try-with-resources and never closed, and
+					// the statement had no value to set -- "SET clan_join_expiry_time WHERE ..." is
+					// not something the database can run -- so removing the penalty from an offline
+					// character leaked a connection and never worked. The column name comes from a
+					// fixed pair of literals; the character name is bound.
+					try (Connection con = DatabaseFactory.getConnection();
+						PreparedStatement ps = con.prepareStatement("UPDATE characters SET " + (changeCreateExpiryTime ? "clan_create_expiry_time" : "clan_join_expiry_time") + "=0 WHERE char_name=? LIMIT 1"))
+					{
+						ps.setString(1, playerName);
+						ps.execute();
+					}
 				}
 				else
 				{

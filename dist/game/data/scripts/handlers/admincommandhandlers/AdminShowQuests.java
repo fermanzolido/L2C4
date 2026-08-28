@@ -168,8 +168,9 @@ public class AdminShowQuests implements IAdminCommandHandler {
 				case "full": {
 					replyMSG.append("<table width=250><tr><td>Full Quest List for <font color=\"LEVEL\">"
 							+ target.getName() + "</font> (ID:" + ID + ")</td></tr>");
-					req = con.prepareStatement("SELECT DISTINCT name FROM character_quests WHERE charId='" + ID
-							+ "' AND var='<state>' ORDER by name");
+					req = con.prepareStatement(
+							"SELECT DISTINCT name FROM character_quests WHERE charId=? AND var='<state>' ORDER by name");
+					req.setInt(1, ID);
 					req.execute();
 					rs = req.getResultSet();
 					while (rs.next()) {
@@ -189,8 +190,11 @@ public class AdminShowQuests implements IAdminCommandHandler {
 							+ "</font><br>State: <font color=\"LEVEL\">" + state + "</font><br><br>");
 					replyMSG.append(
 							"<center><table width=250><tr><td width=70>Var</td><td width=40>Value</td><td>New Value</td><td>&nbsp;</td></tr>");
-					req = con.prepareStatement("SELECT var,value FROM character_quests WHERE charId='" + ID
-							+ "' and name='" + val[1] + "'");
+					// The quest name is the text the GM typed after the command; it is bound rather
+					// than pasted into the statement.
+					req = con.prepareStatement("SELECT var,value FROM character_quests WHERE charId=? AND name=?");
+					req.setInt(1, ID);
+					req.setString(2, val[1]);
 					req.execute();
 					rs = req.getResultSet();
 					while (rs.next()) {
@@ -229,8 +233,10 @@ public class AdminShowQuests implements IAdminCommandHandler {
 					replyMSG.append("Character: <font color=\"LEVEL\">" + target.getName()
 							+ "</font><br>Quests with state: <font color=\"LEVEL\">" + val[1] + "</font><br>");
 					replyMSG.append("<table width=250>");
-					req = con.prepareStatement("SELECT DISTINCT name FROM character_quests WHERE charId='" + ID
-							+ "' and var='<state>' and value='" + val[1] + "'");
+					req = con.prepareStatement(
+							"SELECT DISTINCT name FROM character_quests WHERE charId=? AND var='<state>' AND value=?");
+					req.setInt(1, ID);
+					req.setString(2, val[1]);
 					req.execute();
 					rs = req.getResultSet();
 					while (rs.next()) {
@@ -273,8 +279,9 @@ public class AdminShowQuests implements IAdminCommandHandler {
 									+ "</font><br>State: <font color=\"LEVEL\">" + state + "</font><br><br>");
 							replyMSG.append(
 									"<center><table width=250><tr><td width=70>Var</td><td width=40>Value</td><td>New Value</td><td>&nbsp;</td></tr>");
-							req = con.prepareStatement("SELECT var,value FROM character_quests WHERE charId='" + ID
-									+ "' and name='" + qname + "'");
+							req = con.prepareStatement("SELECT var,value FROM character_quests WHERE charId=? AND name=?");
+							req.setInt(1, ID);
+							req.setString(2, qname);
 							req.execute();
 							rs = req.getResultSet();
 							while (rs.next()) {
