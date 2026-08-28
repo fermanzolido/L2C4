@@ -58,6 +58,7 @@ import org.l2jmobius.gameserver.model.actor.enums.creature.Race;
 import org.l2jmobius.gameserver.model.actor.enums.player.IllegalActionPunishmentType;
 import org.l2jmobius.gameserver.model.actor.enums.player.TeleportWhereType;
 import org.l2jmobius.gameserver.model.clan.Clan;
+import org.l2jmobius.gameserver.model.instancezone.Instance;
 import org.l2jmobius.gameserver.model.item.ItemTemplate;
 import org.l2jmobius.gameserver.model.item.enums.ItemProcessType;
 import org.l2jmobius.gameserver.model.item.instance.Item;
@@ -107,6 +108,11 @@ import org.l2jmobius.gameserver.taskmanagers.GameTimeTaskManager;
 
 public class EnterWorld extends ClientPacket
 {
+	// Keyed by client ip and only ever written to, so it grew for the life of the
+	// server, one entry per distinct ip ever seen. It is a lookup shortcut whose miss
+	// is already handled -- the account variable below is the durable copy -- so it is
+	// capped and dropped rather than grown.
+	private static final int TRACE_HWINFO_LIMIT = 1000;
 	private static final Map<String, ClientHardwareInfoHolder> TRACE_HWINFO = new ConcurrentHashMap<>();
 	
 	@Override
@@ -140,7 +146,14 @@ public class EnterWorld extends ClientPacket
 			final int instanceId = InstanceManager.getInstance().getPlayer(player.getObjectId());
 			if (instanceId > 0)
 			{
-				InstanceManager.getInstance().getInstance(instanceId).removePlayer(player.getObjectId());
+				// getPlayer walks the live instances, so the id came from one that existed a
+				// statement ago. One destroyed in between threw here, and a throw in EnterWorld
+				// kicks the player rather than being swallowed like every other packet's.
+				final Instance instance = InstanceManager.getInstance().getInstance(instanceId);
+				if (instance != null)
+				{
+					instance.removePlayer(player.getObjectId());
+				}
 			}
 		}
 		
@@ -494,7 +507,7 @@ public class EnterWorld extends ClientPacket
 				if (hwInfo != null)
 				{
 					hwInfo.store(player);
-					TRACE_HWINFO.put(ip, hwInfo);
+					traceHardwareInfo(ip, hwInfo);
 				}
 				else
 				{
@@ -512,7 +525,7 @@ public class EnterWorld extends ClientPacket
 						if (!storedInfo.isEmpty())
 						{
 							hwInfo = new ClientHardwareInfoHolder(storedInfo);
-							TRACE_HWINFO.put(ip, hwInfo);
+							traceHardwareInfo(ip, hwInfo);
 							client.setHardwareInfo(hwInfo);
 						}
 					}
@@ -640,5 +653,15 @@ public class EnterWorld extends ClientPacket
 		{
 			qs.getQuest().notifyEvent("UC", null, player);
 		}
+	}
+	
+	private static void traceHardwareInfo(String ip, ClientHardwareInfoHolder hwInfo)
+	{
+		if (TRACE_HWINFO.size() >= TRACE_HWINFO_LIMIT)
+		{
+			TRACE_HWINFO.clear();
+		}
+		
+		TRACE_HWINFO.put(ip, hwInfo);
 	}
 }
