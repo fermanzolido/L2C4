@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.commons.database.DatabaseFactory;
+import org.l2jmobius.gameserver.config.PlayerConfig;
 import org.l2jmobius.gameserver.model.actor.Player;
 import org.l2jmobius.gameserver.model.item.enums.ItemLocation;
 import org.l2jmobius.gameserver.model.item.enums.ItemProcessType;
@@ -315,22 +316,37 @@ public class GlobalAuctionManager
 			return 0;
 		}
 
-		// Reset funds
-		_funds.put(playerId, 0L);
-		try (Connection con = DatabaseFactory.getConnection();
-			PreparedStatement ps = con.prepareStatement("UPDATE global_auction_funds SET adena=0 WHERE player_id=?"))
+		// Funds accumulate across sales in a long, while addAdena takes an int and clamps what
+		// it hands over to the adena cap. Casting the whole balance turned a seller past two
+		// billion into a negative count, and the balance was being cleared before the credit,
+		// so whatever the cap refused was destroyed rather than left to collect later.
+		final long room = (long) PlayerConfig.MAX_ADENA - player.getInventory().getAdena();
+		final long paid = Math.min(amount, room);
+		if (paid <= 0)
 		{
-			ps.setInt(1, playerId);
+			player.sendMessage("You cannot carry any more Adena.");
+			return 0;
+		}
+
+		// Credited first, then only what was credited is taken off the balance. paid never
+		// exceeds the cap, so this cast cannot lose anything.
+		player.addAdena(ItemProcessType.RESTORE, (int) paid, null, true);
+
+		final long remaining = amount - paid;
+		_funds.put(playerId, remaining);
+		try (Connection con = DatabaseFactory.getConnection();
+			PreparedStatement ps = con.prepareStatement("UPDATE global_auction_funds SET adena=? WHERE player_id=?"))
+		{
+			ps.setLong(1, remaining);
+			ps.setInt(2, playerId);
 			ps.executeUpdate();
 		}
 		catch (Exception e)
 		{
-			LOGGER.log(Level.SEVERE, "Failed to reset funds for " + playerId, e);
-			// Rollback logic would be complex here, assume DB works
+			LOGGER.log(Level.SEVERE, "Failed to update funds for " + playerId, e);
 		}
 
-		player.addAdena(ItemProcessType.RESTORE, (int) amount, null, true);
-		return amount;
+		return paid;
 	}
 
 	public List<AuctionListing> getAllAuctions()
