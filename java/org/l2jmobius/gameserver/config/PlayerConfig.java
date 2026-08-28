@@ -473,6 +473,15 @@ public class PlayerConfig {
 		for (int i = 0; i < percents.length; i++) {
 			PARTY_XP_CUTOFF_GAP_PERCENTS[i] = StringUtil.parseInt(percents[i].trim(), 0);
 		}
+		// Party walks the gaps and indexes the percents with the same counter, so a shorter
+		// percent list threw out of experience distribution rather than at startup. Padding
+		// with zero makes those gaps award nothing, which the warning says out loud.
+		if (PARTY_XP_CUTOFF_GAP_PERCENTS.length < PARTY_XP_CUTOFF_GAPS.length) {
+			LOGGER.warning("PlayerConfig: PartyXpCutoffGapPercent has " + PARTY_XP_CUTOFF_GAP_PERCENTS.length
+					+ " values for the " + PARTY_XP_CUTOFF_GAPS.length
+					+ " gaps of PartyXpCutoffGaps; the gaps past that award nothing.");
+			PARTY_XP_CUTOFF_GAP_PERCENTS = Arrays.copyOf(PARTY_XP_CUTOFF_GAP_PERCENTS, PARTY_XP_CUTOFF_GAPS.length);
+		}
 		DISABLE_TUTORIAL = config.getBoolean("DisableTutorial", false);
 		EXPERTISE_PENALTY = config.getBoolean("ExpertisePenalty", true);
 		STORE_RECIPE_SHOPLIST = config.getBoolean("StoreRecipeShopList", false);
