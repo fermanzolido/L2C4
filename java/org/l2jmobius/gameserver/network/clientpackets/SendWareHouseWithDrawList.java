@@ -140,8 +140,10 @@ public class SendWareHouseWithDrawList extends ClientPacket
 			}
 		}
 		
-		int weight = 0;
-		int slots = 0;
+		// validateWeight and validateCapacity both take a long; the totals feeding them were
+		// taken in int, with the product in int as well, so the range was thrown away here.
+		long weight = 0;
+		long slots = 0;
 		for (ItemHolder i : _items)
 		{
 			// Calculate needed slots
@@ -152,7 +154,7 @@ public class SendWareHouseWithDrawList extends ClientPacket
 				return;
 			}
 			
-			weight += i.getCount() * item.getTemplate().getWeight();
+			weight += (long) i.getCount() * item.getTemplate().getWeight();
 			if (!item.isStackable())
 			{
 				slots += i.getCount();

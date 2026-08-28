@@ -88,15 +88,16 @@ public class PetInventory extends Inventory
 	
 	public boolean validateWeight(Item item, long count)
 	{
-		int weight = 0;
 		final ItemTemplate template = ItemData.getInstance().getTemplate(item.getId());
 		if (template == null)
 		{
 			return false;
 		}
 		
-		weight += count * template.getWeight();
-		return validateWeight(weight);
+		// count is a long and the product with it is a long, but it was accumulated into
+		// an int, and a compound assignment narrows without a word from the compiler. The
+		// overload below and ItemContainer.validateWeightByItemId both take the long.
+		return validateWeight(count * template.getWeight());
 	}
 	
 	@Override
