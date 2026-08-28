@@ -198,7 +198,12 @@ public class PlayerTemplateData implements IXmlReader
 	 */
 	public PlayerTemplate getTemplate(int classId)
 	{
-		return _playerTemplates.get(PlayerClass.getPlayerClass(classId));
+		// The id arrives straight off the character creation packet, and the enum only
+		// covers 89 of the values in its range. An unknown one resolves to a null class,
+		// and ConcurrentHashMap.get(null) throws instead of answering null, so the
+		// caller's own null check never got to run.
+		final PlayerClass playerClass = PlayerClass.getPlayerClass(classId);
+		return playerClass == null ? null : _playerTemplates.get(playerClass);
 	}
 	
 	public static PlayerTemplateData getInstance()
