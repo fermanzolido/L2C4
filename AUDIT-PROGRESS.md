@@ -31,8 +31,8 @@ hallazgos aunque no hayas terminado el área.
 | ~~`data`~~ | 71 | 14.922 | **TERMINADA** |
 | ~~`network/serverpackets`~~ | 259 | 19.900 | **TERMINADA** |
 | ~~`network/clientpackets`~~ | 201 | 21.727 | **TERMINADA** |
-| **datapack `handlers/`** | **375** | **51.203** | **en curso** |
-| `model/actor` | 166 | 53.236 | pendiente |
+| ~~datapack `handlers/`~~ | 375 | 51.203 | **TERMINADA** |
+| **`model/actor`** | **166** | **53.236** | **en curso** |
 | datapack `quests/` | 298 | 79.342 | pendiente |
 
 Orden elegido: de menor a mayor, salvo que la criticidad mande. Se empezó por
@@ -3418,7 +3418,7 @@ apareció la pregunta de qué pasa con un clan destruido que era dueño de algo.
 
 ---
 
-## datapack `handlers/` — EN CURSO
+## datapack `handlers/` — TERMINADA
 
 375 archivos, 51.203 líneas, repartidos en doce carpetas. Las dos grandes son
 `admincommandhandlers` (75 archivos, 19.522 líneas) y `effecthandlers` (145,
@@ -3486,6 +3486,76 @@ seis van derecho a `parseInt`. Ése es el delator. Y `isNumeric` sola tampoco
 alcanza en ningún lado: prueba que los caracteres son dígitos, no que el número
 entre en un int. `ClanHandler` prueba `startsWith("privileges")` —diez
 caracteres— y corta con `substring(11)`.
+
+### Segunda vuelta: lo que persiste y lo que no lanza
+
+El catch de `RuntimeException` del despachador cubre todo lo que tira en un
+comando de administración, así que lo que queda ahí es lo que **no** tira:
+escrituras que persisten y acciones sobre el objetivo equivocado.
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 13 | `AdminShowQuests` | cuatro consultas armadas pegando valores en el texto | media |
+| 14 | `AdminEditChar` | conexión filtrada y un `UPDATE` sin valor que asignar | **alta** |
+| 15 | `AdminEffects`, `AdminMobGroup` | el objetivo leído sin comprobar | baja |
+
+**14 — Dos problemas en tres líneas.** El comando que quita la penalidad de clan
+a un personaje **desconectado** abre la conexión fuera de un try-with-resources y
+no la cierra nunca, así que cada uso filtra una del pool. Y la sentencia dice
+`UPDATE characters SET clan_join_expiry_time WHERE char_name=?` — **sin valor que
+asignar**, que no es algo que la base pueda ejecutar. La rama nunca funcionó.
+Ahora pone la columna en cero, que es lo que hace la rama del personaje conectado.
+
+**13 — Valores pegados en el texto de la consulta.** Tres de las cuatro pegan el
+nombre de quest que el GM tecleó detrás del comando; la cuarta pega solo el id de
+objeto del personaje. Las cuatro vinculan sus valores ahora, así que el texto de
+la sentencia queda fijo y el nombre viaja como parámetro.
+
+**15 — Cuarenta y dos de cuarenta y seis.** De los sitios que leen algo de
+`getTarget()` en el acto, todos menos cuatro lo prueban antes o lo guardan en una
+variable. Dos de los cuatro son estos.
+
+### Cómo se cubrió el área
+
+De los **375** archivos se leyeron a fondo los nueve del tablero comunitario y
+todos los que los barridos señalaron. Sobre los 375 corrieron **dieciocho**
+barridos:
+
+1. operación compuesta sobre mapa concurrente — 2, descartados;
+2. `containsKey` seguido de `get` — 4, el modismo de conteo sobre mapas locales;
+3. división o módulo por variable — 6, **1 defecto** (`RebalanceHP`);
+4. producto sin ensanchar — 18, todos `double` por `double`;
+5. `onExit` que muta de forma relativa — 2, los dos guardan;
+6. campo escrito en `onStart` y leído en `onExit` — **0**, que cierra el pendiente;
+7. `split` indexado directo — 20 en administración, descartados por el catch;
+8. lectura de texto tecleado por el jugador — 44, **9 defectos** en el tablero;
+9. encadenamientos sobre captador anulable — 13, **3 defectos**;
+10. misma búsqueda probada y repetida — 29, descartados;
+11. retiro de ítem con retorno descartado — 5, **5 defectos**;
+12. orden entre tomar y dar en `itemhandlers` — 1 archivo, correcto;
+13. estado estático mutable — 11, **1 defecto** (`AdminSkill`);
+14. indexado por un valor calculado — 3, los arreglos miden 119 contra id 118;
+15. guardas comparadas entre `targethandlers` — 34, todos delegan en el ayudante;
+16. SQL armado por concatenación — 5, **2 defectos**;
+17. conexión fuera de try-with-resources — 19, **1 defecto**;
+18. `synchronized` solitario, bloqueo dentro de un handler, y bandera booleana sin
+    `try/finally` — **0** en los tres.
+
+### Tres mecanismos descartados enteros
+
+- **El catch del despachador de administración.** `AdminCommandHandler` envuelve
+  cada manejador en `catch (RuntimeException)` y le informa al GM el comando que
+  falló. Eso cubre los 20 sitios de `split` indexado y las conversiones sin
+  acotar de esa carpeta.
+
+- **El chequeo de cercanía vive un nivel más arriba.** Seis manejadores de bypass
+  mueven ítems o teletransportan sin comprobar la distancia al NPC, y no hace
+  falta: `RequestBypassToServer` rechaza el bypass si el jugador se alejó del NPC
+  de origen, antes de que el manejador corra.
+
+- **La división por defensa.** No es una guarda faltante sino cómo este código
+  calcula daño en todos lados: `Formulas` sola divide por `defence` en ocho
+  lugares.
 
 ### El pendiente arrastrado desde `serverpackets`, cerrado
 
