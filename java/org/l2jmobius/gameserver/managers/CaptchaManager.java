@@ -229,11 +229,27 @@ public class CaptchaManager
 		BEGIN_VALIDATION.put(player.getObjectId(), newTask);
 	}
 	
+	/**
+	 * Cancels and forgets the validation timer for a player.
+	 * <p>
+	 * Both callers used to get the future and call cancel on it in one expression. The entry
+	 * is not guaranteed to be there -- the timer removes itself, and either caller can run
+	 * after that -- so the get answered null and the cancel threw.
+	 * @param player the player whose timer should stop
+	 */
+	protected void cancelValidationTask(Player player)
+	{
+		final Future<?> task = BEGIN_VALIDATION.remove(player.getObjectId());
+		if (task != null)
+		{
+			task.cancel(true);
+		}
+	}
+	
 	protected void banPunishment(Player player)
 	{
 		VALIDATION.remove(player.getObjectId());
-		BEGIN_VALIDATION.get(player.getObjectId()).cancel(true);
-		BEGIN_VALIDATION.remove(player.getObjectId());
+		cancelValidationTask(player);
 		
 		// 0 = move character to the closest village.
 		// 1 = kick characters from the server.
@@ -370,7 +386,11 @@ public class CaptchaManager
 	
 	public void analyseBypass(String command, Player player)
 	{
-		if (!VALIDATION.containsKey(player.getObjectId()))
+		// One lookup held in a local, rather than containsKey followed by two more gets. The
+		// captcha has a timeout task that removes the entry, so an answer arriving as it fires
+		// passed the containsKey and then dereferenced the null the gets returned.
+		final PlayerData data = VALIDATION.get(player.getObjectId());
+		if (data == null)
 		{
 			return;
 		}
@@ -379,15 +399,15 @@ public class CaptchaManager
 		if (params.startsWith("continue"))
 		{
 			validationWindow(player);
-			VALIDATION.get(player.getObjectId()).firstWindow = false;
+			data.firstWindow = false;
 			return;
 		}
 		
-		final PlayerData data = VALIDATION.get(player.getObjectId());
 		if (!params.trim().equalsIgnoreCase(data.captchaText))
 		{
-			int retries = RETRIES.getOrDefault(player.getObjectId(), 0) + 1;
-			RETRIES.put(player.getObjectId(), retries);
+			// merge, so two answers arriving together cannot both read the same count and leave
+			// the player an attempt richer than they earned.
+			final int retries = RETRIES.merge(player.getObjectId(), 1, Integer::sum);
 			
 			if (retries >= CaptchaConfig.CAPTCHA_ATTEMPTS)
 			{
@@ -406,8 +426,7 @@ public class CaptchaManager
 		{
 			player.sendMessage("Congratulations, code matches!");
 			VALIDATION.remove(player.getObjectId());
-			BEGIN_VALIDATION.get(player.getObjectId()).cancel(true);
-			BEGIN_VALIDATION.remove(player.getObjectId());
+			cancelValidationTask(player);
 			
 			// Play sound when code matches.
 			player.sendPacket(QuestSound.ITEMSOUND_SOW_SUCCESS.getPacket());
