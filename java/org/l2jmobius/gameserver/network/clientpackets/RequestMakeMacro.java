@@ -45,11 +45,10 @@ public class RequestMakeMacro extends ClientPacket
 		final String desc = readString();
 		final String acronym = readString();
 		final int icon = readByte();
-		int count = readByte();
-		if (count > MAX_MACRO_LENGTH)
-		{
-			count = MAX_MACRO_LENGTH;
-		}
+		// readByte() is signed -- readUnsignedByte() is the one that is not. Only the
+		// ceiling was clamped, and a negative count reached the ArrayList constructor
+		// as an illegal capacity.
+		final int count = Math.clamp(readByte(), 0, MAX_MACRO_LENGTH);
 		
 		final List<MacroCmd> commands = new ArrayList<>(count);
 		// The bound comes from the enum rather than a literal. The literal happens to be

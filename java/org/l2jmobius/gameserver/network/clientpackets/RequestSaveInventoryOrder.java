@@ -38,8 +38,9 @@ public class RequestSaveInventoryOrder extends ClientPacket
 	@Override
 	protected void readImpl()
 	{
-		int sz = readInt();
-		sz = Math.min(sz, LIMIT);
+		// The count is signed, so clamp both ends. Only the ceiling was clamped, and a
+		// negative one reached the ArrayList constructor as an illegal capacity.
+		final int sz = Math.clamp(readInt(), 0, LIMIT);
 		_order = new ArrayList<>(sz);
 		for (int i = 0; i < sz; i++)
 		{
