@@ -21,12 +21,12 @@
 package org.l2jmobius.gameserver.model.actor.instance;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringTokenizer;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.l2jmobius.commons.util.StringUtil;
 import org.l2jmobius.gameserver.config.PlayerConfig;
@@ -139,10 +139,27 @@ public class SchemeBuffer extends Npc
 			final String schemeName = st.nextToken();
 			final int skillId = Integer.parseInt(st.nextToken());
 			final int page = Integer.parseInt(st.nextToken());
-			final List<Integer> skills = SchemeBufferTable.getInstance().getScheme(player.getObjectId(), schemeName);
+			// Taken from the scheme map rather than through getScheme, which answers
+			// Collections.emptyList() for a scheme that is not there -- and that list refuses
+			// add. A scheme name off the bypass, stale or never created, reached the add below.
+			final Map<String, List<Integer>> playerSchemes = SchemeBufferTable.getInstance().getPlayerSchemes(player.getObjectId());
+			final List<Integer> skills = (playerSchemes == null) ? null : playerSchemes.get(schemeName);
+			if (skills == null)
+			{
+				showEditSchemeWindow(player, groupType, schemeName, page);
+				return;
+			}
+			
 			if (currentCommand.startsWith("skillselect") && !schemeName.equalsIgnoreCase("none"))
 			{
+				// The skill id also comes off the bypass, so it need not name a skill.
 				final Skill skill = SkillData.getInstance().getSkill(skillId, 1);
+				if (skill == null)
+				{
+					showEditSchemeWindow(player, groupType, schemeName, page);
+					return;
+				}
+				
 				final int totalBuffs = skills.size();
 				final int currentDanceSongCount = getCountOf(skills, true); // true = dances/songs
 				final boolean isDanceOrSong = skill.isDance();
@@ -216,7 +233,7 @@ public class SchemeBuffer extends Npc
 					}
 				}
 				
-				SchemeBufferTable.getInstance().setScheme(player.getObjectId(), schemeName.trim(), new ArrayList<>());
+				SchemeBufferTable.getInstance().setScheme(player.getObjectId(), schemeName.trim(), new CopyOnWriteArrayList<>());
 				showGiveBuffsWindow(player);
 			}
 			catch (Exception e)

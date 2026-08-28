@@ -30,7 +30,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -103,7 +104,12 @@ public class SchemeBufferTable
 				final int objectId = rs.getInt("object_id");
 				final String schemeName = rs.getString("scheme_name");
 				final String[] skills = rs.getString("skills").split(",");
-				final List<Integer> schemeList = new ArrayList<>();
+				// Concurrent, like the map that holds it. saveSchemes iterates every scheme and
+				// every skill list at shutdown, while players are still connected through the
+				// countdown and still editing, so a plain list here means the iteration can hit a
+				// concurrent modification -- and the catch around the save abandons the whole
+				// batch, losing every player's schemes, not just the one being edited.
+				final List<Integer> schemeList = new CopyOnWriteArrayList<>();
 				for (String skill : skills)
 				{
 					// Don't feed the skills list if the list is empty.
@@ -181,7 +187,9 @@ public class SchemeBufferTable
 	{
 		if (!_schemesTable.containsKey(playerId))
 		{
-			_schemesTable.put(playerId, new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
+			// ConcurrentSkipListMap keeps the case-insensitive ordering a TreeMap gave and adds
+			// the weakly consistent iteration the shutdown save needs.
+			_schemesTable.put(playerId, new ConcurrentSkipListMap<>(String.CASE_INSENSITIVE_ORDER));
 		}
 		else if (_schemesTable.get(playerId).size() >= SchemeBufferConfig.BUFFER_MAX_SCHEMES)
 		{
