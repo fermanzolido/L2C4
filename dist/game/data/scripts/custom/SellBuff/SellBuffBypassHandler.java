@@ -262,7 +262,9 @@ public class SellBuffBypassHandler implements IBypassHandler
 						}
 						catch (NumberFormatException e)
 						{
-							player.sendMessage("Too big price! Maximum price is " + SellBuffsConfig.SELLBUFF_MIN_PRICE);
+							// Named the minimum. The branch further down that rejects an over-large
+							// price prints SELLBUFF_MAX_PRICE, which is what this one meant.
+							player.sendMessage("Too big price! Maximum price is " + SellBuffsConfig.SELLBUFF_MAX_PRICE);
 							SellBuffsManager.getInstance().sendBuffEditMenu(player);
 						}
 					}
@@ -408,8 +410,24 @@ public class SellBuffBypassHandler implements IBypassHandler
 					{
 						if (Quest.getQuestItemsCount(player, SellBuffsConfig.SELLBUFF_PAYMENT_ID) >= holder.getPrice())
 						{
-							Quest.takeItems(player, SellBuffsConfig.SELLBUFF_PAYMENT_ID, holder.getPrice());
-							Quest.giveItems(seller, SellBuffsConfig.SELLBUFF_PAYMENT_ID, holder.getPrice());
+							// giveItems answers nothing and drops the payment in silence when the seller
+							// cannot hold it -- inventory full, over the weight limit, or at the adena cap.
+							// Charging first therefore meant the buyer could pay into nothing, so the
+							// transfer is checked and handed back when it does not arrive.
+							if (!Quest.takeItems(player, SellBuffsConfig.SELLBUFF_PAYMENT_ID, holder.getPrice()))
+							{
+								SellBuffsManager.getInstance().sendBuffMenu(player, seller, index);
+								return false;
+							}
+							
+							if (seller.getInventory().addItem(ItemProcessType.TRANSFER, SellBuffsConfig.SELLBUFF_PAYMENT_ID, holder.getPrice(), seller, player) == null)
+							{
+								Quest.giveItems(player, SellBuffsConfig.SELLBUFF_PAYMENT_ID, holder.getPrice());
+								player.sendMessage(seller.getName() + " cannot accept the payment right now.");
+								SellBuffsManager.getInstance().sendBuffMenu(player, seller, index);
+								return false;
+							}
+							
 							seller.reduceCurrentMp(skillToBuy.getMpConsume() * SellBuffsConfig.SELLBUFF_MP_MULTIPLER);
 							
 							// Consume item(s) required by the buff.
@@ -521,8 +539,21 @@ public class SellBuffBypassHandler implements IBypassHandler
 							}
 							else
 							{
-								Quest.takeItems(player, SellBuffsConfig.SELLBUFF_PAYMENT_ID, holder.getPrice());
-								Quest.giveItems(seller, SellBuffsConfig.SELLBUFF_PAYMENT_ID, holder.getPrice());
+								// Same checked transfer as the non-pet purchase above.
+								if (!Quest.takeItems(player, SellBuffsConfig.SELLBUFF_PAYMENT_ID, holder.getPrice()))
+								{
+									SellBuffsManager.getInstance().sendBuffMenu(player, seller, index);
+									return false;
+								}
+								
+								if (seller.getInventory().addItem(ItemProcessType.TRANSFER, SellBuffsConfig.SELLBUFF_PAYMENT_ID, holder.getPrice(), seller, player) == null)
+								{
+									Quest.giveItems(player, SellBuffsConfig.SELLBUFF_PAYMENT_ID, holder.getPrice());
+									player.sendMessage(seller.getName() + " cannot accept the payment right now.");
+									SellBuffsManager.getInstance().sendBuffMenu(player, seller, index);
+									return false;
+								}
+								
 								seller.reduceCurrentMp(skillToBuy.getMpConsume() * SellBuffsConfig.SELLBUFF_MP_MULTIPLER);
 								
 								// Consume item(s) required by the buff.
