@@ -329,7 +329,11 @@ public class CastleManorManager implements IXmlReader
 							// Reserved and not used money giving back to treasury
 							if (crop.getAmount() > 0)
 							{
-								castle.addToTreasuryNoTax(crop.getAmount() * crop.getPrice());
+								// Widened before the multiply, not after. Both getters are int, so the product
+								// wrapped in int arithmetic and only then reached this long parameter -- and
+								// addToTreasuryNoTax reads a negative amount as a withdrawal, so an overflow
+								// here took money out of the treasury instead of putting it back.
+								castle.addToTreasuryNoTax((long) crop.getAmount() * crop.getPrice());
 							}
 						}
 					}
@@ -606,12 +610,13 @@ public class CastleManorManager implements IXmlReader
 		for (SeedProduction seed : production)
 		{
 			final Seed s = getSeed(seed.getId());
-			total += (s == null) ? 1 : (s.getSeedReferencePrice() * seed.getStartAmount());
+			total += (s == null) ? 1 : ((long) s.getSeedReferencePrice() * seed.getStartAmount());
 		}
 		
 		for (CropProcure crop : procure)
 		{
-			total += crop.getPrice() * crop.getStartAmount();
+			// Same widening as above: total is a long, but the product was computed in int first.
+			total += (long) crop.getPrice() * crop.getStartAmount();
 		}
 		
 		return total;
