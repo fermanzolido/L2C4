@@ -258,12 +258,27 @@ public class Say2 extends ClientPacket
 			
 			final StringBuilder result = new StringBuilder(9);
 			pos += 3;
-			while (Character.isDigit(_text.charAt(pos)))
+			while ((pos < _text.length()) && Character.isDigit(_text.charAt(pos)))
 			{
 				result.append(_text.charAt(pos++));
 			}
 			
-			final int id = Integer.parseInt(result.toString());
+			// The text here is whatever the player typed. "ID=" at the very end walked charAt
+			// past the end of the string, "ID=" with no digit behind it left the builder empty
+			// for parseInt, and a long enough run of digits was out of int range. All three
+			// threw out of the packet, which drops the message and logs a stack trace.
+			if ((result.length() == 0) || (result.length() > 10))
+			{
+				return false;
+			}
+			
+			final long parsedId = Long.parseLong(result.toString());
+			if ((parsedId < 1) || (parsedId > Integer.MAX_VALUE))
+			{
+				return false;
+			}
+			
+			final int id = (int) parsedId;
 			final WorldObject item = World.getInstance().findObject(id);
 			if (item instanceof Item)
 			{
