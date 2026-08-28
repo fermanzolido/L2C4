@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -66,6 +67,7 @@ public class SpawnData implements IXmlReader
 	private static final String OTHER_XML_FOLDER = "data/spawns/Others";
 	
 	private final Map<Integer, String> _spawnTemplates = new ConcurrentHashMap<>();
+	private final AtomicInteger _spawnTemplateIdFactory = new AtomicInteger();
 	private int _spawnCount = 0;
 	
 	protected SpawnData()
@@ -552,7 +554,11 @@ public class SpawnData implements IXmlReader
 			}
 			else
 			{
-				final int newId = _spawnTemplates.size();
+				// The id comes from a counter, not from the map size. data/spawns is parsed
+				// recursively and in parallel when ThreadsForLoading is on, which Threads.ini ships
+				// on, so two threads holding two different files both read the same size and both
+				// store it -- two spawn files sharing one template id, and one file name lost.
+				final int newId = _spawnTemplateIdFactory.getAndIncrement();
 				_spawnTemplates.put(newId, fileName);
 				spawnDat.setSpawnTemplateId(newId);
 			}

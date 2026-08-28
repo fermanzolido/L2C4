@@ -95,7 +95,9 @@ public class SkillTreeData implements IXmlReader
 	private int[] _allSkillsHashCodes; // Fishing, Collection, Transformations, Common Skills.
 	
 	/** Parent class Ids are read from XML and stored in this map, to allow easy customization. */
-	private final Map<PlayerClass, PlayerClass> _parentClassMap = new LinkedHashMap<>();
+	// Concurrent: written during the parallel directory parse below. Nothing iterates it, so
+	// the insertion order the LinkedHashMap gave it is not used by anything.
+	private final Map<PlayerClass, PlayerClass> _parentClassMap = new ConcurrentHashMap<>();
 	
 	private boolean _loading = true;
 	
@@ -336,14 +338,10 @@ public class SkillTreeData implements IXmlReader
 						
 						if (type.equals("classSkillTree") && (cId > -1))
 						{
-							if (!_classSkillTrees.containsKey(playerClass))
-							{
-								_classSkillTrees.put(playerClass, classSkillTree);
-							}
-							else
-							{
-								_classSkillTrees.get(playerClass).putAll(classSkillTree);
-							}
+							// One atomic step. Two threads parsing two files that both define this class
+							// could each find nothing and each store their own tree, so the loser's skills
+							// were dropped instead of merged by the else branch written for that case.
+							_classSkillTrees.computeIfAbsent(playerClass, key -> new ConcurrentHashMap<>()).putAll(classSkillTree);
 						}
 					}
 				}
