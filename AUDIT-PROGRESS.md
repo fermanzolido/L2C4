@@ -1540,9 +1540,9 @@ y ciclo de carrera, `RecipeManager` en el cálculo de pasadas, `LotteryManager` 
 el reparto de premios, y `RaceManager` (que es `model/actor/instance` pero es el
 NPC de las carreras) en su bypass.
 
-**Pendiente:** `SellBuffsManager` (510), `RaidBossSpawnManager` (498),
-`DimensionalRiftManager` (492), `MapRegionManager` (458), `PetitionManager` (444),
-`InstanceManager` (440), `MercTicketManager` (430) y el resto.
+**Pendiente:** `DimensionalRiftManager` (492), `MapRegionManager` (458),
+`PetitionManager` (444), `InstanceManager` (440), `MercTicketManager` (430),
+`GrandBossManager` (421), `CastleManager` (374) y los menores.
 
 ### Hallazgos
 
@@ -1659,6 +1659,70 @@ con el `RateDropManor = 1` distribuido el peor caso es **247.500.000**, cómodo
 dentro de `int`. Pero ese rate escala el límite, y el umbral es
 `2147483647 / (9000 × 27500)` = **8,67**: un servidor con `RateDropManor` en 9 o
 más desborda, y las tasas altas están muy por encima de eso.
+
+### Tercera vuelta: el barrido de `containsKey` + `get`, y los controles de seguridad
+
+El `containsKey` seguido de `get` del captcha también era un patrón. Barridos los
+44 archivos: **13 candidatos**, de los cuales importan aquellos de cuya colección
+**algo borra concurrentemente** y cuyo resultado se desreferencia sin chequear.
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 13 | `AntiFeedManager` | el contador de conexiones por IP se decrementa dos veces y compara con `== 0` | alta |
+| 14 | `AntiFeedManager` | el límite de dualbox se chequea y se incrementa en pasos separados | alta |
+| 15 | `SellBuffBypassHandler` | se cobra al comprador sin verificar que el vendedor pueda recibir | alta |
+| 16 | `RaidBossSpawnManager` | dos lecturas de `_bosses` desreferencian sin chequear null | media |
+| 17 | `AntiFeedManager` | la rama olímpica decrementa a mano, sin limpiar ni acotar | media |
+| 18 | `SellBuffBypassHandler` | el mensaje de "precio muy alto" nombra el mínimo | baja |
+
+**13, 14 y 17 — Un límite que se desactiva solo.** `tryAddClient` leía la cuenta,
+la comparaba y después incrementaba: tres pasos. Dos clientes de la misma
+dirección que llegan juntos leen el mismo valor, los dos encuentran lugar y los
+dos incrementan, así que el límite admite uno más de los que permite.
+
+Pero lo que lo vuelve permanente es lo otro. `removeClient` borraba la entrada
+cuando `decrementAndGet() == 0`, con igualdad exacta — y `onDisconnect` **recorre
+todos los eventos registrados y saca al cliente de cada uno sin preguntar si
+alguna vez estuvo en ese**. Un cliente que salió bien de un evento por
+`removePlayer` y después se desconecta se decrementa dos veces por un solo
+incremento. Pasado el cero, la igualdad exacta no vuelve a coincidir: la entrada
+queda con cuenta negativa, y una cuenta negativa hace pasar la comparación de
+`tryAddClient` sin importar nada. **El límite de dualbox para esa dirección queda
+apagado por el resto del tiempo que el servidor esté arriba.**
+
+Es la misma forma que el `FloodProtectorListener` del loginserver: un contador
+compartido que se incrementa por un camino, se decrementa por varios, y se compara
+con igualdad exacta.
+
+**15 — Cobrar por algo que nunca llegó.** Los dos caminos de compra movían el pago
+con `Quest.takeItems(comprador)` seguido de `Quest.giveItems(vendedor)`.
+`giveItems` devuelve `void`, y debajo `Inventory.addItem` responde `null` cuando
+el destinatario no puede sostener lo que se le da —inventario lleno, pasado del
+límite de peso, o en el tope de adena— y `giveItems` simplemente vuelve. Así que
+el comprador pagaba, el vendedor no recibía nada, y el pago dejaba de existir. El
+buff se casteaba igual.
+
+**16 — Preguntar dos veces.** `getRaidBossStatus` y `getRaidBossStatusId` abren con
+`containsKey` sobre `_bosses` y después hacen `get` de la misma clave,
+desreferenciando sin test de null. El mapa recibe `remove` al desspawnear un boss
+y `clear` al recargar, desde hilos distintos de los que piden el estado. La clase
+**ya lo lee bien** treinta líneas más arriba, en el bucle de actualización: un solo
+`get` en una local, con el chequeo de null que a estos dos les faltaba.
+
+### Sospechas evaluadas y descartadas (tercera vuelta)
+
+- **`WalkingManager` con `containsKey` sobre `_activeRoutes`** seguido de `get`, y
+  `cancelMoving` borra de ese mapa. Sí chequea el null que devuelve el `get`.
+
+- **Los otros diez candidatos del barrido** (`DimensionalRiftManager`,
+  `InstanceManager`, `ScriptManager`, `ZoneManager`, `MercTicketManager`): o la
+  colección solo se escribe en la carga, o el resultado se usa de una forma que
+  tolera el null.
+
+- **`AntiFeedManager` en el resto de su estructura.** Es un `ConcurrentHashMap` de
+  `ConcurrentHashMap` de `AtomicInteger`, con `computeIfAbsent` y
+  `computeIfPresent` donde corresponde. El defecto no era la estructura sino las
+  dos operaciones compuestas escritas encima.
 
 ### Anotado sin tocar (segunda vuelta de `managers`)
 
