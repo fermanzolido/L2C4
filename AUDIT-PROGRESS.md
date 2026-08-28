@@ -30,8 +30,8 @@ hallazgos aunque no hayas terminado el área.
 | ~~`managers`~~ | 44 | 14.636 | **TERMINADA** |
 | ~~`data`~~ | 71 | 14.922 | **TERMINADA** |
 | ~~`network/serverpackets`~~ | 259 | 19.900 | **TERMINADA** |
-| **`network/clientpackets`** | **201** | **21.727** | **en curso** |
-| datapack `handlers/` | 375 | 51.203 | pendiente |
+| ~~`network/clientpackets`~~ | 201 | 21.727 | **TERMINADA** |
+| **datapack `handlers/`** | **375** | **51.203** | **en curso** |
 | `model/actor` | 166 | 53.236 | pendiente |
 | datapack `quests/` | 298 | 79.342 | pendiente |
 
@@ -2954,7 +2954,7 @@ toda la clase**.
 
 ---
 
-## `network/clientpackets` — EN CURSO
+## `network/clientpackets` — TERMINADA
 
 201 archivos, 21.727 líneas. Todo lo del área entra por la red desde un cliente
 que puede mandar cualquier cosa, así que el eje es: **qué se lee del paquete y
@@ -3246,6 +3246,72 @@ tablero comunitario, y el resto sueltos.
 Los alcanzables desde el cliente son el 14 y dos de `ClanBoard`, y esos dos ya
 están adentro de un `try/catch` con fallback. Los de configuración son el 15. Los
 de comandos de administración quedan para el área `handlers/`.
+
+### Séptima vuelta: la misma búsqueda escrita dos veces
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 24 | `ClanHallManager`, `RequestRestartPoint` | la función se prueba y después se vuelve a buscar | media |
+| 25 | `ClanHallTable`, `Auctioneer` | el salón se desreferencia sin comprobar, y el clan tampoco | media |
+
+**24 — Lo que contestó el test no es lo que se desreferencia.** Trece lugares
+prueban `getFunction(...)` contra null y después llaman `getFunction(...)` **otra
+vez** para usar la respuesta. `ClanHall.removeFunction` corre desde la tarea de
+tasa del salón, que está programada en el pool, así que lo que contestó el test
+no tiene por qué seguir ahí para la desreferencia. Once están en
+`ClanHallManager`, donde el throw cae en el catch-all del bypass y muere la
+interacción del jugador con el administrador; los otros dos en
+`RequestRestartPoint`, donde deja al jugador **muerto** en vez de reaparecerlo.
+
+De los **39** sitios que devolvió el barrido de "la misma búsqueda escrita dos
+veces", estos trece son los únicos cuyo valor otro hilo puede sacar del medio: el
+resto son lecturas de atributos XML durante el parseo, padres de nodos del
+buscador de caminos, y trabajo de un solo hilo por el estilo.
+
+**25 — Un hermano que comprueba y otro que no.** `getClanHallByOwner` lee el id
+del clan de una, mientras `getCastleByOwner`, su contraparte, contesta null para
+un clan null. Cinco lugares de `Auctioneer` desreferencian su respuesta en el
+acto, y dos la buscan dos veces. La respuesta es null para un clan que no posee
+salón, y tener `ClanAccess.HALL_AUCTION` no implica poseer uno, así que un líder
+de clan común llega a todos. Ahora rechazan igual que la rama de al lado ya
+rechaza a un jugador sin clan.
+
+`Auctioneer` vive en `model/actor`, que todavía no se abrió; esto es solo lo que
+el barrido destapó, y el archivo se lee entero cuando llegue esa área.
+
+### Cómo se cubrió el área
+
+De los **201** archivos se leyeron línea por línea los que los barridos señalaron
+más los ocho más grandes: `RequestActionUse` (758), `EnterWorld` (644),
+`MultiSellChoose` (434), `RequestEnchantItem` (392), `CharacterCreate` (333),
+`RequestBypassToServer` (312), `UseItem` (304), `Say2` (293), `RequestBuyItem`
+(291), `RequestAcquireSkill` (280), `RequestRestartPoint` (276) y
+`RequestJoinParty` (261). Sobre los 201 corrieron **quince** barridos:
+
+1. valor del paquete como tamaño de alojamiento o cota de bucle — 17, **2 defectos**;
+2. `getPlayer()` desreferenciado sin comprobar — **2 defectos**;
+3. operación compuesta sobre mapa concurrente — 0;
+4. `containsKey` seguido de `get` — 0;
+5. división o módulo por variable — 3, descartados midiendo;
+6. producto sin ensanchar hacia un long o double — **7 defectos** en la segunda
+   pasada, después de corregir el barrido para ver argumentos y retornos;
+7. indexado con un valor del paquete — 1, ya guardado;
+8. retorno de retiro de ítem descartado — 2 en el área, descartados;
+9. encadenamientos sobre captador anulable — 12 candidatos, **3 defectos**;
+10. campos sin asignar por un `readImpl` que retorna temprano — 2, guardados;
+11. `ClanTable.getClan` sin comprobar — 106 sitios, que llevaron al hallazgo 6;
+12. mapa concurrente indexado con otra búsqueda — 5, **1 defecto**;
+13. resultado de un `split` indexado directo — 41, **2 defectos** más los de config;
+14. misma búsqueda probada y vuelta a buscar — 39, **13 defectos**;
+15. estado estático mutable en paquetes y `synchronized` solitario — 0 defectos.
+
+Dos mecanismos quedaron descartados enteros: los **acumuladores de dinero**, donde
+la aritmética misma prueba que un total acotado por `MAX_ADENA` solo puede dar la
+vuelta hacia el negativo y el negativo se prueba; y los **índices del multisell**,
+seguros porque `getAllItemsByItemId` devuelve una foto y no una vista viva.
+
+Queda anotado sin tocar: los dos `LOGGER_CHAT` de `Say2` y `RequestSendFriendMsg`
+son `static` sin `final`, se asignan una vez y solo se leen — estilo, no defecto.
 
 ### Sospechas de la cuarta vuelta, evaluadas y descartadas
 
