@@ -70,7 +70,9 @@ public class ChatAdmin implements IVoicedCommandHandler
 					if (st.hasMoreTokens())
 					{
 						final String token = st.nextToken();
-						if (StringUtil.isNumeric(token))
+						// isNumeric only proves the characters are digits, not that the number fits
+						// in an int, and parseInt does not take all of them.
+						if (StringUtil.isNumeric(token) && (token.length() <= 9))
 						{
 							expirationTime = Integer.parseInt(token);
 						}

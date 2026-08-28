@@ -57,8 +57,17 @@ public class ClanHandler implements IVoicedCommandHandler
 		
 		if (params.startsWith("privileges"))
 		{
+			// The test above is on ten characters and the cut here skips eleven, so the
+			// command with no value behind it walked past the end of the string. isNumeric
+			// alone is also not enough: it only proves the characters are digits, not that
+			// the number fits in an int.
+			if (params.length() <= 11)
+			{
+				return false;
+			}
+			
 			final String privilegesValue = params.substring(11);
-			if (!StringUtil.isNumeric(privilegesValue))
+			if (!StringUtil.isNumeric(privilegesValue) || (privilegesValue.length() > 9))
 			{
 				return false;
 			}

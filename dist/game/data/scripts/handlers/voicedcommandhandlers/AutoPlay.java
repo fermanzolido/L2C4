@@ -231,7 +231,7 @@ public class AutoPlay implements IVoicedCommandHandler
 						}
 						case "percent":
 						{
-							if ((paramArray.length > 1) && StringUtil.isNumeric(paramArray[1]))
+							if ((paramArray.length > 1) && isSmallNumber(paramArray[1]))
 							{
 								player.getAutoPlaySettings().setAutoPotionPercent(Math.max(0, Math.min(100, Integer.parseInt(paramArray[1]))));
 							}
@@ -350,7 +350,7 @@ public class AutoPlay implements IVoicedCommandHandler
 				
 				// Manage skill activation.
 				final String[] paramArray = params == null ? new String[0] : params.split(" ");
-				if (paramArray.length > 1)
+				if ((paramArray.length > 1) && isSmallNumber(paramArray[1]))
 				{
 					final Integer skillId = Integer.parseInt(paramArray[1]);
 					Skill knownSkill = player.getKnownSkill(skillId);
@@ -398,7 +398,7 @@ public class AutoPlay implements IVoicedCommandHandler
 				
 				// Calculate page number.
 				final int max = HtmlUtil.countPageNumber(skills.size(), PAGE_LIMIT);
-				int page = params == null ? 1 : Integer.parseInt(paramArray[0]);
+				int page = ((params == null) || !isSmallNumber(paramArray[0])) ? 1 : Integer.parseInt(paramArray[0]);
 				if (page > max)
 				{
 					page = max;
@@ -482,7 +482,7 @@ public class AutoPlay implements IVoicedCommandHandler
 				
 				// Manage item activation.
 				final String[] paramArray = params == null ? new String[0] : params.split(" ");
-				if (paramArray.length > 1)
+				if ((paramArray.length > 1) && isSmallNumber(paramArray[1]))
 				{
 					final int itemId = Integer.parseInt(paramArray[1]);
 					if (AutoPlayConfig.ENABLE_AUTO_ITEM && items.contains(ItemData.getInstance().getTemplate(itemId)))
@@ -500,7 +500,7 @@ public class AutoPlay implements IVoicedCommandHandler
 				
 				// Calculate page number.
 				final int max = HtmlUtil.countPageNumber(items.size(), PAGE_LIMIT);
-				int page = params == null ? 1 : Integer.parseInt(paramArray[0]);
+				int page = ((params == null) || !isSmallNumber(paramArray[0])) ? 1 : Integer.parseInt(paramArray[0]);
 				if (page > max)
 				{
 					page = max;
@@ -584,7 +584,7 @@ public class AutoPlay implements IVoicedCommandHandler
 				
 				// Manage item activation.
 				final String[] paramArray = params == null ? new String[0] : params.split(" ");
-				if (paramArray.length > 1)
+				if ((paramArray.length > 1) && isSmallNumber(paramArray[1]))
 				{
 					final int itemId = Integer.parseInt(paramArray[1]);
 					if (AutoPlayConfig.ENABLE_AUTO_POTION && items.contains(ItemData.getInstance().getTemplate(itemId)))
@@ -602,7 +602,7 @@ public class AutoPlay implements IVoicedCommandHandler
 				
 				// Calculate page number.
 				final int max = HtmlUtil.countPageNumber(items.size(), PAGE_LIMIT);
-				int page = params == null ? 1 : Integer.parseInt(paramArray[0]);
+				int page = ((params == null) || !isSmallNumber(paramArray[0])) ? 1 : Integer.parseInt(paramArray[0]);
 				if (page > max)
 				{
 					page = max;
@@ -669,5 +669,17 @@ public class AutoPlay implements IVoicedCommandHandler
 	public String[] getCommandList()
 	{
 		return VOICED_COMMANDS;
+	}
+
+	/**
+	 * The percent case tested its parameter with isNumeric and the six others did not,
+	 * which is what singled them out. isNumeric alone is also not quite enough: it only
+	 * proves the characters are digits, not that the number fits in an int.
+	 * @param value one of the command's parameters
+	 * @return {@code true} when it is a number parseInt can take
+	 */
+	private static boolean isSmallNumber(String value)
+	{
+		return StringUtil.isNumeric(value) && (value.length() <= 9);
 	}
 }
