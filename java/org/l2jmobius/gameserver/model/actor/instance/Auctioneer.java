@@ -37,6 +37,7 @@ import org.l2jmobius.gameserver.model.actor.Player;
 import org.l2jmobius.gameserver.model.actor.enums.creature.InstanceType;
 import org.l2jmobius.gameserver.model.actor.templates.NpcTemplate;
 import org.l2jmobius.gameserver.model.clan.ClanAccess;
+import org.l2jmobius.gameserver.model.residences.AuctionableHall;
 import org.l2jmobius.gameserver.model.residences.ClanHallAuction;
 import org.l2jmobius.gameserver.model.residences.ClanHallAuction.Bidder;
 import org.l2jmobius.gameserver.network.SystemMessageId;
@@ -104,7 +105,17 @@ public class Auctioneer extends Npc
 							bid = Math.min(Integer.parseInt(st.nextToken()), MAX_ADENA);
 						}
 						
-						final ClanHallAuction a = new ClanHallAuction(player.getClan().getHideoutId(), player.getClan(), days * 86400000L, bid, ClanHallTable.getInstance().getClanHallByOwner(player.getClan()).getName());
+						// The hall is null for a clan that owns none, and holding the auction rights
+						// does not imply owning one. Every branch here dereferenced the answer on the
+						// spot, and some of them looked it up twice.
+						final AuctionableHall ownedHall = ClanHallTable.getInstance().getClanHallByOwner(player.getClan());
+						if (ownedHall == null)
+						{
+							player.sendPacket(SystemMessageId.YOU_CANNOT_PARTICIPATE_IN_AN_AUCTION);
+							return;
+						}
+						
+						final ClanHallAuction a = new ClanHallAuction(player.getClan().getHideoutId(), player.getClan(), days * 86400000L, bid, ownedHall.getName());
 						if (_pendingAuctions.get(a.getId()) != null)
 						{
 							_pendingAuctions.remove(a.getId());
@@ -119,7 +130,7 @@ public class Auctioneer extends Npc
 						html.replace("%AGIT_AUCTION_END%", format.format(a.getEndDate()));
 						html.replace("%AGIT_AUCTION_MINBID%", String.valueOf(a.getStartingBid()));
 						html.replace("%AGIT_AUCTION_MIN%", String.valueOf(a.getStartingBid()));
-						html.replace("%AGIT_AUCTION_DESC%", ClanHallTable.getInstance().getClanHallByOwner(player.getClan()).getDesc());
+						html.replace("%AGIT_AUCTION_DESC%", ownedHall.getDesc());
 						html.replace("%AGIT_LINK_BACK%", "bypass -h npc_" + getObjectId() + "_sale2");
 						html.replace("%objectId%", String.valueOf((getObjectId())));
 						player.sendPacket(html);
@@ -526,10 +537,16 @@ public class Auctioneer extends Npc
 					return;
 				}
 				
+				final AuctionableHall ownedHall = ClanHallTable.getInstance().getClanHallByOwner(player.getClan());
+				if (ownedHall == null)
+				{
+					player.sendPacket(SystemMessageId.YOU_CANNOT_PARTICIPATE_IN_AN_AUCTION);
+					return;
+				}
 				final String filename = "data/html/auction/AgitSaleCancel.htm";
 				final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 				html.setFile(player, filename);
-				html.replace("%AGIT_DEPOSIT%", String.valueOf(ClanHallTable.getInstance().getClanHallByOwner(player.getClan()).getLease()));
+				html.replace("%AGIT_DEPOSIT%", String.valueOf(ownedHall.getLease()));
 				html.replace("%AGIT_LINK_BACK%", "bypass -h npc_" + getObjectId() + "_selectedItems");
 				html.replace("%objectId%", String.valueOf(getObjectId()));
 				player.sendPacket(html);
@@ -537,19 +554,28 @@ public class Auctioneer extends Npc
 			}
 			else if (actualCommand.equalsIgnoreCase("doCancelAuction"))
 			{
-				if (ClanHallAuctionManager.getInstance().getAuction(player.getClan().getHideoutId()) != null)
+				// Looked up again to be cancelled after being tested; auctions are closed from a
+				// scheduled task, so the one that answered the test need not still be there.
+				final ClanHallAuction ownedAuction = ClanHallAuctionManager.getInstance().getAuction(player.getClan().getHideoutId());
+				if (ownedAuction != null)
 				{
-					ClanHallAuctionManager.getInstance().getAuction(player.getClan().getHideoutId()).cancelAuction();
+					ownedAuction.cancelAuction();
 					player.sendMessage("Your auction has been canceled");
 				}
 				return;
 			}
 			else if (actualCommand.equalsIgnoreCase("sale2"))
 			{
+				final AuctionableHall ownedHall = ClanHallTable.getInstance().getClanHallByOwner(player.getClan());
+				if (ownedHall == null)
+				{
+					player.sendPacket(SystemMessageId.YOU_CANNOT_PARTICIPATE_IN_AN_AUCTION);
+					return;
+				}
 				final String filename = "data/html/auction/AgitSale2.htm";
 				final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 				html.setFile(player, filename);
-				html.replace("%AGIT_LAST_PRICE%", String.valueOf(ClanHallTable.getInstance().getClanHallByOwner(player.getClan()).getLease()));
+				html.replace("%AGIT_LAST_PRICE%", String.valueOf(ownedHall.getLease()));
 				html.replace("%AGIT_LINK_BACK%", "bypass -h npc_" + getObjectId() + "_sale");
 				html.replace("%objectId%", String.valueOf(getObjectId()));
 				player.sendPacket(html);
@@ -567,10 +593,16 @@ public class Auctioneer extends Npc
 					return;
 				}
 				
+				final AuctionableHall ownedHall = ClanHallTable.getInstance().getClanHallByOwner(player.getClan());
+				if (ownedHall == null)
+				{
+					player.sendPacket(SystemMessageId.YOU_CANNOT_PARTICIPATE_IN_AN_AUCTION);
+					return;
+				}
 				final String filename = "data/html/auction/AgitSale1.htm";
 				final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 				html.setFile(player, filename);
-				html.replace("%AGIT_DEPOSIT%", String.valueOf(ClanHallTable.getInstance().getClanHallByOwner(player.getClan()).getLease()));
+				html.replace("%AGIT_DEPOSIT%", String.valueOf(ownedHall.getLease()));
 				html.replace("%AGIT_PLEDGE_ADENA%", String.valueOf(player.getClan().getWarehouse().getAdena()));
 				html.replace("%AGIT_LINK_BACK%", "bypass -h npc_" + getObjectId() + "_selectedItems");
 				html.replace("%objectId%", String.valueOf(getObjectId()));

@@ -301,6 +301,13 @@ public class ClanHallTable
 	 */
 	public AuctionableHall getClanHallByOwner(Clan clan)
 	{
+		// getCastleByOwner, its counterpart, answers null for a null clan rather than
+		// dereferencing it.
+		if (clan == null)
+		{
+			return null;
+		}
+		
 		for (Entry<Integer, AuctionableHall> ch : _clanHall.entrySet())
 		{
 			if (clan.getId() == ch.getValue().getOwnerId())
