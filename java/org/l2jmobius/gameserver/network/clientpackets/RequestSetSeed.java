@@ -23,6 +23,7 @@ import org.l2jmobius.gameserver.config.PlayerConfig;
 import org.l2jmobius.gameserver.managers.CastleManorManager;
 import org.l2jmobius.gameserver.model.Seed;
 import org.l2jmobius.gameserver.model.SeedProduction;
+import org.l2jmobius.gameserver.model.actor.Npc;
 import org.l2jmobius.gameserver.model.actor.Player;
 import org.l2jmobius.gameserver.model.clan.ClanAccess;
 import org.l2jmobius.gameserver.network.serverpackets.ActionFailed;
@@ -87,8 +88,13 @@ public class RequestSetSeed extends ClientPacket
 			return;
 		}
 		
+		// The last folk is null until the player talks to one. The sibling manor
+		// packets read it into a variable and run it through an instanceof, which
+		// absorbs that; these two dereferenced it straight away.
+		final Npc folk = player.getLastFolkNPC();
+		
 		// Check player privileges
-		if ((player.getClan() == null) || (player.getClan().getCastleId() != _manorId) || !player.hasAccess(ClanAccess.CASTLE_MANOR) || !player.getLastFolkNPC().canInteract(player))
+		if ((player.getClan() == null) || (player.getClan().getCastleId() != _manorId) || !player.hasAccess(ClanAccess.CASTLE_MANOR) || (folk == null) || !folk.canInteract(player))
 		{
 			player.sendPacket(ActionFailed.STATIC_PACKET);
 			return;

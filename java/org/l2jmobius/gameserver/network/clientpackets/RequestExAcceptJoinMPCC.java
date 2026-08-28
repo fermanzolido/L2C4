@@ -18,6 +18,7 @@ package org.l2jmobius.gameserver.network.clientpackets;
 
 import org.l2jmobius.gameserver.model.actor.Player;
 import org.l2jmobius.gameserver.model.groups.CommandChannel;
+import org.l2jmobius.gameserver.model.groups.Party;
 import org.l2jmobius.gameserver.network.SystemMessageId;
 import org.l2jmobius.gameserver.network.serverpackets.SystemMessage;
 
@@ -50,20 +51,32 @@ public class RequestExAcceptJoinMPCC extends ClientPacket
 			
 			if (_response == 1)
 			{
-				boolean newCc = false;
-				if (!requestor.getParty().isInCommandChannel())
+				// Either party can be gone by the time the answer arrives. The packet that
+				// sends the invitation tests isInParty() before every getParty(); this one
+				// tested neither, and still has to clear the pending request below.
+				final Party requestorParty = requestor.getParty();
+				final Party playerParty = player.getParty();
+				if ((requestorParty == null) || (playerParty == null))
 				{
-					new CommandChannel(requestor); // Create new CC
-					sm = new SystemMessage(SystemMessageId.A_COMMAND_CHANNEL_HAS_BEEN_OPENED);
-					requestor.sendPacket(sm);
-					newCc = true;
+					requestor.sendMessage("The Command Channel invitation could no longer be completed.");
 				}
-				
-				requestor.getParty().getCommandChannel().addParty(player.getParty());
-				if (!newCc)
+				else
 				{
-					sm = new SystemMessage(SystemMessageId.YOU_HAVE_PARTICIPATED_IN_THE_COMMAND_CHANNEL);
-					player.sendPacket(sm);
+					boolean newCc = false;
+					if (!requestorParty.isInCommandChannel())
+					{
+						new CommandChannel(requestor); // Create new CC
+						sm = new SystemMessage(SystemMessageId.A_COMMAND_CHANNEL_HAS_BEEN_OPENED);
+						requestor.sendPacket(sm);
+						newCc = true;
+					}
+					
+					requestorParty.getCommandChannel().addParty(playerParty);
+					if (!newCc)
+					{
+						sm = new SystemMessage(SystemMessageId.YOU_HAVE_PARTICIPATED_IN_THE_COMMAND_CHANNEL);
+						player.sendPacket(sm);
+					}
 				}
 			}
 			else
