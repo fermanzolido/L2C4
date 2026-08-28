@@ -87,10 +87,17 @@ public class WyvernManager extends Script
 		{
 			if (isOwnerClan(npc, player) && (getQuestItemsCount(player, CRYSTAL_B_GRADE) >= WYVERN_FEE))
 			{
-				takeItems(player, CRYSTAL_B_GRADE, WYVERN_FEE);
+				// Charged only once the mount has actually happened. mount() answers false when the
+				// equipped weapon is force-equip -- a cursed weapon -- and so cannot be unequipped,
+				// and that answer was being discarded: the fee was gone, the strider dismounted and
+				// no wyvern to show for it, behind the success page.
 				player.dismount();
-				player.mount(WYVERN, 0, true);
+				if (!player.mount(WYVERN, 0, true))
+				{
+					return replacePart(player, "wyvernmanager-05.html");
+				}
 				
+				takeItems(player, CRYSTAL_B_GRADE, WYVERN_FEE);
 				return "wyvernmanager-04.html";
 			}
 			

@@ -5004,8 +5004,11 @@ public class Quest implements IEventTimerEvent<String>, IEventTimerCancel<String
 	 */
 	public static boolean takeItems(Player player, int itemId, int amount) {
 		final Collection<Item> items = player.getInventory().getAllItemsByItemId(itemId);
+		boolean taken = true;
 		if (amount < 0) {
-			items.forEach(i -> takeItem(player, i, i.getCount()));
+			for (Item i : items) {
+				taken &= takeItem(player, i, i.getCount());
+			}
 		} else {
 			int currentCount = 0;
 			for (Item i : items) {
@@ -5015,14 +5018,17 @@ public class Quest implements IEventTimerEvent<String>, IEventTimerCancel<String
 				}
 
 				if (toDelete > 0) {
-					takeItem(player, i, toDelete);
+					taken &= takeItem(player, i, toDelete);
 				}
 
 				currentCount += toDelete;
 			}
+
+			// Short of the requested amount is not success either.
+			taken &= currentCount == amount;
 		}
 
-		return true;
+		return taken;
 	}
 
 	private static boolean takeItem(Player player, Item item, int toDelete) {
