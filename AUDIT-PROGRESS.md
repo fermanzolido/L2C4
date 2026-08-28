@@ -27,7 +27,7 @@ hallazgos aunque no hayas terminado el área.
 | ~~`gameserver/ai`~~ | 15 | 7.907 | **TERMINADA** |
 | ~~`commons`~~ | 47 | 11.240 | **TERMINADA** |
 | ~~datapack `ai/`~~ | 67 | 14.462 | **TERMINADA** |
-| **`managers`** | **44** | **14.636** | **en curso** |
+| ~~`managers`~~ | 44 | 14.636 | **TERMINADA** |
 | `data` | 71 | 14.922 | pendiente |
 | `network/serverpackets` | 259 | 19.900 | pendiente |
 | `network/clientpackets` | 201 | 21.727 | pendiente |
@@ -1530,7 +1530,7 @@ declaraciones, 0 `volatile`, 0 `finally`. Uniforme. Un grep por `_working` habr�
 mostrado los sitios sin mostrar que **ninguno** estaba protegido.
 
 
-## `managers` — en curso
+## `managers` — TERMINADA
 
 Son **44** archivos y **14.636** líneas. Se empezó por los que mueven dinero, que
 es donde vienen apareciendo los defectos.
@@ -1540,9 +1540,6 @@ y ciclo de carrera, `RecipeManager` en el cálculo de pasadas, `LotteryManager` 
 el reparto de premios, y `RaceManager` (que es `model/actor/instance` pero es el
 NPC de las carreras) en su bypass.
 
-**Pendiente:** `DimensionalRiftManager` (492), `MapRegionManager` (458),
-`PetitionManager` (444), `InstanceManager` (440), `MercTicketManager` (430),
-`GrandBossManager` (421), `CastleManager` (374) y los menores.
 
 ### Hallazgos
 
@@ -1760,6 +1757,53 @@ y `clear` al recargar, desde hilos distintos de los que piden el estado. La clas
 - **El barrido de multiplicaciones de dinero ensanchadas tarde** sobre todo el core
   dejó un solo sitio más, `RequestBuySeed:180`, y está cubierto por el
   pre-chequeo de desborde que tiene arriba.
+
+### Cuarta vuelta: consumir antes de otorgar
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 19 | `MercTicket` | se contrata el mercenario y **después** se saca el ítem, con el booleano descartado | alta |
+| 20 | `Recipes` | se registra la receta y después se destruye el libro | media |
+| 21 | `FishShots` | se carga el shot y después se destruye | baja |
+
+**19 — Un ticket, dos mercenarios.** El handler contrata al mercenario, lo
+spawnea, crea el ticket en el mundo y lo registra, y recién ahí saca el ítem del
+inventario del jugador — descartando lo que `destroyItem` devuelve. Dos usos del
+mismo ticket que llegan juntos pasan los dos los límites de castillo, tipo y
+distancia, colocan cada uno un mercenario, y solo un `destroyItem` tiene éxito.
+
+**20 — Quedarse con el libro y con la receta.** `Recipes` registra la receta y
+después destruye el libro. Un `destroyItem` fallido deja al jugador con las dos
+cosas, y el libro es comerciable.
+
+Los tres **destruyen primero** ahora y vuelven sin otorgar si el consumo no
+ocurrió.
+
+Encontrados contando en vez de leyendo: en los handlers de ítems hay **diez**
+llamadas a `destroyItem` que testean lo que devuelve y, antes de esto, **tres**
+que lo ignoraban. Esas tres eran exactamente éstas.
+
+### Cómo se cubrió el área
+
+De los 44 archivos se leyeron línea por línea **los que mueven valor o hacen de
+control**: `GlobalAuctionManager`, `MonsterRaceManager`, `LotteryManager`,
+`RecipeManager`, `CastleManorManager`, `SellBuffsManager`, `MercTicketManager`,
+`ClanHallAuctionManager`, `CaptchaManager`, `AntiFeedManager`, `ZoneManager`,
+`WalkingManager` y `RaidBossSpawnManager` — más `RaceManager`, `Auctioneer`,
+`SellBuffBypassHandler`, `MercTicket`, `Recipes` y `FishShots`, que están fuera
+del paquete pero son el otro extremo de estos.
+
+Sobre los **44** se corrieron cuatro barridos mecánicos, cada uno derivado de un
+defecto ya encontrado:
+
+1. **operación compuesta sobre colección concurrente** — 7 candidatos, 5 defectos;
+2. **`containsKey` seguido de `get`** — 13 candidatos, 2 defectos;
+3. **división o módulo por variable** — 7 candidatos, 1 defecto;
+4. **multiplicación de dinero ensanchada tarde** — 1 candidato más en todo el core,
+   ya cubierto por su propio pre-chequeo.
+
+Los cuatro están anotados arriba con lo que encontraron **y con lo que
+descartaron**, que es la mitad que importa para no volver a correrlos.
 
 ### Anotado sin tocar (`managers`)
 
