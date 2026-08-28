@@ -167,12 +167,20 @@ public class AntiFeedManager
 		
 		final Integer addrHash = client.getIp().hashCode();
 		final AtomicInteger connectionCount = event.computeIfAbsent(addrHash, unused -> new AtomicInteger());
-		if ((connectionCount.get() + 1) <= (max + DualboxCheckConfig.DUALBOX_CHECK_WHITELIST.getOrDefault(addrHash, 0)))
+		final int limit = max + DualboxCheckConfig.DUALBOX_CHECK_WHITELIST.getOrDefault(addrHash, 0);
+		
+		// Claim the slot and give it back if it turns out not to exist, rather than reading the
+		// count and incrementing it as two steps. Two clients from the same address arriving
+		// together could each read the same value, each find room, and each increment -- so the
+		// dualbox limit admitted one more than it allows, which is the wrong way for a limit to
+		// fail. Rolling back can turn away a third client that would have fit, and turning one
+		// away is the safe direction.
+		if (connectionCount.incrementAndGet() <= limit)
 		{
-			connectionCount.incrementAndGet();
 			return true;
 		}
 		
+		connectionCount.decrementAndGet();
 		return false;
 	}
 	
@@ -209,7 +217,12 @@ public class AntiFeedManager
 		final Integer addrHash = client.getIp().hashCode();
 		return event.computeIfPresent(addrHash, (unused, v) ->
 		{
-			if ((v == null) || (v.decrementAndGet() == 0))
+			// At or below zero, not exactly zero. onDisconnect walks every registered event and
+			// removes the client from each without asking whether it was ever added to that one,
+			// so a client that left an event properly and then disconnected was decremented
+			// twice. Past zero, an exact test never matches again: the entry stays with a
+			// negative count, and a negative count makes the limit check above pass forever.
+			if ((v == null) || (v.decrementAndGet() <= 0))
 			{
 				return null;
 			}
@@ -251,10 +264,12 @@ public class AntiFeedManager
 			final int eventId = entry.getKey();
 			if (eventId == OLYMPIAD_ID)
 			{
-				final AtomicInteger count = entry.getValue().get(clientIp.hashCode());
-				if ((count != null) && (Olympiad.getInstance().isRegistered(player) || (player.getOlympiadGameId() != -1)))
+				// Through the same guarded path as every other event: a bare decrementAndGet here
+				// never removed the entry at zero and never stopped below it. The absent-entry test
+				// this replaced is not needed, since removeClient is a no-op on a key that is gone.
+				if (Olympiad.getInstance().isRegistered(player) || (player.getOlympiadGameId() != -1))
 				{
-					count.decrementAndGet();
+					removeClient(eventId, client);
 				}
 			}
 			else
