@@ -2951,3 +2951,163 @@ arreglar `ClassBalanceConfig`, no de leer los 55 archivos. Un grep por
 parcial (`toUpperCase`) y otro tenía defensa inerte (el `catch` imposible). Los
 dos son la misma señal que ya rindió tres veces: **una guarda angosta delata a
 toda la clase**.
+
+---
+
+## `network/clientpackets` — EN CURSO
+
+201 archivos, 21.727 líneas. Todo lo del área entra por la red desde un cliente
+que puede mandar cualquier cosa, así que el eje es: **qué se lee del paquete y
+qué se comprueba antes de usarlo**.
+
+### Primera vuelta: valores del paquete usados sin acotar
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 1 | `RequestMakeMacro` | conteo con signo recortado solo por arriba | baja |
+| 2 | `RequestSaveInventoryOrder` | ídem | baja |
+
+**1 y 2 — Recortar un solo extremo.** Los dos leen un conteo y lo recortan contra
+un techo, y después se lo pasan al constructor de un `ArrayList`. `readByte()`
+devuelve un `byte` **con signo** —`readUnsignedByte()` existe justo por eso y no
+tiene ni un llamador— y `readInt()` un `int` con signo, así que un conteo
+negativo pasa el recorte y llega al constructor como capacidad ilegal.
+
+Lo que los delata no es leerlos: es la tabla. De los **17** sitios del área que
+dimensionan una colección con un valor del paquete, **14** llevan la guarda
+completa de tres partes —piso, techo, y que el conteo declarado calce con los
+bytes que quedan—, la misma que se lee palabra por palabra en `RequestSetCrop`.
+Los tres restantes eran éstos dos más `RequestPreviewItem`, que recorta el
+negativo a cero y rechaza por arriba, y está bien.
+
+`ClientPacket.read()` atrapa y loguea, y `ReadHandler` solo ejecuta el paquete si
+`read()` volvió true, así que el costo es una traza en el log y un paquete
+descartado, no una caída.
+
+### Segunda vuelta: captadores anulables desreferenciados
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 3 | `RequestExOustFromMPCC`, `RequestPledgePowerGradeList` | el jugador sin comprobar | baja |
+| 4 | `RequestSetCrop`, `RequestSetSeed` | el último NPC sin comprobar | media |
+| 5 | `RequestExAcceptJoinMPCC` | los dos grupos sin comprobar | media |
+
+**3 — Dos de doscientos.** `getPlayer()` es `getClient().getPlayer()`, que es null
+hasta que el jugador entra al mundo. De los ~200 paquetes del área, todos menos
+estos dos comprueban el resultado.
+
+**4 — `getLastFolkNPC()` arranca en null** y solo se fija al hablar con un folk.
+Estos dos llaman `.canInteract()` de una; **todos** los demás lectores del
+repositorio lo meten en una variable y lo pasan por un `instanceof`, que absorbe
+el null. Alcanzable por un miembro de un clan dueño de castillo que manda el
+paquete recién entrado.
+
+**5 — La invitación comprueba, la respuesta no.** `RequestExAskJoinMPCC` prueba
+`isInParty()` antes de cada `getParty()`, en las seis ramas. Su contraparte usa
+los dos grupos sin probar ninguno, y entre la invitación y la respuesta cualquiera
+de los dos puede dejar el grupo. La guarda tenía que dejar limpio el pedido
+pendiente, así que cae al cierre de abajo en vez de retornar.
+
+### Tercera vuelta: lo que el área destapó afuera
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 6 | `ClanTable`, `AuctionableHall` | el castillo y el salón nunca se sueltan | **alta** |
+
+**6 — La otra mitad que faltaba.** `destroyClan` probaba `getCastleId()` y
+`getHideoutId()` contra cero y, cuando eran cero, desinscribía al clan de lo que
+**no** era suyo. Cuando no eran cero —cuando el clan sí era dueño— no pasaba
+nada: el castillo se quedaba con un id de dueño apuntando a un clan inexistente,
+y el salón con su id de dueño y `isFree` todavía en false.
+
+Ése es exactamente el estado desde el cual las tareas periódicas de tasa buscan
+al clan dueño, y las tres se guardan distinto: la de `Castle` prueba el id de
+dueño, la de `ClanHall` prueba solo `isFree`, y la de `AuctionableHall` no prueba
+nada. Los dos llamadores —el `//pledge dismiss` de administración y el
+temporizador de disolución— no tienen precondición sobre ninguno de los dos.
+
+Las ramas de cero están bien como están y quedaron intactas; lo que faltaba era
+la otra mitad. El salón subastable va por `setFree`, que lo devuelve al mapa de
+libres y limpia al dueño; el asediable no está en ese mapa, así que se libera
+directo.
+
+La tarea de tasa de `AuctionableHall` buscaba al dueño tres veces, guardaba la
+primera en una variable que no usaba, y no probaba ninguna de las tres. Ahora usa
+la que ya tiene.
+
+### Sospechas evaluadas y descartadas, con lo que las descarta
+
+- **El producto de la finca.** `getPrice()` es `count * price` en int. El peor
+  caso con los datos distribuidos da **10.012.500**, y haría falta
+  `RateDropManor ≥ 214,5` para desbordar; se distribuye en **1**. El
+  `cropLimit = limit_crops * RateDropManor` necesitaría **238.610**. El `weight`
+  int necesitaría **1.073.741.824** unidades de una recompensa cuando el tope de
+  cantidad es **9.000**. Las **34** recompensas de cultivo tienen entrada de ítem,
+  así que el `template` no puede venir null. Y `Seed.getReward(type)` es un
+  ternario, no un índice: cualquier tipo distinto de 1 cae en la segunda
+  recompensa.
+
+- **La división de las tiendas privadas.** `(MAX_ADENA / _count) < _price`
+  dividiría por cero, pero `cnt < 1` se rechaza al leer. Y el `getPrice()` de al
+  lado multiplica en int: no puede desbordar porque **`MAX_ADENA` es un `int`**,
+  así que el producto que la guarda deja pasar cabe en int por construcción.
+
+- **El impuesto del multisell.** `getTaxAmount() * _amount` es int por int hacia
+  un `addToTreasury(long)`, y el archivo ya ensancha a long en cinco lugares. No
+  hace falta un sexto: el importe gravado se suma **dentro** del ingrediente de
+  adena, y el chequeo de veinte líneas más arriba ya acota ese producto a
+  `Integer.MAX_VALUE`.
+
+- **`Npc.getCastle()` devolviendo null.** Puede, explícitamente. Pero el respaldo
+  es `findNearestCastleIndex` con cota `Long.MAX_VALUE`, que recorre todos los
+  castillos: solo da negativo si no hay ninguno cargado.
+
+- **Retornos de retiro de ítem descartados.** 60 descartados contra 92 usados en
+  todo el repositorio: población difusa, no una clase. Los dos del área
+  —`RequestExEnchantSkill` y `RequestHennaEquip`— son ventanas de carrera y su
+  orden ya es el correcto o neutro; cambiarlo cambia una carrera por otra.
+
+- **Cobertura del protector de inundación.** 19 de 33 paquetes que mueven ítems o
+  dinero lo consultan. También difuso: creación de personaje o entrada al mundo
+  están limitados por su naturaleza. Es política, no defecto.
+
+- **Campos que un `readImpl` deja sin asignar.** Dos aciertos,
+  `RequestSetAllyCrest` y `RequestSetPledgeCrest`, y los dos guardan su `byte[]`
+  de forma indirecta: `runImpl` vuelve a probar el largo, que es exactamente la
+  condición que lo deja null.
+
+- **`ClanTable.getClan` sin comprobar.** 36 sitios contra 70 comprobados; 21 sin
+  ni siquiera un test del id. Los alcanzables desde esta área resultaron todos
+  guardados —en el sitio, como `ExShowCastleInfo`, o en el único llamador, como
+  `AllianceInfo`— y eso es lo que terminó apuntando a `destroyClan`. Los de
+  `Siege` quedan para cuando se abra esa área.
+
+### Barridos corridos sobre los 201 archivos
+
+1. valor del paquete como tamaño de alojamiento o cota de bucle — 17, **2 defectos**;
+2. `getPlayer()` desreferenciado sin comprobar — **2 defectos**;
+3. operación compuesta sobre mapa concurrente — 0;
+4. `containsKey` seguido de `get` — 0;
+5. división o módulo por variable — 3, todos descartados midiendo;
+6. producto asignado a long sin ensanchar — 0 (el barrido no veía argumentos ni
+   retornos, y por eso se revisó a mano el del multisell);
+7. indexado con un valor del paquete — 1, ya guardado;
+8. retorno de retiro de ítem descartado — 2 en el área, descartados;
+9. encadenamientos sobre captador anulable, con las guardas que cada uno acepta —
+   12 candidatos, **3 defectos**;
+10. campos sin asignar por un `readImpl` que retorna temprano — 2, guardados;
+11. `ClanTable.getClan` sin comprobar — 106 sitios, que llevaron al hallazgo 6.
+
+### Método
+
+Los dos barridos que rindieron son el mismo movimiento: **listar toda la
+población y ver quién no lleva la guarda que llevan los demás**. Catorce de
+diecisiete con la guarda de tres partes; ciento noventa y ocho de doscientos con
+el chequeo de null del jugador; todos menos dos pasando el último NPC por un
+`instanceof`. Cuando la proporción se da vuelta —60 contra 92, 19 contra 14— no
+hay clase que encontrar y el barrido se descarta entero, que es igual de útil
+porque es lo que impide volver a correrlo.
+
+El hallazgo 6 no salió de leer `ClanTable`: salió de que un barrido del área
+llegó hasta `RequestSetAllyCrest`, que resultó guardado, y al mirar por qué
+apareció la pregunta de qué pasa con un clan destruido que era dueño de algo.
