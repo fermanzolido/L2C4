@@ -151,7 +151,7 @@ public class RequestSellItem extends ClientPacket
 			}
 		}
 		
-		int totalPrice = 0;
+		long totalPrice = 0;
 		
 		// Proceed the sell
 		for (UniqueItemHolder i : _items)
@@ -162,13 +162,20 @@ public class RequestSellItem extends ClientPacket
 				continue;
 			}
 			
+			// The total was added to before it was tested, and both the product and the
+			// running total were taken in int. The per item test catches one item worth more
+			// than the limit, but the sum of several could wrap before anything looked at it,
+			// and a wrapped total passes the test it should fail. Testing first also keeps the
+			// goods from moving for the item that breaks the limit.
 			final int price = item.getReferencePrice() / 2;
-			totalPrice += price * i.getCount();
-			if (((MAX_ADENA / i.getCount()) < price) || (totalPrice > MAX_ADENA))
+			final long itemPrice = (long) price * i.getCount();
+			if (((MAX_ADENA / i.getCount()) < price) || ((totalPrice + itemPrice) > MAX_ADENA))
 			{
 				player.sendPacket(SystemMessageId.YOU_HAVE_EXCEEDED_YOUR_POCKET_MONEY_LIMIT);
 				return;
 			}
+			
+			totalPrice += itemPrice;
 			
 			if (GeneralConfig.ALLOW_REFUND)
 			{
@@ -182,7 +189,7 @@ public class RequestSellItem extends ClientPacket
 		
 		if (!MerchantZeroSellPriceConfig.MERCHANT_ZERO_SELL_PRICE)
 		{
-			player.addAdena(ItemProcessType.SELL, totalPrice, merchant, false);
+			player.addAdena(ItemProcessType.SELL, (int) totalPrice, merchant, false);
 		}
 		
 		// Update current load as well

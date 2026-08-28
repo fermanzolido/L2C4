@@ -159,7 +159,12 @@ public class RequestBuyItem extends ClientPacket
 			}
 		}
 		
-		int subTotal = 0;
+		// The per item check below bounds count * price, but it runs on the price before
+		// tax and the price grows right after it. Accumulating in int let the taxed total
+		// wrap, and the wrapped value passes the MAX_ADENA test it should fail. The weight
+		// test twenty lines down already reads "weight > Integer.MAX_VALUE", which can only
+		// ever be true if the product feeding it is widened first.
+		long subTotal = 0;
 		
 		// Check for buylist validity and calculates summary values
 		long slots = 0;
@@ -217,14 +222,14 @@ public class RequestBuyItem extends ClientPacket
 			
 			// first calculate price per item with tax, then multiply by count
 			price = (int) (price * (1 + castleTaxRate + baseTaxRate));
-			subTotal += i.getCount() * price;
+			subTotal += (long) i.getCount() * price;
 			if (subTotal > MAX_ADENA)
 			{
 				PunishmentManager.handleIllegalPlayerAction(player, "Warning!! Character " + player.getName() + " of account " + player.getAccountName() + " tried to purchase over " + MAX_ADENA + " adena worth of goods.", GeneralConfig.DEFAULT_PUNISH);
 				return;
 			}
 			
-			weight += i.getCount() * product.getItem().getWeight();
+			weight += (long) i.getCount() * product.getItem().getWeight();
 			if (player.getInventory().getItemByItemId(product.getItemId()) == null)
 			{
 				slots++;
@@ -246,7 +251,7 @@ public class RequestBuyItem extends ClientPacket
 		}
 		
 		// Charge buyer and add tax to castle treasury if not owned by npc clan
-		if ((subTotal < 0) || !player.reduceAdena(ItemProcessType.BUY, subTotal, player.getLastFolkNPC(), false))
+		if ((subTotal < 0) || !player.reduceAdena(ItemProcessType.BUY, (int) subTotal, player.getLastFolkNPC(), false))
 		{
 			player.sendPacket(SystemMessageId.YOU_DO_NOT_HAVE_ENOUGH_ADENA);
 			player.sendPacket(ActionFailed.STATIC_PACKET);
