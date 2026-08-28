@@ -26,6 +26,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
@@ -204,7 +205,10 @@ public class FourSepulchers extends Script implements IXmlReader {
 			"You may now enter the Sepulcher.",
 			"If you place your hand on the stone statue in front of each sepulcher, you will be able to enter."
 	};
-	private static final Map<Integer, Integer> STORED_PROGRESS = new HashMap<>();
+	// Concurrent, like the CopyOnWriteArrayList values of STORED_MONSTER_SPAWNS above: the
+	// four sepulchers run at once and this map is read and written from monster kills on packet
+	// threads and from the wave timer on pool threads.
+	private static final Map<Integer, Integer> STORED_PROGRESS = new ConcurrentHashMap<>();
 	static {
 		STORED_PROGRESS.put(1, 1);
 		STORED_PROGRESS.put(2, 1);
@@ -264,9 +268,16 @@ public class FourSepulchers extends Script implements IXmlReader {
 
 				if (qs.isStarted() && npc.isScriptValue(0)) {
 					if (hasQuestItems(player, CHAPEL_KEY)) {
+						// Resolved before the key is taken. getSepulcherId answers zero for a player in
+						// none of the four zones, STORED_PROGRESS holds no such key, and unboxing the
+						// null that get returns threw here -- after the key had already been consumed.
+						final int sepulcherId = getSepulcherId(player);
+						if (sepulcherId <= 0) {
+							return null;
+						}
+
 						npc.setScriptValue(1);
 						takeItems(player, CHAPEL_KEY, -1);
-						final int sepulcherId = getSepulcherId(player);
 						final int currentWave = STORED_PROGRESS.get(sepulcherId) + 1;
 						STORED_PROGRESS.put(sepulcherId, currentWave); // update progress
 						for (int[] doorInfo : DOORS) {
@@ -324,7 +335,14 @@ public class FourSepulchers extends Script implements IXmlReader {
 				return null;
 			}
 			case "WAVE_DEFEATED_CHECK": {
+				// This timer repeats every five seconds while the wave is alive, so a player who
+				// leaves the zone still has one firing pending. The check for a real sepulcher was
+				// twenty lines below, after both maps had already been indexed with a zero key.
 				final int sepulcherId = getSepulcherId(player);
+				if (sepulcherId <= 0) {
+					return null;
+				}
+
 				final int currentWave = STORED_PROGRESS.get(sepulcherId);
 				Location lastLocation = null;
 				for (Npc spawn : STORED_MONSTER_SPAWNS.get(sepulcherId)) {
@@ -345,7 +363,7 @@ public class FourSepulchers extends Script implements IXmlReader {
 						STORED_PROGRESS.put(sepulcherId, currentWave + 1);
 						spawnNextWave(player);
 					}
-				} else if (sepulcherId > 0) {
+				} else {
 					startQuestTimer("WAVE_DEFEATED_CHECK", 5000, null, player, false);
 				}
 
@@ -454,11 +472,17 @@ public class FourSepulchers extends Script implements IXmlReader {
 			case EMPEROR_BOSS:
 			case GREAT_SAGES_BOSS:
 			case JUDGE_BOSS: {
+				// The sepulcherId > 0 test used to sit on the line after next, three statements too
+				// late to protect the get above it.
 				final int sepulcherId = getSepulcherId(killer);
+				if (sepulcherId <= 0) {
+					break;
+				}
+
 				final int currentWave = STORED_PROGRESS.get(sepulcherId);
 				STORED_PROGRESS.put(sepulcherId, currentWave + 1);
 
-				if ((killer.getParty() != null) && (sepulcherId > 0)) {
+				if (killer.getParty() != null) {
 					for (Player mem : killer.getParty().getMembers()) {
 						if (LocationUtil.checkIfInRange(PlayerConfig.ALT_PARTY_RANGE, killer, mem, true)) {
 							final QuestState qs = mem.getQuestState(Q00620_FourGoblets.class.getSimpleName());
@@ -594,12 +618,19 @@ public class FourSepulchers extends Script implements IXmlReader {
 		ThreadPool.schedule(() -> ZoneManager.getInstance().getZoneById(MANAGER_ZONES.get(npcId)).oustAllPlayers(),
 				EVENT_TIME * 60 * 1000);
 
-		// Init progress.
-		STORED_PROGRESS.put(sepulcherId, 1); // Start from 1.
+		// Init progress. Guarded for the same reason as the rest: a zero id here used to add a
+		// fifth key to a map that is supposed to hold exactly the four sepulchers.
+		if (sepulcherId > 0) {
+			STORED_PROGRESS.put(sepulcherId, 1); // Start from 1.
+		}
 	}
 
 	private void spawnNextWave(Player player) {
 		final int sepulcherId = getSepulcherId(player);
+		if (sepulcherId <= 0) {
+			return;
+		}
+
 		final int currentWave = STORED_PROGRESS.get(sepulcherId);
 		for (int[] spawnInfo : ROOM_SPAWN_DATA) {
 			if ((spawnInfo[0] == sepulcherId) && (spawnInfo[1] == currentWave)) {
@@ -625,6 +656,10 @@ public class FourSepulchers extends Script implements IXmlReader {
 
 	private void spawnMysteriousChest(Player player) {
 		final int sepulcherId = getSepulcherId(player);
+		if (sepulcherId <= 0) {
+			return;
+		}
+
 		final int currentWave = STORED_PROGRESS.get(sepulcherId);
 		for (int[] spawnInfo : CHEST_SPAWN_LOCATIONS) {
 			if ((spawnInfo[0] == sepulcherId) && (spawnInfo[1] == currentWave)) {
