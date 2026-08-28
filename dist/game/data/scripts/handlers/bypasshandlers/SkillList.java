@@ -23,6 +23,7 @@ package handlers.bypasshandlers;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.l2jmobius.commons.util.StringUtil;
 import org.l2jmobius.gameserver.config.PlayerConfig;
 import org.l2jmobius.gameserver.data.xml.SkillTreeData;
 import org.l2jmobius.gameserver.handler.IBypassHandler;
@@ -55,7 +56,15 @@ public class SkillList implements IBypassHandler
 				final String id = command.substring(9).trim();
 				if (id.length() != 0)
 				{
-					Folk.showSkillList(player, target.asNpc(), PlayerClass.getPlayerClass(Integer.parseInt(id)));
+					// The class id arrives in the bypass. getPlayerClass answers null for one that
+					// names no class, and that null reached canTeach, which calls level() on it.
+					final PlayerClass learningClass = PlayerClass.getPlayerClass(StringUtil.parseInt(id, -1));
+					if (learningClass == null)
+					{
+						return false;
+					}
+					
+					Folk.showSkillList(player, target.asNpc(), learningClass);
 				}
 				else
 				{
