@@ -685,6 +685,15 @@ public class TradeList
 				continue;
 			}
 			
+			// A store entry that ran out leaves the requested count at zero above, and the
+			// overflow check below divides by it. privateStoreSell folds this into its found
+			// flag; this path cannot, because its not-found branch punishes for package
+			// cheating, which an emptied entry is not.
+			if (item.getCount() <= 0)
+			{
+				continue;
+			}
+			
 			// check for overflow in the single item
 			if ((MAX_ADENA / item.getCount()) < item.getPrice())
 			{

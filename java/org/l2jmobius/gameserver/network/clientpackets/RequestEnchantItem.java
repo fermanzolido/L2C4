@@ -264,16 +264,20 @@ public class RequestEnchantItem extends ClientPacket {
 							player.sendPacket(
 									SystemMessageId.FAILED_IN_BLESSED_ENCHANT_THE_ENCHANT_VALUE_OF_THE_ITEM_BECAME_0);
 
+							// The log below reads the level again, and it is zeroed right here, so every
+							// blessed failure was recorded as if the item had been +0. The sibling
+							// branches read the level before they mutate it.
+							final int levelBeforeBlessedFailure = item.getEnchantLevel();
 							item.setEnchantLevel(0);
 							item.updateDatabase();
 							player.sendPacket(new EnchantResult(0));
 							if (GeneralConfig.LOG_ITEM_ENCHANTS) {
 								final StringBuilder sb = new StringBuilder();
-								if (item.getEnchantLevel() > 0) {
+								if (levelBeforeBlessedFailure > 0) {
 									LOGGER_ENCHANT.info(sb.append("Blessed Fail, Character:").append(player.getName())
 											.append(" [").append(player.getObjectId()).append("] Account:")
 											.append(player.getAccountName()).append(" IP:")
-											.append(player.getIPAddress()).append(", +").append(item.getEnchantLevel())
+											.append(player.getIPAddress()).append(", +").append(levelBeforeBlessedFailure)
 											.append(" ").append(item.getName()).append("(").append(item.getCount())
 											.append(") [").append(item.getObjectId()).append("], ")
 											.append(scroll.getName()).append("(").append(scroll.getCount())
