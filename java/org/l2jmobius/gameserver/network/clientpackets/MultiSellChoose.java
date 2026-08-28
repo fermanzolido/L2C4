@@ -117,8 +117,15 @@ public class MultiSellChoose extends ClientPacket
 				}
 				
 				final PlayerInventory inv = player.getInventory();
-				int slots = 0;
-				int weight = 0;
+				// long, and widened before each multiply. validateWeight and validateCapacity both
+				// take a long already, so the range was being thrown away here rather than at the
+				// call. The ingredient loop sixty lines below gets this right -- it guards with
+				// ((long) e.getItemCount() * _amount) > Integer.MAX_VALUE -- and the product loop
+				// did not. With MultisellAmountLimit at the shipped 10000, a production of twenty
+				// of the heaviest item in the game overflows, and a negative weight passes the
+				// check it is supposed to fail.
+				long slots = 0;
+				long weight = 0;
 				for (Ingredient e : entry.getProducts())
 				{
 					if (e.getItemId() < 0)
@@ -128,14 +135,14 @@ public class MultiSellChoose extends ClientPacket
 					
 					if (!e.isStackable())
 					{
-						slots += e.getItemCount() * _amount;
+						slots += (long) e.getItemCount() * _amount;
 					}
 					else if (player.getInventory().getItemByItemId(e.getItemId()) == null)
 					{
 						slots++;
 					}
 					
-					weight += e.getItemCount() * _amount * e.getWeight();
+					weight += (long) e.getItemCount() * _amount * e.getWeight();
 				}
 				
 				if (!inv.validateWeight(weight))
