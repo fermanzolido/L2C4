@@ -201,6 +201,15 @@ public enum BaseStat
 										continue;
 									}
 									
+									// The value is the index into the bonus tables. Only the parse above was
+									// guarded, and the catch that wraps this method covers the XML parse alone,
+									// so a value outside the tables threw out of the whole load naming nothing.
+									if ((val < 0) || (val >= MAX_STAT_VALUE))
+									{
+										LOGGER.severe("[BaseStats] Stat value out of 0.." + (MAX_STAT_VALUE - 1) + ": " + val + " for " + statName + ", skipping");
+										continue;
+									}
+									
 									if ("STR".equalsIgnoreCase(statName))
 									{
 										STRbonus[val] = bonus;
