@@ -391,12 +391,18 @@ public class World
 	
 	public static void addFactionPlayerToWorld(Player player)
 	{
+		// removeObject keys off the player's faction at the time they leave, so a player
+		// who changes faction while online was put in the new map and left behind in the
+		// old one -- counted by the balance limiter on both sides, and removed from only
+		// one at logout, which strands the whole Player there. A player belongs to one.
 		if (player.isGood())
 		{
+			_allEvilPlayers.remove(player.getObjectId());
 			_allGoodPlayers.put(player.getObjectId(), player);
 		}
 		else if (player.isEvil())
 		{
+			_allGoodPlayers.remove(player.getObjectId());
 			_allEvilPlayers.put(player.getObjectId(), player);
 		}
 	}

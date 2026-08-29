@@ -49,7 +49,10 @@ public class WorldRegion
 	private final ConcurrentHashMap<WorldRegion, Boolean> _surroundingRegionCache = new ConcurrentHashMap<>();
 	private final int _regionX;
 	private final int _regionY;
-	private boolean _active = GeneralConfig.GRIDS_ALWAYS_ON;
+	// setActive writes this under _lock and the object add path reads it under the same
+	// lock, but isActive reads it with none -- and that is the read the movement and AI
+	// threads make to decide whether a region runs at all.
+	private volatile boolean _active = GeneralConfig.GRIDS_ALWAYS_ON;
 	private ScheduledFuture<?> _neighborsTask = null;
 	private final AtomicInteger _activeNeighbors = new AtomicInteger();
 	private final ReentrantLock _lock = new ReentrantLock();
