@@ -41,6 +41,11 @@ public class ConditionTargetRace extends Condition
 	@Override
 	public boolean testImpl(Creature effector, Creature effected, Skill skill, ItemTemplate item)
 	{
+		if (effected == null)
+		{
+			return false;
+		}
+		
 		return _race == effected.getRace();
 	}
 }

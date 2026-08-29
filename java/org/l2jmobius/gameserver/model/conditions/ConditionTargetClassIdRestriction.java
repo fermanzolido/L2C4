@@ -45,6 +45,11 @@ public class ConditionTargetClassIdRestriction extends Condition
 	@Override
 	public boolean testImpl(Creature effector, Creature effected, Skill skill, ItemTemplate item)
 	{
+		if (effected == null)
+		{
+			return false;
+		}
+		
 		return effected.isPlayer() && _classIds.contains(effected.asPlayer().getPlayerClass().getId());
 	}
 }

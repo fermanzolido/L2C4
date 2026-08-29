@@ -40,6 +40,13 @@ public class ConditionTargetAbnormal extends Condition
 	@Override
 	public boolean testImpl(Creature effector, Creature effected, Skill skill, ItemTemplate item)
 	{
+		// Ten of the sixteen target conditions test this before reading it; these five
+		// did not, and a skill can reach a condition with no target.
+		if (effected == null)
+		{
+			return false;
+		}
+		
 		return (effected.getAbnormalVisualEffects() & _abnormalId) != 0;
 	}
 }
