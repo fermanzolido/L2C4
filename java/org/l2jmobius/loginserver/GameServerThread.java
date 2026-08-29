@@ -115,6 +115,7 @@ public class GameServerThread extends Thread
 		_socket = socket;
 		_connectionIp = socket.getInetAddress().getHostAddress();
 		
+		boolean streamsReady = true;
 		try
 		{
 			// Initialize network streams for communication.
@@ -124,6 +125,20 @@ public class GameServerThread extends Thread
 		catch (IOException e)
 		{
 			LOGGER.warning(getClass().getSimpleName() + ": Failed to initialize network streams - " + e.getMessage());
+			
+			// Both streams stay null and the thread was started anyway. run() writes to the
+			// output one on its first line, and the lock it takes on it throws there; run()
+			// only catches IOException, so that left the thread dying on an unhandled throw
+			// with the socket still open.
+			streamsReady = false;
+			try
+			{
+				_socket.close();
+			}
+			catch (IOException ignored)
+			{
+				// Already gone.
+			}
 		}
 		
 		// Retrieve RSA key pair for secure initial communication.
@@ -134,8 +149,11 @@ public class GameServerThread extends Thread
 		// Initialize Blowfish cipher with default key for packet encryption.
 		_blowfishCipher = new NewCrypt(DEFAULT_BLOWFISH_KEY);
 		
-		// Start the thread to begin processing.
-		start();
+		// Start the thread to begin processing, unless there is nothing to process on.
+		if (streamsReady)
+		{
+			start();
+		}
 	}
 	
 	/**
