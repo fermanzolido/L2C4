@@ -31,7 +31,6 @@ import org.l2jmobius.gameserver.communitybbs.TopicConstructorType;
 import org.l2jmobius.gameserver.communitybbs.BB.Forum;
 import org.l2jmobius.gameserver.communitybbs.BB.Post;
 import org.l2jmobius.gameserver.communitybbs.BB.Topic;
-import org.l2jmobius.gameserver.data.sql.ClanTable;
 import org.l2jmobius.gameserver.handler.CommunityBoardHandler;
 import org.l2jmobius.gameserver.model.actor.Player;
 
@@ -268,8 +267,13 @@ public class TopicBBSManager extends BaseBBSManager
 			html.append("<td><button action=\"bypass _bbstopics;read;" + forum.getID() + ";" + (index - 1) + "\" back=\"l2ui_ch3.prev1_down\" fore=\"l2ui_ch3.prev1\" width=16 height=16 ></td>");
 		}
 		
-		int nbp = forum.getTopicSize() / 8;
-		if ((nbp * 8) != ClanTable.getInstance().getClanCount())
+		// The page count was rounded up by comparing against the number of clans on the
+		// server rather than the number of topics being paged, so the last page appeared
+		// or vanished depending on a number with nothing to do with this forum. Taken from
+		// the clan pager in ClanBoard, which counts what it pages.
+		final int topicCount = forum.getTopicSize();
+		int nbp = topicCount / 8;
+		if ((nbp * 8) != topicCount)
 		{
 			nbp++;
 		}
