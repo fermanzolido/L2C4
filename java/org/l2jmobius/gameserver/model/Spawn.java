@@ -60,7 +60,11 @@ public class Spawn extends Location
 	/** The current number of Npc managed by this Spawn */
 	private int _currentCount;
 	/** The current number of SpawnTask in progress or stand by of this Spawn */
-	public int _scheduledCount;
+	// These two are mutated from three threads -- the decay thread lowers the current
+	// count and raises this one, the respawn manager lowers this one, and the spawn
+	// thread raises the current count -- with no lock between them. A lost decrement
+	// here leaves the sum permanently at the maximum, and that spawn never returns.
+	private int _scheduledCount;
 	/** The identifier of the location area where Npc can be spawned */
 	private int _locationId;
 	/** Link to NPC spawn territory */
@@ -232,7 +236,24 @@ public class Spawn extends Location
 	 * <li>Create a new SpawnTask to launch after the respawn Delay</li> <font color=#FF0000><b><u>Caution</u>: A respawn is possible ONLY if _doRespawn=True and _scheduledCount + _currentCount < _maximumCount</b></font>
 	 * @param oldNpc
 	 */
-	public void decreaseCount(Npc oldNpc)
+	private synchronized void increaseCurrentCount()
+	{
+		_currentCount++;
+	}
+	
+	/**
+	 * Lowers the count of respawns this Spawn is waiting on. Called by the respawn task
+	 * manager once it has put an Npc back, on its own thread.
+	 */
+	public synchronized void decreaseScheduledCount()
+	{
+		if (_scheduledCount > 0)
+		{
+			_scheduledCount--;
+		}
+	}
+	
+	public synchronized void decreaseCount(Npc oldNpc)
 	{
 		// sanity check
 		if (_currentCount <= 0)
@@ -333,7 +354,7 @@ public class Spawn extends Location
 			// Check if the spawn is not a Pet, Decoy or Trap spawn.
 			if (_template.isType("Pet") || _template.isType("Decoy") || _template.isType("Trap"))
 			{
-				_currentCount++;
+				increaseCurrentCount();
 				return null;
 			}
 			
@@ -491,7 +512,7 @@ public class Spawn extends Location
 		_spawnedNpcs.add(npc);
 		
 		// Increase the current number of Npcs managed by this Spawn
-		_currentCount++;
+		increaseCurrentCount();
 		
 		// Minions
 		if (npc.isMonster() && NpcData.getMasterMonsterIDs().contains(npc.getId()))

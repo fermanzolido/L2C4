@@ -71,7 +71,7 @@ public class RespawnTaskManager implements Runnable
 						if (spawn != null)
 						{
 							spawn.respawnNpc(npc);
-							spawn._scheduledCount--;
+							spawn.decreaseScheduledCount();
 						}
 					}
 				}
