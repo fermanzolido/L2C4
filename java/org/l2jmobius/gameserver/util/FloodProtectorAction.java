@@ -20,6 +20,7 @@
  */
 package org.l2jmobius.gameserver.util;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -67,7 +68,11 @@ public class FloodProtectorAction
 	// Protection State.
 	private final AtomicInteger _requestCount = new AtomicInteger(0);
 	private volatile int _nextGameTick = GameTimeTaskManager.getInstance().getGameTicks();
-	private volatile boolean _punishmentInProgress;
+	// Tested and then set in two steps, which is exactly what two packets from the same
+	// flooding client -- dispatched to a pool, not serialised -- can both get through. A
+	// double kick is noise; a double ban writes two punishment records. The counter above
+	// already uses the right idiom.
+	private final AtomicBoolean _punishmentInProgress = new AtomicBoolean();
 	private volatile boolean _logged;
 	
 	/**
@@ -95,7 +100,7 @@ public class FloodProtectorAction
 		}
 		
 		final int currentTick = GameTimeTaskManager.getInstance().getGameTicks();
-		if ((currentTick < _nextGameTick) || _punishmentInProgress)
+		if ((currentTick < _nextGameTick) || _punishmentInProgress.get())
 		{
 			// Log flooding if enabled and not already logged.
 			if (LOG_WARNING_ENABLED && _settings.isLogFlooding() && !_logged)
@@ -107,16 +112,14 @@ public class FloodProtectorAction
 			
 			// Check if punishment should be applied.
 			final int currentCount = _requestCount.incrementAndGet();
-			if (!_punishmentInProgress)
+			if (!_punishmentInProgress.get())
 			{
 				final int punishmentLimit = _settings.getPunishmentLimit();
 				if ((punishmentLimit > 0) && (currentCount >= punishmentLimit))
 				{
 					final String punishmentType = _settings.getPunishmentType();
-					if (punishmentType != null)
+					if ((punishmentType != null) && _punishmentInProgress.compareAndSet(false, true))
 					{
-						_punishmentInProgress = true;
-						
 						try
 						{
 							switch (punishmentType)
@@ -176,7 +179,7 @@ public class FloodProtectorAction
 						}
 						finally
 						{
-							_punishmentInProgress = false;
+							_punishmentInProgress.set(false);
 						}
 					}
 				}

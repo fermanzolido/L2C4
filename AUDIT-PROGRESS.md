@@ -37,7 +37,7 @@ hallazgos aunque no hayas terminado el área.
 | ~~`model/conditions`~~ | 80 | 4.989 | **TERMINADA** |
 | ~~`model/script`~~ | 9 | 7.622 | **TERMINADA** |
 | ~~`model` (raiz)~~ | 58 | 14.546 | **TERMINADA** |
-| resto fuera de mapa | 485 | 84.955 | pendiente |
+| ~~resto fuera de mapa~~ | 408 | 68.882 | **TERMINADA** |
 | datapack `quests/` | 298 | 79.342 | pendiente |
 
 Orden elegido: de menor a mayor, salvo que la criticidad mande. Se empezó por
@@ -4135,3 +4135,128 @@ quita de uno — el `Player` entero queda anclado en el otro.
 
 - **`WalkInfo.getCurrentNode`** ya acota su índice con
   `Math.min(Math.max(0, …), size - 1)`.
+
+---
+
+## El resto fuera del mapa — TERMINADA
+
+Contado de verdad al abrirlo: **408** archivos y **68.882** líneas en **77**
+carpetas, no los 485 y 84.955 que el mapa corregido estimaba. La diferencia es que
+`model/actor/instance`, `model/actor/tasks` y `model/actor/templates` ya habían
+entrado con `model/actor`.
+
+Los barridos mecánicos —publicación insegura, uso tras el `catch`, colecciones
+sueltas en clases concurrentes, colecciones perezosas, índices cíclicos, campos
+públicos mutados desde fuera, desempaquetado de nulos, trazas perdidas, doble
+desbloqueo, reclamación no atómica— ya habían corrido **sobre el repositorio
+entero**, así que aquí el trabajo fue leer las carpetas de más riesgo.
+
+| # | Archivo | Defecto | Severidad |
+|---|---------|---------|-----------|
+| 1 | `ItemContainer` | las dos formas de `addItem` cambian la cuenta sin el candado | **muy alta** |
+| 2 | `ClanHallAuction` | borra la subasta y luego desreferencia tres búsquedas | **alta** |
+| 3 | `PlayerVariables` y dos más | doble desbloqueo; el fallo de base se pierde | **alta** |
+| 4 | `SevenSigns` | los tres mapas de sellos quedan vacíos si la carga falla | **alta** |
+| 5 | `ThreadPool` y `PacketExecutor` | concatenan un arreglo creyendo que es la traza | media |
+| 6 | `Castle` y `ClanHall` | cobran la renta y desreferencian sin comprobar | media |
+| 7 | `GameClient` | el estado de conexión y el jugador sin publicar | media |
+| 8 | `FakePlayerData` | el javadoc promete un nulo que el retorno no puede llevar | media |
+| 9 | `GrandBossManager` | `getStatus` de un jefe sin fila lanza en el script | media |
+| 10 | `FloodProtectorAction` | la reclamación del castigo no es atómica | media |
+| 11 | `EffectZone` | pide el mapa tres veces y desempaqueta un nulo | media |
+| 12 | `CharSummonTable` | lee lo que el llamador ya había probado | baja |
+| 13 | `Disconnection` y 85 más | el registro sin la excepción | baja |
+| 14 | `PostBBSManager` | dos hilos construyen el mismo `Post` y uno se tira | baja |
+
+**1 — La duplicación que la casa ya sabía evitar.** `ItemContainer.destroyItem` y
+`transferItem` sostienen `synchronized (item)` mientras cambian la cuenta de una
+pila. **Las dos formas de `addItem` no lo hacían** — y `changeCount` es leer la
+cuenta, decidir contra el tope y volver a escribirla. Contado: de los **siete**
+sitios del repositorio que llaman a `changeCount`, **seis** están bajo el monitor
+del propio ítem y uno no. Dos miembros de clan depositando el mismo apilable en el
+almacén compartido bastan, y eso son dos hilos de paquete sobre un contenedor.
+
+**Y el arreglo creó un problema que hubo que cerrar.** Con el candado en
+`addItem`, `transferItem` pasó a sostener el monitor del origen y pedir el del
+destino: dos transferencias en sentidos opuestos entre el mismo par se bloquearían
+mutuamente. Se comprobó en vez de suponerse — `PacketExecutor` manda los paquetes
+de un cliente **a un pool, sin serializar por conexión**, así que un depósito y una
+retirada pueden estar en vuelo a la vez. Se cierra tomando los dos monitores en
+**orden de id de objeto**, sobre el que ningún par de hilos puede discrepar.
+
+**2 — La sala que el ganador paga y no recibe.** `endAuction` borraba la fila de la
+base y **después** desreferenciaba el registro del pujador, el clan detrás y la
+sala vendida. Un clan disuelto entre la última puja y el cierre dejaba la subasta
+borrada y la sala sin dueño, con la adena ya cobrada. Ahora resuelve primero y, si
+falta el ganador, deja la subasta en pie.
+
+**3 — El fallo de base que se sepulta a sí mismo.** Las tres clases de variables
+persistidas desbloqueaban en el `catch` y otra vez en el `finally` que siempre le
+sigue: `IllegalMonitorStateException` lanzada desde el `finally`, que oculta el
+fallo que estaba reportando y devuelve una excepción donde el método promete
+`false` — con `clearChangeTracking()` ya ejecutado, así que las variables sin
+guardar se perdían. Su `deleteMe` tomaba el candado **sin `finally` alguno**.
+
+**5 — Años imprimiendo un hash.** `ThreadPool` (cuatro sitios) y `PacketExecutor`
+concatenaban `e.getStackTrace()` en el mensaje. Eso devuelve un **arreglo**, así
+que `String.valueOf` daba `[Ljava.lang.StackTraceElement;@1a2b3c` donde iba la
+traza. Salió al medir cómo registra el repositorio: **460 con la excepción contra
+86 sin ella**; ahora **546 contra 0**.
+
+### Barridos nuevos, todos validados contra el fichero previo al arreglo
+
+Regla adoptada tras las dos cegueras anteriores: **un barrido que no encuentra el
+defecto que lo originó no vale.** Cada uno se corrió primero sobre la versión del
+archivo anterior al arreglo.
+
+| barrido | validación | repositorio | qué quedó |
+|---|---|---|---|
+| índice cíclico con `==` | encuentra el conocido | **0** | era el único |
+| campo público mutado desde otra clase | encuentra el conocido | 19 | 7 son campos de `MoveData`, resto colisiones de nombre; reales: Olimpiada |
+| nulo desempaquetado a primitivo | encuentra el conocido | 17 | los de quests indexan mapas constantes por los npcs que registran |
+| doble desbloqueo / lock sin finally | encuentra los seis | **0** | vivían solo en `variables` |
+| bandera reclamada en dos pasos | encuentra el conocido | 6 | 1 real; ver abajo |
+| `changeCount` sin el monitor del ítem | — | 7 | 6 con candado, 1 sin: el defecto 1 |
+
+El de banderas tiene un punto ciego conocido y anotado: busca `synchronized`
+**hacia atrás**, así que una doble comprobación correcta —candado *dentro*, como
+`ClanHallDoorman`— aparece como falso positivo.
+
+### Sospechas evaluadas y descartadas, con lo que las descarta
+
+- **El desbordamiento del producto en multisell**: el ingrediente comprueba
+  `> Integer.MAX_VALUE` y el producto no. El mayor `count` de producción del dato
+  distribuido es **700**, contra los **214.748** que harían falta con el tope de
+  10.000. No alcanzable.
+
+- **La rotación de botín de `Party`** ya está defendida: `try/catch` alrededor del
+  índice con el comentario "take another member if this just logged off", y usa
+  `>=` donde `AutoSpawnHandler` usaba `==`.
+
+- **`Forum.vload`** puede cargar dos veces, pero `_topic` es un mapa por id y
+  `_forumPost` se **asigna**, no se acumula: la segunda carga sobrescribe.
+
+- **`PunishmentTask._isStored`**: cada castigo es un objeto nuevo en su sitio de
+  construcción, así que no hay dos hilos sobre el mismo.
+
+- **`ClanHallAuction.setBid`** ya es `synchronized`, así que las pujas cruzadas que
+  sus tres lecturas del mapa sugerían no ocurren.
+
+- **`Instance._resetData` y `_exceptionList`** son listas lisas, pero solo se
+  llenan al parsear la plantilla y se leen después.
+
+- **`WorldRegion._surroundingRegions`** se asigna una vez en el constructor de
+  `World`; **`StatSet`** tiene 35 captadores con un contrato uniforme y sus
+  captadores de objeto usan `instanceof`, que cubre el nulo; **`BlockList`** nunca
+  quita de su mapa, así que su `get` no puede fallar.
+
+### Señalado y **no** cambiado
+
+- **Un guardado fallido de variables sigue descartando los cambios** en vez de
+  reintentarlos. Conservarlos exigiría que el `INSERT` fuese idempotente y es un
+  `INSERT` liso sin `ON DUPLICATE KEY UPDATE`: reintentar tras un lote a medias
+  chocaría por clave. Cambiar la semántica de persistencia sin eso sería cambiar un
+  problema por otro.
+
+- **`IdManager` sigue arrancando tras un fallo de inicialización** (ver el registro
+  de `model/script`).
