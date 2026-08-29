@@ -4664,3 +4664,40 @@ Se comprobó lo contrario por si acaso: **¿registra alguna quest la adena (57)?
 Registrarla haría que `exitQuest` **borrase el dinero del jugador**. Resultado:
 **cero**. `Q00333_HuntOfTheBlackLion` la entrega y la recupera, y correctamente no
 la registra.
+
+### Séptima clase: el dato contra sí mismo
+
+Hasta aquí se comprobó **código contra dato**. Falta lo otro: **el dato contra el
+dato**, que es la referencia cruzada más grande del repositorio y la que rompería
+más juego si estuviera mal.
+
+| comprobación | referencias examinadas | rotas |
+|---|---|---|
+| ítems en las listas de botín de los npcs | **23.775** | **0** |
+| skills declaradas en el `<skillList>` de los npcs | **24.526** | **0** |
+| ítems en los multisells (ingredientes y productos) | **18.892** | **0** |
+| ítems en las buylists | **15.757** | **0** |
+| **total** | **82.950** | **0** |
+
+Ochenta y dos mil novecientas cincuenta referencias y **todas resuelven**. Es el
+resultado negativo más grande de la auditoría, y vale exactamente por eso: el dato
+distribuido es internamente consistente. Todo lo que se encontró antes —las 53
+páginas, los 22 ítems, las 5 skills, los 10 multisells— es **código que pide dato
+que no vino**, nunca dato que se contradiga a sí mismo.
+
+### Una comprobación que salió nula, y se dice
+
+Se intentó una quinta —**los secuaces que invoca un jefe**— y examinó **cero
+referencias**. No es que estén bien: es que **no hay ninguna**. Un npc entra en
+`_masterMonsterIDs` solo si declara un `<param name="Privates">`, y ningún npc del
+dato distribuido lo declara, así que la ruta de invocación de secuaces de
+`Spawn.doSpawn` está muerta en este datapack. Un cero sin denominador no es un
+aprobado, y por eso se separa de la tabla de arriba.
+
+### Y una que sí tuvo denominador
+
+Los **conflictos de primer diálogo** —dos scripts reclamando el mismo npc, donde
+solo gana uno y cuál gana depende del orden de carga— dan **cero** sobre 55 npcs
+declarados en 48 sitios de llamada. Cuatro de esos 48 usan formas que no se pueden
+resolver estáticamente (`MANAGERS.keySet()`, una variable, un índice de arreglo),
+así que el cero cubre 44 de 48.
