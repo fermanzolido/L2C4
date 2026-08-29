@@ -1244,8 +1244,13 @@ public class Formulas {
 				+ 30.0) - targetBaseStat);
 		final double elementMod = calcAttributeBonus(attacker, target, skill);
 		final double traitMod = calcGeneralTraitBonus(attacker, target, skill.getTraitType(), false);
+		// The initial value is what calcStat answers when nothing modifies the stat, and
+		// it is added into the percentage below. Starting from one meant the neutral case
+		// came out at 1.01 rather than 1, and every declaration in the data landed one
+		// point off what it says -- a sub of 20 gave 0.81 where the data asks for 0.80.
+		// calcCancelEffects reads the same kind of percentage stat starting from zero.
 		final double buffDebuffMod = 1
-				+ (target.calcStat(skill.isDebuff() ? Stat.DEBUFF_VULN : Stat.BUFF_VULN, 1, null, null) / 100);
+				+ (target.calcStat(skill.isDebuff() ? Stat.DEBUFF_VULN : Stat.BUFF_VULN, 0, null, null) / 100);
 		double mAtkMod = 1;
 
 		if (skill.isMagic()) {
