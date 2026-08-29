@@ -77,6 +77,15 @@ public class IdManager
 			LOGGER.severe("IdManager: Could not be initialized properly: " + e.getMessage());
 		}
 		
+		// The allocation above is inside the try, so a failure there leaves this null and
+		// the line below was the second thing to go wrong -- reporting a null dereference
+		// instead of the failure that caused it.
+		if (_freeIds == null)
+		{
+			LOGGER.severe("IdManager: No id set was built; the server cannot hand out object ids.");
+			return;
+		}
+		
 		LOGGER.info("IdManager: " + _freeIds.size() + " ids available.");
 	}
 	

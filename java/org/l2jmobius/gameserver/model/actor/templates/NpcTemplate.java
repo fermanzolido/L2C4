@@ -673,13 +673,20 @@ public class NpcTemplate extends CreatureTemplate
 	
 	public List<ItemHolder> calculateDrops(DropType dropType, Creature victim, Creature killer)
 	{
+		// These three were tested here and read again inside the helpers below, and
+		// removeDrops and removeDropGroups null them -- which the npc data reload does
+		// with the world running. Hold what was tested so a reload landing mid-kill
+		// cannot turn the read into a throw, or hand the loop a list being rebuilt.
+		final List<DropGroupHolder> dropGroups = _dropGroups;
+		final List<DropHolder> deathDrops = _dropListDeath;
+		final List<DropHolder> spoilDrops = _dropListSpoil;
 		if (dropType == DropType.DROP)
 		{
 			// calculate group drops
 			List<ItemHolder> groupDrops = null;
-			if (_dropGroups != null)
+			if (dropGroups != null)
 			{
-				groupDrops = calculateGroupDrops(victim, killer);
+				groupDrops = calculateGroupDrops(dropGroups, victim, killer);
 				
 				if ((groupDrops != null) && victim.isMonster() && victim.asMonster().isSeeded())
 				{
@@ -689,9 +696,9 @@ public class NpcTemplate extends CreatureTemplate
 			
 			// calculate ungrouped drops
 			List<ItemHolder> ungroupedDrops = null;
-			if (_dropListDeath != null)
+			if (deathDrops != null)
 			{
-				ungroupedDrops = calculateUngroupedDrops(dropType, victim, killer);
+				ungroupedDrops = calculateUngroupedDrops(deathDrops, victim, killer);
 				
 				if ((ungroupedDrops != null) && victim.isMonster() && victim.asMonster().isSeeded())
 				{
@@ -717,16 +724,16 @@ public class NpcTemplate extends CreatureTemplate
 				return ungroupedDrops;
 			}
 		}
-		else if ((dropType == DropType.SPOIL) && (_dropListSpoil != null))
+		else if ((dropType == DropType.SPOIL) && (spoilDrops != null))
 		{
-			return calculateUngroupedDrops(dropType, victim, killer);
+			return calculateUngroupedDrops(spoilDrops, victim, killer);
 		}
 		
 		// no drops
 		return null;
 	}
 	
-	private List<ItemHolder> calculateGroupDrops(Creature victim, Creature killer)
+	private List<ItemHolder> calculateGroupDrops(List<DropGroupHolder> dropGroups, Creature victim, Creature killer)
 	{
 		// level difference calculations
 		final int levelDifference = victim.getLevel() - killer.getLevel();
@@ -741,7 +748,7 @@ public class NpcTemplate extends CreatureTemplate
 			List<ItemHolder> randomDrops = null;
 			ItemHolder cachedItem = null;
 			double totalChance; // total group chance is 100
-			for (DropGroupHolder group : _dropGroups)
+			for (DropGroupHolder group : dropGroups)
 			{
 				totalChance = 0;
 				GROUP_DROP: for (DropHolder dropItem : group.getDropList())
@@ -915,10 +922,8 @@ public class NpcTemplate extends CreatureTemplate
 		return calculatedDrops;
 	}
 	
-	private List<ItemHolder> calculateUngroupedDrops(DropType dropType, Creature victim, Creature killer)
+	private List<ItemHolder> calculateUngroupedDrops(List<DropHolder> dropList, Creature victim, Creature killer)
 	{
-		final List<DropHolder> dropList = dropType == DropType.SPOIL ? _dropListSpoil : _dropListDeath;
-		
 		// level difference calculations
 		final int levelDifference = victim.getLevel() - killer.getLevel();
 		final double levelGapChanceToDropAdena = MathUtil.scaleToRange(levelDifference, -RatesConfig.DROP_ADENA_MAX_LEVEL_DIFFERENCE, -RatesConfig.DROP_ADENA_MIN_LEVEL_DIFFERENCE, RatesConfig.DROP_ADENA_MIN_LEVEL_GAP_CHANCE, 100d);

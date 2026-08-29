@@ -1295,6 +1295,13 @@ public class SevenSignsFestival {
 		try {
 			currData = _festivalData.get(_signsCycle).get(offsetId);
 		} catch (Exception e) {
+			// Handled below.
+		}
+
+		// A missing cycle throws and lands in the catch, but a missing festival id inside a
+		// cycle that is present simply answers null -- and all six callers dereference what
+		// this returns. The blank set is the answer this method promises for both.
+		if (currData == null) {
 			currData = new StatSet();
 			currData.set("score", 0);
 			currData.set("members", "");
@@ -1869,6 +1876,16 @@ public class SevenSignsFestival {
 						+ _witchSpawn._npcId + ": " + e.getMessage(), e);
 			}
 
+			// The catch above is there because the spawn can fail, and doSpawn answers null
+			// on its own too; either way the appearance below dereferenced the field right
+			// after the failure was logged. unspawnMobs is the one place that already tested
+			// it, and there is nothing left in this method after the message.
+			if (_witchInst == null) {
+				LOGGER.warning("SevenSignsFestival: no Festival Witch spawned for level range " + _levelRange
+						+ "; skipping her appearance and announcement.");
+				return;
+			}
+
 			// Make it appear as though the Witch has apparated there.
 			MagicSkillUse msu = new MagicSkillUse(_witchInst, _witchInst, 2003, 1, 1, 0);
 			_witchInst.broadcastPacket(msu);
@@ -2007,7 +2024,8 @@ public class SevenSignsFestival {
 		}
 
 		public void sendMessageToParticipants(String text) {
-			if ((_participants != null) && !_participants.isEmpty()) {
+			// The witch is who speaks this, and she may never have spawned.
+			if ((_witchInst != null) && (_participants != null) && !_participants.isEmpty()) {
 				_witchInst.broadcastPacket(new CreatureSay(_witchInst, ChatType.NPC_GENERAL, text));
 			}
 		}
