@@ -20,6 +20,7 @@
  */
 package org.l2jmobius.gameserver.network;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.commons.threads.ThreadPool;
@@ -129,7 +130,10 @@ public class Disconnection
 		}
 		catch (Exception e)
 		{
-			LOGGER.warning(getClass().getSimpleName() + ": Problem with storeAndDelete: " + e.getMessage());
+			// This is the path that writes the character to the database. 460 catches in
+			// this repository log the exception itself and 86 keep only its message; this
+			// one cannot afford to be among the 86.
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Problem with storeAndDelete: " + e.getMessage(), e);
 		}
 	}
 	

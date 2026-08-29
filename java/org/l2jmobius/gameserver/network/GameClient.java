@@ -68,12 +68,19 @@ public class GameClient extends Client<org.l2jmobius.commons.network.Connection<
 	
 	private final FloodProtectors _floodProtectors = new FloodProtectors(this);
 	private final ReentrantLock _playerLock = new ReentrantLock();
-	private ConnectionState _connectionState = ConnectionState.CONNECTED;
+	// Moved by the packet thread and read by the reader thread, by every thread that
+	// broadcasts a packet, and by the flood protector. ServerPacket asks it whether the
+	// connection is already gone -- the same question _isDetached below answers, and that
+	// one is volatile.
+	private volatile ConnectionState _connectionState = ConnectionState.CONNECTED;
 	private Encryption _encryption = null;
 	private String _ip = "N/A";
 	private String _accountName;
 	private SessionKey _sessionKey;
-	private Player _player;
+	// Set once character selection finishes and read from every thread that broadcasts to
+	// this client or looks up its character. The lock beside it serialises character
+	// selection only; it does not stand between this write and those reads.
+	private volatile Player _player;
 	private ClientHardwareInfoHolder _hardwareInfo;
 	private List<CharacterInfoHolder> _charSlotMapping = null;
 	private volatile boolean _isDetached = false;
