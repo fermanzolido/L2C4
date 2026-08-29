@@ -5020,3 +5020,42 @@ Antes, los dos bonos se aplicaban siempre. Ahora se aplican **solo por la espald
 que es lo que el dato pedía y nunca hacía. Es la misma clase de cambio que
 `buffDebuffMod`: honrar la intención declarada altera números que llevaban años
 comportándose de otra manera. Se puede revertir en un commit.
+
+### Duodécima clase: botones que no llaman a nadie
+
+**12.782 páginas** del datapack piden **507 comandos distintos** por bypass. Los
+manejadores declaran 532. Cruzarlos marcó **16** sin atender — y **14 eran falsos
+positivos**, cada uno por un mecanismo de despacho distinto que hubo que verificar
+uno a uno:
+
+| lo marcado | por qué no lo era |
+|---|---|
+| `TE023`–`TE028` (67 usos) | van por **su propio paquete**, `RequestTutorialLinkHtml`, y la quest del tutorial los toma con `event.startsWith("TE")` |
+| `sellbuffadd`, `sellbuffstart`, … | los sirve un manejador en `custom/SellBuff/`, carpeta que mi glob no cubría |
+| `_block;del`, `_block;delconfirm` | `FriendsBoard` declara `_block` y casa **por prefijo** |
+| `%fav_bypass%` | es un **marcador de plantilla** que `FavoriteBoard` sustituye en tiempo de ejecución |
+
+Que 14 de 16 fueran falsos no resta valor al barrido: obligó a recorrer **cinco
+formas distintas** de atender un bypass —lista declarada, prefijo, paquete propio,
+sustitución de plantilla y carpeta fuera del árbol de manejadores— y a comprobar
+cada una en vez de suponerla.
+
+#### Los dos que sí están muertos
+
+**`talk_select`**, en `html/default/30949.htm` y `32779.htm`. El enlace dice
+literalmente `<a action="bypass -h talk_select">Quest</a>`. Nada en el repositorio
+declara ese comando; lo único parecido es `manor_menu_select`, que es otro. El
+camino termina en `BypassHandler.getHandler` devolviendo nulo: el jugador pulsa
+"Quest" y no ocurre nada.
+
+**`menu_select?ask=348&reply=3`** y `&reply=8`, en dos páginas de
+`Q00348_AnArrogantSearch`. Las **otras 23** páginas de esa misma quest enlazan con
+`bypass Script QN_AnArrogantSearch <pagina>.htm`; estas tres usan una convención que
+nada implementa.
+
+#### Señalado y **no** cambiado
+
+Arreglarlos exige saber **a qué página debe llevar cada botón**, y eso no está en el
+repositorio: el `onEvent` de la quest solo tiene casos para páginas concretas y
+`30864-13.htm` no es una de ellas. Elegir el destino es reconstruir un flujo de
+diálogo — contenido, no reparación. Misma línea que con `Q00627`.
