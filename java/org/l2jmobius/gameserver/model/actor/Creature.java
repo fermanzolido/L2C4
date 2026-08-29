@@ -302,13 +302,6 @@ public abstract class Creature extends WorldObject {
 	/** A list containing the dropped items of this fake player. */
 	private final List<Item> _fakePlayerDrops = new CopyOnWriteArrayList<>();
 
-	private OnCreatureAttack _onCreatureAttack = null;
-	private OnCreatureAttacked _onCreatureAttacked = null;
-	private OnCreatureDamageDealt _onCreatureDamageDealt = null;
-	private OnCreatureDamageReceived _onCreatureDamageReceived = null;
-	private OnCreatureAttackAvoid _onCreatureAttackAvoid = null;
-	private OnCreatureSkillUse _onCreatureSkillUse = null;
-
 	/**
 	 * Creates a creature.
 	 * 
@@ -961,13 +954,10 @@ public abstract class Creature extends WorldObject {
 
 			// Notify to scripts
 			if (EventDispatcher.getInstance().hasListener(EventType.ON_CREATURE_ATTACK, this)) {
-				if (_onCreatureAttack == null) {
-					_onCreatureAttack = new OnCreatureAttack();
-				}
-
-				_onCreatureAttack.setAttacker(this);
-				_onCreatureAttack.setTarget(target);
-				final TerminateReturn attackReturn = EventDispatcher.getInstance().notifyEvent(_onCreatureAttack, this,
+				final OnCreatureAttack onCreatureAttack = new OnCreatureAttack();
+				onCreatureAttack.setAttacker(this);
+				onCreatureAttack.setTarget(target);
+				final TerminateReturn attackReturn = EventDispatcher.getInstance().notifyEvent(onCreatureAttack, this,
 						TerminateReturn.class);
 				if ((attackReturn != null) && attackReturn.terminate()) {
 					getAI().setIntention(Intention.ACTIVE);
@@ -977,13 +967,10 @@ public abstract class Creature extends WorldObject {
 			}
 
 			if (EventDispatcher.getInstance().hasListener(EventType.ON_CREATURE_ATTACKED, target)) {
-				if (_onCreatureAttacked == null) {
-					_onCreatureAttacked = new OnCreatureAttacked();
-				}
-
-				_onCreatureAttacked.setAttacker(this);
-				_onCreatureAttacked.setTarget(target);
-				final TerminateReturn attackedReturn = EventDispatcher.getInstance().notifyEvent(_onCreatureAttacked,
+				final OnCreatureAttacked onCreatureAttacked = new OnCreatureAttacked();
+				onCreatureAttacked.setAttacker(this);
+				onCreatureAttacked.setTarget(target);
+				final TerminateReturn attackedReturn = EventDispatcher.getInstance().notifyEvent(onCreatureAttacked,
 						target, TerminateReturn.class);
 				if ((attackedReturn != null) && attackedReturn.terminate()) {
 					getAI().setIntention(Intention.ACTIVE);
@@ -1630,16 +1617,13 @@ public abstract class Creature extends WorldObject {
 		}
 
 		if (EventDispatcher.getInstance().hasListener(EventType.ON_CREATURE_SKILL_USE, this)) {
-			if (_onCreatureSkillUse == null) {
-				_onCreatureSkillUse = new OnCreatureSkillUse();
-			}
-
-			_onCreatureSkillUse.setCaster(this);
-			_onCreatureSkillUse.setSkill(skill);
-			_onCreatureSkillUse.setSimultaneously(simultaneously);
-			_onCreatureSkillUse.setTarget(target);
-			_onCreatureSkillUse.setTargets(targets);
-			final TerminateReturn term = EventDispatcher.getInstance().notifyEvent(_onCreatureSkillUse, this,
+			final OnCreatureSkillUse onCreatureSkillUse = new OnCreatureSkillUse();
+			onCreatureSkillUse.setCaster(this);
+			onCreatureSkillUse.setSkill(skill);
+			onCreatureSkillUse.setSimultaneously(simultaneously);
+			onCreatureSkillUse.setTarget(target);
+			onCreatureSkillUse.setTargets(targets);
+			final TerminateReturn term = EventDispatcher.getInstance().notifyEvent(onCreatureSkillUse, this,
 					TerminateReturn.class);
 			if ((term != null) && term.terminate()) {
 				if (simultaneously) {
@@ -2387,13 +2371,6 @@ public abstract class Creature extends WorldObject {
 
 		// Enable AI.
 		_disabledAI = false;
-
-		_onCreatureAttack = null;
-		_onCreatureAttacked = null;
-		_onCreatureDamageDealt = null;
-		_onCreatureDamageReceived = null;
-		_onCreatureAttackAvoid = null;
-		_onCreatureSkillUse = null;
 
 		return super.decayMe();
 	}
@@ -6191,31 +6168,31 @@ public abstract class Creature extends WorldObject {
 
 		if ((attacker != null)
 				&& EventDispatcher.getInstance().hasListener(EventType.ON_CREATURE_DAMAGE_DEALT, attacker)) {
-			if (_onCreatureDamageDealt == null) {
-				_onCreatureDamageDealt = new OnCreatureDamageDealt();
-			}
-
-			_onCreatureDamageDealt.setAttacker(attacker);
-			_onCreatureDamageDealt.setTarget(this);
-			_onCreatureDamageDealt.setDamage(damage);
-			_onCreatureDamageDealt.setSkill(skill);
-			_onCreatureDamageDealt.setCritical(critical);
-			_onCreatureDamageDealt.setDamageOverTime(damageOverTime);
-			EventDispatcher.getInstance().notifyEvent(_onCreatureDamageDealt, attacker);
+			final OnCreatureDamageDealt onCreatureDamageDealt = new OnCreatureDamageDealt();
+			onCreatureDamageDealt.setAttacker(attacker);
+			onCreatureDamageDealt.setTarget(this);
+			onCreatureDamageDealt.setDamage(damage);
+			onCreatureDamageDealt.setSkill(skill);
+			onCreatureDamageDealt.setCritical(critical);
+			onCreatureDamageDealt.setDamageOverTime(damageOverTime);
+			EventDispatcher.getInstance().notifyEvent(onCreatureDamageDealt, attacker);
 		}
 
 		if (EventDispatcher.getInstance().hasListener(EventType.ON_CREATURE_DAMAGE_RECEIVED, this)) {
-			if (_onCreatureDamageReceived == null) {
-				_onCreatureDamageReceived = new OnCreatureDamageReceived();
-			}
-
-			_onCreatureDamageReceived.setAttacker(attacker);
-			_onCreatureDamageReceived.setTarget(this);
-			_onCreatureDamageReceived.setDamage(damage);
-			_onCreatureDamageReceived.setSkill(skill);
-			_onCreatureDamageReceived.setCritical(critical);
-			_onCreatureDamageReceived.setDamageOverTime(damageOverTime);
-			EventDispatcher.getInstance().notifyEventAsync(_onCreatureDamageReceived, this);
+			// These six events were each a field on the creature, refilled and dispatched.
+			// Two attackers hitting the same creature at once refill the same object, so a
+			// listener could be handed another hit's numbers -- and this one is dispatched
+			// asynchronously, which reads it after the next hit has already overwritten it.
+			// The other 86 dispatch sites in the codebase build their event where they send
+			// it; these seven were the exception.
+			final OnCreatureDamageReceived onCreatureDamageReceived = new OnCreatureDamageReceived();
+			onCreatureDamageReceived.setAttacker(attacker);
+			onCreatureDamageReceived.setTarget(this);
+			onCreatureDamageReceived.setDamage(damage);
+			onCreatureDamageReceived.setSkill(skill);
+			onCreatureDamageReceived.setCritical(critical);
+			onCreatureDamageReceived.setDamageOverTime(damageOverTime);
+			EventDispatcher.getInstance().notifyEventAsync(onCreatureDamageReceived, this);
 		}
 	}
 
@@ -6227,14 +6204,11 @@ public abstract class Creature extends WorldObject {
 	 */
 	public void notifyAttackAvoid(Creature target, boolean isDot) {
 		if (EventDispatcher.getInstance().hasListener(EventType.ON_CREATURE_ATTACK_AVOID, target)) {
-			if (_onCreatureAttackAvoid == null) {
-				_onCreatureAttackAvoid = new OnCreatureAttackAvoid();
-			}
-
-			_onCreatureAttackAvoid.setAttacker(this);
-			_onCreatureAttackAvoid.setTarget(target);
-			_onCreatureAttackAvoid.setDamageOverTime(isDot);
-			EventDispatcher.getInstance().notifyEvent(_onCreatureAttackAvoid, target);
+			final OnCreatureAttackAvoid onCreatureAttackAvoid = new OnCreatureAttackAvoid();
+			onCreatureAttackAvoid.setAttacker(this);
+			onCreatureAttackAvoid.setTarget(target);
+			onCreatureAttackAvoid.setDamageOverTime(isDot);
+			EventDispatcher.getInstance().notifyEvent(onCreatureAttackAvoid, target);
 		}
 	}
 

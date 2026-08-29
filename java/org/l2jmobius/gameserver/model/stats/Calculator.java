@@ -42,7 +42,11 @@ public class Calculator
 	private static final AbstractFunction[] EMPTY_FUNCS = new AbstractFunction[0];
 	
 	/** Table of Func object */
-	private AbstractFunction[] _functions;
+	// addFunc, removeFunc and removeOwner are all synchronized: they build a new array
+	// and publish it here. calc() and getFunctions() take no lock, so without volatile
+	// a reader has no happens-before edge with the writer and may see the new reference
+	// with its elements still null -- and calc() runs on every stat this server computes.
+	private volatile AbstractFunction[] _functions;
 	
 	/**
 	 * Constructor of Calculator (Init value : emptyFuncs).
