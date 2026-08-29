@@ -264,15 +264,18 @@ public class LongTimeEvent extends Script
 					}
 				}
 				
+				// The active period has to be valid before anything can be checked against it:
+				// an unparsed one leaves both dates null, and the containment test below
+				// dereferences them -- reporting a bare null instead of the real fault.
+				if (!isValidPeriod())
+				{
+					throw new NullPointerException("WARNING!!! " + getName() + " event: illegal event period");
+				}
+				
 				// Check that drop period is inside active period
 				if (((_dropStartDate != null) && _dropStartDate.before(_startDate)) || ((_dropEndDate != null) && _dropEndDate.after(_endDate)))
 				{
 					throw new NullPointerException("WARNING!!! " + getName() + " event: drop period must be within the active period");
-				}
-				
-				if (!isValidPeriod())
-				{
-					throw new NullPointerException("WARNING!!! " + getName() + " event: illegal event period");
 				}
 				
 				final Date today = new Date();

@@ -1205,7 +1205,9 @@ public class Quest implements IEventTimerEvent<String>, IEventTimerCancel<String
 	 */
 	public boolean showError(Player player, Throwable t) {
 		LOGGER.log(Level.WARNING, getScriptFile().toAbsolutePath().toString(), t);
-		if (t.getMessage() == null) {
+		// The test was inverted, so this line could only ever print "Quest: null" -- the
+		// one case where there is nothing to add. The log above already carries the trace.
+		if (t.getMessage() != null) {
 			LOGGER.warning(getClass().getSimpleName() + ": " + t.getMessage());
 		}
 
