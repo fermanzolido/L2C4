@@ -3551,7 +3551,8 @@ barridos:
 2. `containsKey` seguido de `get` — 4, el modismo de conteo sobre mapas locales;
 3. división o módulo por variable — 6, **1 defecto** (`RebalanceHP`);
 4. producto sin ensanchar — 18, todos `double` por `double`;
-5. `onExit` que muta de forma relativa — 2, los dos guardan;
+5. `onExit` que muta de forma relativa — 3 con el patrón corregido, los tres
+   guardan (el primer patrón no leía mutaciones a través de un índice);
 6. campo escrito en `onStart` y leído en `onExit` — **0**, que cierra el pendiente;
 7. `split` indexado directo — 20 en administración, descartados por el catch;
 8. lectura de texto tecleado por el jugador — 44, **9 defectos** en el tablero;
@@ -3591,7 +3592,15 @@ premisa era exacta.
 
 Pero no cuesta nada: barridos los **145** manejadores de efecto buscando un campo
 escrito en `onStart` y leído en `onExit` —**cero**— y `onExit` que mute de forma
-relativa —**dos**, `Disarm` y `Distrust`, y los dos guardan—. El hilo no vuelve.
+relativa. Ese segundo barrido hubo que correrlo **dos veces**: el primero devolvió
+`Disarm` y `Distrust`, y su patrón no sabía leer una mutación a través de un
+índice, así que se perdía justamente los dos casos que importaban. Corregido
+devuelve **tres**: `Disarm`, `AttackTrait` y `DefenceTrait`.
+
+Los tres guardan, y los dos de rasgos guardan **con la respuesta exacta al
+problema**: llevan un contador por rasgo que hace de libro mayor de si `onStart`
+llegó a correr, y `onExit` no divide si el contador está en cero. El hilo no
+vuelve, ahora por la razón correcta.
 
 ### Sospechas evaluadas y descartadas, con lo que las descarta
 
