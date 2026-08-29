@@ -141,7 +141,7 @@ public class CastleChamberlain extends Script {
 			if (level == 0) {
 				html = getHtmlPacket(player, npc, "castleresetdeco.html");
 				html.replace("%AgitDecoSubmit%", Integer.toString(func));
-			} else if ((castle.getFunction(func) != null) && (castle.getFunction(func).getLvl() == level)) {
+			} else if (isFunctionAtLevel(castle, func, level)) {
 				html = getHtmlPacket(player, npc, "castledecoalreadyset.html");
 				html.replace("%AgitDecoEffect%", "<fstring p1=\"" + level + "\">" + fstring + "</fstring>");
 			} else {
@@ -178,6 +178,19 @@ public class CastleChamberlain extends Script {
 			html.replace("%" + str + "Reset%",
 					"[<a action=\"bypass -h Script CastleChamberlain " + str + " 0\">Deactivate</a>]");
 		}
+	}
+
+	/**
+	 * @param castle the castle to read from
+	 * @param func the function type
+	 * @param level the level to compare against
+	 * @return {@code true} when the castle has that function at that level. It used to
+	 *         be tested and then looked up a second time to be read, and the castle's
+	 *         fee task removes functions from a scheduled task.
+	 */
+	private static boolean isFunctionAtLevel(Castle castle, int func, int level) {
+		final CastleFunction function = castle.getFunction(func);
+		return (function != null) && (function.getLvl() == level);
 	}
 
 	private final int getFunctionFee(int func, int level) {

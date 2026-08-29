@@ -133,9 +133,10 @@ public class WyvernManager extends Script
 			}
 			case CLAN_HALL:
 			{
-				if (npc.getConquerableHall() != null)
+				final SiegableHall hall = npc.getConquerableHall();
+				if (hall != null)
 				{
-					return player.getClanId() == npc.getConquerableHall().getOwnerId();
+					return player.getClanId() == hall.getOwnerId();
 				}
 				
 				return false;

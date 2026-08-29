@@ -51,9 +51,11 @@ import org.l2jmobius.gameserver.model.item.enums.ShotType;
 import org.l2jmobius.gameserver.model.item.type.ArmorType;
 import org.l2jmobius.gameserver.model.item.type.WeaponType;
 import org.l2jmobius.gameserver.model.residences.ClanHall;
+import org.l2jmobius.gameserver.model.residences.ClanHall.ClanHallFunction;
 import org.l2jmobius.gameserver.model.sevensigns.SevenSigns;
 import org.l2jmobius.gameserver.model.sevensigns.SevenSignsFestival;
 import org.l2jmobius.gameserver.model.siege.Castle;
+import org.l2jmobius.gameserver.model.siege.Castle.CastleFunction;
 import org.l2jmobius.gameserver.model.siege.Siege;
 import org.l2jmobius.gameserver.model.siege.SiegeClan;
 import org.l2jmobius.gameserver.model.skill.BuffInfo;
@@ -292,9 +294,13 @@ public class Formulas {
 				final int clanHallIndex = clan.getHideoutId();
 				if ((clanHallIndex > 0) && (clanHallIndex == posChIndex)) {
 					final ClanHall clansHall = ClanHallTable.getInstance().getClanHallById(clanHallIndex);
-					if ((clansHall != null) && (clansHall.getFunction(ClanHall.FUNC_RESTORE_HP) != null)) {
-						hpRegenMultiplier *= 1
-								+ ((double) clansHall.getFunction(ClanHall.FUNC_RESTORE_HP).getLevel() / 100);
+					// Four lookups in this file are tested and then written again to be read.
+					// The hall and castle fee tasks remove functions from a scheduled task, so
+					// what answered the test need not still be there -- and this runs on the
+					// regeneration timer for every creature.
+					final ClanHallFunction hallRestoreHp = clansHall == null ? null : clansHall.getFunction(ClanHall.FUNC_RESTORE_HP);
+					if (hallRestoreHp != null) {
+						hpRegenMultiplier *= 1 + ((double) hallRestoreHp.getLevel() / 100);
 					}
 				}
 			}
@@ -305,8 +311,9 @@ public class Formulas {
 				final int castleIndex = clan.getCastleId();
 				if ((castleIndex > 0) && (castleIndex == posCastleIndex)) {
 					final Castle castle = CastleManager.getInstance().getCastleById(castleIndex);
-					if ((castle != null) && (castle.getFunction(Castle.FUNC_RESTORE_HP) != null)) {
-						hpRegenMultiplier *= 1 + ((double) castle.getFunction(Castle.FUNC_RESTORE_HP).getLvl() / 100);
+					final CastleFunction castleRestoreHp = castle == null ? null : castle.getFunction(Castle.FUNC_RESTORE_HP);
+					if (castleRestoreHp != null) {
+						hpRegenMultiplier *= 1 + ((double) castleRestoreHp.getLvl() / 100);
 					}
 				}
 			}
@@ -372,9 +379,9 @@ public class Formulas {
 				final int clanHallIndex = clan.getHideoutId();
 				if ((clanHallIndex > 0) && (clanHallIndex == posChIndex)) {
 					final ClanHall clansHall = ClanHallTable.getInstance().getClanHallById(clanHallIndex);
-					if ((clansHall != null) && (clansHall.getFunction(ClanHall.FUNC_RESTORE_MP) != null)) {
-						mpRegenMultiplier *= 1
-								+ ((double) clansHall.getFunction(ClanHall.FUNC_RESTORE_MP).getLevel() / 100);
+					final ClanHallFunction hallRestoreMp = clansHall == null ? null : clansHall.getFunction(ClanHall.FUNC_RESTORE_MP);
+					if (hallRestoreMp != null) {
+						mpRegenMultiplier *= 1 + ((double) hallRestoreMp.getLevel() / 100);
 					}
 				}
 			}
@@ -385,8 +392,9 @@ public class Formulas {
 				final int castleIndex = clan.getCastleId();
 				if ((castleIndex > 0) && (castleIndex == posCastleIndex)) {
 					final Castle castle = CastleManager.getInstance().getCastleById(castleIndex);
-					if ((castle != null) && (castle.getFunction(Castle.FUNC_RESTORE_MP) != null)) {
-						mpRegenMultiplier *= 1 + ((double) castle.getFunction(Castle.FUNC_RESTORE_MP).getLvl() / 100);
+					final CastleFunction castleRestoreMp = castle == null ? null : castle.getFunction(Castle.FUNC_RESTORE_MP);
+					if (castleRestoreMp != null) {
+						mpRegenMultiplier *= 1 + ((double) castleRestoreMp.getLvl() / 100);
 					}
 				}
 			}

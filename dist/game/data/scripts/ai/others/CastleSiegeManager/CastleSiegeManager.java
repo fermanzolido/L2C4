@@ -18,6 +18,7 @@ package ai.others.CastleSiegeManager;
 
 import org.l2jmobius.gameserver.model.actor.Npc;
 import org.l2jmobius.gameserver.model.actor.Player;
+import org.l2jmobius.gameserver.model.siege.clanhalls.SiegableHall;
 import org.l2jmobius.gameserver.model.script.Script;
 
 /**
@@ -47,6 +48,9 @@ public class CastleSiegeManager extends Script
 	@Override
 	public String onFirstTalk(Npc npc, Player player)
 	{
+		// getConquerableHall is a spatial search on every call, and the chain below tested
+		// it and then read it a second time; one search answers both.
+		final SiegableHall conquerableHall = npc.getConquerableHall();
 		String htmltext = null;
 		if (player.isClanLeader() && (player.getClanId() == npc.getCastle().getOwnerId()))
 		{
@@ -63,9 +67,9 @@ public class CastleSiegeManager extends Script
 		{
 			htmltext = "CastleSiegeManager-02.html";
 		}
-		else if (npc.getConquerableHall() != null)
+		else if (conquerableHall != null)
 		{
-			npc.getConquerableHall().showSiegeInfo(player);
+			conquerableHall.showSiegeInfo(player);
 		}
 		else
 		{
@@ -77,7 +81,8 @@ public class CastleSiegeManager extends Script
 	
 	private boolean isInSiege(Npc npc)
 	{
-		if ((npc.getConquerableHall() != null) && npc.getConquerableHall().isInSiege())
+		final SiegableHall hall = npc.getConquerableHall();
+		if ((hall != null) && hall.isInSiege())
 		{
 			return true;
 		}
