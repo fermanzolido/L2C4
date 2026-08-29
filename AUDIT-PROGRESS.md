@@ -3599,3 +3599,96 @@ relativa —**dos**, `Disarm` y `Distrust`, y los dos guardan—. El hilo no vue
 
 - **Los cuatro `containsKey` seguidos de `get`** son el modismo de conteo sobre
   mapas locales de un método.
+
+---
+
+## `model/actor` — EN CURSO
+
+166 archivos, 53.236 líneas. `Player.java` sola tiene **12.131**, `Creature.java`
+6.483, y después nada pasa de 1.900.
+
+### Primera vuelta: la misma búsqueda escrita dos veces
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 1 | `ClanHallManager`, `PetStat`, `CastleDoorman`, `SiegeFlag`, `Player` | trece búsquedas vivas probadas y vueltas a escribir | media |
+| 2 | `SignsPriest` | el intercambio de las tres piedras paga sin mirar si tomó | **alta** |
+| 3 | `Auctioneer` | seis ramas leen el clan sin preguntar, y una encadena tres búsquedas | media |
+| 4 | `ClanHallManager` | el salón desreferenciado en la primera línea del bypass | **alta** |
+| 5 | `ClanHallDoorman` | ídem en las dos puertas | media |
+
+**1 — Lo que contestó el test no es lo que se usa.** Ocho de los trece son la
+forma de **una sola línea** del caso de `ClanHallManager` ya arreglado; la pasada
+anterior solo había matcheado la de varias líneas. `PetStat` lee el ítem de
+control de la mascota, que es una consulta al inventario por id en cada llamada.
+`CastleDoorman` y `SiegeFlag` leen `getConquerableHall()`, que es una **búsqueda
+espacial** cada vez — el portero corría dos por puerta, dentro del bucle. Y
+`Player` prueba `_client` y lo lee dos veces más en la misma expresión, en
+`isJailed` y en `isChatBanned`; el campo se anula al desconectar y los dos métodos
+se llaman desde el camino del chat.
+
+**2 — El hermano de treinta líneas más abajo.** Intercambiar los tres tipos de
+piedra de sello a la vez hacía tres retiros con la respuesta descartada y pagaba
+la adena antigua por los tres conteos pase lo que pase. Intercambiar **un solo**
+tipo sí comprueba que el retiro salió antes de pagar. La recompensa ahora se
+calcula sobre lo que efectivamente se tomó.
+
+**3 — Seis de diez.** De las ramas del subastador que leen el clan del jugador,
+`bid1` y `selectedItems` lo comprueban, y dos más quedan cubiertas por
+`hasAccess`. Eso último se verificó en vez de suponerse: `setClan(null)` reemplaza
+los privilegios por un conjunto vacío y los privilegios solo se otorgan desde el
+rango de un clan, así que **`hasAccess` no puede ser cierto sin clan**. Las seis
+restantes lo leían sin preguntar. `cancelBid` además encadena tres búsquedas sin
+probar ninguna: la subasta es null cuando el clan no tiene puja en pie, y el
+pujador es null cuando la puja no es de ese clan.
+
+**4 — Una comprobación que cubre veinticinco lecturas.** `getClanHall()` busca un
+salón a 500 unidades del NPC, cae al registro de salones asediables, y devuelve
+**null** si ninguno lo encuentra. `onBypassFeedback` lo desreferencia en su
+**primera línea**, así que un administrador parado en otro lado tiraba abajo
+cualquier bypass que le llegara. Una sola guarda en la entrada alcanza porque
+todas las lecturas de abajo llegan al salón por el id que esa primera llamada
+cachea.
+
+### Sospechas evaluadas y descartadas, con lo que las descarta
+
+- **El reparto de experiencia de `Attackable`.** Divide por un total entero, y
+  `getExpReward` devuelve `long` — o sea división entera, que por cero lanza. Pero
+  el total y el mapa de recompensas se incrementan **bajo la misma condición**
+  (`damage > 1`), así que un mapa no vacío implica un total de al menos 2.
+
+- **`getClient().getFloodProtectors()`.** **36** sitios en el repositorio lo hacen
+  y **ninguno** comprueba null antes. Es el patrón de la casa, no una omisión
+  estrecha: se descarta como clase.
+
+- **`SummonStatus` usando el grupo de otro jugador.** La línea de arriba exige que
+  ese jugador sea **miembro** de ese grupo, así que su grupo no puede ser null.
+
+- **`ItemManager.destroyItem` devuelve `void`**: no hay retorno que descartar en
+  los cuatro sitios que el barrido marcó.
+
+- **`Npc.getCastle()`** cae al castillo más cercano, lo cual cubre `Artefact`,
+  `CastleDoorman`, `ControlTower` y `Teleporter`.
+
+- **Los índices de parámetro de las sentencias preparadas.** Revisadas las **125**
+  del núcleo y el datapack con tres o más parámetros, contando los `?` de cada
+  consulta contra los `setXxx(n, …)` vinculados. **13** marcadas y las 13
+  explicadas: vinculaciones por lote dentro de un bucle, y dos sentencias
+  declaradas en el mismo try-with-resources. Cero defectos. La de 23 parámetros de
+  `SevenSigns` calza exacto: 17 columnas, cinco bonos del 18 al 22 con
+  `FESTIVAL_COUNT = 5`, y la fecha en el 23.
+
+- **Columnas guardadas y nunca releídas.** Diez sobre la fila del personaje.
+  `maxHp`, `maxMp` y `maxCp` se recalculan de las estadísticas; `online` y `race`
+  los leen otros archivos; `clan_privs` se ignora a propósito porque los
+  privilegios se restauran del rango del clan; `bookmarkslot` se escribe siempre
+  como literal `0` con un comentario que nombra el campo no implementado; y
+  `cancraft` solo aparece en el INSERT inicial. Ninguna es un valor que se pierda.
+
+- **El camino de subclase.** `isValidNewSubClass` pasa a `equalsOrChildOf` un
+  `PlayerClass` que puede ser null para un id inexistente, pero `childOf(null)`
+  recorre padres y devuelve false sin lanzar, y la búsqueda posterior en las
+  subclases disponibles no encuentra un id inexistente. Y el `getParent().getId()`
+  de `VillageMaster`, guardado por `subClassId >= 88`, es seguro por construcción:
+  de las **89** constantes del enum, **9** son raíz y todas tienen id ≤ 53; de las
+  **30** con id ≥ 88, ninguna lo es.
