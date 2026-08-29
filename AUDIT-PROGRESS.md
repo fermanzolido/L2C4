@@ -4550,3 +4550,41 @@ premio y un intercambio completo. Ninguna de las dos es una decisión de quien
 audita: son de quien decide qué contenido lleva el servidor.
 
 Queda la lista exacta, que es lo accionable: son esas tres quests y esos ids.
+
+### Tercera y cuarta clase decidibles: skills y coordenadas
+
+**Coordenadas: cero.** Ninguna de las `new Location(x, y, z)` literales del
+repositorio cae fuera de la rejilla del mundo (X −131.072 a 229.376, Y −262.144 a
+262.144). Interesaba comprobarlo porque `World.getRegion` devuelve nulo justo para
+eso y `spawnMe` desechaba el objeto. Resultado negativo limpio.
+
+**Skills: diez referencias a ids que el dato no define**, y esta vez en el núcleo,
+no en quests. El dato define **1.976** skills contando `skills/custom/`, que la
+primera pasada se dejó fuera y por eso marcaba como inexistentes el 100000 de los
+eventos y el 49991 de las monturas.
+
+| dónde | skill | qué queda inerte |
+|---|---|---|
+| `Player` (5 usos) | 5076 | la penalización por muerte entera |
+| `Antharas` | 5092, 5093 | su Terror y su Meteoro |
+| `Cubic` ATTRACT_CUBIC | 5115, 5116 | el cubo de atracción entero |
+| `Cubic` SMART_CUBIC_SHILLIENTEMPLAR | 5115 | la mitad de sus lanzamientos |
+
+**No hay caída en ninguna parte**, y eso se comprobó en vez de suponerse:
+`CubicAction` saca una skill al azar de la lista y **comprueba el nulo** antes de
+usarla; `CubicHeal` recorre la lista y hace `s.getId()` **sin comprobarlo**, pero
+solo se programa para `LIFE_CUBIC`, cuya skill 4051 sí existe. `ATTRACT_CUBIC` sí se
+programa, con una lista de dos nulos: cada tick saca uno, ve que es nulo y vuelve.
+
+### Señalado y **no** cambiado, con el motivo
+
+Se podría filtrar los nulos al construir la lista del cubo. **No se hace**, y no por
+pereza: `SMART_CUBIC_SHILLIENTEMPLAR` lleva 4049 (existe) y 5115 (no existe), así
+que hoy lanza la mitad de las veces. Filtrar el nulo haría que lanzara **siempre** —
+duplicar la eficacia de un cubo es un cambio de equilibrio, no un arreglo de un
+error. Es la misma línea que con `buffDebuffMod`: cuando la "corrección" mueve
+números del juego, la decisión es del dueño del servidor.
+
+Las cinco skills son, otra vez, contenido de una crónica posterior al dato
+distribuido — la tercera vez que aparece esa misma raíz, después de las 53 páginas
+de los maestros de aldea 32092–32098 y de los 22 ítems.
