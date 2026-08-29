@@ -304,7 +304,7 @@ public class BoatTalkingGludin implements Runnable
 		}
 		catch (Exception e)
 		{
-			LOGGER.log(Level.WARNING, e.getMessage());
+			LOGGER.log(Level.WARNING, e.getMessage(), e);
 		}
 	}
 	

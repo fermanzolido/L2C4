@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -79,7 +80,7 @@ public class GameServerTable
 		}
 		catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e)
 		{
-			LOGGER.warning("GameServerTable: Problem initializing: " + e.getMessage());
+			LOGGER.log(Level.WARNING, "GameServerTable: Problem initializing: " + e.getMessage(), e);
 		}
 	}
 	

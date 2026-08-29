@@ -32,6 +32,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.commons.database.DatabaseFactory;
@@ -255,7 +256,7 @@ public class DatabaseIdManager
 				}
 				catch (Exception e)
 				{
-					LOGGER.severe("DatabaseIdManager: Could not initialize used IDs for query " + query + ": " + e.getMessage());
+					LOGGER.log(Level.SEVERE, "DatabaseIdManager: Could not initialize used IDs for query " + query + ": " + e.getMessage(), e);
 				}
 			}));
 		}
@@ -268,7 +269,7 @@ public class DatabaseIdManager
 			}
 			catch (Exception e)
 			{
-				LOGGER.warning("Failed to parse file: " + e.getMessage());
+				LOGGER.log(Level.WARNING, "Failed to parse file: " + e.getMessage(), e);
 			}
 		}
 		
@@ -280,7 +281,7 @@ public class DatabaseIdManager
 		catch (InterruptedException e)
 		{
 			Thread.currentThread().interrupt();
-			LOGGER.warning("DatabaseIdManager: Extraction interrupted: " + e.getMessage());
+			LOGGER.log(Level.WARNING, "DatabaseIdManager: Extraction interrupted: " + e.getMessage(), e);
 		}
 		
 		return usedIds;

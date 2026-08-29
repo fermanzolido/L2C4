@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.commons.database.DatabaseFactory;
@@ -691,7 +692,7 @@ public class MailBoard implements IWriteBoardHandler
 		}
 		catch (Exception e)
 		{
-			LOGGER.warning(MailBoard.class.getSimpleName() + ": Couldn't send mail for player " + player.getName() + ". Exception: " + e.getMessage());
+			LOGGER.log(Level.WARNING, MailBoard.class.getSimpleName() + ": Couldn't send mail for player " + player.getName() + ". Exception: " + e.getMessage(), e);
 		}
 	}
 	
@@ -750,7 +751,7 @@ public class MailBoard implements IWriteBoardHandler
 		}
 		catch (Exception e)
 		{
-			LOGGER.warning(MailBoard.class.getSimpleName() + ": Couldn't delete mail #" + mailId + ". Exception: " + e.getMessage());
+			LOGGER.log(Level.WARNING, MailBoard.class.getSimpleName() + ": Couldn't delete mail #" + mailId + ". Exception: " + e.getMessage(), e);
 		}
 	}
 	
@@ -770,7 +771,7 @@ public class MailBoard implements IWriteBoardHandler
 		}
 		catch (Exception e)
 		{
-			LOGGER.warning(MailBoard.class.getSimpleName() + ": Couldn't set read status for mail #" + mailId + ". Exception: " + e.getMessage());
+			LOGGER.log(Level.WARNING, MailBoard.class.getSimpleName() + ": Couldn't set read status for mail #" + mailId + ". Exception: " + e.getMessage(), e);
 		}
 	}
 	
@@ -791,7 +792,7 @@ public class MailBoard implements IWriteBoardHandler
 		}
 		catch (Exception e)
 		{
-			LOGGER.warning(MailBoard.class.getSimpleName() + ": Couldn't set mail #" + mailId + " location. Exception: " + e.getMessage());
+			LOGGER.log(Level.WARNING, MailBoard.class.getSimpleName() + ": Couldn't set mail #" + mailId + " location. Exception: " + e.getMessage(), e);
 		}
 	}
 	

@@ -22,6 +22,7 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.commons.database.DatabaseFactory;
@@ -81,7 +82,7 @@ public class CHSiegeManager
 		}
 		catch (Exception e)
 		{
-			LOGGER.warning("CHSiegeManager: Could not load siegable clan halls!:" + e.getMessage());
+			LOGGER.log(Level.WARNING, "CHSiegeManager: Could not load siegable clan halls!:" + e.getMessage(), e);
 		}
 	}
 	

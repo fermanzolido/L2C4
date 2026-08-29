@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.w3c.dom.Document;
@@ -102,7 +103,7 @@ public class SiegeScheduleData implements IXmlReader
 		}
 		catch (Exception e)
 		{
-			LOGGER.warning(getClass().getSimpleName() + ": Could not get value for field " + field + ". " + e.getMessage());
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Could not get value for field " + field + ". " + e.getMessage(), e);
 			return -1;
 		}
 	}

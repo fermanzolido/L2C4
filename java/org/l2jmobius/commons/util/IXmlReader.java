@@ -169,7 +169,7 @@ public interface IXmlReader {
 				try {
 					task.get();
 				} catch (Exception e) {
-					LOGGER.warning("Failed to parse file: " + e.getMessage());
+					LOGGER.log(Level.WARNING, "Failed to parse file: " + e.getMessage(), e);
 				}
 			}
 
@@ -178,7 +178,7 @@ public interface IXmlReader {
 				executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
-				LOGGER.warning("Parsing process was interrupted: " + e.getMessage());
+				LOGGER.log(Level.WARNING, "Parsing process was interrupted: " + e.getMessage(), e);
 			}
 		} else // Parse files sequentially if multithreading is not enabled.
 		{

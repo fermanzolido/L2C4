@@ -16,6 +16,8 @@
  */
 package handlers.effecthandlers;
 
+import java.util.logging.Level;
+
 import org.l2jmobius.commons.util.Rnd;
 import org.l2jmobius.gameserver.data.xml.NpcData;
 import org.l2jmobius.gameserver.model.Location;
@@ -145,7 +147,7 @@ public class SummonNpc extends AbstractEffect
 				}
 				catch (Exception e)
 				{
-					LOGGER.warning(SummonNpc.class.getSimpleName() + ": " + e.getMessage());
+					LOGGER.log(Level.WARNING, SummonNpc.class.getSimpleName() + ": " + e.getMessage(), e);
 					return;
 				}
 				

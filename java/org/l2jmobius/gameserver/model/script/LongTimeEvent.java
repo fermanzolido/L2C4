@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -177,7 +178,7 @@ public class LongTimeEvent extends Script
 			}
 			catch (Exception e)
 			{
-				LOGGER.warning("Invalid Date Format: " + e.getMessage());
+				LOGGER.log(Level.WARNING, "Invalid Date Format: " + e.getMessage(), e);
 			}
 		}
 		

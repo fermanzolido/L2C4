@@ -23,6 +23,7 @@ package org.l2jmobius.gameserver.managers;
 import java.util.BitSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.gameserver.config.IdManagerConfig;
@@ -74,7 +75,7 @@ public class IdManager
 		}
 		catch (Exception e)
 		{
-			LOGGER.severe("IdManager: Could not be initialized properly: " + e.getMessage());
+			LOGGER.log(Level.SEVERE, "IdManager: Could not be initialized properly: " + e.getMessage(), e);
 		}
 		
 		// The allocation above is inside the try, so a failure there leaves this null and

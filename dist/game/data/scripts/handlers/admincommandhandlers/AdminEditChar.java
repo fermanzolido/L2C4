@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.commons.database.DatabaseFactory;
@@ -599,7 +600,7 @@ public class AdminEditChar implements IAdminCommandHandler
 			}
 			catch (Exception e)
 			{
-				LOGGER.warning("Problem with AdminEditChar: " + e.getMessage());
+				LOGGER.log(Level.WARNING, "Problem with AdminEditChar: " + e.getMessage(), e);
 			}
 		}
 		else if (command.startsWith("admin_find_dualbox"))
@@ -691,7 +692,7 @@ public class AdminEditChar implements IAdminCommandHandler
 				}
 				catch (Exception e)
 				{
-					LOGGER.warning("Problem with AdminEditChar: " + e.getMessage());
+					LOGGER.log(Level.WARNING, "Problem with AdminEditChar: " + e.getMessage(), e);
 				}
 			}
 			else

@@ -1744,7 +1744,7 @@ public class SevenSignsFestival {
 				_festivalInitialized = false;
 				sendMessageToAll("That will do! I'll move you to the outside soon.");
 			} catch (Exception e) {
-				LOGGER.warning(e.getMessage());
+				LOGGER.log(Level.WARNING, e.getMessage(), e);
 			}
 		}
 

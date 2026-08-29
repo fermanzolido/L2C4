@@ -118,7 +118,7 @@ public class PrecautionaryRestartManager
 		{
 			if (_logCpuError)
 			{
-				LOGGER.log(Level.FINE, "No se pudo obtener la carga de CPU via JMX: " + e.getMessage());
+				LOGGER.log(Level.FINE, "No se pudo obtener la carga de CPU via JMX: " + e.getMessage(), e);
 				_logCpuError = false; // Evitamos el spam de logs en llamadas periodicas
 			}
 		}

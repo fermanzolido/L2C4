@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.w3c.dom.Document;
@@ -132,7 +133,7 @@ public class ScriptEngine implements IXmlReader
 		}
 		catch (IOException e)
 		{
-			LOGGER.warning(getClass().getSimpleName() + ": Could not initialize. " + e.getMessage());
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Could not initialize. " + e.getMessage(), e);
 		}
 	}
 	

@@ -20,6 +20,7 @@
  */
 package handlers;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.gameserver.handler.EffectHandler;
@@ -204,7 +205,7 @@ public class EffectMasterHandler
 		}
 		catch (Exception e)
 		{
-			LOGGER.warning("Failed invoking size method for handler: " + EffectMasterHandler.class.getSimpleName() + " " + e.getMessage());
+			LOGGER.log(Level.WARNING, "Failed invoking size method for handler: " + EffectMasterHandler.class.getSimpleName() + " " + e.getMessage(), e);
 		}
 	}
 }

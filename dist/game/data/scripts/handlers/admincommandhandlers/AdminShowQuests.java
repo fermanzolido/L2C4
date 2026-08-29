@@ -19,6 +19,7 @@ package handlers.admincommandhandlers;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.commons.database.DatabaseFactory;
@@ -340,7 +341,7 @@ public class AdminShowQuests implements IAdminCommandHandler {
 			actor.sendPacket(adminReply);
 		} catch (Exception e) {
 			actor.sendMessage("There was an error.");
-			LOGGER.warning(AdminShowQuests.class.getSimpleName() + ": " + e.getMessage());
+			LOGGER.log(Level.WARNING, AdminShowQuests.class.getSimpleName() + ": " + e.getMessage(), e);
 		}
 	}
 

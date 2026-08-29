@@ -113,13 +113,13 @@ public class MultisellData implements IXmlReader
 							}
 							catch (Exception e1)
 							{
-								LOGGER.warning(e1.getMessage() + document.getLocalName());
+								LOGGER.log(Level.WARNING, e1.getMessage() + document.getLocalName(), e1);
 								list.setUseRate(1.0);
 							}
 						}
 						catch (DOMException e)
 						{
-							LOGGER.warning(e.getMessage() + document.getLocalName());
+							LOGGER.log(Level.WARNING, e.getMessage() + document.getLocalName(), e);
 						}
 					}
 					

@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 import org.l2jmobius.commons.database.DatabaseFactory;
 import org.l2jmobius.gameserver.cache.HtmCache;
@@ -285,7 +286,7 @@ public class Transmog extends Script
 		}
 		catch (SQLException e)
 		{
-			LOGGER.warning("Problem with Transmog: " + e.getMessage());
+			LOGGER.log(Level.WARNING, "Problem with Transmog: " + e.getMessage(), e);
 		}
 		
 		if (!playerTransmogs.isEmpty())
@@ -317,7 +318,7 @@ public class Transmog extends Script
 		}
 		catch (SQLException e)
 		{
-			LOGGER.warning("Problem with Transmog: " + e.getMessage());
+			LOGGER.log(Level.WARNING, "Problem with Transmog: " + e.getMessage(), e);
 		}
 		
 		PLAYER_TRANSMOGS.remove(playerObjectId);

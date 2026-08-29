@@ -36,6 +36,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
@@ -573,7 +574,7 @@ public class LogPanel extends JFrame
 				catch (Exception e)
 				{
 					JOptionPane.showMessageDialog(null, "Error reading log file: " + selectedItem, "Error", JOptionPane.ERROR_MESSAGE);
-					LOGGER.warning(getClass().getName() + ": Error reading log file: " + selectedItem + " - " + e.getMessage());
+					LOGGER.log(Level.WARNING, getClass().getName() + ": Error reading log file: " + selectedItem + " - " + e.getMessage(), e);
 				}
 				finally
 				{
@@ -675,7 +676,7 @@ public class LogPanel extends JFrame
 				catch (Exception e)
 				{
 					JOptionPane.showMessageDialog(_searchButton.getParent(), "Error during search: " + e.getMessage(), "Search Error", JOptionPane.ERROR_MESSAGE);
-					LOGGER.warning(getClass().getName() + ": Error during search: " + e.getMessage());
+					LOGGER.log(Level.WARNING, getClass().getName() + ": Error during search: " + e.getMessage(), e);
 				}
 				finally
 				{
@@ -707,7 +708,7 @@ public class LogPanel extends JFrame
 		}
 		catch (BadLocationException e)
 		{
-			LOGGER.warning(getClass().getName() + ": Bad location exception. " + e.getMessage());
+			LOGGER.log(Level.WARNING, getClass().getName() + ": Bad location exception. " + e.getMessage(), e);
 		}
 		
 		_logTextArea.setCaretPosition(start);

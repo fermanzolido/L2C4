@@ -24,6 +24,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -51,8 +52,9 @@ public class PacketExecutor<T extends Client<Connection<T>>> {
 				_executor.execute(new PacketRunnable<>(packet, _semaphore));
 			} catch (Exception e) {
 				_semaphore.release();
-				LOGGER.warning(packet.getClass().getSimpleName() + System.lineSeparator() + e.getMessage()
-						+ System.lineSeparator() + e.getStackTrace());
+				// getStackTrace answers an array, so concatenating it printed the array's
+				// identity hash where the trace was meant to go. The logger takes it directly.
+				LOGGER.log(Level.WARNING, packet.getClass().getSimpleName() + System.lineSeparator() + e.getMessage(), e);
 			}
 		} else {
 			LOGGER.warning("PacketExecutor: Max virtual threads reached (" + _semaphore.getQueueLength()

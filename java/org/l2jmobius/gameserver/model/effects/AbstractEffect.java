@@ -25,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.gameserver.config.PlayerConfig;
@@ -88,7 +89,7 @@ public abstract class AbstractEffect
 		}
 		catch (NoSuchMethodException | SecurityException e)
 		{
-			LOGGER.warning(AbstractEffect.class.getSimpleName() + ": Requested unexistent constructor for effect handler: " + name + ": " + e.getMessage());
+			LOGGER.log(Level.WARNING, AbstractEffect.class.getSimpleName() + ": Requested unexistent constructor for effect handler: " + name + ": " + e.getMessage(), e);
 			return null;
 		}
 		
@@ -98,7 +99,7 @@ public abstract class AbstractEffect
 		}
 		catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
 		{
-			LOGGER.warning(AbstractEffect.class.getSimpleName() + ": Unable to initialize effect handler: " + name + ": " + e.getMessage());
+			LOGGER.log(Level.WARNING, AbstractEffect.class.getSimpleName() + ": Unable to initialize effect handler: " + name + ": " + e.getMessage(), e);
 		}
 		
 		return null;

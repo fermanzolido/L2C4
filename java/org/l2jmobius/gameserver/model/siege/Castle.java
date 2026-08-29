@@ -972,7 +972,7 @@ public class Castle extends AbstractResidence
 		}
 		catch (Exception e)
 		{
-			LOGGER.info("Error saving showNpcCrest for castle " + getName() + ": " + e.getMessage());
+			LOGGER.log(Level.INFO, "Error saving showNpcCrest for castle " + getName() + ": " + e.getMessage(), e);
 		}
 	}
 	

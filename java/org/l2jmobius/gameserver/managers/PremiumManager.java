@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.commons.database.DatabaseFactory;
@@ -145,7 +146,7 @@ public class PremiumManager
 		}
 		catch (SQLException e)
 		{
-			LOGGER.warning("Problem with PremiumManager: " + e.getMessage());
+			LOGGER.log(Level.WARNING, "Problem with PremiumManager: " + e.getMessage(), e);
 		}
 	}
 	
@@ -173,7 +174,7 @@ public class PremiumManager
 		}
 		catch (SQLException e)
 		{
-			LOGGER.warning("Problem with PremiumManager: " + e.getMessage());
+			LOGGER.log(Level.WARNING, "Problem with PremiumManager: " + e.getMessage(), e);
 		}
 		
 		// UPDATE CACHE
@@ -222,7 +223,7 @@ public class PremiumManager
 		}
 		catch (SQLException e)
 		{
-			LOGGER.warning("Problem with PremiumManager: " + e.getMessage());
+			LOGGER.log(Level.WARNING, "Problem with PremiumManager: " + e.getMessage(), e);
 		}
 	}
 	

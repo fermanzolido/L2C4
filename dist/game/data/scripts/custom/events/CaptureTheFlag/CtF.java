@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -963,7 +964,7 @@ public class CtF extends Event
 								}
 								catch (Exception e)
 								{
-									LOGGER.warning(e.getMessage());
+									LOGGER.log(Level.WARNING, e.getMessage(), e);
 								}
 								finally
 								{

@@ -4457,7 +4457,7 @@ public class Quest implements IEventTimerEvent<String>, IEventTimerCancel<String
 
 			return npc;
 		} catch (Exception e) {
-			LOGGER.warning("Could not spawn NPC #" + npcId + "; error: " + e.getMessage());
+			LOGGER.log(Level.WARNING, "Could not spawn NPC #" + npcId + "; error: " + e.getMessage(), e);
 		}
 
 		return null;

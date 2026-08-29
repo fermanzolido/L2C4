@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.commons.database.DatabaseFactory;
@@ -144,7 +145,7 @@ public class Hero
 		}
 		catch (SQLException e)
 		{
-			LOGGER.warning("Hero System: Could not load Heroes: " + e.getMessage());
+			LOGGER.log(Level.WARNING, "Hero System: Could not load Heroes: " + e.getMessage(), e);
 		}
 		
 		LOGGER.info("Hero System: Loaded " + HEROES.size() + " Heroes.");
@@ -215,7 +216,7 @@ public class Hero
 		}
 		catch (SQLException e)
 		{
-			LOGGER.warning("Hero System: Could not load Hero Message for CharId: " + charId + ": " + e.getMessage());
+			LOGGER.log(Level.WARNING, "Hero System: Could not load Hero Message for CharId: " + charId + ": " + e.getMessage(), e);
 		}
 	}
 	
@@ -269,7 +270,7 @@ public class Hero
 		}
 		catch (SQLException e)
 		{
-			LOGGER.warning("Hero System: Could not load Hero Diary for CharId: " + charId + ": " + e.getMessage());
+			LOGGER.log(Level.WARNING, "Hero System: Could not load Hero Diary for CharId: " + charId + ": " + e.getMessage(), e);
 		}
 	}
 	
@@ -780,7 +781,7 @@ public class Hero
 		}
 		catch (SQLException e)
 		{
-			LOGGER.warning("Hero System: Could not update Heroes: " + e.getMessage());
+			LOGGER.log(Level.WARNING, "Hero System: Could not update Heroes: " + e.getMessage(), e);
 		}
 	}
 	
@@ -844,7 +845,7 @@ public class Hero
 		}
 		catch (SQLException e)
 		{
-			LOGGER.severe("SQL exception while saving DiaryData: " + e.getMessage());
+			LOGGER.log(Level.SEVERE, "SQL exception while saving DiaryData: " + e.getMessage(), e);
 		}
 	}
 	
@@ -878,7 +879,7 @@ public class Hero
 		}
 		catch (SQLException e)
 		{
-			LOGGER.severe("SQL exception while saving HeroMessage:" + e.getMessage());
+			LOGGER.log(Level.SEVERE, "SQL exception while saving HeroMessage:" + e.getMessage(), e);
 		}
 	}
 	
@@ -891,7 +892,7 @@ public class Hero
 		}
 		catch (SQLException e)
 		{
-			LOGGER.warning("Heroes: " + e.getMessage());
+			LOGGER.log(Level.WARNING, "Heroes: " + e.getMessage(), e);
 		}
 	}
 	

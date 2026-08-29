@@ -242,7 +242,7 @@ public class LoginServer extends FloodProtectorListener
 		}
 		catch (IOException e)
 		{
-			LOGGER.warning("LoginServer: " + e.getMessage());
+			LOGGER.log(Level.WARNING, "LoginServer: " + e.getMessage(), e);
 		}
 		
 		if (InterfaceConfig.ENABLE_GUI)

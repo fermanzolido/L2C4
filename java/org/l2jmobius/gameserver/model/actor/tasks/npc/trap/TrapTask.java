@@ -16,6 +16,7 @@
  */
 package org.l2jmobius.gameserver.model.actor.tasks.npc.trap;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.gameserver.model.World;
@@ -85,7 +86,7 @@ public class TrapTask implements Runnable
 		}
 		catch (Exception e)
 		{
-			LOGGER.severe(TrapTask.class.getSimpleName() + ": " + e.getMessage());
+			LOGGER.log(Level.SEVERE, TrapTask.class.getSimpleName() + ": " + e.getMessage(), e);
 			_trap.unSummon();
 		}
 	}

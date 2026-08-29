@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.commons.database.DatabaseFactory;
@@ -93,7 +94,7 @@ public class PunishmentManager
 		}
 		catch (Exception e)
 		{
-			LOGGER.warning(getClass().getSimpleName() + ": Error while loading punishments: " + e.getMessage());
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Error while loading punishments: " + e.getMessage(), e);
 		}
 		
 		LOGGER.info(getClass().getSimpleName() + ": Loaded " + initiated + " active and " + expired + " expired punishments.");
@@ -173,7 +174,7 @@ public class PunishmentManager
 		}
 		catch (SQLException e)
 		{
-			LOGGER.warning(getClass().getSimpleName() + ": Error updating access level for character: " + charId + ". " + e.getMessage());
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Error updating access level for character: " + charId + ". " + e.getMessage(), e);
 		}
 	}
 	

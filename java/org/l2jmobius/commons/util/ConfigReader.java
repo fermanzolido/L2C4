@@ -30,6 +30,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.commons.time.TimeUtil;
@@ -66,7 +67,7 @@ public class ConfigReader
 		}
 		catch (IOException e)
 		{
-			LOGGER.warning("Failed to load configurations from " + _file.getName() + ": " + e.getMessage());
+			LOGGER.log(Level.WARNING, "Failed to load configurations from " + _file.getName() + ": " + e.getMessage(), e);
 		}
 	}
 	

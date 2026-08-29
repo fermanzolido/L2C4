@@ -32,6 +32,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.commons.crypt.NewCrypt;
@@ -124,7 +125,7 @@ public class GameServerThread extends Thread
 		}
 		catch (IOException e)
 		{
-			LOGGER.warning(getClass().getSimpleName() + ": Failed to initialize network streams - " + e.getMessage());
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Failed to initialize network streams - " + e.getMessage(), e);
 			
 			// Both streams stay null and the thread was started anyway. run() writes to the
 			// output one on its first line, and the lock it takes on it throws there; run()
@@ -494,7 +495,7 @@ public class GameServerThread extends Thread
 		}
 		catch (IOException e)
 		{
-			LOGGER.warning("Error occurred while registering GameServer " + GameServerTable.getInstance()._serverNames.get(_serverId) + " (ID: " + _serverId + ") - " + e.getMessage());
+			LOGGER.log(Level.WARNING, "Error occurred while registering GameServer " + GameServerTable.getInstance()._serverNames.get(_serverId) + " (ID: " + _serverId + ") - " + e.getMessage(), e);
 		}
 	}
 	
@@ -543,13 +544,13 @@ public class GameServerThread extends Thread
 				catch (IOException e)
 				{
 					// Game server might have terminated connection during flush.
-					LOGGER.finer("GameServerThread: Failed to flush output stream. Game server may have disconnected - " + e.getMessage());
+					LOGGER.log(Level.FINER, "GameServerThread: Failed to flush output stream. Game server may have disconnected - " + e.getMessage(), e);
 				}
 			}
 		}
 		catch (IOException e)
 		{
-			LOGGER.severe("GameServerThread: IOException occurred while sending packet " + packet.getClass().getSimpleName() + " - " + e.getMessage());
+			LOGGER.log(Level.SEVERE, "GameServerThread: IOException occurred while sending packet " + packet.getClass().getSimpleName() + " - " + e.getMessage(), e);
 			LOGGER.severe(TraceUtil.getStackTrace(e));
 		}
 	}
@@ -585,7 +586,7 @@ public class GameServerThread extends Thread
 			}
 			catch (UnknownHostException e)
 			{
-				LOGGER.warning("Failed to resolve external hostname \"" + _gameExternalHost + "\" - " + e.getMessage());
+				LOGGER.log(Level.WARNING, "Failed to resolve external hostname \"" + _gameExternalHost + "\" - " + e.getMessage(), e);
 			}
 		}
 		else
@@ -602,7 +603,7 @@ public class GameServerThread extends Thread
 			}
 			catch (UnknownHostException e)
 			{
-				LOGGER.warning("Failed to resolve internal hostname \"" + _gameInternalHost + "\" - " + e.getMessage());
+				LOGGER.log(Level.WARNING, "Failed to resolve internal hostname \"" + _gameInternalHost + "\" - " + e.getMessage(), e);
 			}
 		}
 		else

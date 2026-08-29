@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.gameserver.data.xml.DoorData;
@@ -226,7 +227,7 @@ public class AdminDoorControl implements IAdminCommandHandler
 		}
 		catch (Exception e)
 		{
-			LOGGER.warning("Problem with AdminDoorControl: " + e.getMessage());
+			LOGGER.log(Level.WARNING, "Problem with AdminDoorControl: " + e.getMessage(), e);
 		}
 		
 		return true;

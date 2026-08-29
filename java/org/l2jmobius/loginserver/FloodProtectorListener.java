@@ -191,7 +191,7 @@ public abstract class FloodProtectorListener extends Thread
 		}
 		catch (IOException e)
 		{
-			LOGGER.warning(getClass().getSimpleName() + ": " + e.getMessage());
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": " + e.getMessage(), e);
 		}
 	}
 }

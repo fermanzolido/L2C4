@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 
 import org.l2jmobius.commons.database.DatabaseFactory;
 import org.l2jmobius.commons.threads.ThreadPool;
@@ -584,7 +585,7 @@ public class BanditStronghold extends ClanHallSiegeEngine
 			catch (Exception e)
 			{
 				endSiege();
-				LOGGER.warning(getClass().getSimpleName() + ": Problems in siege initialization! " + e.getMessage());
+				LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Problems in siege initialization! " + e.getMessage(), e);
 			}
 		}
 	}
@@ -704,7 +705,7 @@ public class BanditStronghold extends ClanHallSiegeEngine
 		}
 		catch (Exception e)
 		{
-			LOGGER.warning(getClass().getSimpleName() + ": Could not make clan spawns: " + e.getMessage());
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Could not make clan spawns: " + e.getMessage(), e);
 		}
 	}
 	
@@ -908,7 +909,7 @@ public class BanditStronghold extends ClanHallSiegeEngine
 		}
 		catch (Exception e)
 		{
-			LOGGER.warning(getClass().getSimpleName() + ".loadAttackers()->" + e.getMessage());
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ".loadAttackers()->" + e.getMessage(), e);
 		}
 	}
 	
@@ -936,7 +937,7 @@ public class BanditStronghold extends ClanHallSiegeEngine
 		}
 		catch (Exception e)
 		{
-			LOGGER.warning(getClass().getSimpleName() + ".loadAttackerMembers()->" + e.getMessage());
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ".loadAttackerMembers()->" + e.getMessage(), e);
 		}
 	}
 	
@@ -954,7 +955,7 @@ public class BanditStronghold extends ClanHallSiegeEngine
 		}
 		catch (Exception e)
 		{
-			LOGGER.warning(getClass().getSimpleName() + ".saveClan()->" + e.getMessage());
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ".saveClan()->" + e.getMessage(), e);
 		}
 	}
 	
@@ -970,7 +971,7 @@ public class BanditStronghold extends ClanHallSiegeEngine
 		}
 		catch (Exception e)
 		{
-			LOGGER.warning(getClass().getSimpleName() + ".saveNpc()->" + e.getMessage());
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ".saveNpc()->" + e.getMessage(), e);
 		}
 	}
 	
@@ -987,7 +988,7 @@ public class BanditStronghold extends ClanHallSiegeEngine
 		}
 		catch (Exception e)
 		{
-			LOGGER.warning(getClass().getSimpleName() + ".saveMember()->" + e.getMessage());
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ".saveMember()->" + e.getMessage(), e);
 		}
 	}
 	
@@ -1007,7 +1008,7 @@ public class BanditStronghold extends ClanHallSiegeEngine
 		}
 		catch (Exception e)
 		{
-			LOGGER.warning(getClass().getSimpleName() + ".clearTables()->" + e.getMessage());
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ".clearTables()->" + e.getMessage(), e);
 		}
 	}
 	

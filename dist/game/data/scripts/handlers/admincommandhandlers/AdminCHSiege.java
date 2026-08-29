@@ -17,6 +17,7 @@
 package handlers.admincommandhandlers;
 
 import java.util.Calendar;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.gameserver.config.DevelopmentConfig;
@@ -358,7 +359,7 @@ public class AdminCHSiege implements IAdminCommandHandler
 		}
 		catch (NumberFormatException e)
 		{
-			LOGGER.warning("Problem with AdminCHSiege: " + e.getMessage());
+			LOGGER.log(Level.WARNING, "Problem with AdminCHSiege: " + e.getMessage(), e);
 		}
 		
 		return val;

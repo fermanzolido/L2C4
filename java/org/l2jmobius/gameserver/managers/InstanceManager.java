@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -152,7 +153,7 @@ public class InstanceManager implements IXmlReader
 		}
 		catch (Exception e)
 		{
-			LOGGER.warning(getClass().getSimpleName() + ": Could not insert character instance time data: " + e.getMessage());
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Could not insert character instance time data: " + e.getMessage(), e);
 		}
 	}
 	
@@ -172,7 +173,7 @@ public class InstanceManager implements IXmlReader
 		}
 		catch (Exception e)
 		{
-			LOGGER.warning(getClass().getSimpleName() + ": Could not delete character instance time data: " + e.getMessage());
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Could not delete character instance time data: " + e.getMessage(), e);
 		}
 	}
 	
@@ -210,7 +211,7 @@ public class InstanceManager implements IXmlReader
 		}
 		catch (Exception e)
 		{
-			LOGGER.warning(getClass().getSimpleName() + ": Could not delete character instance time data: " + e.getMessage());
+			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Could not delete character instance time data: " + e.getMessage(), e);
 		}
 	}
 	
