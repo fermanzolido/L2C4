@@ -414,8 +414,11 @@ public class AutoSpawnHandler
 				// If the index is greater than the number of possible spawns, reset the counter to zero.
 				if (!spawnInst.isRandomSpawn())
 				{
+					// The list is copy-on-write and carries a public removeSpawnLocation, so it
+					// can be shorter than it was when the index was last stored -- and testing
+					// only for equality lets the index walk straight past its one way out.
 					locationIndex = spawnInst._lastLocIndex + 1;
-					if (locationIndex == locationCount)
+					if (locationIndex >= locationCount)
 					{
 						locationIndex = 0;
 					}
@@ -424,10 +427,12 @@ public class AutoSpawnHandler
 				}
 				
 				// Set the X, Y and Z co-ordinates, where this spawn will take place.
-				final int x = locationList.get(locationIndex).getX();
-				final int y = locationList.get(locationIndex).getY();
-				final int z = locationList.get(locationIndex).getZ();
-				final int heading = locationList.get(locationIndex).getHeading();
+				// One read: four asked a copy-on-write list four separate times.
+				final Location spawnLocation = locationList.get(locationIndex);
+				final int x = spawnLocation.getX();
+				final int y = spawnLocation.getY();
+				final int z = spawnLocation.getZ();
+				final int heading = spawnLocation.getHeading();
 				final Spawn newSpawn = new Spawn(spawnInst.getId());
 				newSpawn.setXYZ(x, y, z);
 				if (heading != -1)
