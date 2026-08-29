@@ -58,7 +58,9 @@ public class GrandBossManager
 	
 	protected static final Map<Integer, GrandBoss> BOSSES = new ConcurrentHashMap<>();
 	
-	protected static Map<Integer, StatSet> _storedInfo = new HashMap<>();
+	// The maps declared either side of this one are concurrent. This one was a plain
+	// HashMap that the save task iterates on its own thread while a boss dying puts.
+	protected static final Map<Integer, StatSet> _storedInfo = new ConcurrentHashMap<>();
 	
 	private final Map<Integer, Integer> _bossStatus = new ConcurrentHashMap<>();
 	

@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -78,7 +79,10 @@ public class Siege implements Siegable
 	public static final byte ATTACKER = 1;
 	public static final byte DEFENDER_NOT_APPROVED = 2;
 	
-	private int _controlTowerCount;
+	// Decremented by whichever thread killed a tower and read by the resurrection
+	// condition from another, so two towers falling together could lose a decrement and
+	// leave the count above zero for the rest of the siege -- with every tower down.
+	private final AtomicInteger _controlTowerCount = new AtomicInteger();
 	
 	// must support Concurrent Modifications
 	private final Collection<SiegeClan> _attackerClans = ConcurrentHashMap.newKeySet();
@@ -462,7 +466,7 @@ public class Siege implements Siegable
 				_castle.removeUpgrade(); // Remove all castle upgrade
 				_castle.spawnDoor(true); // Respawn door to castle but make them weaker (50% hp)
 				removeTowers(); // Remove all towers from this castle
-				_controlTowerCount = 0; // Each new siege midvictory CT are completely respawned.
+				_controlTowerCount.set(0); // Each new siege midvictory CT are completely respawned.
 				spawnControlTower();
 				spawnFlameTower();
 				updatePlayerSiegeStateFlags(false);
@@ -510,7 +514,7 @@ public class Siege implements Siegable
 			loadSiegeClan(); // Load siege clan from db
 			updatePlayerSiegeStateFlags(false);
 			teleportPlayer(SiegeTeleportWhoType.NotOwner, TeleportWhereType.TOWN); // Teleport to the closest town
-			_controlTowerCount = 0;
+			_controlTowerCount.set(0);
 			spawnControlTower(); // Spawn control tower
 			spawnFlameTower(); // Spawn control tower
 			_castle.spawnDoor(); // Spawn door
@@ -858,11 +862,7 @@ public class Siege implements Siegable
 	 */
 	public void killedCT()
 	{
-		_controlTowerCount--;
-		if (_controlTowerCount < 0)
-		{
-			_controlTowerCount = 0;
-		}
+		_controlTowerCount.updateAndGet(count -> Math.max(0, count - 1));
 	}
 	
 	/**
@@ -1504,7 +1504,7 @@ public class Siege implements Siegable
 			}
 		}
 		
-		_controlTowerCount = _controlTowers.size();
+		_controlTowerCount.set(_controlTowers.size());
 	}
 	
 	/**
@@ -1717,7 +1717,7 @@ public class Siege implements Siegable
 	
 	public int getControlTowerCount()
 	{
-		return _controlTowerCount;
+		return _controlTowerCount.get();
 	}
 	
 	@Override
