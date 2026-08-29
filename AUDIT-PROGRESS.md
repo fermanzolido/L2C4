@@ -4588,3 +4588,40 @@ números del juego, la decisión es del dueño del servidor.
 Las cinco skills son, otra vez, contenido de una crónica posterior al dato
 distribuido — la tercera vez que aparece esa misma raíz, después de las 53 páginas
 de los maestros de aldea 32092–32098 y de los 22 ítems.
+
+### Quinta clase decidible: las listas de tienda que el bypass abre
+
+El primer intento buscó estas referencias **en Java** y dio cero. El cero era falso
+y lo delató un contador que se añadió a propósito: había examinado **22**
+referencias en total —13 de zona, 7 de puerta, 2 de multisell— y **ninguna** de
+instancia ni de buylist, con 555 buylists en el dato. Las expresiones no coincidían
+con nada.
+
+**Multisells y buylists no se invocan desde Java: viven en bypasses dentro del
+html.** Buscando ahí: **190** referencias de multisell y 10 de compra examinadas.
+
+| dónde | id | qué queda muerto |
+|---|---|---|
+| `Q00336_CoinsOfMagic` | 30078, 30092, 30165, 30183, 30200, 30673, 30688, 30696, 30847 | **el intercambio entero de la quest** |
+| `CastleChamberlain` | 350980008 | el único botón de `35507-02.html` |
+
+Los nueve de Coins of Magic son ids de npc, y la carpeta **sí usa esa convención**
+(`31522.xml` está ahí), así que se esperaban y faltan. Cada uno de esos nueve npcs
+tiene un `-01.htm` cuya única acción es abrir su multisell: el jugador habla, pulsa,
+y no pasa nada. El del chambelán es el hueco 8 de una serie donde existen el 1 al 7.
+
+`separateAndSend` con un id que no existe deja un aviso en consola y vuelve sin
+abrir la ventana — el mismo síntoma que las páginas ausentes: **para el jugador no
+ocurre nada**.
+
+### Dos falsos positivos que valió la pena perseguir
+
+`bypass -h Script CastleMercenaryManager buy 1` **no** referencia el buylist 1. El
+script hace `Integer.parseInt(npc.getId() + st.nextToken())`, así que sobre el npc
+35102 la lista es la 351021. Los diez aciertos de buylist eran todos esa forma.
+
+### Señalado y **no** cambiado
+
+Otra vez contenido que falta, no código roto. Escribir esos diez multisells es
+decidir **qué se cambia por qué** —una tabla de intercambio económica—, y eso no lo
+inventa quien audita. Lo accionable es la lista, y está arriba.
