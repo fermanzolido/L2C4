@@ -207,7 +207,11 @@ public class GrandBossManager
 	
 	public int getStatus(int bossId)
 	{
-		return _bossStatus.get(bossId);
+		// A boss with no row in grand_boss data is simply absent here, and the null that
+		// came back was unboxed into an int inside whichever script asked. The states all
+		// start at zero, so -1 matches none of them and the script just finds no case.
+		final Integer status = _bossStatus.get(bossId);
+		return status == null ? -1 : status.intValue();
 	}
 	
 	public void setStatus(int bossId, int status)

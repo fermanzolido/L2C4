@@ -67,11 +67,15 @@ public class FakePlayerData
 	/**
 	 * Retrieves the NPC ID associated with the given fake player name.
 	 * @param name the name of the fake player
-	 * @return the NPC ID corresponding to the given name, or {@code null} if no match is found
+	 * @return the NPC ID corresponding to the given name, or {@code 0} if no match is found
 	 */
 	public int getNpcIdByName(String name)
 	{
-		return _fakePlayerIds.get(name);
+		// The javadoc promised a null this return type cannot carry, and an unknown name
+		// unboxed one straight into an int. Both callers hand the answer to getAnySpawn
+		// and then test its result, and no npc has id zero.
+		final Integer npcId = _fakePlayerIds.get(name);
+		return npcId == null ? 0 : npcId.intValue();
 	}
 	
 	/**

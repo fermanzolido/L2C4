@@ -176,7 +176,15 @@ public class CharSummonTable
 	
 	public void restoreServitor(Player player)
 	{
-		final int skillId = _servitors.get(player.getObjectId());
+		// The caller tests containsKey before calling; this read the map again, so a
+		// servitor removed in between unboxed a null into an int.
+		final Integer servitorSkillId = _servitors.get(player.getObjectId());
+		if (servitorSkillId == null)
+		{
+			return;
+		}
+		
+		final int skillId = servitorSkillId.intValue();
 		try (Connection con = DatabaseFactory.getConnection();
 			PreparedStatement ps = con.prepareStatement(LOAD_SUMMON))
 		{

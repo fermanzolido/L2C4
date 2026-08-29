@@ -127,9 +127,22 @@ public class SevenSigns
 	protected Calendar _lastSave = Calendar.getInstance();
 	
 	protected Map<Integer, StatSet> _signsPlayerData = new LinkedHashMap<>();
-	private final Map<Integer, Integer> _signsSealOwners = new LinkedHashMap<>();
-	private final Map<Integer, Integer> _signsDuskSealTotals = new LinkedHashMap<>();
-	private final Map<Integer, Integer> _signsDawnSealTotals = new LinkedHashMap<>();
+	// Filled from a single seven_signs_status row, and the loader's catch logs a failed
+	// read and carries on -- which left these empty, and every getSealOwner and
+	// getSealProportion unboxed the resulting null straight into an int. Seeded with the
+	// three seals so a failed load answers "nobody owns it" instead of throwing.
+	private final Map<Integer, Integer> _signsSealOwners = newSealMap();
+	private final Map<Integer, Integer> _signsDuskSealTotals = newSealMap();
+	private final Map<Integer, Integer> _signsDawnSealTotals = newSealMap();
+	
+	private static Map<Integer, Integer> newSealMap()
+	{
+		final Map<Integer, Integer> map = new LinkedHashMap<>();
+		map.put(SEAL_AVARICE, 0);
+		map.put(SEAL_GNOSIS, 0);
+		map.put(SEAL_STRIFE, 0);
+		return map;
+	}
 	
 	private static final String LOAD_DATA = "SELECT charId, cabal, seal, red_stones, green_stones, blue_stones, ancient_adena_amount, contribution_score FROM seven_signs";
 	

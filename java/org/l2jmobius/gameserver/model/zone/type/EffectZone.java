@@ -244,12 +244,17 @@ public class EffectZone extends ZoneType
 	
 	public int getSkillLevel(int skillId)
 	{
-		if ((_skills == null) || !_skills.containsKey(skillId))
+		// The field is volatile because it is replaced at runtime, and clearSkills empties
+		// the map: asking it three times let the entry vanish between the test and the
+		// read, and the null that came back was unboxed straight into an int.
+		final Map<Integer, Integer> skills = _skills;
+		if (skills == null)
 		{
 			return 0;
 		}
 		
-		return _skills.get(skillId);
+		final Integer level = skills.get(skillId);
+		return level == null ? 0 : level.intValue();
 	}
 	
 	private class ApplySkill implements Runnable
