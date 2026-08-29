@@ -4607,7 +4607,7 @@ public class Player extends Playable {
 							itemDrop.isTimeLimitedItem() || // do not drop Time Limited Items
 							!itemDrop.isDropable() || (itemDrop.getId() == Inventory.ADENA_ID) || // Adena
 							(itemDrop.getTemplate().getType2() == ItemTemplate.TYPE2_QUEST) || // Quest Items
-							(hasSummon() && (_summon.getControlObjectId() == itemDrop.getId())) || // Control Item of
+							(hasSummon() && (_summon.getControlObjectId() == itemDrop.getObjectId())) || // Control Item of
 																									// active pet
 							(Arrays.binarySearch(PvpConfig.KARMA_LIST_NONDROPPABLE_ITEMS, itemDrop.getId()) >= 0) || // Item
 																														// listed
