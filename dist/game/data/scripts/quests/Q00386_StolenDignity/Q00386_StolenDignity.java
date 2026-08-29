@@ -166,7 +166,9 @@ public class Q00386_StolenDignity extends Quest
 			{
 				case 3:
 				{
-					return "30843-09a.html";
+					// The shipped page is 30843-09a.htm; asking for .html found nothing and
+					// the player got a blank window where the bingo rules should be.
+					return "30843-09a.htm";
 				}
 				case 5:
 				{
@@ -179,7 +181,8 @@ public class Q00386_StolenDignity extends Quest
 				}
 				case 9:
 				{
-					return "30843-09.htm";
+					// And this one is the other way round: the shipped page is 30843-09.html.
+					return "30843-09.html";
 				}
 				case 8:
 				{

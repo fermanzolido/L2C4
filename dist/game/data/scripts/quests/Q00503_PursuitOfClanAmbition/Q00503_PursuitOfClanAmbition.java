@@ -386,7 +386,11 @@ public class Q00503_PursuitOfClanAmbition extends Quest
 							}
 							else if (memberCond == 13)
 							{
-								htmltext = "30766-24t.htm";
+								// Every branch around this one speaks for 30760, and 30760-24t.htm
+								// is the page this quest ships. There is no 30766-24t.htm, and a
+								// page that does not resolve is simply never sent: the player
+								// clicks and the window does not change.
+								htmltext = "30760-24t.htm";
 							}
 						}
 						break;

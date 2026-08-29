@@ -4455,3 +4455,61 @@ sigue verificado solo por lectura**, y se deja dicho en vez de forzarlo.
 
 Lo mismo para el doble desbloqueo de `PlayerVariables`, `AccountVariables` e
 `ItemVariables`: sus rutas de guardado y borrado hablan con la base de datos.
+
+---
+
+## `quests/` — las clases decidibles
+
+296 archivos y 77.828 líneas no se cierran leyéndolos uno a uno, y los barridos
+estructurales ya habían pasado por todos. Pero hay una clase **completamente
+decidible** que rompe la quest para el jugador: **una página que el script nombra y
+el datapack no tiene**.
+
+Cuando eso pasa el síntoma es preciso, y conviene saberlo: `showHtmlFile` solo
+envía si `getHtm` encontró algo, así que **no se envía nada**. El jugador hace clic
+y la ventana no cambia. No hay error, no hay traza, no hay nada en el registro. La
+quest simplemente parece atascada.
+
+### El barrido, y las tres veces que hubo que afinarlo
+
+De **6.267** referencias literales a páginas, empezó marcando 243 inexistentes.
+Ninguna cifra intermedia era la buena:
+
+1. **243** — resolvía todo junto al `.java`. Falso: el html de administración vive
+   en `data/html/admin/`. Añadidas las raíces reales → **179**.
+2. **179** — `AbstractSagaQuest` es una **clase base** y sus páginas viven en las
+   carpetas de las 31 sagas concretas. Contando como resuelto lo que existe en
+   cualquier carpeta del datapack → **103**.
+3. **103** — `htmltext += "mystic.html"` es una concatenación, y el filtro
+   comprobaba que la línea terminara en `+`, no en `+=`. Corregido → **86**.
+
+De esas 86, **12 son fragmentos** que se arman con el id del npc en tiempo de
+ejecución (`npcId + "-01.htm"`), y **74 son código muerto**: ninguna página del
+datapack las nombra, así que la rama no se alcanza.
+
+El grueso de las 74 son los maestros de aldea de los npcs **32092 a 32098**, que
+son de una crónica posterior y cuyo contenido nunca se distribuyó — 53 páginas de
+ramas que no existen. No se tocan.
+
+### Lo que sí eran defectos
+
+| quest | dice | existe | qué falla |
+|---|---|---|---|
+| `Q00386_StolenDignity` | `30843-09a.**html**` | `30843-09a.**htm**` | las reglas del bingo |
+| `Q00386_StolenDignity` | `30843-09.**htm**` | `30843-09.**html**` | las reglas del bingo |
+| `Q00503_PursuitOfClanAmbition` | `307**66**-24t.htm` | `307**60**-24t.htm` | la respuesta con `memberCond == 13` |
+
+Las dos de `StolenDignity` tienen las extensiones **cruzadas** entre sí, y los dos
+ficheros existen con el mismo contenido. La de `PursuitOfClanAmbition` es un dígito:
+todas las ramas de alrededor hablan por el npc 30760, incluida la de justo encima.
+
+### Señalado y **no** cambiado
+
+**`Q00627_HeartInSearchOfPower` línea 142** dice `"31518-7.htm"` —sin el cero— y la
+línea 128 del mismo método dice `"31518-07.htm"`, que sí existe. Parece el mismo
+error de un carácter que los tres de arriba, **y no se toca**, por esto: las dos son
+las ramas de un mismo `if`. La primera es "tienes la Gema de los Santos" y muestra
+la página de recompensa; la segunda es "no la tienes". Apuntarla a `-07` le mostraría
+la confirmación de recompensa a quien no recibió ninguna, que es peor que la ventana
+en blanco. Cuál era la página que el autor quiso no está en el repositorio, y
+adivinarla es escribir contenido, no arreglar un error.
