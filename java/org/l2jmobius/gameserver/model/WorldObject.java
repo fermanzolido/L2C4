@@ -162,13 +162,25 @@ public abstract class WorldObject extends ListenersContainer implements IPositio
 		{
 			// Set the x,y,z position of the WorldObject spawn and update its _worldregion
 			_isSpawned = true;
-			setWorldRegion(World.getInstance().getRegion(this));
+			
+			// getRegion answers null for an object outside the world grid -- it disposes of
+			// the object first and says so in the log -- and setXYZ tests for exactly that
+			// before using the answer. Going on regardless put a just-disposed object back
+			// into _allObjects and then dereferenced the null region.
+			final WorldRegion region = World.getInstance().getRegion(this);
+			if (region == null)
+			{
+				_isSpawned = false;
+				return false;
+			}
+			
+			setWorldRegion(region);
 			
 			// Add the WorldObject spawn in the _allobjects of World
 			World.getInstance().addObject(this);
 			
 			// Add the WorldObject spawn to _visibleObjects and if necessary to _allplayers of its WorldRegion
-			_worldRegion.addVisibleObject(this);
+			region.addVisibleObject(this);
 		}
 		
 		// this can synchronize on others instances, so it's out of synchronized, to avoid deadlocks

@@ -36,7 +36,7 @@ hallazgos aunque no hayas terminado el área.
 | ~~`model/stats`~~ | 7 | 2.663 | **TERMINADA** |
 | ~~`model/conditions`~~ | 80 | 4.989 | **TERMINADA** |
 | ~~`model/script`~~ | 9 | 7.622 | **TERMINADA** |
-| `model` (raiz) | 58 | 14.546 | pendiente |
+| ~~`model` (raiz)~~ | 58 | 14.546 | **TERMINADA** |
 | resto fuera de mapa | 485 | 84.955 | pendiente |
 | datapack `quests/` | 298 | 79.342 | pendiente |
 
@@ -4041,3 +4041,97 @@ try, con el comentario "managed below"), y los otros tres son los defectos 5, 6 
   decisión de diseño del dueño del servidor, no del arreglo. Lo acotado sí se
   arregló: la línea que leía el conjunto fuera del `try` reportaba un nulo en vez
   del fallo real.
+
+---
+
+## `model` (raiz) — TERMINADA
+
+58 archivos, 14.546 líneas. Los barridos corrieron sobre los 58; a mano se leyeron
+los doce mayores (`EffectList`, `WorldObject`, `TradeList`, `StatSet`, `World`,
+`AutoSpawnHandler`, `Spawn`, `WorldRegion`, `BlockList`, `Request`,
+`DropProtection`, `WalkInfo`), que son unas 7.500 de esas líneas.
+
+**Casi todo lo encontrado es la misma familia**: una clase que *sí* pensó en
+concurrencia —tiene candado, atómico o colecciones concurrentes— y dejó uno o dos
+campos fuera. No es descuido genérico: es una intención a medio aplicar, y por eso
+se puede señalar sin discutir cuál era la intención.
+
+| # | Archivo | Defecto | Severidad |
+|---|---------|---------|-----------|
+| 1 | `Spawn` + `RespawnTaskManager` | dos contadores, tres hilos, ningún candado | **alta** |
+| 2 | `DropProtection` | valida el argumento tras las escrituras que impide | **alta** |
+| 3 | `WorldObject.spawnMe` | no comprueba la región que `setXYZ` sí comprueba | **alta** |
+| 4 | `OlympiadGame` | el daño que decide el combate, acumulado sin candado | **alta** |
+| 5 | `World` | un jugador podía quedar en las dos facciones | media |
+| 6 | `Request` | limpia cuatro campos desde el pool sin el monitor | media |
+| 7 | `EffectList` | `EnumSet` entre seis colecciones concurrentes | media |
+| 8 | `Siege` | el contador de torres decrementado sin atomicidad | media |
+| 9 | `GrandBossManager` | `HashMap` entre dos mapas concurrentes | media |
+| 10 | `TradeList`, `Clan`, `PlayerStat`, `WorldRegion` | escrito bajo candado, leído sin él | media |
+| 11 | `AutoSpawnHandler` | índice cíclico probado con `==` | baja |
+
+**1 — El respawn que no vuelve.** El hilo de decaimiento baja `_currentCount` y
+sube `_scheduledCount`; el gestor de respawn baja `_scheduledCount` **metiendo
+mano en un campo público desde su propio hilo**; el hilo de spawn sube
+`_currentCount`. Y los dos se leen juntos para decidir si cabe un respawn. Un solo
+decremento perdido deja esa suma clavada en el máximo y **ese spawn no vuelve a
+aparecer en lo que dure el servidor**. Se pierde en silencio, y se acumula.
+
+**2 — El ítem que nadie puede recoger.** `protect()` marcaba protegido, asignaba
+el dueño, y **entonces** lanzaba si el dueño era nulo. El objeto quedaba protegido,
+sin dueño y sin tarea que lo limpiara, que es el único estado en el que cada
+`tryPickUp` posterior lanza — para todos, para siempre.
+
+**3 — La región que se sabe nula.** `World.getRegion` devuelve null **a propósito**
+para un objeto fuera de la rejilla: lo desecha primero y lo dice en el registro.
+`setXYZ` comprueba exactamente eso antes de usar la respuesta; `spawnMe` seguía
+adelante, volvía a meter en `_allObjects` un objeto recién desechado, y
+desreferenciaba el nulo.
+
+**4 — El combate decidido por daño no contado.** Los dos totales se acumulan desde
+los hilos de combate —un golpe y un tic de daño pueden caer juntos— y la tarea de
+cuenta atrás los pone a cero desde otro. Deciden el ganador cuando ninguno muere.
+
+**5 — El jugador de dos facciones.** El gestor de facción **no comprueba** si el
+jugador ya tiene una, así que puede volver a elegir: entra en el mapa nuevo y se
+queda en el viejo. Cuenta doble en el limitador de balance, y al salir solo se le
+quita de uno — el `Player` entero queda anclado en el otro.
+
+### Barridos nuevos, los dos validados contra el fichero previo al arreglo
+
+- **Índice cíclico probado con `==` contra una cota**: encuentra el de
+  `AutoSpawnHandler` en la versión previa y **cero** en el repositorio entero. Era
+  el único.
+- **Campo público mutable que otra clase muta por referencia**: encuentra el de
+  `Spawn` en la versión previa y **19** en el repositorio. Siete son campos de
+  `MoveData`, que es una estructura y se usa así en todo el código; el resto son
+  colisiones de nombre (`id`, `name`, `b`) que el barrido no puede distinguir. Los
+  únicos reales fueron los de Olimpiada.
+- **Una o dos colecciones lisas en una clase con mayoría concurrente**: **8**
+  candidatos, de los cuales **6** se construyen en la carga y solo se leen después.
+  Los dos vivos eran `GrandBossManager` y `EffectList`.
+
+### Sospechas evaluadas y descartadas, con lo que las descarta
+
+- **`StatSet`**: 35 captadores con un contrato **uniforme y deliberado** —ausente
+  da el defecto, presente pero mal formado lanza— y los que devuelven objetos usan
+  `instanceof`, que cubre el nulo. Sin defecto. Su familia `increase*` (12 métodos,
+  uno con retorno `short` que guarda un `byte` truncado) **no se usa en ninguna
+  parte** fuera de la propia clase: código muerto, no se toca.
+
+- **`BlockList.isInBlockList`**: el `containsKey` + `put` + `get` son tres
+  búsquedas para una pregunta, pero `loadList` nunca devuelve nulo y **nada quita
+  del mapa**, así que el `get` no puede fallar.
+
+- **`WorldRegion._surroundingRegions`**: se asigna una sola vez en el constructor
+  de `World`, antes de que exista ningún jugador.
+
+- **`EffectList._stackedEffects`**: el `containsKey`+`get` está dentro de
+  `synchronized (this)` y el código **ya comprueba nulo tras cada `get`**. Bien
+  escrito; el autor sabía.
+
+- **`TradeList`**: `(MAX_ADENA / count) < price` divide por una variable, pero
+  `count <= 0` se comprueba dos guardas antes, en los dos sitios.
+
+- **`WalkInfo.getCurrentNode`** ya acota su índice con
+  `Math.min(Math.max(0, …), size - 1)`.
