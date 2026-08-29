@@ -304,8 +304,7 @@ class OlympiadGameTask implements Runnable
 			switch (i)
 			{
 				case 10:
-					_game._damageP1 = 0;
-					_game._damageP2 = 0;
+					_game.resetDamage();
 					step = 5;
 					break;
 				case 5:

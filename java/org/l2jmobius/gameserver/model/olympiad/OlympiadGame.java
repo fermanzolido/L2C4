@@ -87,11 +87,16 @@ class OlympiadGame {
 
 	protected long _startTime = 0;
 
-	public int _damageP1 = 0;
-	public int _damageP2 = 0;
+	// Accumulated from the combat threads -- a melee hit and a damage-over-time tick can
+	// land together -- and zeroed by the countdown task from another. These two decide the
+	// winner when neither fighter dies, so a lost addition awards the wrong match.
+	private volatile int _damageP1 = 0;
+	private volatile int _damageP2 = 0;
 
-	public Player _playerOne;
-	public Player _playerTwo;
+	// Written by this class and by the game task from its own thread, and read by the
+	// combat threads that report damage.
+	public volatile Player _playerOne;
+	public volatile Player _playerTwo;
 	protected List<Player> _players;
 	private final int[] _stadiumPort;
 	private int x1, y1, z1, x2, y2, z2;
@@ -935,20 +940,33 @@ class OlympiadGame {
 		return true;
 	}
 
-	protected void addDamage(Player player, int damage) {
-		if ((_playerOne == null) || (_playerTwo == null)) {
+	protected synchronized void addDamage(Player player, int damage) {
+		// Both were tested above and read again below; the game task nulls them from its
+		// own thread, so hold the pair that was tested.
+		final Player one = _playerOne;
+		final Player two = _playerTwo;
+		if ((one == null) || (two == null)) {
 			return;
 		}
 
-		if (player == _playerOne) {
-			if (!_playerTwo.isInvul()) {
+		if (player == one) {
+			if (!two.isInvul()) {
 				_damageP1 += damage;
 			}
-		} else if (player == _playerTwo) {
-			if (!_playerOne.isInvul()) {
+		} else if (player == two) {
+			if (!one.isInvul()) {
 				_damageP2 += damage;
 			}
 		}
+	}
+
+	/**
+	 * Clears both damage tallies. Called by the game task from its own thread as the
+	 * countdown reaches ten.
+	 */
+	protected synchronized void resetDamage() {
+		_damageP1 = 0;
+		_damageP2 = 0;
 	}
 
 	protected String getTitle() {
