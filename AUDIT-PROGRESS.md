@@ -4400,8 +4400,58 @@ because the return value of "java.util.Map.get(Object)" is null`.
 (`/c/...`): javac es un binario de Windows y con la segunda forma no resuelve las
 clases del build, dando errores de "cannot find symbol" que parecen del código.
 
-### Lo que sigue sin cubrir
+### Dos más, y la deuda que queda nombrada
 
-`Spawn` y `QuestState` necesitan npcs y jugadores reales para construirse, así que
-sus arreglos —los contadores de reaparición y el mapa de variables— siguen
-verificados solo por lectura. Es la deuda de verificación que queda.
+De **41** a **47**.
+
+#### `SpawnCounterTest`
+
+`new Spawn(null)` sale del constructor antes de reflexionar sobre la clase de la
+plantilla, así que cuesta nada construirlo. El contador es privado, así que el test
+lo fija y lo lee por reflexión en vez de ensanchar la clase para un test.
+
+**Validación con la forma antigua repuesta** —decremento directo, sin candado ni
+suelo, que es como lo hacía el gestor de reaparición metiendo mano en el campo
+público—, tres corridas de 16.000 decrementos:
+
+| esperado | obtenido |
+|---|---|
+| 0 | 11.706 |
+| 0 | 13.139 |
+| 0 | 12.120 |
+
+**Y aquí hay que leer con cuidado, no repetir el número.** Eso es ~12.500 de 16.000
+decrementos perdidos, pero es **un bucle apretado**: sin `volatile` ni candado el
+JIT mantiene el campo en un registro durante toda la iteración y los decrementos ni
+siquiera llegan a memoria. En el servidor real están repartidos en el tiempo y la
+tasa sería muchísimo menor. El test prueba que **la pérdida es posible y que el
+arreglo la impide**; no dice que se pierdan tres de cada cuatro reapariciones en
+producción.
+
+El segundo caso pide más decrementos que reapariciones programadas: con el suelo
+puesto queda en cero, sin él la cuenta se va por debajo.
+
+#### `DocumentBaseNotConditionTest`
+
+El constructor de `DocumentBase` solo guarda el fichero, así que una subclase de
+test llega a `parseLogicNot` con un DOM construido a mano y sin tocar disco.
+
+Cuatro casos: hijo desconocido, `<player>` sin atributo legible, `<not>` vacío, y un
+hijo legible que debe seguir funcionando.
+
+**Validación con la versión que envolvía el nulo:** fallan **los dos primeros**,
+devolviendo un `ConditionLogicNot` que envuelve null. Los otros dos pasan con las
+dos versiones —el `<not>` vacío ya se rechazaba y el camino normal no se tocó—, que
+es exactamente lo que debe pasar y por eso están.
+
+#### La deuda que queda
+
+**`QuestState` no es comprobable en aislamiento.** Su constructor exige un `Player`
+real, y el de `Quest` reflexiona sobre `ScriptEngine.getCurrentLoadingScript()`, que
+fuera del cargador de scripts es nulo. Sin un framework de mocks —solo hay JUnit y
+hamcrest en `test/libs`— sacarlo exigiría instanciar sin constructor por reflexión
+interna, que es frágil y necesita `--add-opens`. **El mapa de variables de quest
+sigue verificado solo por lectura**, y se deja dicho en vez de forzarlo.
+
+Lo mismo para el doble desbloqueo de `PlayerVariables`, `AccountVariables` e
+`ItemVariables`: sus rutas de guardado y borrado hablan con la base de datos.
