@@ -225,12 +225,16 @@
 		<effects>
 			<effect name="Buff">
 				<mul stat="critRatePos" val="2">
-					<using kind="DAGGER,DUALDAGGER" />
-					<player behind="true" />
+					<and>
+						<player behind="true" />
+						<using kind="DAGGER,DUALDAGGER" />
+					</and>
 				</mul>
 				<mul stat="critDmg" val="1.2">
-					<using kind="RAPIER" />
-					<player behind="true" />
+					<and>
+						<player behind="true" />
+						<using kind="RAPIER" />
+					</and>
 				</mul>
 			</effect>
 		</effects>

@@ -73,6 +73,10 @@ decisión de quien audita.
 
 1. **`buffDebuffMod`** arrancaba en 1 y no en 0; corregido. **Mueve un punto cada
    probabilidad de prender** de todo buff y debuff. Se puede revertir en un commit.
+1. **La skill 4522 "Eye of Assassin"** declaraba dos condiciones hermanas donde el
+   parser solo lee la primera, así que sus dos bonos de crítico se aplicaban **desde
+   cualquier ángulo**. Corregido con `<and>`: ahora exigen estar por la espalda, que
+   es lo que el dato pedía. También mueve números.
 2. **La crónica**: añadir el contenido que falta o quitar las ramas muertas.
 3. **`IdManager`** sigue arrancando tras un fallo de inicialización, con el espacio
    de ids a medio construir — riesgo de colisiones. Abortar el arranque sería
@@ -4965,3 +4969,54 @@ distintos.
 
 De las 190, las únicas confirmadas muertas por comprobación directa son esas cuatro.
 El resto se declara aquí como **no medido**, no como limpio.
+
+### Undécima clase: validar el dato contra su propio esquema
+
+Los 1.447 XML del datapack declaran cada uno su XSD, y el lector del servidor corre
+con `factory.setValidating(false)`. O sea: **si un fichero viola su esquema, nadie
+se entera** — el parser lee lo que puede y lo demás no se carga.
+
+Primero lo barato: **los 1.447 parsean** sin error de sintaxis, y **los 1.447**
+declaran un XSD que existe en la ruta indicada.
+
+Después lo caro, con un validador escrito para esto (`javax.xml.validation`, porque
+`lxml` no está disponible): **1.446 válidos, uno no**.
+
+#### El que no validaba, y lo que costaba
+
+`stats/skills/04500-04599.xml`, skill **4522 "Eye of Assassin"**, dos veces:
+
+```xml
+<mul stat="critRatePos" val="2">
+    <using kind="DAGGER,DUALDAGGER" />
+    <player behind="true" />   <!-- dos condiciones hermanas -->
+</mul>
+```
+
+**Y el parser real solo lee la primera.** `attachFunc` hace
+`parseCondition(n.getFirstChild(), template)`, y `parseCondition` avanza al primer
+nodo elemento y parsea **ése y nada más**; los hermanos que siguen no se leen nunca.
+
+Así que `<player behind="true"/>` **se descartaba en silencio** en las dos: el bono
+de probabilidad de crítico con daga y el de daño crítico con estoque **se aplicaban
+desde cualquier ángulo**, cuando el dato dice claramente que son por la espalda.
+
+#### El arreglo, y el error intermedio que enseñó algo
+
+La forma que el datapack usa para varias condiciones es `<and>` — **119 usos** en el
+dato de skills. Envueltas así, `parseLogicAnd` recorre **todos** los hijos y la
+condición pasa a contar.
+
+Pero el primer intento **seguía sin validar**, y el motivo es instructivo: el
+esquema declara ese `<and>` como `xs:sequence` con `player` **antes** que `using`, y
+yo las había puesto al revés. En una secuencia el orden es parte del contrato. Al
+parser le da igual —recorre hijos— pero al esquema no. Invertidas:
+
+**1.447 de 1.447 validan.**
+
+#### Esto mueve el juego, y es tuyo decidirlo
+
+Antes, los dos bonos se aplicaban siempre. Ahora se aplican **solo por la espalda**,
+que es lo que el dato pedía y nunca hacía. Es la misma clase de cambio que
+`buffDebuffMod`: honrar la intención declarada altera números que llevaban años
+comportándose de otra manera. Se puede revertir en un commit.
