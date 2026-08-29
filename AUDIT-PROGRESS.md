@@ -4915,3 +4915,53 @@ donde el instalador mira.
 - **`character_contacts`** parecía no tener esquema. Lo tiene: es el **único** de los
   93 ficheros que escribe sus columnas **sin comillas invertidas**, y mi parser las
   buscaba con ellas.
+
+### Décima clase: las claves de configuración, en los dos sentidos
+
+62 ficheros de configuración declaran **1.208 claves**; el código pide **1.019**
+literalmente.
+
+#### La sección anticheat estaba desconectada de sí misma
+
+Cuatro claves que **el código lee y ningún fichero declaraba**:
+`AntiCheatMovementEnable`, `AntiCheatAttackSpeedEnable`, `AntiCheatCastSpeedEnable`,
+`AntiCheatRangeEnable`. No son constantes muertas — las cuatro gobiernan rutas vivas:
+
+| clave | dónde actúa |
+|---|---|
+| `AntiCheatMovementEnable` | `ValidatePosition`: rechaza un movimiento que supere 1,5× la velocidad |
+| `AntiCheatAttackSpeedEnable` | `AttackRequest`: rechaza un ataque enviado mientras ya se ataca |
+| `AntiCheatCastSpeedEnable` | `RequestMagicSkillUse`: rechaza un lanzamiento mientras ya se lanza |
+| `AntiCheatRangeEnable` | `Creature`: la comprobación de rango de ataque |
+
+Las cuatro **por defecto activas**, y sin aparecer en ningún `.ini` el dueño del
+servidor **no tenía forma de saber que existen**, y por tanto ninguna de apagarlas.
+
+Y en el otro sentido, cuatro claves que **`Player.ini` declara y ningún código lee**:
+`AntiCheat`, `AntiCheatCheckInterval`, `AntiCheatCheckDualBox`, `AntiCheatCheckBot`.
+Poner `AntiCheat = False` **no hacía absolutamente nada**; el dueño creía haber
+desactivado el anticheat y seguía encendido.
+
+Ocho claves, cuatro por lado, **ninguna coincidiendo**. Las cuatro reales están ahora
+en `Player.ini` con lo que hace cada una y su valor por defecto. Las cuatro muertas
+se **anotan, no se borran**: quitarlas cambiaría en silencio una configuración que el
+dueño puede tener editada, y una nota dice la verdad igual de bien.
+
+Tras el arreglo: **0 claves que el código pida y nadie declare.**
+
+#### El otro lado del recuento no vale, y por qué
+
+Quedan 190 claves declaradas que el barrido no ve pedidas, y **no son hallazgos**:
+se leen por mecanismos que una búsqueda literal no puede resolver, y son tres
+distintos.
+
+| familia | claves | cómo se lee de verdad |
+|---|---|---|
+| `FloodProtector.ini` | 80 | prefijo: `"FloodProtector" + nombre + "Interval"` |
+| `Siege.ini` | 42 | prefijo: `castle.getName() + "ControlTower" + i` |
+| `Custom/ClassBalance.ini` | 37 | por clase, fuera de las clases de configuración |
+| `Network.ini` | 24 | **patrón** `BufferPool\.\w+?\.Size` sobre el conjunto de claves |
+| `Player.ini` | **4** | **nadie: son las anticheat muertas de arriba** |
+
+De las 190, las únicas confirmadas muertas por comprobación directa son esas cuatro.
+El resto se declara aquí como **no medido**, no como limpio.
