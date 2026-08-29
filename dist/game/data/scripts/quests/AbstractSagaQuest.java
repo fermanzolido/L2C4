@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.l2jmobius.gameserver.ai.Intention;
 import org.l2jmobius.gameserver.config.PlayerConfig;
@@ -50,7 +51,9 @@ public abstract class AbstractSagaQuest extends Quest {
 	protected int[] _y = {};
 	protected int[] _z = {};
 	protected String[] _text = {};
-	private static final Map<Npc, Integer> SPAWN_LIST = new HashMap<>();
+	// Static, so every saga quest shares this one map, and it is put into and removed
+	// from at runtime by whichever thread is running a quest event. It was a plain HashMap.
+	private static final Map<Npc, Integer> SPAWN_LIST = new ConcurrentHashMap<>();
 	// @formatter:off
 	private static final int[][] QUEST_CLASSES =
 	{
@@ -589,24 +592,31 @@ public abstract class AbstractSagaQuest extends Quest {
 
 	@Override
 	public void onSkillSee(Npc npc, Player player, Skill skill, List<WorldObject> targets, boolean isSummon) {
-		if (SPAWN_LIST.containsKey(npc) && (SPAWN_LIST.get(npc) != player.getObjectId())) {
-			final Player questPlayer = World.getInstance().findObject(SPAWN_LIST.get(npc)).asPlayer();
-			if (questPlayer == null) {
-				return;
-			}
+		// Asked three times for one answer, and the null test below guarded what asPlayer
+		// returns while findObject -- which answers null for an object already gone -- was
+		// dereferenced before it. A concurrent remove also unboxed a null into the compare.
+		final Integer owner = SPAWN_LIST.get(npc);
+		if ((owner == null) || (owner.intValue() == player.getObjectId())) {
+			return;
+		}
 
-			for (WorldObject obj : targets) {
-				if ((obj == questPlayer) || (obj == npc)) {
-					final QuestState st2 = findRightState(npc);
-					if (st2 == null) {
-						return;
-					}
+		final WorldObject ownerObject = World.getInstance().findObject(owner.intValue());
+		final Player questPlayer = ownerObject == null ? null : ownerObject.asPlayer();
+		if (questPlayer == null) {
+			return;
+		}
 
-					autoChat(npc, _text[5].replace("PLAYERNAME", player.getName()));
-					cancelQuestTimer("Archon Hellisha has despawned", npc, st2.getPlayer());
-					st2.set("spawned", "0");
-					deleteSpawn(npc);
+		for (WorldObject obj : targets) {
+			if ((obj == questPlayer) || (obj == npc)) {
+				final QuestState st2 = findRightState(npc);
+				if (st2 == null) {
+					return;
 				}
+
+				autoChat(npc, _text[5].replace("PLAYERNAME", player.getName()));
+				cancelQuestTimer("Archon Hellisha has despawned", npc, st2.getPlayer());
+				st2.set("spawned", "0");
+				deleteSpawn(npc);
 			}
 		}
 	}
@@ -828,16 +838,13 @@ public abstract class AbstractSagaQuest extends Quest {
 	}
 
 	private static Npc findSpawn(Player player, Npc npc) {
-		if (SPAWN_LIST.containsKey(npc) && (SPAWN_LIST.get(npc) == player.getObjectId())) {
-			return npc;
-		}
-
-		return null;
+		final Integer owner = SPAWN_LIST.get(npc);
+		return ((owner != null) && (owner.intValue() == player.getObjectId())) ? npc : null;
 	}
 
 	private void deleteSpawn(Npc npc) {
-		if (SPAWN_LIST.containsKey(npc)) {
-			SPAWN_LIST.remove(npc);
+		// One step: the test and the removal were two, so two threads could both delete.
+		if (SPAWN_LIST.remove(npc) != null) {
 			npc.deleteMe();
 		}
 	}
@@ -845,8 +852,9 @@ public abstract class AbstractSagaQuest extends Quest {
 	private QuestState findRightState(Npc npc) {
 		Player player = null;
 		QuestState st = null;
-		if (SPAWN_LIST.containsKey(npc)) {
-			player = World.getInstance().getPlayer(SPAWN_LIST.get(npc));
+		final Integer owner = SPAWN_LIST.get(npc);
+		if (owner != null) {
+			player = World.getInstance().getPlayer(owner.intValue());
 			if (player != null) {
 				st = player.getQuestState(getName());
 			}
