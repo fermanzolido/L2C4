@@ -13,6 +13,100 @@ hallazgos aunque no hayas terminado el área.
 
 ---
 
+## Resumen ejecutivo
+
+**Estado: las 21 áreas del mapa están cerradas.** 2.342 archivos, ~434.000 líneas.
+El núcleo y el datapack compilan; la suite de tests pasa (47, de los 31 que había).
+
+### Los diez hallazgos que más cuestan si no se arreglan
+
+Ordenados por lo que le pasa al jugador, no por dificultad técnica.
+
+| # | dónde | qué ocurría |
+|---|---|---|
+| 1 | `ItemContainer.addItem` | dos depósitos simultáneos al mismo apilable **perdían la mitad**; medido con un test contra la versión rota: 8.519 de 17.000 |
+| 2 | `Spawn` + `RespawnTaskManager` | un decremento perdido dejaba el contador clavado y **ese spawn no volvía a aparecer** en lo que durara el servidor |
+| 3 | `ClanHallAuction.endAuction` | borraba la subasta y **después** desreferenciaba: sala sin dueño con la adena del ganador ya cobrada |
+| 4 | `PlayerVariables` y dos más | doble desbloqueo: el fallo de base se sepultaba a sí mismo y **las variables sin guardar se perdían** |
+| 5 | `DropProtection.protect` | validaba tras escribir: el ítem quedaba protegido sin dueño, **imposible de recoger para siempre** |
+| 6 | `QuestState._vars` | mapa liso construido con pereza: dos hilos podían **perder un juego entero de variables** |
+| 7 | `DocumentBase.parseLogicNot` | envolvía un nulo que el propio parser fabrica, y lo desreferenciaba **en cada prueba de esa habilidad** |
+| 8 | `WorldObject.spawnMe` | no comprobaba la región que `getRegion` devuelve nula a propósito |
+| 9 | `OlympiadGame` | el daño que decide el combate, acumulado sin candado |
+| 10 | `World.addFactionPlayerToWorld` | un jugador podía quedar en **las dos facciones** y anclar su `Player` al salir |
+
+**El patrón que los une:** casi ninguno es descuido genérico. Son **intención a
+medio aplicar** — clases que sí tienen candado, atómico o colecciones concurrentes
+y dejaron uno o dos campos fuera. Por eso se pueden señalar sin discutir cuál era
+la intención: la propia clase la declara.
+
+### Una sola raíz explica ~80 hallazgos de contenido
+
+Las 53 páginas de los maestros de aldea 32092–32098, los 22 ítems del bingo y del
+almacén de castillo, las 5 skills inertes y los 10 multisells que no abren **no son
+ochenta errores**. Son un hecho: **el código es de una crónica posterior al dato
+distribuido**.
+
+Y se comprobó lo contrario para estar seguro: **82.950 referencias del dato contra
+sí mismo** —botín, skills de npc, multisells, buylists— **y ninguna rota**. El dato
+es coherente; lo que sobra es código.
+
+**La decisión no es "arreglar ochenta cosas", es "qué crónica lleva este
+servidor"**, y de ahí sale si hay que añadir contenido o quitar ramas. No es una
+decisión de quien audita.
+
+### Lo que está verificado y lo que no
+
+- **Verificado por test contra la versión rota**: el candado del contenedor de
+  ítems, los contadores de spawn, el `<not>` del parser, el nulo de `State`, el
+  desempaquetado de `EffectZone`. Regla: *un test que también pasa con el defecto
+  puesto vale lo mismo que un barrido ciego*.
+- **Verificado solo por lectura**: `QuestState` y el doble desbloqueo de las tres
+  clases de variables. Sus constructores exigen `Player` real o base de datos, y en
+  `test/libs` solo hay JUnit y hamcrest.
+- **Nunca ejecutado**: el servidor. Todo esto es compilación más 47 tests.
+
+### Decisiones abiertas, que son tuyas
+
+1. **`buffDebuffMod`** arrancaba en 1 y no en 0; corregido. **Mueve un punto cada
+   probabilidad de prender** de todo buff y debuff. Se puede revertir en un commit.
+2. **La crónica**: añadir el contenido que falta o quitar las ramas muertas.
+3. **`IdManager`** sigue arrancando tras un fallo de inicialización, con el espacio
+   de ids a medio construir — riesgo de colisiones. Abortar el arranque sería
+   inventar un mecanismo que ningún gestor tiene.
+4. **Un guardado fallido de variables descarta los cambios** en vez de reintentar.
+   Reintentar exige un `INSERT ... ON DUPLICATE KEY UPDATE` que hoy no está.
+5. **`Q00627` línea 142** pide una página inexistente en la rama "no tienes la
+   gema". Apuntarla a la de recompensa sería peor; la que se quiso no está.
+
+### Método, en una línea
+
+**Enumerar la población y arreglar solo a quien le falta la guarda que llevan los
+demás** — y cuando la proporción se da vuelta (37 a 6, 1.313 a 6, 46 a 0), no hay
+clase: es el patrón de la casa y el barrido se descarta entero. Cada barrido se
+valida **contra el fichero anterior al arreglo**; tres dieron ceros falsos y se
+corrigieron antes de creerles.
+
+---
+
+## Índice
+
+- **Mapa y estado** — la tabla de las 21 áreas
+- **Áreas**, en el orden en que se cerraron: `model/itemcontainer`, `model/clan`,
+  `model/skill`, `model/olympiad`, `loginserver`, `gameserver/ai`, `taskmanagers`,
+  `network/serverpackets`, `data`, `managers`, datapack `ai/`, `commons`,
+  `gameserver/config`, `network/clientpackets`, datapack `handlers/`,
+  `model/actor`, `model/stats`, `model/conditions`, `model/script`, `model` (raíz),
+  el resto fuera del mapa
+- **Auditar la auditoría** — si los barridos tardíos cubrieron las áreas viejas, y
+  la suite de tests que existía y no se había corrido
+- **Tests para los invariantes que esta auditoría cambió** — los cinco, con sus
+  números contra la versión rota
+- **`quests/` — las clases decidibles** — páginas, ids, skills, coordenadas,
+  tiendas, ítems que se quedan pegados, y el dato contra sí mismo
+
+---
+
 ## Mapa y estado
 
 | Área | Archivos | Líneas | Estado |
