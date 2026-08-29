@@ -51,8 +51,12 @@ public class TradeList
 	private String _title;
 	private boolean _packaged;
 	
-	private boolean _confirmed = false;
-	private boolean _locked = false;
+	// The confirm path locks both lists in a fixed order and the item mutators are all
+	// synchronized, so the intent was there -- but lock() writes _locked outside any of
+	// it, and isLocked and isConfirmed are read with no lock by the packet handlers that
+	// decide whether a trade may still change.
+	private volatile boolean _confirmed = false;
+	private volatile boolean _locked = false;
 	
 	public TradeList(Player owner)
 	{

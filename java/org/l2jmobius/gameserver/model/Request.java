@@ -31,17 +31,21 @@ public class Request
 	private static final int REQUEST_TIMEOUT = 15; // in secs
 	
 	protected Player _player;
-	protected Player _partner;
-	protected boolean _isRequestor;
-	protected boolean _isAnswerer;
-	protected ClientPacket _requestPacket;
+	// setPartner, setRequestPacket and setRequest all take this monitor, but clear runs
+	// on a pool thread fifteen seconds later without it, and getPartner, getRequestPacket
+	// and isProcessingRequest read with no lock at all -- so a reader had no edge with
+	// either writer.
+	protected volatile Player _partner;
+	protected volatile boolean _isRequestor;
+	protected volatile boolean _isAnswerer;
+	protected volatile ClientPacket _requestPacket;
 	
 	public Request(Player player)
 	{
 		_player = player;
 	}
 	
-	protected void clear()
+	protected synchronized void clear()
 	{
 		_partner = null;
 		_requestPacket = null;
@@ -133,9 +137,12 @@ public class Request
 	 */
 	public void onRequestResponse()
 	{
-		if (_partner != null)
+		// The timeout task can null this between the test and the use, so hold the one
+		// that was tested.
+		final Player partner = _partner;
+		if (partner != null)
 		{
-			_partner.getRequest().clear();
+			partner.getRequest().clear();
 		}
 		
 		clear();

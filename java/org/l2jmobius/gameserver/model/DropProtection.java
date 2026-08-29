@@ -29,7 +29,9 @@ import org.l2jmobius.gameserver.model.actor.instance.Pet;
 public class DropProtection implements Runnable
 {
 	private volatile boolean _isProtected = false;
-	private Creature _owner = null;
+	// Its companion above is volatile because getOwner and isProtected are read with no
+	// lock while run, unprotect and protect all write under one; this field was left out.
+	private volatile Creature _owner = null;
 	private ScheduledFuture<?> _task = null;
 	
 	private static final long PROTECTED_MILLIS_TIME = 15000;
@@ -76,15 +78,18 @@ public class DropProtection implements Runnable
 	
 	public synchronized void protect(Creature creature)
 	{
-		unprotect();
-		
-		_isProtected = true;
-		_owner = creature;
-		if (_owner == null)
+		// This test used to sit after the two writes it exists to prevent, so the throw
+		// left the item protected with no owner and no task to clear it -- which is the
+		// one state that makes every later tryPickUp throw, for everyone, forever.
+		if (creature == null)
 		{
 			throw new NullPointerException("Trying to protect dropped item to null owner");
 		}
 		
+		unprotect();
+		
+		_isProtected = true;
+		_owner = creature;
 		_task = ThreadPool.schedule(this, PROTECTED_MILLIS_TIME);
 	}
 }

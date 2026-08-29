@@ -49,7 +49,10 @@ public class PlayerStat extends PlayableStat
 	private int _oldMaxHp; // stats watch
 	private int _oldMaxMp; // stats watch
 	private int _oldMaxCp; // stats watch
-	private float _vitalityPoints = 1;
+	// Its sibling updateVitalityPoints is synchronized and does the same read, modify
+	// and write; setVitalityPoints did it without the lock, so a kill granting vitality
+	// and an item setting it could each lose the other's change.
+	private volatile float _vitalityPoints = 1;
 	private byte _vitalityLevel = 0;
 	/** Player's maximum cubic count. */
 	private int _maxCubicCount = 1;
@@ -679,7 +682,7 @@ public class PlayerStat extends PlayableStat
 	/*
 	 * Set current vitality points to this value if quiet = true - does not send system messages
 	 */
-	public void setVitalityPoints(int value, boolean quiet)
+	public synchronized void setVitalityPoints(int value, boolean quiet)
 	{
 		final int points = Math.min(Math.max(value, MIN_VITALITY_POINTS), MAX_VITALITY_POINTS);
 		if (points == _vitalityPoints)

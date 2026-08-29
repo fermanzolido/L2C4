@@ -117,7 +117,9 @@ public class Clan
 	private Forum _forum;
 	
 	private final Map<Integer, RankPrivs> _privs = new ConcurrentHashMap<>();
-	private int _rank = 0;
+	// setRank takes the monitor for a single assignment, so the write was meant to be
+	// published -- but getRank takes no lock, so it never received it.
+	private volatile int _rank = 0;
 	
 	private String _notice;
 	private boolean _noticeEnabled = false;
