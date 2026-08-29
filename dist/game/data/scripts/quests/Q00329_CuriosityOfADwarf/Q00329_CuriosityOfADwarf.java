@@ -39,6 +39,9 @@ public class Q00329_CuriosityOfADwarf extends Quest
 		addStartNpc(30437); // Rolento
 		addTalkId(30437);
 		addKillId(20083, 20085); // Granite golem, Puncher
+		// exitQuest deletes only the registered items, and these are flagged is_questitem,
+		// so abandoning left them in the inventory with no way to drop or destroy them.
+		registerQuestItems(GOLEM_HEARTSTONE, BROKEN_HEARTSTONE);
 	}
 	
 	@Override

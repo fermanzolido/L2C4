@@ -41,6 +41,9 @@ public class Q00277_GatekeepersOffering extends Quest
 		addStartNpc(30576); // Tamil
 		addTalkId(30576);
 		addKillId(20333); // Graystone Golem
+		// exitQuest deletes only the registered items, and these are flagged is_questitem,
+		// so abandoning left them in the inventory with no way to drop or destroy them.
+		registerQuestItems(STARSTONE);
 	}
 	
 	@Override

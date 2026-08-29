@@ -56,7 +56,9 @@ public class Q00101_SwordOfSolidarity extends Quest
 	public Q00101_SwordOfSolidarity()
 	{
 		super(101, "Sword of Solidarity");
-		registerQuestItems(BROKEN_SWORD_HANDLE, BROKEN_BLADE_BOTTOM, BROKEN_BLADE_TOP);
+		// exitQuest deletes only the registered items, and these are flagged is_questitem,
+		// so abandoning left them in the inventory with no way to drop or destroy them.
+		registerQuestItems(BROKEN_SWORD_HANDLE, BROKEN_BLADE_BOTTOM, BROKEN_BLADE_TOP, ALTRANS_NOTE, ROIENS_LETTER, DIR_TO_RUINS);
 		addStartNpc(ROIEN);
 		addTalkId(ROIEN, ALTRAN);
 		addKillId(20361, 20362);

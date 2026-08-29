@@ -60,6 +60,9 @@ public final class Q00504_CompetitionForTheBanditStronghold extends Quest
 		for (int mob : MOBS)
 		{
 			addKillId(mob);
+		// exitQuest deletes only the registered items, and these are flagged is_questitem,
+		// so abandoning left them in the inventory with no way to drop or destroy them.
+		registerQuestItems(TARLK_AMULET);
 		}
 	}
 	

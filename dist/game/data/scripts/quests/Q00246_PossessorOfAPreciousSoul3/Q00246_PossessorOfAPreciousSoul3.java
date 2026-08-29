@@ -64,6 +64,9 @@ public class Q00246_PossessorOfAPreciousSoul3 extends Quest
 		addStartNpc(CARADINE);
 		addTalkId(CARADINE, OSSIAN, LADD);
 		addKillId(PILGRIM_OF_SPLENDOR, JUDGE_OF_SPLENDOR, BARAKIEL);
+		// exitQuest deletes only the registered items, and these are flagged is_questitem,
+		// so abandoning left them in the inventory with no way to drop or destroy them.
+		registerQuestItems(RAIN_SONG, RELIC_BOX);
 	}
 	
 	@Override

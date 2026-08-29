@@ -81,7 +81,9 @@ public class Q00234_FatesWhisper extends Quest
 	public Q00234_FatesWhisper()
 	{
 		super(234, "Fate's Whisper");
-		registerQuestItems(PIPETTE_KNIFE, RED_PIPETTE_KNIFE);
+		// exitQuest deletes only the registered items, and these are flagged is_questitem,
+		// so abandoning left them in the inventory with no way to drop or destroy them.
+		registerQuestItems(PIPETTE_KNIFE, RED_PIPETTE_KNIFE, REIRIA_SOUL_ORB, REORIN_HAMMER, REORIN_MOLD, INFERNIUM_VARNISH);
 		addStartNpc(31002);
 		addTalkId(31002, 30182, 30847, 30178, 30833, 31028, 31029, 31030, 31027);
 		

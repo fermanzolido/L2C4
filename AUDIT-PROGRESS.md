@@ -4625,3 +4625,42 @@ script hace `Integer.parseInt(npc.getId() + st.nextToken())`, así que sobre el 
 Otra vez contenido que falta, no código roto. Escribir esos diez multisells es
 decidir **qué se cambia por qué** —una tabla de intercambio económica—, y eso no lo
 inventa quien audita. Lo accionable es la lista, y está arriba.
+
+### Sexta clase decidible: el ítem que se queda pegado
+
+`QuestState.exitQuest` limpia **solo lo registrado**: llama a
+`removeRegisteredQuestItems`, que es `takeItems(player, -1, _questItemIds)`. Un ítem
+que la quest entrega y no registra sobrevive al abandono.
+
+Y ahí está lo que lo convierte en defecto y no en molestia: esos ítems están
+marcados `is_questitem = true` en el dato, y un ítem de quest **no se puede tirar,
+intercambiar ni destruir**. El jugador que abandona se queda con él **para siempre**,
+ocupando inventario, sin ninguna forma de deshacerse de él.
+
+La señal para encontrarlos sin falsos positivos: un ítem que la quest **entrega y
+además recupera** circula dentro de ella, así que es suyo por definición. Ni un
+premio ni un objeto recogido de fuera cumplen las dos cosas.
+
+De **19** quests que salieron, quedaron **11** tras tres filtros, y cada filtro
+evitó un daño distinto:
+
+| filtro | qué habría pasado sin él |
+|---|---|
+| el ítem lo tocan **varias** quests | `BLOODED_FABRIC(4295)` lo usa también el encuentro de **Baium**: registrarlo haría que terminar la quest 348 borrase lo que Baium necesita |
+| el ítem **no** está marcado como de quest | ocho ids con precio de venta —Álbum de Monedas 10.000, Polvo de Hada 10.000, Esposas del Penitente 22.000, la propia Poción del Deseo— **son propiedad del jugador**: registrarlos la destruiría al abandonar |
+| el registro es **calculado** | `Q00335` los mete en una lista y la registra entera; mi barrido solo lee tokens literales y la marcó por error |
+
+**Arreglado: 11 quests, 25 ítems.** Seis ya tenían `registerQuestItems` y se les
+añadió lo que faltaba; cinco no registraban **nada** y ahora lo hacen —
+`Q00504_CompetitionForTheBanditStronghold` dejaba hasta veintinueve amuletos
+clavados, y `Q00627_HeartInSearchOfPower` registraba uno de tres.
+
+En todas, la ruta de éxito ya consume el ítem antes de terminar, así que el cambio
+**solo afecta al abandono**. Eso es lo que lo hace seguro.
+
+### El inverso, que habría sido mucho peor
+
+Se comprobó lo contrario por si acaso: **¿registra alguna quest la adena (57)?**
+Registrarla haría que `exitQuest` **borrase el dinero del jugador**. Resultado:
+**cero**. `Q00333_HuntOfTheBlackLion` la entrega y la recupera, y correctamente no
+la registra.

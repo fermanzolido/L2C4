@@ -77,7 +77,9 @@ public class Q00627_HeartInSearchOfPower extends Quest
 	public Q00627_HeartInSearchOfPower()
 	{
 		super(627, "Heart in Search of Power");
-		registerQuestItems(BEAD_OF_OBEDIENCE);
+		// exitQuest deletes only the registered items, and these are flagged is_questitem,
+		// so abandoning left them in the inventory with no way to drop or destroy them.
+		registerQuestItems(BEAD_OF_OBEDIENCE, SEAL_OF_LIGHT, GEM_OF_SAINTS);
 		addStartNpc(NECROMANCER);
 		addTalkId(NECROMANCER, ENFEUX);
 		addKillId(CHANCES.keySet());

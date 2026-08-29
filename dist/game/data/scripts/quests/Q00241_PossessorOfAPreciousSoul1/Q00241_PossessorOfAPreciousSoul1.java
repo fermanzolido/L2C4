@@ -84,6 +84,9 @@ public class Q00241_PossessorOfAPreciousSoul1 extends Quest
 		addStartNpc(TALIEN);
 		addTalkId(TALIEN, GABRIELLE, GILMORE, KANTABILON, STEDMIEL, VIRGIL, OGMAR, RAHORAKTI, KASSANDRA, CARADINE, NOEL);
 		addKillId(BARAHAM, MALRUK_SUCCUBUS, MALRUK_SUCCUBUS_TUREN, SPLINTER_STAKATO, SPLINTER_STAKATO_WALKER, SPLINTER_STAKATO_SOLDIER, SPLINTER_STAKATO_DRONE1, SPLINTER_STAKATO_DRONE2);
+		// exitQuest deletes only the registered items, and these are flagged is_questitem,
+		// so abandoning left them in the inventory with no way to drop or destroy them.
+		registerQuestItems(LEGEND_OF_SEVENTEEN, POETRY_BOOK, ECHO_CRYSTAL, MALRUK_SUCCUBUS_CLAW, CRIMSON_MOSS, RAHORAKTIS_MEDICINE);
 	}
 	
 	@Override
