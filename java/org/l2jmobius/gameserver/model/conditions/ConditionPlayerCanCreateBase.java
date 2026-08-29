@@ -22,6 +22,8 @@ import org.l2jmobius.gameserver.model.actor.Creature;
 import org.l2jmobius.gameserver.model.actor.Player;
 import org.l2jmobius.gameserver.model.item.ItemTemplate;
 import org.l2jmobius.gameserver.model.siege.Castle;
+import org.l2jmobius.gameserver.model.siege.Siege;
+import org.l2jmobius.gameserver.model.siege.SiegeClan;
 import org.l2jmobius.gameserver.model.skill.Skill;
 import org.l2jmobius.gameserver.model.zone.ZoneId;
 import org.l2jmobius.gameserver.network.SystemMessageId;
@@ -51,6 +53,11 @@ public class ConditionPlayerCanCreateBase extends Condition
 		final Player player = effector.asPlayer();
 		boolean canCreateBase = !player.isAlikeDead() && (player.getClan() != null);
 		final Castle castle = CastleManager.getInstance().getCastle(player);
+		// The chain below asked the castle for its siege four times and the siege for the
+		// attacker clan twice -- testing that clan for null in one branch and reading it
+		// in another. Hold each answer once so both branches speak about the same one.
+		final Siege siege = castle == null ? null : castle.getSiege();
+		final SiegeClan attackerClan = siege == null ? null : siege.getAttackerClan(player.getClan());
 		final SystemMessage sm;
 		if (castle == null)
 		{
@@ -59,14 +66,14 @@ public class ConditionPlayerCanCreateBase extends Condition
 			player.sendPacket(sm);
 			canCreateBase = false;
 		}
-		else if (!castle.getSiege().isInProgress())
+		else if (!siege.isInProgress())
 		{
 			sm = new SystemMessage(SystemMessageId.S1_CANNOT_BE_USED_DUE_TO_UNSUITABLE_TERMS);
 			sm.addSkillName(skill);
 			player.sendPacket(sm);
 			canCreateBase = false;
 		}
-		else if (castle.getSiege().getAttackerClan(player.getClan()) == null)
+		else if (attackerClan == null)
 		{
 			sm = new SystemMessage(SystemMessageId.S1_CANNOT_BE_USED_DUE_TO_UNSUITABLE_TERMS);
 			sm.addSkillName(skill);
@@ -80,7 +87,7 @@ public class ConditionPlayerCanCreateBase extends Condition
 			player.sendPacket(sm);
 			canCreateBase = false;
 		}
-		else if (castle.getSiege().getAttackerClan(player.getClan()).getNumFlags() >= SiegeManager.getInstance().getFlagMaxCount())
+		else if (attackerClan.getNumFlags() >= SiegeManager.getInstance().getFlagMaxCount())
 		{
 			sm = new SystemMessage(SystemMessageId.S1_CANNOT_BE_USED_DUE_TO_UNSUITABLE_TERMS);
 			sm.addSkillName(skill);

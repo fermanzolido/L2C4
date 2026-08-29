@@ -49,7 +49,10 @@ public class ConditionTargetAggro extends Condition
 			
 			if (effected.isPlayer())
 			{
-				return effected.asPlayer().getKarma() > 0;
+				// The monster branch above answers against the flag this condition was
+				// declared with; this one answered the same whether it was asked for
+				// aggressive or for peaceful, so aggro="false" matched a karma player.
+				return (effected.asPlayer().getKarma() > 0) == _isAggro;
 			}
 		}
 		

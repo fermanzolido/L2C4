@@ -47,7 +47,7 @@ public class ConditionPlayerCallPc extends Condition
 		}
 		else if ((effected != null) && effected.isPlayer() && effected.isDead())
 		{
-			player.sendMessage(effected.asPlayer() + " is dead at the moment and cannot be summoned.");
+			player.sendMessage(effected.getName() + " is dead at the moment and cannot be summoned.");
 			canCallPlayer = false;
 		}
 		else if (player.isInOlympiadMode())

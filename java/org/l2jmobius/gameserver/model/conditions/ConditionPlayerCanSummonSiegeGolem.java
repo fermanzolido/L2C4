@@ -22,6 +22,7 @@ import org.l2jmobius.gameserver.model.actor.Player;
 import org.l2jmobius.gameserver.model.item.ItemTemplate;
 import org.l2jmobius.gameserver.model.sevensigns.SevenSigns;
 import org.l2jmobius.gameserver.model.siege.Castle;
+import org.l2jmobius.gameserver.model.siege.Siege;
 import org.l2jmobius.gameserver.model.skill.Skill;
 import org.l2jmobius.gameserver.network.SystemMessageId;
 
@@ -54,6 +55,9 @@ public class ConditionPlayerCanSummonSiegeGolem extends Condition
 		}
 		
 		final Castle castle = CastleManager.getInstance().getCastle(player);
+		// Two of the branches below asked the castle for its siege again; holding the one
+		// answer also guards the siege itself, which the repeated calls never checked.
+		final Siege siege = castle == null ? null : castle.getSiege();
 		if (castle == null)
 		{
 			canSummonSiegeGolem = false;
@@ -64,12 +68,12 @@ public class ConditionPlayerCanSummonSiegeGolem extends Condition
 			player.sendPacket(SystemMessageId.INCORRECT_TARGET);
 			canSummonSiegeGolem = false;
 		}
-		else if ((castle != null) && !castle.getSiege().isInProgress())
+		else if ((siege != null) && !siege.isInProgress())
 		{
 			player.sendPacket(SystemMessageId.INCORRECT_TARGET);
 			canSummonSiegeGolem = false;
 		}
-		else if ((player.getClanId() != 0) && ((castle != null) && (castle.getSiege().getAttackerClan(player.getClanId()) == null)))
+		else if ((player.getClanId() != 0) && ((siege != null) && (siege.getAttackerClan(player.getClanId()) == null)))
 		{
 			player.sendPacket(SystemMessageId.INCORRECT_TARGET);
 			canSummonSiegeGolem = false;
