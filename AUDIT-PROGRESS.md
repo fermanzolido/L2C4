@@ -35,7 +35,7 @@ hallazgos aunque no hayas terminado el área.
 | ~~`model/actor`~~ | 166 | 53.236 | **TERMINADA** |
 | ~~`model/stats`~~ | 7 | 2.663 | **TERMINADA** |
 | ~~`model/conditions`~~ | 80 | 4.989 | **TERMINADA** |
-| `model/script` | 9 | 7.622 | pendiente |
+| ~~`model/script`~~ | 9 | 7.622 | **TERMINADA** |
 | `model` (raiz) | 58 | 14.546 | pendiente |
 | resto fuera de mapa | 485 | 84.955 | pendiente |
 | datapack `quests/` | 298 | 79.342 | pendiente |
@@ -3934,3 +3934,110 @@ internamente consistentes y nada en el repositorio decide cuál se quiso.
   prueba más de una vez por lanzamiento, el anuncio sale más de una vez. Es
   comportamiento existente del juego, no una guarda faltante; cambiarlo es una
   decisión de diseño.
+
+---
+
+## `model/script` — TERMINADA
+
+9 archivos, 7.622 líneas: el motor de quests. `Quest.java` sola son 5.706. Es la
+capa que más hilos cruza del repositorio —el temporizador dispara en el pool
+mientras el hilo del paquete del dueño contesta un bypass— y no toma un candado
+en ninguna parte.
+
+| # | Archivo | Defecto | Severidad |
+|---|---------|---------|-----------|
+| 1 | `QuestState` | el mapa de variables, liso y construido con pereza | **alta** |
+| 2 | `Quest` | el mapa de temporizadores, escrito bajo candado y leído sin él | **alta** |
+| 3 | `QuestTimer` | el planificador publicado sin `volatile` | **alta** |
+| 4 | `NpcTemplate` | las tres listas de botín probadas y vueltas a leer | **alta** |
+| 5 | `SevenSignsFestival` | sigue tras atrapar el fallo del spawn | media |
+| 6 | `SevenSignsFestival` | `getHighestScoreData` incumple su contrato | media |
+| 7 | `LongTimeEvent` | valida la contención antes que el periodo | media |
+| 8 | `State` | `switch` sobre una cadena de columna anulable | media |
+| 9 | `IdManager` | lee fuera del try lo que el try construyó | baja |
+| 10 | `Quest` | `showError` con la condición invertida | baja |
+| 11 | `Quest` | `getRandomPartyMember` pide la variable dos veces | baja |
+| 12 | dato `HeavyMedal` | el periodo de botín termina antes de empezar | baja |
+
+**1 y 2 — La misma mitad que faltaba en `Calculator`.** En `Quest`, las listas
+internas de temporizadores **sí** son `CopyOnWriteArrayList`: la intención
+concurrente estaba entera. El mapa exterior era un `HashMap` que
+`startQuestTimer` escribía bajo `synchronized` y que `getQuestTimer`,
+`cancelQuestTimer`, `removeQuestTimer` y `unload` leían sin tomarlo — y
+`removeQuestTimer` lo llama **el hilo del temporizador**, mientras tres scripts
+de evento y un comando de administración recorren el mapa que reparte
+`getQuestTimers()`.
+
+En `QuestState` el mapa de variables se construía con pereza sin candado: dos
+hilos podían construir uno cada uno y perderse un juego de variables entero, y
+`exitQuest` anula el campo mientras los lectores están entre su comprobación de
+nulo y su lectura. Ahora es concurrente, se construye una sola vez con el mismo
+doble chequeo que `Quest` usa para su ejecutor de temporizadores —**el idioma ya
+estaba en la casa**— y cada lector sostiene el mapa que comprobó.
+
+**4 — Una recarga de npcs en mitad de una muerte.** `NpcTemplate` probaba sus
+tres listas de botín y las dos ayudantes volvían a leer los campos, que recorren
+**sin comprobar**. `removeDrops` y `removeDropGroups` los anulan, y la recarga de
+datos de npc los llama con el mundo corriendo. Las ayudantes reciben ahora la
+lista que se probó.
+
+**5 — El `catch` que sabía y siguió.** El bloque atrapa un fallo al invocar a la
+Bruja del Festival, lo registra, y sigue derecho a `new MagicSkillUse(_witchInst,
+_witchInst, ...)`. `unspawnMobs` es el **único** sitio del archivo que comprueba
+ese campo. De ahí salió un barrido nuevo, y hubo que corregirlo dos veces (ver
+abajo).
+
+**6 — Un contrato a medias.** `getHighestScoreData` promete un conjunto en blanco
+cuando no encuentra puntuación, pero solo un ciclo ausente **lanza** y cae en el
+`catch`; un id de festival ausente dentro de un ciclo presente simplemente
+contesta nulo. Los **seis** llamadores desreferencian lo devuelto.
+
+### El barrido nuevo, y su segunda ceguera
+
+De (5) salió: *asignado dentro de un `try`, desreferenciado después del `catch`
+sin comprobar*. Primer intento: **cero** en todo el repositorio. Pero el recorrido
+de profundidad contaba llaves, y la línea `} catch (...) {` tiene una de cada
+signo, así que pasaba de largo el `catch` y descartaba todo. La prueba que lo
+delató fue correr el barrido **contra la versión del archivo anterior al arreglo**:
+si no encuentra el defecto que lo originó, el barrido no vale. Corregido,
+encuentra ese y otro más en el mismo archivo, y **5** en el repositorio: dos de
+ellos son correctos (`type` y `quest` se inicializan a un valor no nulo antes del
+try, con el comentario "managed below"), y los otros tres son los defectos 5, 6 y 9.
+
+### Sospechas evaluadas y descartadas, con lo que las descarta
+
+- **`isInParty()` y luego `getParty()` sin sostenerlo**: **37** sitios lo
+  re-piden contra **6** que lo guardan en un local. La proporción se da vuelta:
+  es el patrón de la casa, como `getFloodProtectors` (36 a 0). Se descartó el
+  barrido entero — y con él una "corrección" a `getRandomPartyMemberState` que
+  iba a hacer antes de medir.
+
+- **Los desplazamientos de `QuestState.setCond`**: `1 << cond` está acotado por
+  el `if ((cond < 3) || (cond > 31))` de arriba, y `1 << old` por la condición
+  `cond > (old + 1)` de su propia rama, que obliga a `old <= 29`.
+
+- **`QuestSound.SOUND_PACKETS`** ya es un `ConcurrentHashMap`, y sus valores
+  nunca son nulos, así que el `containsKey` seguido de `get` es una búsqueda de
+  más, no una carrera.
+
+- **Los diez métodos `notify*` de `Quest`** tienen los diez su `try`/`catch`. Sin
+  excepción que delate a nadie.
+
+- **`playerEnter` concatena el jugador en un registro**, no en un mensaje: ahí el
+  `toString` de `WorldObject` es lo apropiado. El barrido de mensajes visibles lo
+  excluye por eso.
+
+- **`_startDate.after(today)`** de `LongTimeEvent` sí está cubierto: lo protege
+  `isValidPeriod()`, que comprueba los dos extremos. Lo que estaba mal era el
+  orden respecto de la comprobación de contención, no la comprobación.
+
+### Señalado y **no** cambiado
+
+- **`IdManager` sigue arrancando tras un fallo de inicialización**, registrando
+  SEVERE y continuando con un espacio de ids a medio construir — lo que puede dar
+  colisiones de id de objeto, la clase de daño irreversible. El idioma de la casa
+  ante un fallo de carga es exactamente ése (registrar y seguir) y **no existe un
+  mecanismo de abortar arranque** en ningún gestor, así que introducir uno es una
+  decisión de diseño del dueño del servidor, no del arreglo. Lo acotado sí se
+  arregló: la línea que leía el conjunto fuera del `try` reportaba un nulo en vez
+  del fallo real.

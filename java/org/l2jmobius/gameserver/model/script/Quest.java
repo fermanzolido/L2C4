@@ -2064,7 +2064,10 @@ public class Quest implements IEventTimerEvent<String>, IEventTimerCancel<String
 		// the conditions itself
 		if ((party == null) || party.getMembers().isEmpty()) {
 			temp = player.getQuestState(getName());
-			if ((temp != null) && temp.isSet(var) && temp.get(var).equalsIgnoreCase(value)) {
+			// Asking the state twice -- once to test the variable, once to read it -- lets
+			// another thread unset it in between. One read answers both questions.
+			final String own = temp == null ? null : temp.get(var);
+			if ((own != null) && own.equalsIgnoreCase(value)) {
 				return player; // match
 			}
 
@@ -2087,7 +2090,8 @@ public class Quest implements IEventTimerEvent<String>, IEventTimerCancel<String
 			}
 
 			temp = partyMember.getQuestState(getName());
-			if ((temp != null) && (temp.get(var) != null) && (temp.get(var)).equalsIgnoreCase(value)
+			final String held = temp == null ? null : temp.get(var);
+			if ((held != null) && held.equalsIgnoreCase(value)
 					&& partyMember.isInsideRadius3D(target, PlayerConfig.ALT_PARTY_RANGE)
 					&& (player.getInstanceId() == partyMember.getInstanceId())) {
 				candidates.add(partyMember);
