@@ -47,9 +47,12 @@ almacén de castillo, las 5 skills inertes y los 10 multisells que no abren **no
 ochenta errores**. Son un hecho: **el código es de una crónica posterior al dato
 distribuido**.
 
-Y se comprobó lo contrario para estar seguro: **82.950 referencias del dato contra
-sí mismo** —botín, skills de npc, multisells, buylists— **y ninguna rota**. El dato
-es coherente; lo que sobra es código.
+Y se comprobó lo contrario: **82.950 referencias del dato contra sí mismo**
+—botín, skills de npc, multisells, buylists— **y ninguna rota**. Revisados después
+los otros 610 ficheros de dato, aparecen **133 rotas** en tres —pesca, skills de
+mascota y semillas del manor—, y también apuntan al mismo hueco: el grado de pesca
+difícil trajo sus 81 peces y ninguno de sus ítems. Las **skills dan 0 de 14.290**,
+que es la señal de que lo que falta es contenido nuevo, no mecánica.
 
 **La decisión no es "arreglar ochenta cosas", es "qué crónica lleva este
 servidor"**, y de ahí sale si hay que añadir contenido o quitar ramas. No es una
@@ -4795,3 +4798,48 @@ solo gana uno y cuál gana depende del orden de carga— dan **cero** sobre 55 n
 declarados en 48 sitios de llamada. Cuatro de esos 48 usan formas que no se pueden
 resolver estáticamente (`MANAGERS.keySet()`, una variable, un índice de arreglo),
 así que el cero cubre 44 de 48.
+
+### El resto del dato, y una corrección a lo dicho arriba
+
+La tabla de 82.950 referencias limpias cubría cuatro comprobaciones grandes
+—botín, skills de npc, multisells, buylists—. Faltaban **610 ficheros de dato** más:
+`Seeds.xml`, `Recipes.xml`, `PetSkillData.xml`, `EnchantItemData.xml`, las zonas,
+los teletransportadores, la pesca, las instancias y el resto.
+
+Revisados por atributo (`itemId`, `skillId`, `npcId` y sus variantes):
+
+| tipo | examinadas | rotas |
+|---|---|---|
+| skills | **14.290** | **0** |
+| npcs | 2.179 | 36 |
+| ítems | 1.308 | 97 |
+
+**Esto corrige lo dicho más arriba.** Decir "el dato es coherente consigo mismo" era
+demasiado rotundo: lo es en las cuatro referencias grandes, y **tres ficheros
+sueltos tienen 133 referencias rotas**.
+
+| fichero | rotas / examinadas | qué es |
+|---|---|---|
+| `stats/fishing/fishes.xml` | 89 / 278 | los peces |
+| `PetSkillData.xml` | 36 / 1.150 | skills de mascota para ids de npc que no existen |
+| `Seeds.xml` | 8 / 198 | semillas del manor |
+
+**La pesca desglosada por grado es la medición que lo explica todo:**
+
+| grado | peces | con ítem inexistente |
+|---|---|---|
+| `fish_easy` | 81 | **0** |
+| `fish_normal` | 116 | 8 |
+| `fish_hard` | 81 | **81 — todos** |
+
+El grado difícil **entero** trajo su tabla de peces y no sus ítems. Y los ocho de
+`fish_normal`, que parecían anomalías dentro de contenido vivo, resultaron ser **un
+solo ítem**: el 8547 "Old Box", en los peces de nivel 20 a 27. Se comprobó si era
+una omisión aislada mirando a sus vecinos: **el bloque 8540–8555 falta entero**.
+
+Así que las 133 no son una clase nueva. Son **la misma raíz por cuarta vez**: código
+y dato de una crónica posterior a los ítems distribuidos, junto a las 53 páginas,
+los 22 ítems de quest, las 5 skills y los 10 multisells.
+
+Que las skills den **0 de 14.290** refuerza la lectura: lo que falta son **ítems y
+npcs de contenido nuevo**, no definiciones de mecánica.
