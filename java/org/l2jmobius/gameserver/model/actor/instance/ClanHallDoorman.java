@@ -175,7 +175,15 @@ public class ClanHallDoorman extends Doorman
 	@Override
 	protected void openDoors(Player player, String command)
 	{
-		getClanHall().openCloseDoors(true);
+		// The method that shows this doorman's page tests getClanHall() for null; these two
+		// read it straight away.
+		final ClanHall clanHall = getClanHall();
+		if (clanHall == null)
+		{
+			return;
+		}
+		
+		clanHall.openCloseDoors(true);
 		final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 		html.setFile(player, "data/html/clanHallDoorman/doorman-opened.htm");
 		html.replace("%objectId%", String.valueOf(getObjectId()));
@@ -185,7 +193,13 @@ public class ClanHallDoorman extends Doorman
 	@Override
 	protected void closeDoors(Player player, String command)
 	{
-		getClanHall().openCloseDoors(false);
+		final ClanHall clanHall = getClanHall();
+		if (clanHall == null)
+		{
+			return;
+		}
+		
+		clanHall.openCloseDoors(false);
 		final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 		html.setFile(player, "data/html/clanHallDoorman/doorman-closed.htm");
 		html.replace("%objectId%", String.valueOf(getObjectId()));

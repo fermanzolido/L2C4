@@ -72,7 +72,17 @@ public class ClanHallManager extends Merchant
 	@Override
 	public void onBypassFeedback(Player player, String command)
 	{
-		if (getClanHall().isSiegableHall() && ((SiegableHall) getClanHall()).isInSiege())
+		// getClanHall searches for a hall within 500 units of this npc and answers null
+		// when there is none, so a manager standing anywhere else threw on this very line
+		// and took every bypass to it with it. Everything below reaches the hall through
+		// the id this first call caches.
+		final ClanHall clanHall = getClanHall();
+		if (clanHall == null)
+		{
+			return;
+		}
+		
+		if (clanHall.isSiegableHall() && ((SiegableHall) clanHall).isInSiege())
 		{
 			return;
 		}
