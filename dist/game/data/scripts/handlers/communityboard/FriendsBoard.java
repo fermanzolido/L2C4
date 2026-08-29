@@ -96,7 +96,12 @@ public class FriendsBoard implements IParseBoardHandler
 			{
 				try (Connection con = DatabaseFactory.getConnection())
 				{
-					final PreparedStatement statement = con.prepareStatement("DELETE FROM character_friends WHERE char_id = ? OR friend_id = ?");
+					// The columns are charId and friendId; the seven other queries in the
+					// repository against this table use those names, including the one forty
+					// lines below. This one threw, the catch logged it, and the code carried
+					// on to empty the list in memory and tell the player it had worked -- so
+					// every friend came back at the next login.
+					final PreparedStatement statement = con.prepareStatement("DELETE FROM character_friends WHERE charId = ? OR friendId = ?");
 					statement.setInt(1, player.getObjectId());
 					statement.setInt(2, player.getObjectId());
 					statement.execute();
@@ -112,8 +117,11 @@ public class FriendsBoard implements IParseBoardHandler
 					final Player friend = World.getInstance().getPlayer(friendId);
 					if (friend != null)
 					{
-						friend.getFriendList().remove(Integer.valueOf(friend.getObjectId()));
-						friend.getSelectedFriendList().remove(Integer.valueOf(friend.getObjectId()));
+						// The player is what has to leave the friend's list. Removing the
+						// friend's own id there does nothing: nobody is their own friend.
+						// RequestFriendDel does it this way.
+						friend.getFriendList().remove(Integer.valueOf(player.getObjectId()));
+						friend.getSelectedFriendList().remove(Integer.valueOf(player.getObjectId()));
 						
 						friend.sendPacket(new FriendList(friend));
 					}
@@ -147,7 +155,7 @@ public class FriendsBoard implements IParseBoardHandler
 						final Player friend = World.getInstance().getPlayer(friendId);
 						if (friend != null)
 						{
-							friend.getFriendList().remove(Integer.valueOf(friend.getObjectId()));
+							friend.getFriendList().remove(Integer.valueOf(player.getObjectId()));
 							friend.sendPacket(new FriendList(friend));
 						}
 						

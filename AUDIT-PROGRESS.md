@@ -4873,3 +4873,45 @@ La misma raíz, por quinta vez.
 **Que los 10.167 puntos de aparición estén todos dentro y todos apunten a un npc
 definido** es el negativo más útil de esta tanda: el arreglo de `spawnMe` no tenía
 que corregir ningún dato, solo dejar de reventar si algún día lo hubiera.
+
+### Novena clase: las consultas contra el esquema
+
+El esquema define **93 tablas**. Revisadas todas las cadenas SQL del repositorio:
+**579 referencias a tabla** y **1.213 nombres de columna**.
+
+#### Lo que salió, y era de verdad
+
+**`FriendsBoard` borraba amigos con columnas que no existen.** La consulta de
+"borrar todos" decía `WHERE char_id = ? OR friend_id = ?`, y la tabla tiene `charId`
+y `friendId`. Las **otras siete** consultas del repositorio contra esa tabla usan los
+nombres correctos, **incluida la que está cuarenta líneas más abajo en el mismo
+fichero**.
+
+Y el síntoma no era un error visible: la consulta lanza, el `catch` lo registra, y
+**el código sigue** — vacía la lista en memoria, manda la lista vacía al cliente y le
+dice al jugador *"has vaciado tu lista de amigos"*. Las filas siguen en la base.
+**Al reconectar, vuelven todos.**
+
+**Y en el mismo bloque, el lado del amigo estaba al revés.** Las dos ramas hacían
+`friend.getFriendList().remove(friend.getObjectId())` — quitar al amigo de su propia
+lista, donde nadie está nunca. Lo que hay que quitar es **al jugador**, que es
+exactamente lo que hace `RequestFriendDel`, el manejador de paquete:
+`target.getFriendList().remove(player.getObjectId())`.
+
+**El esquema de la subasta global no se instalaba.** `GlobalAuctionManager` necesita
+`global_auctions` y `global_auction_funds`, y su `CREATE TABLE` vivía en `./sql/`,
+que el instalador **no lee**: éste hace `Paths.get("sql", dbType)` desde
+`dist/db_installer/`. Los otros cuatro ficheros de esa carpeta son migraciones
+—`ALTER`, `INSERT`—; **éste era el único `CREATE TABLE` fuera de la carpeta del
+instalador, 92 contra 1**, y nada lo documenta. En una instalación nueva la subasta
+global fallaba al cargar con un SEVERE en el registro y quedaba muerta. Movido a
+donde el instalador mira.
+
+#### Dos falsos positivos, y qué los causó
+
+- **`Hero.java`** parecía usar `heroes.char_name`. No: la consulta une `heroes` y
+  `characters`, mi expresión capturaba solo la primera tabla del `FROM`, y
+  `char_name` es de `characters`, donde sí existe.
+- **`character_contacts`** parecía no tener esquema. Lo tiene: es el **único** de los
+  93 ficheros que escribe sus columnas **sin comillas invertidas**, y mi parser las
+  buscaba con ellas.
