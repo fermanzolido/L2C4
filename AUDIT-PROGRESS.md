@@ -4329,3 +4329,79 @@ destino entre la búsqueda y el `addItem` de más abajo, ese `addItem` toma un t
 monitor sobre el que no se acordó orden. Hace falta además que ese hilo quiera el
 origen de éste. Se deja así porque la alternativa —sostener un candado a través de
 la búsqueda que decide el candado— es circular.
+
+---
+
+## Tests para los invariantes que esta auditoría cambió
+
+La suite que ya existía pasa, pero **no toca nada de lo que se cambió**. Estos tres
+ficheros cubren tres de los arreglos, y cada uno se validó igual que un barrido:
+**contra la versión rota**. Un test que también pasa con el defecto puesto no vale
+nada, exactamente igual que un barrido ciego.
+
+De **31** tests a **41**.
+
+### `ItemContainerConcurrencyTest`
+
+Ocho hilos sumando 2.000 unidades cada uno a una misma pila, y un segundo caso con
+mitad sumando y mitad restando la misma cantidad.
+
+**Validación con el candado de `addItem` quitado, tres corridas:**
+
+| esperado | obtenido |
+|---|---|
+| 17.000 | 8.519 |
+| 17.000 | 8.303 |
+| 17.000 | 8.846 |
+
+**Se pierde la mitad.** El registro de esta auditoría decía "dos miembros de clan
+depositando a la vez bastan para perder un depósito"; era quedarse corto. Bajo
+contención se pierde alrededor del cincuenta por ciento de lo depositado. El
+segundo caso pierde ~1.500 unidades por corrida sobre un millón, y eso son ítems
+de jugador **destruidos**, no descolocados.
+
+Con el candado puesto: exacto, tres de tres.
+
+Nota sobre el propio test: usa el id 1060, no adena. `changeCount` acota la adena
+con `Inventory.MAX_ADENA`, que se lee de `PlayerConfig`, y un test corre **sin
+configuración cargada** — así que ese tope vale cero y la primera suma recortaría
+la pila entera. Costó una tarde entenderlo y queda escrito en el test.
+
+### `StateTest`
+
+Cuatro casos sobre `State.getStateId`, incluido el nulo que la columna
+`character_quests.value` permite.
+
+**Validación con la guarda quitada:** falla solo ese caso, con
+`NullPointerException: Cannot invoke "String.hashCode()" because "<local1>" is
+null` — que es exactamente lo que el cargador de quests atrapaba y convertía en
+"este personaje pierde las quests que quedaban por leer".
+
+### `EffectZoneTest`
+
+Tres casos de contrato **más uno de regresión**, y la distinción importa: los tres
+primeros **pasan también contra el código viejo**, porque un solo hilo nunca ve
+desaparecer una entrada entre el `containsKey` y el `get`. El cuarto vacía el mapa
+por debajo de un lector.
+
+**Validación con la versión de tres búsquedas restituida, tres corridas:** falla
+las tres con `NullPointerException: Cannot invoke "java.lang.Integer.intValue()"
+because the return value of "java.util.Map.get(Object)" is null`.
+
+### Cómo se corre sin `ant`
+
+`ant` no está en PATH. El objetivo `test` de `build.xml` se replica en dos pasos:
+
+1. `javac` de `test/**.java` con el build del core, `dist/libs` y `test/libs`;
+2. `java org.junit.runner.JUnitCore <clases>`, excluyendo `ItemsOnGroundManagerTest`
+   como hace `build.xml` — usa `main()`, no es JUnit.
+
+**El classpath tiene que ir en forma de Windows** (`C:/...`), no en la de Git Bash
+(`/c/...`): javac es un binario de Windows y con la segunda forma no resuelve las
+clases del build, dando errores de "cannot find symbol" que parecen del código.
+
+### Lo que sigue sin cubrir
+
+`Spawn` y `QuestState` necesitan npcs y jugadores reales para construirse, así que
+sus arreglos —los contadores de reaparición y el mapa de variables— siguen
+verificados solo por lectura. Es la deuda de verificación que queda.
