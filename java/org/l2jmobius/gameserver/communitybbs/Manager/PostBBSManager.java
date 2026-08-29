@@ -39,14 +39,9 @@ public class PostBBSManager extends BaseBBSManager
 	
 	public Post getGPosttByTopic(Topic t)
 	{
-		Post post = _postByTopic.get(t);
-		if (post == null)
-		{
-			post = new Post(t);
-			_postByTopic.put(t, post);
-		}
-		
-		return post;
+		// Two threads reading the same topic each built a Post and one was dropped on the
+		// floor with whatever it had loaded. One step answers both.
+		return _postByTopic.computeIfAbsent(t, Post::new);
 	}
 	
 	public void delPostByTopic(Topic t)
@@ -56,10 +51,7 @@ public class PostBBSManager extends BaseBBSManager
 	
 	public void addPostByTopic(Post p, Topic t)
 	{
-		if (_postByTopic.get(t) == null)
-		{
-			_postByTopic.put(t, p);
-		}
+		_postByTopic.putIfAbsent(t, p);
 	}
 	
 	@Override

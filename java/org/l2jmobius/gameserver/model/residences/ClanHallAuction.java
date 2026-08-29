@@ -472,14 +472,30 @@ public class ClanHallAuction
 				return;
 			}
 			
+			// Resolved before anything is destroyed. The three lookups below can each
+			// answer null, and deleteAuctionFromDB used to run first -- so a missing bidder
+			// row or a disbanded clan left the auction gone and the hall unowned, with the
+			// winning clan's adena already taken and no way back.
+			final Bidder highestBidder = _bidders.get(_highestBidderId);
+			final Clan clan = highestBidder == null ? null : ClanTable.getInstance().getClanByName(highestBidder.getClanName());
+			if (clan == null)
+			{
+				LOGGER.warning("ClanHallAuction: auction " + _id + " ended with no clan behind highest bidder " + _highestBidderId + "; leaving it standing rather than deleting it.");
+				return;
+			}
+			
 			if (_sellerId > 0)
 			{
 				returnItem(_sellerClanName, _highestBidderMaxBid, true);
-				returnItem(_sellerClanName, ClanHallTable.getInstance().getAuctionableHallById(_itemId).getLease(), false);
+				
+				final AuctionableHall hall = ClanHallTable.getInstance().getAuctionableHallById(_itemId);
+				if (hall != null)
+				{
+					returnItem(_sellerClanName, hall.getLease(), false);
+				}
 			}
 			
 			deleteAuctionFromDB();
-			final Clan clan = ClanTable.getInstance().getClanByName(_bidders.get(_highestBidderId).getClanName());
 			_bidders.remove(_highestBidderId);
 			clan.setAuctionBiddedAt(0, true);
 			removeBids();

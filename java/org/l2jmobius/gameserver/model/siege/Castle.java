@@ -719,17 +719,21 @@ public class Castle extends AbstractResidence
 		}
 		else
 		{
-			final int diffLease = lease - _function.get(type).getLease();
-			if (diffLease > 0)
+			// addNew is decided by the caller, and the adena above is taken before this
+			// runs: on a concurrent map another thread removing the function in between
+			// left four separate lookups dereferencing null, with the player already paid.
+			// A function that is no longer there is created, which is what was bought.
+			final CastleFunction function = _function.get(type);
+			if ((function == null) || ((lease - function.getLease()) > 0))
 			{
 				_function.remove(type);
 				_function.put(type, new CastleFunction(type, lvl, lease, 0, rate, -1, false));
 			}
 			else
 			{
-				_function.get(type).setLease(lease);
-				_function.get(type).setLvl(lvl);
-				_function.get(type).dbSave();
+				function.setLease(lease);
+				function.setLvl(lvl);
+				function.dbSave();
 			}
 		}
 		

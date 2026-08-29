@@ -507,16 +507,23 @@ public abstract class ClanHall
 		{
 			removeFunction(type);
 		}
-		else if ((lease - _functions.get(type).getLease()) > 0)
-		{
-			_functions.remove(type);
-			_functions.put(type, new ClanHallFunction(type, level, lease, 0, rate, -1, false));
-		}
 		else
 		{
-			_functions.get(type).setLease(lease);
-			_functions.get(type).setLevel(level);
-			_functions.get(type).dbSave();
+			// Same as Castle.updateFunctions: addNew comes from the caller and the rent is
+			// taken before this point, so a function removed in between left these lookups
+			// dereferencing null with the player already paid. Creating it is what was bought.
+			final ClanHallFunction function = _functions.get(type);
+			if ((function == null) || ((lease - function.getLease()) > 0))
+			{
+				_functions.remove(type);
+				_functions.put(type, new ClanHallFunction(type, level, lease, 0, rate, -1, false));
+			}
+			else
+			{
+				function.setLease(lease);
+				function.setLevel(level);
+				function.dbSave();
+			}
 		}
 		
 		return true;
