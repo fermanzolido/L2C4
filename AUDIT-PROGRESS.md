@@ -38,7 +38,7 @@ hallazgos aunque no hayas terminado el área.
 | ~~`model/script`~~ | 9 | 7.622 | **TERMINADA** |
 | ~~`model` (raiz)~~ | 58 | 14.546 | **TERMINADA** |
 | ~~resto fuera de mapa~~ | 408 | 68.882 | **TERMINADA** |
-| datapack `quests/` | 298 | 79.342 | pendiente |
+| `quests/` | 296 | 77.828 | **clases decidibles cerradas** |
 
 Orden elegido: de menor a mayor, salvo que la criticidad mande. Se empezó por
 `itemcontainer` porque es chico y es donde vive la duplicación de ítems, que es
@@ -4513,3 +4513,40 @@ la página de recompensa; la segunda es "no la tienes". Apuntarla a `-07` le mos
 la confirmación de recompensa a quien no recibió ninguna, que es peor que la ventana
 en blanco. Cuál era la página que el autor quiso no está en el repositorio, y
 adivinarla es escribir contenido, no arreglar un error.
+
+### La segunda clase decidible: ids que el dato no define
+
+Mismo método que las páginas. El dato define **7.852 ítems** y **5.783 npcs**
+(contando los subdirectorios `custom/`, que la primera versión del barrido se dejó
+fuera y por eso marcaba los npcs de eventos como inexistentes).
+
+**El nombre de la constante no sirve para decidir si un id es de ítem o de npc.** El
+primer intento lo intentó y falló en las dos direcciones: `TOMBSTONE` (31523),
+`GILMORE` (30754) y `STONE_GOLEM` (20016) son **npcs** que contienen "STONE" o
+"GEM"; `GATEKEEPER_TOKEN` (1659), `GUARDIAN_BASILISK_FANG` (3207) y
+`MONSTEREYE_CORNEA` (3410) son **ítems** que contienen "KEEPER" o "GUARD". Lo que
+decide es **el sitio de llamada**: el segundo argumento de `giveItems` es un ítem y
+el primero de `addKillId` es un npc, sin ambigüedad posible.
+
+Resultado con ese método: **0 npcs** y **22 ítems**.
+
+| dónde | ids | qué pasa |
+|---|---|---|
+| `Q00386_StolenDignity` | 16, entre 8331 y 8722 | el premio del bingo |
+| `CastleWarehouse` | 9910 y 9911 | el intercambio entero |
+| `Tunatun` | 15473 | el látigo del domador |
+
+`giveItems` con un id que el dato no define llega a
+`ItemData.getTemplate(id) == null`, deja `Invalid ItemId` en la consola y vuelve sin
+dar nada. Para el operador hay un aviso; **para el jugador no pasa nada**: gana el
+bingo y no recibe el premio.
+
+### Señalado y **no** cambiado
+
+Los 22 son **contenido de una crónica posterior al dato distribuido**, la misma
+categoría que las 53 páginas de los maestros de aldea 32092–32098. Arreglarlo sería
+o **inventar las estadísticas** de dieciséis armas, o **borrar** dieciséis ramas de
+premio y un intercambio completo. Ninguna de las dos es una decisión de quien
+audita: son de quien decide qué contenido lleva el servidor.
+
+Queda la lista exacta, que es lo accionable: son esas tres quests y esos ids.
