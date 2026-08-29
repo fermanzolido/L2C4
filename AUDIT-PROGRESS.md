@@ -4260,3 +4260,72 @@ El de banderas tiene un punto ciego conocido y anotado: busca `synchronized`
 
 - **`IdManager` sigue arrancando tras un fallo de inicialización** (ver el registro
   de `model/script`).
+
+---
+
+## Auditar la auditoría
+
+Antes de seguir buscando defecto número doscientos, dos preguntas sobre lo ya
+hecho.
+
+### ¿Cubrieron los barridos tardíos las áreas cerradas temprano?
+
+La mitad de los barridos —`unbox`, `catchuse`, `cyclic`, `pubfield`, `unlock`,
+`claim`, `odd`, `lazy`, `count`— se escribieron en los últimos paquetes. Las áreas
+cerradas antes de que existieran (`itemcontainer`, `clan`, `skill`, `olympiad`,
+`loginserver`, `ai`, `commons`, `managers`, `data`, `serverpackets`,
+`clientpackets`, `handlers`, `actor`) nunca las vieron nacer.
+
+**Sí las cubrieron**: todos usan globs de repositorio entero. Corridos otra vez
+al final, lo que queda está triado y explicado:
+
+| barrido | quedan | qué son |
+|---|---|---|
+| `catchuse` | 3 | variables inicializadas a un valor no nulo antes del `try`, con su "managed below" |
+| `cyclic` | 0 | — |
+| `unlock` | 0 | — |
+| `trace` | 0 | de 86 a 0 |
+| `claim` | 6 | una doble comprobación correcta, dos iteradores locales, un objeto por castigo, una carga idempotente, el cifrado del handshake |
+| `pubfield` | 17 | 7 campos de `MoveData`, resto colisiones de nombre |
+| `odd` | 7 | se construyen en la carga y solo se leen después |
+| `lazy` | 16 | igual |
+| `unbox` | 14 | mapas constantes de quests indexados por los npcs que registran |
+| `count` | 2 «sin monitor» | **artefacto de mi propio arreglo**: están dentro de `synchronized (outerLock) { synchronized (innerLock)`, y el barrido compara el nombre del candado |
+
+Resultado negativo, pero es el que se buscaba: ningún área marcada TERMINADA
+escondía un acierto de los barridos posteriores.
+
+### ¿Se ha ejecutado algo?
+
+Hasta aquí, **no**. Cuarenta commits verificados solo por `javac`. El repositorio
+**sí tiene suite de tests** —`test/`, con JUnit 4.13.2 en `test/libs`, y objetivos
+`compile-tests` y `test` en `build.xml`— y no se había corrido ni una vez.
+
+Corre así, sin `ant` (que no está en PATH), replicando lo que hace el objetivo:
+
+1. compilar `test/**.java` con el build del core más `dist/libs` más `test/libs`;
+2. `java org.junit.runner.JUnitCore <clases>`, excluyendo
+   `ItemsOnGroundManagerTest` como hace `build.xml` (usa `main()`, no es JUnit).
+
+**Resultado: OK (31 tests).**
+
+**Y hay que ser exacto sobre qué prueba eso.** La suite cubre `BCrypt`,
+`StringUtil`, `Subnet`, `TraceUtil`, el parseo del teletransportador, `MathUtil` y
+`LoginController`. **No toca nada de lo que esta auditoría cambió**: ni el candado
+del contenedor de ítems, ni el hilado del motor de quests, ni los contadores de
+spawn, ni el marcador de Olimpiada. Confirma que la compilación y esas utilidades
+siguen en pie. Nada más.
+
+### El límite que queda escrito en el código
+
+La edición de mayor consecuencia de toda la auditoría es el candado de
+`ItemContainer`, y es la única donde el arreglo **creó** un peligro que hubo que
+cerrar después. Releída entera al final, queda un residuo que se documenta en el
+propio método en vez de fingir que está cerrado:
+
+`transferItem` busca la pila destino **antes** de tomar los candados, porque esa
+búsqueda es la que decide el orden. Si otro hilo crea una pila de ese id en el
+destino entre la búsqueda y el `addItem` de más abajo, ese `addItem` toma un tercer
+monitor sobre el que no se acordó orden. Hace falta además que ese hilo quiera el
+origen de éste. Se deja así porque la alternativa —sostener un candado a través de
+la búsqueda que decide el candado— es circular.

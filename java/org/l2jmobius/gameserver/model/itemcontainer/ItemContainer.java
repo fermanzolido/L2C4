@@ -356,6 +356,12 @@ public abstract class ItemContainer
 		// other wants, so both are taken in object-id order and every acquisition inside is
 		// then reentrant. When there is no distinct target stack both names are the source,
 		// and locking the same monitor twice costs nothing.
+		//
+		// One case this ordering does not cover: the lookup below runs before the lock, so
+		// if another thread creates a stack of this id in the target between here and the
+		// addItem further down, that addItem takes a third monitor no order was agreed on.
+		// It needs that thread to then want this source, which is why it is left as it is
+		// rather than solved by holding a lock across the lookup that decides the lock.
 		final Item outerLock;
 		final Item innerLock;
 		if ((targetitem == null) || (targetitem == sourceitem))
