@@ -33,11 +33,37 @@ hallazgos aunque no hayas terminado el área.
 | ~~`network/clientpackets`~~ | 201 | 21.727 | **TERMINADA** |
 | ~~datapack `handlers/`~~ | 375 | 51.203 | **TERMINADA** |
 | **`model/actor`** | **166** | **53.236** | **en curso** |
+| `model/stats` | 7 | 2.663 | pendiente |
+| `model/conditions` | 80 | 4.989 | pendiente |
+| `model/script` | 9 | 7.622 | pendiente |
+| `model` (raiz) | 58 | 14.546 | pendiente |
+| resto fuera de mapa | 485 | 84.955 | pendiente |
 | datapack `quests/` | 298 | 79.342 | pendiente |
 
 Orden elegido: de menor a mayor, salvo que la criticidad mande. Se empezó por
 `itemcontainer` porque es chico y es donde vive la duplicación de ítems, que es
 la única clase de bug que puede arruinar una economía de forma irreversible.
+
+### El mapa estaba incompleto
+
+Medido con los quince primeros cerrados: el repositorio tiene **2.342** archivos
+y **434.459** líneas, y las áreas que este mapa listaba cubrían **1.703**. Los
+otros **639 archivos y 114.775 líneas nunca estuvieron en el plan** — entre ellos
+`model/stats/Formulas` (la matemática de combate entera), los **80** archivos de
+`model/conditions` que deciden si una habilidad puede usarse, el motor de quests
+de `model/script`, las zonas, el asedio y `Item.java`.
+
+No están vírgenes: **once** barridos corrieron sobre todo el repositorio y no solo
+sobre el área en curso —comparadores rotos, `split` indexado, índices de parámetro
+de sentencias preparadas, productos sin ensanchar, `ClanTable.getClan` sin
+comprobar, retiros de ítem con retorno descartado, aritmética de redondeo, mapas
+concurrentes indexados con otra búsqueda, comparaciones de identidad, y las dos de
+búsqueda repetida—, y varios arreglos ya cayeron ahí dentro. Pero como áreas
+leídas, faltan.
+
+Van antes de `quests/`: son código de núcleo que corre en cada combate y cada
+habilidad, mientras que los quests son en su mayoría guiones repetidos que rinden
+más por barrido que por lectura.
 
 ---
 
