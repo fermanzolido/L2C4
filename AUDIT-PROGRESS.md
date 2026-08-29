@@ -33,8 +33,8 @@ hallazgos aunque no hayas terminado el área.
 | ~~`network/clientpackets`~~ | 201 | 21.727 | **TERMINADA** |
 | ~~datapack `handlers/`~~ | 375 | 51.203 | **TERMINADA** |
 | ~~`model/actor`~~ | 166 | 53.236 | **TERMINADA** |
-| **`model/stats`** | **7** | **2.663** | **en curso** |
-| `model/conditions` | 80 | 4.989 | pendiente |
+| ~~`model/stats`~~ | 7 | 2.663 | **TERMINADA** |
+| **`model/conditions`** | **80** | **4.989** | **en curso** |
 | `model/script` | 9 | 7.622 | pendiente |
 | `model` (raiz) | 58 | 14.546 | pendiente |
 | resto fuera de mapa | 485 | 84.955 | pendiente |
@@ -3763,3 +3763,76 @@ barridos, más los once que corren sobre todo el repositorio.
 
 - **`getClient().getFloodProtectors()`**: 36 sitios, ninguno comprueba null. Patrón
   de la casa.
+
+---
+
+## `model/stats` — TERMINADA
+
+36 archivos contando el subpaquete `functions/`; `Formulas.java` sola tiene 1.830
+líneas y es cada cálculo de daño, regeneración y probabilidad del juego.
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 1 | `Calculator` | el arreglo de funciones publicado sin `volatile` | **alta** |
+| 2 | `Creature` | seis eventos de combate compartidos en vez de construidos | **alta** |
+| 3 | `Formulas` | el modificador de vulnerabilidad arranca en 1 y no en 0 | media |
+| 4 | `Formulas` | cuatro búsquedas de función probadas y vueltas a escribir | media |
+| 5 | `BaseStat` | el índice de las tablas de bonificación sin acotar al cargar | media |
+
+**1 — La mitad de un copy-on-write.** `Calculator` publica su arreglo de funciones
+desde tres mutadores `synchronized`, y lo leen `calc()` y `getFunctions()`, que
+**no toman el candado**. Sin `volatile` el lector no tiene arista de precedencia
+con el escritor y puede ver la referencia nueva con los elementos todavía en null
+— y `calc()` corre en cada estadística que el servidor calcula. El patrón lo
+delata: los tres mutadores están bloqueados, o sea que la intención estaba
+entera; faltaba la palabra que hace correcta la publicación.
+
+**2 — Un objeto por criatura para un evento por golpe.** `Creature` guardaba seis
+objetos de evento como campos, repoblándolos y despachándolos. El objeto es de la
+criatura, así que dos atacantes golpeando al mismo objetivo repueblan el mismo, y
+un oyente puede recibir el atacante, el daño o la habilidad de otro golpe. El de
+daño recibido se despacha **asincrónico**: lo lee en otro hilo después de que el
+golpe siguiente ya lo sobrescribió.
+
+Contado antes de tocar nada: **86** sitios de despacho construyen su evento donde
+lo mandan y **7** reusan un campo. Seis de los siete eran éstos; el séptimo es
+inmutable y queda.
+
+**3 — Un punto de sesgo en cada debuff.** El inicial que se le pasa a `calcStat`
+es lo que contesta cuando nada modifica la estadística, y entra derecho al
+porcentaje: el caso neutro daba 1,01 en vez de 1. Su hermana `calcCancelEffects`
+lee el mismo tipo de estadística desde cero, y de los **22** sitios del
+repositorio donde un `calcStat` alimenta una división por 100, **los 22** usan
+base 0. Éste era el único fuera de línea. **Mueve números**: cada probabilidad de
+prender se corre un punto de su modificador.
+
+### Sospechas evaluadas y descartadas, con lo que las descarta
+
+- **El índice de las tablas de bonificación, del lado de la lectura.**
+  `STRbonus[actor.getSTR()]` no acota nada y corre en cada cálculo. El techo real
+  es **CON en 59** —base 47 en las plantillas, más tres hennas de 4— contra
+  arreglos de 100, y los conjuntos de armadura distribuidos **no declaran ninguna
+  estadística base**. Cuarenta y uno de margen, y ningún comando de administración
+  fija esas estadísticas.
+
+- **La resistencia a cancelación** se invierte si la resistencia combinada llega a
+  100, pero el dato la declara con `sub` dieciséis veces, lo que hace el valor
+  negativo y el divisor mayor que uno. La única declaración aditiva es un debuff de
+  vulnerabilidad de +30 que no apila consigo mismo, y `cancelProf` no aparece.
+
+- **`calcFallDam`** multiplica altura por vida máxima en `int`: el HP base más alto
+  de las plantillas es **3.834**, contra los **134.218** que haría falta para
+  desbordar con una caída de dieciséis mil.
+
+- **La división por defensa** de las seis fórmulas de daño: no es una guarda
+  faltante sino cómo este código calcula daño en todos lados.
+
+- **`calcHitMiss`** recorta después del bono de condición y devuelve "falla" para
+  una probabilidad baja; **`calcBlowSuccess`**, **`calcStealEffects`** y el bono de
+  atributo recortan todos sus resultados.
+
+- **`FuncEnchant`**: el sobre-encantado está acotado por la protección de
+  sobre-encantado y por el límite de olimpiada.
+
+- **Los rasgos de arma y defensa** se indexan por ordinal sobre arreglos
+  dimensionados con `TraitType.values().length`, así que entran por construcción.
