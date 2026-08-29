@@ -743,22 +743,19 @@ public class SignsPriest extends Npc
 								return;
 							}
 							
-							if (blueStoneCountAll > 0)
+							// The three takes had their answers thrown away and the reward was paid for
+							// all three counts either way, so a stack that moved between the count above
+							// and the take was still paid for. The reward is now what was actually taken.
+							final int blueTaken = ((blueStoneCountAll > 0) && player.destroyItemByItemId(ItemProcessType.FEE, SevenSigns.SEAL_STONE_BLUE_ID, blueStoneCountAll, this, true)) ? blueStoneCountAll : 0;
+							final int greenTaken = ((greenStoneCountAll > 0) && player.destroyItemByItemId(ItemProcessType.FEE, SevenSigns.SEAL_STONE_GREEN_ID, greenStoneCountAll, this, true)) ? greenStoneCountAll : 0;
+							final int redTaken = ((redStoneCountAll > 0) && player.destroyItemByItemId(ItemProcessType.FEE, SevenSigns.SEAL_STONE_RED_ID, redStoneCountAll, this, true)) ? redStoneCountAll : 0;
+							final int ancientAdenaTaken = SevenSigns.calcAncientAdenaReward(blueTaken, greenTaken, redTaken);
+							if (ancientAdenaTaken == 0)
 							{
-								player.destroyItemByItemId(ItemProcessType.FEE, SevenSigns.SEAL_STONE_BLUE_ID, blueStoneCountAll, this, true);
+								return;
 							}
 							
-							if (greenStoneCountAll > 0)
-							{
-								player.destroyItemByItemId(ItemProcessType.FEE, SevenSigns.SEAL_STONE_GREEN_ID, greenStoneCountAll, this, true);
-							}
-							
-							if (redStoneCountAll > 0)
-							{
-								player.destroyItemByItemId(ItemProcessType.FEE, SevenSigns.SEAL_STONE_RED_ID, redStoneCountAll, this, true);
-							}
-							
-							player.addAncientAdena(ItemProcessType.REWARD, ancientAdenaRewardAll, this, true);
+							player.addAncientAdena(ItemProcessType.REWARD, ancientAdenaTaken, this, true);
 							if (this instanceof DawnPriest)
 							{
 								showChatWindow(player, 18, "dawn", false);

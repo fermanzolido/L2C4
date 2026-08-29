@@ -88,6 +88,14 @@ public class Auctioneer extends Npc
 			
 			if (actualCommand.equalsIgnoreCase("auction"))
 			{
+				// bid1 and selectedItems test the clan before reading anything off it; six of
+				// the branches here, this one among them, read it without asking.
+				if (player.getClan() == null)
+				{
+					player.sendPacket(SystemMessageId.YOU_CANNOT_PARTICIPATE_IN_AN_AUCTION);
+					return;
+				}
+				
 				if (val.isEmpty())
 				{
 					return;
@@ -148,6 +156,12 @@ public class Auctioneer extends Npc
 			}
 			else if (actualCommand.equalsIgnoreCase("confirmAuction"))
 			{
+				if (player.getClan() == null)
+				{
+					player.sendPacket(SystemMessageId.YOU_CANNOT_PARTICIPATE_IN_AN_AUCTION);
+					return;
+				}
+				
 				try
 				{
 					final ClanHallAuction a = _pendingAuctions.get(player.getClan().getHideoutId());
@@ -369,6 +383,12 @@ public class Auctioneer extends Npc
 			}
 			else if (actualCommand.equalsIgnoreCase("bidlist"))
 			{
+				if (player.getClan() == null)
+				{
+					player.sendPacket(SystemMessageId.YOU_CANNOT_PARTICIPATE_IN_AN_AUCTION);
+					return;
+				}
+				
 				int auctionId = 0;
 				if (val.isEmpty())
 				{
@@ -505,7 +525,23 @@ public class Auctioneer extends Npc
 			}
 			else if (actualCommand.equalsIgnoreCase("cancelBid"))
 			{
-				final long bid = ClanHallAuctionManager.getInstance().getAuction(player.getClan().getAuctionBiddedAt()).getBidders().get(player.getClanId()).getBid();
+				if (player.getClan() == null)
+				{
+					player.sendPacket(SystemMessageId.YOU_CANNOT_PARTICIPATE_IN_AN_AUCTION);
+					return;
+				}
+				
+				// Three lookups chained with nothing tested: the auction is null when the clan
+				// has no bid standing, and the bidder is null when it is not this clan's.
+				final ClanHallAuction biddedAuction = ClanHallAuctionManager.getInstance().getAuction(player.getClan().getAuctionBiddedAt());
+				final Bidder bidder = biddedAuction == null ? null : biddedAuction.getBidders().get(player.getClanId());
+				if (bidder == null)
+				{
+					player.sendPacket(SystemMessageId.YOU_CANNOT_PARTICIPATE_IN_AN_AUCTION);
+					return;
+				}
+				
+				final long bid = bidder.getBid();
 				final String filename = "data/html/auction/AgitBidCancel.htm";
 				final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 				html.setFile(player, filename);
@@ -518,9 +554,16 @@ public class Auctioneer extends Npc
 			}
 			else if (actualCommand.equalsIgnoreCase("doCancelBid"))
 			{
-				if (ClanHallAuctionManager.getInstance().getAuction(player.getClan().getAuctionBiddedAt()) != null)
+				if (player.getClan() == null)
 				{
-					ClanHallAuctionManager.getInstance().getAuction(player.getClan().getAuctionBiddedAt()).cancelBid(player.getClanId());
+					player.sendPacket(SystemMessageId.YOU_CANNOT_PARTICIPATE_IN_AN_AUCTION);
+					return;
+				}
+				
+				final ClanHallAuction biddedAuction = ClanHallAuctionManager.getInstance().getAuction(player.getClan().getAuctionBiddedAt());
+				if (biddedAuction != null)
+				{
+					biddedAuction.cancelBid(player.getClanId());
 					player.sendPacket(SystemMessageId.YOU_HAVE_CANCELED_YOUR_BID);
 				}
 				return;
@@ -543,6 +586,7 @@ public class Auctioneer extends Npc
 					player.sendPacket(SystemMessageId.YOU_CANNOT_PARTICIPATE_IN_AN_AUCTION);
 					return;
 				}
+				
 				final String filename = "data/html/auction/AgitSaleCancel.htm";
 				final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 				html.setFile(player, filename);
@@ -554,6 +598,12 @@ public class Auctioneer extends Npc
 			}
 			else if (actualCommand.equalsIgnoreCase("doCancelAuction"))
 			{
+				if (player.getClan() == null)
+				{
+					player.sendPacket(SystemMessageId.YOU_CANNOT_PARTICIPATE_IN_AN_AUCTION);
+					return;
+				}
+				
 				// Looked up again to be cancelled after being tested; auctions are closed from a
 				// scheduled task, so the one that answered the test need not still be there.
 				final ClanHallAuction ownedAuction = ClanHallAuctionManager.getInstance().getAuction(player.getClan().getHideoutId());
