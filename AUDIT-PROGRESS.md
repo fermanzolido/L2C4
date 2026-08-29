@@ -4843,3 +4843,33 @@ los 22 ítems de quest, las 5 skills y los 10 multisells.
 
 Que las skills den **0 de 14.290** refuerza la lectura: lo que falta son **ítems y
 npcs de contenido nuevo**, no definiciones de mecánica.
+
+### Octava clase: coordenadas y puntos de aparición
+
+Esto sigue directamente del arreglo de `WorldObject.spawnMe`: `World.getRegion`
+devuelve nulo a propósito para un objeto fuera de la rejilla y lo desecha. Si algún
+punto de aparición del dato cayera fuera, ese npc se borraría al arrancar.
+
+| comprobación | examinadas | fuera de rango o inexistentes |
+|---|---|---|
+| puntos de aparición (165 ficheros) | **10.167** | **0** fuera de rejilla, **0** npcs desconocidos |
+| destinos de teletransporte | 1.190 | **0** |
+| puertas: posición y los cuatro nodos | 2.735 | **0** |
+| npcs teletransportadores | 138 | **17 no existen** |
+| vértices de zona | 11.164 | 300 fuera de rejilla |
+
+**Los 300 vértices de zona no son un defecto**, y se comprobó en vez de suponerse:
+`ZoneManager` registra una zona **iterando la rejilla** y preguntando a cada región
+`intersectsRectangle`, no indexando por las coordenadas del vértice. Un vértice
+fuera solo significa que el polígono se extiende más allá del área jugable, que es
+como se dibuja una zona que cubre "todo lo que hay pasada esta línea". Nada lo
+indexa, así que nada se sale de rango.
+
+**Los 17 teletransportadores** —35503, 35504, 35505, 35544, 35545, 35548 a 35550,
+35566 a 35578 pares, 35605 y 35640— son npcs de castillo y fortaleza que el dato no
+define. Sus ficheros de destinos se cargan y nunca se usan, porque el npc no existe.
+La misma raíz, por quinta vez.
+
+**Que los 10.167 puntos de aparición estén todos dentro y todos apunten a un npc
+definido** es el negativo más útil de esta tanda: el arreglo de `spawnMe` no tenía
+que corregir ningún dato, solo dejar de reventar si algún día lo hubiera.
