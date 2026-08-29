@@ -227,11 +227,19 @@ public abstract class ItemContainer
 		// If stackable item is found in inventory just add to current quantity
 		if ((olditem != null) && olditem.isStackable())
 		{
-			final int count = newItem.getCount();
-			olditem.changeCount(process, count, actor, reference);
-			olditem.setLastChange(Item.MODIFIED);
+			// destroyItem and transferItem both hold the item's monitor across exactly this
+			// mutation; the two add paths did not, and changeCount reads the count, decides
+			// against the cap and writes it back. Two clan members depositing the same
+			// stackable at once is enough to lose one of the deposits.
+			synchronized (olditem)
+			{
+				final int count = newItem.getCount();
+				olditem.changeCount(process, count, actor, reference);
+				olditem.setLastChange(Item.MODIFIED);
+			}
 			
-			// And destroys the item
+			// And destroys the item -- outside the block above, because taking a second
+			// item's monitor while holding the first is the one way to deadlock here.
 			ItemManager.destroyItem(process, newItem, actor, reference);
 			newItem.updateDatabase();
 			newItem = olditem;
@@ -266,8 +274,11 @@ public abstract class ItemContainer
 		// If stackable item is found in inventory just add to current quantity
 		if ((item != null) && item.isStackable())
 		{
-			item.changeCount(process, count, actor, reference);
-			item.setLastChange(Item.MODIFIED);
+			synchronized (item)
+			{
+				item.changeCount(process, count, actor, reference);
+				item.setLastChange(Item.MODIFIED);
+			}
 		}
 		else // If item hasn't be found in inventory, create new one
 		{
