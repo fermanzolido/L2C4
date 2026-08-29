@@ -1496,7 +1496,13 @@ public class CtF extends Event
 	public boolean eventStop()
 	{
 		// Despawn event manager.
-		MANAGER_NPC_INSTANCE.deleteMe();
+		// eventStop can run without an event having started, and the spawn below can fail,
+		// so this was a throw where the event simply has no manager to remove.
+		if (MANAGER_NPC_INSTANCE != null)
+		{
+			MANAGER_NPC_INSTANCE.deleteMe();
+			MANAGER_NPC_INSTANCE = null;
+		}
 		
 		// Cancel timers.
 		for (List<QuestTimer> timers : getQuestTimers().values())

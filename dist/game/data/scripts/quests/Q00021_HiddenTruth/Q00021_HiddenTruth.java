@@ -106,33 +106,65 @@ public class Q00021_HiddenTruth extends Quest
 			}
 			case "1":
 			{
-				_page.getAI().setIntention(Intention.MOVE_TO, PAGE_LOCS[0]);
-				_page.broadcastSay(ChatType.GENERAL, "Follow me...");
-				startQuestTimer("2", 5000, _page, player, false);
+				// The page despawns on its own timer, which nulls this field, and the quest
+				// is one object shared by every player -- so one player's despawn lands
+				// between another's walk timers, and every step below tested nothing.
+				final Npc page = _page;
+				if (page == null)
+				{
+					return null;
+				}
+				
+				page.getAI().setIntention(Intention.MOVE_TO, PAGE_LOCS[0]);
+				page.broadcastSay(ChatType.GENERAL, "Follow me...");
+				startQuestTimer("2", 5000, page, player, false);
 				return null;
 			}
 			case "2":
 			{
-				_page.getAI().setIntention(Intention.MOVE_TO, PAGE_LOCS[1]);
-				startQuestTimer("3", 12000, _page, player, false);
+				final Npc page = _page;
+				if (page == null)
+				{
+					return null;
+				}
+				
+				page.getAI().setIntention(Intention.MOVE_TO, PAGE_LOCS[1]);
+				startQuestTimer("3", 12000, page, player, false);
 				return null;
 			}
 			case "3":
 			{
-				_page.getAI().setIntention(Intention.MOVE_TO, PAGE_LOCS[2]);
-				startQuestTimer("4", 18000, _page, player, false);
+				final Npc page = _page;
+				if (page == null)
+				{
+					return null;
+				}
+				
+				page.getAI().setIntention(Intention.MOVE_TO, PAGE_LOCS[2]);
+				startQuestTimer("4", 18000, page, player, false);
 				return null;
 			}
 			case "4":
 			{
 				st.set("end_walk", "1");
-				_page.broadcastSay(ChatType.GENERAL, "Please check this bookcase, " + player.getName() + ".");
-				startQuestTimer("5", 47000, _page, player, false);
+				
+				final Npc page = _page;
+				if (page == null)
+				{
+					return null;
+				}
+				
+				page.broadcastSay(ChatType.GENERAL, "Please check this bookcase, " + player.getName() + ".");
+				startQuestTimer("5", 47000, page, player, false);
 				return null;
 			}
 			case "5":
 			{
-				_page.broadcastSay(ChatType.GENERAL, "I'm confused! Maybe it's time to go back.");
+				final Npc page = _page;
+				if (page != null)
+				{
+					page.broadcastSay(ChatType.GENERAL, "I'm confused! Maybe it's time to go back.");
+				}
 				return null;
 			}
 			case "31328-05.htm":
@@ -147,14 +179,20 @@ public class Q00021_HiddenTruth extends Quest
 			}
 			case "dukeDespawn":
 			{
-				_duke.deleteMe();
-				_duke = null;
+				if (_duke != null)
+				{
+					_duke.deleteMe();
+					_duke = null;
+				}
 				return null;
 			}
 			case "pageDespawn":
 			{
-				_page.deleteMe();
-				_page = null;
+				if (_page != null)
+				{
+					_page.deleteMe();
+					_page = null;
+				}
 				return null;
 			}
 		}
@@ -346,9 +384,17 @@ public class Q00021_HiddenTruth extends Quest
 	{
 		if (_duke == null)
 		{
-			_duke = addSpawn(VON_HELLMAN_DUKE, 51432, -54570, -3136, 0, false, 0);
-			_duke.broadcastSay(ChatType.GENERAL, "Who awoke me?");
-			startQuestTimer("dukeDespawn", 300000, _duke, player, false);
+			// addSpawn answers null for invalid coordinates and for any exception, logging
+			// both, so the two lines that followed it turned a reported failure into a throw.
+			final Npc duke = addSpawn(VON_HELLMAN_DUKE, 51432, -54570, -3136, 0, false, 0);
+			if (duke == null)
+			{
+				return;
+			}
+			
+			_duke = duke;
+			duke.broadcastSay(ChatType.GENERAL, "Who awoke me?");
+			startQuestTimer("dukeDespawn", 300000, duke, player, false);
 		}
 	}
 	
@@ -356,10 +402,16 @@ public class Q00021_HiddenTruth extends Quest
 	{
 		if (_page == null)
 		{
-			_page = addSpawn(VON_HELLMAN_PAGE, 51608, -54520, -3168, 0, false, 0);
-			_page.broadcastSay(ChatType.GENERAL, "My master has instructed me to be your guide, " + player.getName() + ".");
-			startQuestTimer("1", 4000, _page, player, false);
-			startQuestTimer("pageDespawn", 90000, _page, player, false);
+			final Npc page = addSpawn(VON_HELLMAN_PAGE, 51608, -54520, -3168, 0, false, 0);
+			if (page == null)
+			{
+				return;
+			}
+			
+			_page = page;
+			page.broadcastSay(ChatType.GENERAL, "My master has instructed me to be your guide, " + player.getName() + ".");
+			startQuestTimer("1", 4000, page, player, false);
+			startQuestTimer("pageDespawn", 90000, page, player, false);
 		}
 	}
 }

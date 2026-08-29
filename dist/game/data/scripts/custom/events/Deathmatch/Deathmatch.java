@@ -857,9 +857,14 @@ public class Deathmatch extends Event
 		PLAYER_SCORES.clear();
 		
 		// Spawn event manager.
+		// addSpawn answers null for invalid coordinates and for any exception, logging
+		// both, so the two lines that followed turned a reported failure into a throw.
 		MANAGER_NPC_INSTANCE = addSpawn(MANAGER, MANAGER_SPAWN_LOC, false, REGISTRATION_TIME * 60000);
-		MANAGER_NPC_INSTANCE.setTitle("Deathmatch Event");
-		MANAGER_NPC_INSTANCE.broadcastStatusUpdate();
+		if (MANAGER_NPC_INSTANCE != null)
+		{
+			MANAGER_NPC_INSTANCE.setTitle("Deathmatch Event");
+			MANAGER_NPC_INSTANCE.broadcastStatusUpdate();
+		}
 		startQuestTimer("TeleportToArena", REGISTRATION_TIME * 60000, null, null);
 		
 		// Send message to players.
@@ -892,7 +897,13 @@ public class Deathmatch extends Event
 		EVENT_ACTIVE = false;
 		
 		// Despawn event manager.
-		MANAGER_NPC_INSTANCE.deleteMe();
+		// eventStop can run without an event having started, and the spawn below can fail,
+		// so this was a throw where the event simply has no manager to remove.
+		if (MANAGER_NPC_INSTANCE != null)
+		{
+			MANAGER_NPC_INSTANCE.deleteMe();
+			MANAGER_NPC_INSTANCE = null;
+		}
 		
 		// Cancel timers.
 		for (List<QuestTimer> timers : getQuestTimers().values())

@@ -182,14 +182,21 @@ public class Q00226_TestOfTheHealer extends Quest
 			}
 			case "tatoma_despawn":
 			{
-				_tatoma.deleteMe();
-				_tatoma = null;
+				// Nulled here and in the quest's other exit paths, and shared by every player.
+				if (_tatoma != null)
+				{
+					_tatoma.deleteMe();
+					_tatoma = null;
+				}
 				return null;
 			}
 			case "leto_leader_despawn":
 			{
-				_letoLeader.deleteMe();
-				_letoLeader = null;
+				if (_letoLeader != null)
+				{
+					_letoLeader.deleteMe();
+					_letoLeader = null;
+				}
 				return null;
 			}
 		}

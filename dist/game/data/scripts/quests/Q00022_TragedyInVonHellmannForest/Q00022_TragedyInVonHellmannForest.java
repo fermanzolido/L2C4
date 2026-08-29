@@ -272,10 +272,18 @@ public class Q00022_TragedyInVonHellmannForest extends Quest
 			{
 				if (qs.isCond(10) && (_soulWellNpc == null))
 				{
-					_soulWellNpc = addSpawn(SOUL_OF_WELL, SOUL_WELL_LOC, true, 0);
-					startQuestTimer("activateSoulOfWell", 90000, _soulWellNpc, player);
-					startQuestTimer("despawnSoulOfWell", 120000, _soulWellNpc, player);
-					_soulWellNpc.getAI().setIntention(Intention.ATTACK, player);
+					// addSpawn answers null for invalid coordinates and for any exception,
+					// logging both, so the line below turned a reported failure into a throw.
+					final Npc soulOfWell = addSpawn(SOUL_OF_WELL, SOUL_WELL_LOC, true, 0);
+					if (soulOfWell == null)
+					{
+						return null;
+					}
+					
+					_soulWellNpc = soulOfWell;
+					startQuestTimer("activateSoulOfWell", 90000, soulOfWell, player);
+					startQuestTimer("despawnSoulOfWell", 120000, soulOfWell, player);
+					soulOfWell.getAI().setIntention(Intention.ATTACK, player);
 					
 					htmltext = event;
 				}

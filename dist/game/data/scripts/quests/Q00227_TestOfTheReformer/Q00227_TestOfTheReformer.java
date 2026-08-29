@@ -326,8 +326,13 @@ public class Q00227_TestOfTheReformer extends Quest
 								// Resets Ol Mahums' instances
 								startQuestTimer("ol_mahums_despawn", 5000, null, player, true);
 								
-								_olMahumInspector.asAttackable().addDamageHate(_olMahumPilgrim, 0, 99999);
-								_olMahumInspector.getAI().setIntention(Intention.ATTACK, _olMahumPilgrim);
+								// The despawn timer just started above nulls both of these, and the
+								// quest is one object shared by every player.
+								if ((_olMahumInspector != null) && (_olMahumPilgrim != null))
+								{
+									_olMahumInspector.asAttackable().addDamageHate(_olMahumPilgrim, 0, 99999);
+									_olMahumInspector.getAI().setIntention(Intention.ATTACK, _olMahumPilgrim);
+								}
 								
 								// NPC-to-Attackable combat not supported; using alternative logic.
 								// _olMahumPilgrim.asAttackable().addDamageHate(_olMahumInspector, 0, 99999);
