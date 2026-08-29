@@ -22,7 +22,6 @@ package org.l2jmobius.gameserver.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -86,7 +85,10 @@ public class EffectList {
 	 * Set containing all {@code AbnormalType}s that shouldn't be added to this
 	 * creature effect list.
 	 */
-	private final Set<AbnormalType> _blockedAbnormalTypes = EnumSet.noneOf(AbnormalType.class);
+	// Every other collection in this class is concurrent; this one was an EnumSet, which
+	// is not. The BlockAbnormalSlot effect adds and removes from it as it starts and ends,
+	// and the add-effect path reads it -- both from whichever thread is casting.
+	private final Set<AbnormalType> _blockedAbnormalTypes = ConcurrentHashMap.newKeySet();
 	/** Short buff skill ID. */
 	private BuffInfo _shortBuff = null;
 	/** If {@code true} this effect list has buffs removed on any action. */
@@ -96,7 +98,9 @@ public class EffectList {
 	/** If {@code true} this effect list has debuffs removed on damage. */
 	private volatile boolean _hasDebuffsRemovedOnDamage = false;
 	/** Effect flags. */
-	private int _effectFlags;
+	// Recomputed by one thread and read by isAffected from the combat paths of others.
+	// The three flags declared just above are volatile for exactly that reason.
+	private volatile int _effectFlags;
 	/** If {@code true} only party icons need to be updated. */
 	private boolean _partyOnly = false;
 	/** The owner of this effect list. */
