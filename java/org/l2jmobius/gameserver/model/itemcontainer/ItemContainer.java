@@ -349,59 +349,87 @@ public abstract class ItemContainer
 		}
 		
 		Item targetitem = sourceitem.isStackable() ? target.getItemByItemId(sourceitem.getId()) : null;
-		synchronized (sourceitem)
+		
+		// This method holds two item monitors at once: the source's across the whole move,
+		// and the target stack's as soon as changeCount or addItem reaches it. Two transfers
+		// running in opposite directions between the same pair would each hold what the
+		// other wants, so both are taken in object-id order and every acquisition inside is
+		// then reentrant. When there is no distinct target stack both names are the source,
+		// and locking the same monitor twice costs nothing.
+		final Item outerLock;
+		final Item innerLock;
+		if ((targetitem == null) || (targetitem == sourceitem))
 		{
-			// check if this item still present in this container
-			if (getItemByObjectId(objectId) != sourceitem)
+			outerLock = sourceitem;
+			innerLock = sourceitem;
+		}
+		else if (sourceitem.getObjectId() < targetitem.getObjectId())
+		{
+			outerLock = sourceitem;
+			innerLock = targetitem;
+		}
+		else
+		{
+			outerLock = targetitem;
+			innerLock = sourceitem;
+		}
+		
+		synchronized (outerLock)
+		{
+			synchronized (innerLock)
 			{
-				return null;
-			}
-			
-			// Check if requested quantity is available
-			int count = countValue;
-			if (count > sourceitem.getCount())
-			{
-				count = sourceitem.getCount();
-			}
-			
-			// If possible, move entire item object
-			if ((sourceitem.getCount() == count) && (targetitem == null) && !sourceitem.isStackable())
-			{
-				removeItem(sourceitem);
-				target.addItem(process, sourceitem, actor, reference);
-				targetitem = sourceitem;
-			}
-			else
-			{
-				if (sourceitem.getCount() > count) // If possible, only update counts
+				// check if this item still present in this container
+				if (getItemByObjectId(objectId) != sourceitem)
 				{
-					sourceitem.changeCount(process, -count, actor, reference);
-				}
-				else // Otherwise destroy old item
-				{
-					removeItem(sourceitem);
-					ItemManager.destroyItem(process, sourceitem, actor, reference);
+					return null;
 				}
 				
-				if (targetitem != null) // If possible, only update counts
+				// Check if requested quantity is available
+				int count = countValue;
+				if (count > sourceitem.getCount())
 				{
-					targetitem.changeCount(process, count, actor, reference);
+					count = sourceitem.getCount();
 				}
-				else // Otherwise add new item
+				
+				// If possible, move entire item object
+				if ((sourceitem.getCount() == count) && (targetitem == null) && !sourceitem.isStackable())
 				{
-					targetitem = target.addItem(process, sourceitem.getId(), count, actor, reference);
+					removeItem(sourceitem);
+					target.addItem(process, sourceitem, actor, reference);
+					targetitem = sourceitem;
 				}
+				else
+				{
+					if (sourceitem.getCount() > count) // If possible, only update counts
+					{
+						sourceitem.changeCount(process, -count, actor, reference);
+					}
+					else // Otherwise destroy old item
+					{
+						removeItem(sourceitem);
+						ItemManager.destroyItem(process, sourceitem, actor, reference);
+					}
+					
+					if (targetitem != null) // If possible, only update counts
+					{
+						targetitem.changeCount(process, count, actor, reference);
+					}
+					else // Otherwise add new item
+					{
+						targetitem = target.addItem(process, sourceitem.getId(), count, actor, reference);
+					}
+				}
+				
+				// Updates database
+				sourceitem.updateDatabase(true);
+				if ((targetitem != sourceitem) && (targetitem != null))
+				{
+					targetitem.updateDatabase();
+				}
+				
+				refreshWeight();
+				target.refreshWeight();
 			}
-			
-			// Updates database
-			sourceitem.updateDatabase(true);
-			if ((targetitem != sourceitem) && (targetitem != null))
-			{
-				targetitem.updateDatabase();
-			}
-			
-			refreshWeight();
-			target.refreshWeight();
 		}
 		
 		return targetitem;
