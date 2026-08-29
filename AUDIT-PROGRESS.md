@@ -32,8 +32,8 @@ hallazgos aunque no hayas terminado el área.
 | ~~`network/serverpackets`~~ | 259 | 19.900 | **TERMINADA** |
 | ~~`network/clientpackets`~~ | 201 | 21.727 | **TERMINADA** |
 | ~~datapack `handlers/`~~ | 375 | 51.203 | **TERMINADA** |
-| **`model/actor`** | **166** | **53.236** | **en curso** |
-| `model/stats` | 7 | 2.663 | pendiente |
+| ~~`model/actor`~~ | 166 | 53.236 | **TERMINADA** |
+| **`model/stats`** | **7** | **2.663** | **en curso** |
 | `model/conditions` | 80 | 4.989 | pendiente |
 | `model/script` | 9 | 7.622 | pendiente |
 | `model` (raiz) | 58 | 14.546 | pendiente |
@@ -3628,7 +3628,7 @@ relativa —**dos**, `Disarm` y `Distrust`, y los dos guardan—. El hilo no vue
 
 ---
 
-## `model/actor` — EN CURSO
+## `model/actor` — TERMINADA
 
 166 archivos, 53.236 líneas. `Player.java` sola tiene **12.131**, `Creature.java`
 6.483, y después nada pasa de 1.900.
@@ -3676,45 +3676,81 @@ cualquier bypass que le llegara. Una sola guarda en la entrada alcanza porque
 todas las lecturas de abajo llegan al salón por el id que esa primera llamada
 cachea.
 
+### Segunda vuelta: dos ids que no son el mismo id
+
+| # | Archivo | Defecto | Severidad |
+|---|---|---|---|
+| 6 | `Player` | el ítem de control de la mascota comparado por id de plantilla | **alta** |
+| 7 | `PvpConfig` | dos listas de ítems convertidas sin acotar | media |
+| 8 | `TopicBBSManager` | el paginador de temas cuenta clanes | media |
+| 9 | `GameServerThread` | el hilo arranca sin flujos que usar | media |
+
+**6 — Uno de cinco.** Cuando un jugador muere y dropea ítems hay una guarda que
+debería saltear el ítem que invoca a su mascota. Compara
+`_summon.getControlObjectId()` contra `itemDrop.getId()` — pero el primero es un
+**id de objeto** y el segundo el **id de plantilla**. Los ids de objeto arrancan
+en 0x10000000 y los de plantilla llegan a unos diez mil: los dos números no
+pueden ser iguales nunca, así que la guarda no se disparó jamás.
+
+Lo delata el propio archivo: otros **cuatro** usos leen ese mismo valor y todos lo
+comparan contra un id de objeto —`validateItemManipulation` dos veces, el id del
+objeto de montura, y el ítem de control guardado—. Éste era el único que no.
+
+**8 — Contar lo que no se pagina.** `TopicBBSManager` divide la cantidad de temas
+por ocho y redondea hacia arriba comparando el resultado contra **la cantidad de
+clanes del servidor**. La última página aparecía o desaparecía según un número sin
+relación con ese foro. La forma viene del paginador de `ClanBoard`, que sí cuenta
+lo que pagina.
+
+**9 — Arrancar a medias.** `GameServerThread` abre los flujos del socket en su
+constructor, loguea la `IOException` si falla, y arranca el hilo igual. `run()`
+escribe el paquete inicial en su primera línea, y el bloqueo que `sendPacket` toma
+sobre el flujo de salida revienta contra el null. `run()` solo atrapa
+`IOException`, así que el hilo moría con un throw sin manejar y el socket abierto.
+
+### Cómo se cubrió el área
+
+De los **166** archivos, los de `instance/` —donde vive la mayoría de los
+hallazgos— se leyeron a fondo, junto con los caminos de más riesgo de los dos
+grandes: en `Player.java` (12.131 líneas) la persistencia, el drop por muerte, el
+karma y el cambio de subclase; en `Creature.java` (6.483) el movimiento, la
+aplicación de golpe y el sumidero de daño. Sobre los 166 corrieron **doce**
+barridos, más los once que corren sobre todo el repositorio.
+
 ### Sospechas evaluadas y descartadas, con lo que las descarta
 
-- **El reparto de experiencia de `Attackable`.** Divide por un total entero, y
-  `getExpReward` devuelve `long` — o sea división entera, que por cero lanza. Pero
-  el total y el mapa de recompensas se incrementan **bajo la misma condición**
-  (`damage > 1`), así que un mapa no vacío implica un total de al menos 2.
+- **Los índices de parámetro de las sentencias preparadas.** **125** revisadas en
+  núcleo y datapack, contando los `?` de cada consulta contra los `setXxx(n, …)`.
+  13 marcadas, las 13 explicadas: vinculaciones por lote dentro de un bucle, y dos
+  sentencias en el mismo try-with-resources. **Cero defectos.**
 
-- **`getClient().getFloodProtectors()`.** **36** sitios en el repositorio lo hacen
-  y **ninguno** comprueba null antes. Es el patrón de la casa, no una omisión
-  estrecha: se descarta como clase.
+- **Columnas guardadas y nunca releídas.** Diez sobre la fila del personaje, cada
+  una con su razón; ninguna es un valor que se pierda.
 
-- **`SummonStatus` usando el grupo de otro jugador.** La línea de arriba exige que
-  ese jugador sea **miembro** de ese grupo, así que su grupo no puede ser null.
+- **El camino de subclase.** `childOf(null)` recorre padres y devuelve false sin
+  lanzar. Y el `getParent().getId()` detrás de `subClassId >= 88` es seguro por
+  construcción: de las **89** constantes del enum, las **9** raíz tienen id ≤ 53 y
+  de las **30** con id ≥ 88 ninguna lo es.
 
-- **`ItemManager.destroyItem` devuelve `void`**: no hay retorno que descartar en
-  los cuatro sitios que el barrido marcó.
+- **`synchronized` sobre un campo reasignable** (22) y **doble comprobación sin
+  `volatile`** (12). Todos aguantan salvo el hallazgo 9: las tres colecciones que
+  parecían candados reasignables son `final`, y los doce campos de doble
+  comprobación son `volatile` —incluido el de `Cubic`, cuya declaración el barrido
+  no supo leer por el comodín de `Future<?>`—.
 
-- **`Npc.getCastle()`** cae al castillo más cercano, lo cual cubre `Artefact`,
-  `CastleDoorman`, `ControlTower` y `Teleporter`.
+- **Las absorciones de vida y maná en `onHitTimer`.** Recortan contra un margen que
+  se vuelve negativo si la criatura está sobrecurada, y el recorte cae debajo del
+  test de cero que sigue.
 
-- **Los índices de parámetro de las sentencias preparadas.** Revisadas las **125**
-  del núcleo y el datapack con tres o más parámetros, contando los `?` de cada
-  consulta contra los `setXxx(n, …)` vinculados. **13** marcadas y las 13
-  explicadas: vinculaciones por lote dentro de un bucle, y dos sentencias
-  declaradas en el mismo try-with-resources. Cero defectos. La de 23 parámetros de
-  `SevenSigns` calza exacto: 17 columnas, cinco bonos del 18 al 22 con
-  `FESTIVAL_COUNT = 5`, y la fecha en el 23.
+- **Las divisiones de movimiento de `Creature`.** Cada una está guardada por la
+  rama en la que vive: `700/distance` solo corre con `distance > 700`, y el `else`
+  de los senos solo con `distance >= 1.79`.
 
-- **Columnas guardadas y nunca releídas.** Diez sobre la fila del personaje.
-  `maxHp`, `maxMp` y `maxCp` se recalculan de las estadísticas; `online` y `race`
-  los leen otros archivos; `clan_privs` se ignora a propósito porque los
-  privilegios se restauran del rango del clan; `bookmarkslot` se escribe siempre
-  como literal `0` con un comentario que nombra el campo no implementado; y
-  `cancraft` solo aparece en el INSERT inicial. Ninguna es un valor que se pierda.
+- **Los 32 captadores que entregan una colección interna no concurrente.** Son
+  todos datos de solo lectura llenados en la carga.
 
-- **El camino de subclase.** `isValidNewSubClass` pasa a `equalsOrChildOf` un
-  `PlayerClass` que puede ser null para un id inexistente, pero `childOf(null)`
-  recorre padres y devuelve false sin lanzar, y la búsqueda posterior en las
-  subclases disponibles no encuentra un id inexistente. Y el `getParent().getId()`
-  de `VillageMaster`, guardado por `subClassId >= 88`, es seguro por construcción:
-  de las **89** constantes del enum, **9** son raíz y todas tienen id ≤ 53; de las
-  **30** con id ≥ 88, ninguna lo es.
+- **El reparto de experiencia de `Attackable`.** Divide por un total entero, pero el
+  total y el mapa de recompensas se incrementan bajo la misma condición.
+
+- **`getClient().getFloodProtectors()`**: 36 sitios, ninguno comprueba null. Patrón
+  de la casa.
