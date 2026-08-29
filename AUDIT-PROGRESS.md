@@ -34,7 +34,7 @@ hallazgos aunque no hayas terminado el área.
 | ~~datapack `handlers/`~~ | 375 | 51.203 | **TERMINADA** |
 | ~~`model/actor`~~ | 166 | 53.236 | **TERMINADA** |
 | ~~`model/stats`~~ | 7 | 2.663 | **TERMINADA** |
-| **`model/conditions`** | **80** | **4.989** | **en curso** |
+| ~~`model/conditions`~~ | 80 | 4.989 | **TERMINADA** |
 | `model/script` | 9 | 7.622 | pendiente |
 | `model` (raiz) | 58 | 14.546 | pendiente |
 | resto fuera de mapa | 485 | 84.955 | pendiente |
@@ -3836,3 +3836,101 @@ prender se corre un punto de su modificador.
 
 - **Los rasgos de arma y defensa** se indexan por ordinal sobre arreglos
   dimensionados con `TraitType.values().length`, así que entran por construcción.
+
+---
+
+## `model/conditions` — TERMINADA
+
+80 archivos, 4.989 líneas: la capa que decide si una habilidad o un ítem puede
+usarse. Casi toda condición es un `testImpl` de tres líneas, así que el método
+aquí no fue leer cada una sino **alinear a las hermanas**: cuando dieciséis
+condiciones hacen lo mismo y cinco no, las cinco son el defecto.
+
+| # | Archivo | Defecto | Severidad |
+|---|---------|---------|-----------|
+| 1 | `DocumentBase.parseLogicNot` | envuelve el null que `parseCondition` sabe devolver | **alta** |
+| 2 | cinco condiciones de objetivo | leen `effected` sin comprobarlo, diez hermanas sí | **alta** |
+| 3 | `ConditionUsingItemType` | piernas sin peto cae a la máscara vestida | media |
+| 4 | `ConditionTargetAggro` | la rama de jugador ignora la bandera | media |
+| 5 | `ConditionPlayerCallPc` | vuelca el objeto en un mensaje al jugador | media |
+| 6 | `ConditionPlayerCanCreateBase` | prueba el clan atacante y lo vuelve a pedir | media |
+| 7 | `ConditionPlayerCanResurrect` | igual, con `checkIsAttacker` de por medio | media |
+| 8 | `ConditionSiegeZone` | lee las coordenadas de un objetivo que puede faltar | baja |
+| 9 | `ConditionPlayerCanSummonSiegeGolem` | dos `getSiege()` y ninguno comprobado | baja |
+
+**1 — El null que el propio parser fabrica.** `parseCondition` contesta null por
+tres caminos: nodo desconocido, `<not>` vacío y atributo no reconocido. Las dos
+combinadoras hermanas lo saben y lo descartan —`ConditionLogicAnd.add` y
+`ConditionLogicOr.add` abren las dos con `if (condition == null) return;`— pero
+`parseLogicNot` lo envolvía. El null quedaba guardado en el campo y se
+desreferenciaba **en cada prueba de esa habilidad**. Un solo sitio de
+construcción y veinte `<not>` en el dato distribuido, así que la guarda en el
+parser es el arreglo entero.
+
+**3 — La media armadura que pasaba.** El bloque de armadura devuelve en todos los
+casos menos uno: piernas puestas y sin peto. Ése caía a `getWearedMask()` de
+abajo, que hace un OR de **todas** las ranuras del muñeco, así que la media
+armadura contestaba que sí donde el peto solo contesta que no. Alcanzable:
+**33** declaraciones del dato entran por esa rama (LIGHT 19, HEAVY 8, MAGIC 6).
+
+**4 — Una bandera honrada a medias.** El mismo método compara su rama de monstruo
+contra `_isAggro` y su rama de jugador contra nada, así que `aggro="false"` daba
+verdadero para un jugador con karma. Nada declara `aggro` hoy; el arreglo no
+mueve el juego actual y deja de morder a quien lo escriba mañana.
+
+**5 — El volcado del objeto.** `player.sendMessage(effected.asPlayer() + " is
+dead...")` y `Player` no define `toString()`, así que hereda el de `WorldObject`
+y al jugador le llegaba `Player:Nombre[268437456] is dead at the moment`. Un
+barrido de **todos** los mensajes visibles del repositorio encontró éste y
+ninguno más — pero solo después de corregirlo: el primer intento usaba
+`[\w.()]+` para el operando, que es voraz e incluye el paréntesis, así que se
+tragaba `sendMessage(` dentro del operando y **no encontraba ni el caso que ya
+tenía en la mano**. Un barrido ciego no cuenta como barrido.
+
+### Sospechas evaluadas y descartadas, con lo que las descarta
+
+- **La división por un máximo cero.** `ConditionPlayerCp` divide por `getMaxCp()`,
+  y `baseCpMax` es `set.getFloat("baseCpMax", 0)`: cero por defecto, y **ningún**
+  fichero de npc declara cp. Parecía una excepción aritmética garantizada. No lo
+  es: `getCurrentCp()` devuelve `double` y `getMaxCp()` `int`, así que la
+  división es en coma flotante y no lanza — el NaN que da un máximo cero hace
+  falsa toda comparación, que es la respuesta que se quiere. Las dos condiciones
+  de peso **sí** comprueban su divisor porque las suyas son `int / int`: ahí la
+  guarda evita una excepción real. La asimetría tiene motivo.
+
+- **El lanzador sin comprobar**: 12 de 53 condiciones lo comprueban. Es el patrón
+  de la casa, no una guarda faltante.
+
+- **`skill` sin comprobar en `ConditionPlayerCanResurrect`**: `canResurrect` se
+  declara **solo** en ficheros de skills —seis veces— y nunca en items, así que
+  el `skill` nunca llega nulo.
+
+- **`isBehind` / `isInFrontOf` / `isInSideOf`** con objetivo nulo: las tres
+  guardan `target == null` en `ILocational` y contestan falso.
+
+- **`checkIsAttacker(clan)`** es literalmente `getAttackerClan(clan) != null`, así
+  que la rama que lo probaba y volvía a pedirlo era una sola pregunta hecha dos
+  veces. Se sostiene la respuesta; no cambia la semántica.
+
+### Dos asimetrías registradas y **no** tocadas
+
+Las dos son preguntas de diseño, no de código: las dos lecturas son
+internamente consistentes y nada en el repositorio decide cuál se quiso.
+
+- **`ConditionPlayerCp` compara con `>=` donde `Hp` y `Mp` usan `<=`.** Lo que
+  zanja el caso de `Hp` no sirve aquí: `hp="5"` bajo `>=` sería casi un no-op, y
+  eso obliga a `<=`; `cp="50"` no es degenerado en ninguna de las dos lecturas.
+  El parser trata las tres igual, el `msgId="113"` es el genérico "cannot be used
+  due to unsuitable terms", y los dos únicos usos son las skills 1326 y 1327
+  (Harmony y Symphony of Noblesse) con `<player cp="50" />` junto a
+  `<player SiegeZone="126" />`. **Cambiarlo movería el juego sobre una conjetura.**
+
+- **`ConditionPlayerCheckAbnormal` compara con `>=`** donde `ActiveEffectId` y
+  `ActiveSkillId` usan `<=`. Además `checkabnormal` **no se declara ni una vez**
+  en el dato distribuido, así que la pregunta es hoy teórica.
+
+- **`ConditionPlayerCanTakeCastle` anuncia desde dentro de un predicado**
+  (`announceToPlayer` de "el clan enemigo empezó a grabar"). Si la condición se
+  prueba más de una vez por lanzamiento, el anuncio sale más de una vez. Es
+  comportamiento existente del juego, no una guarda faltante; cambiarlo es una
+  decisión de diseño.
