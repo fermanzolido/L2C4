@@ -247,7 +247,11 @@ public class Quest implements IEventTimerEvent<String>, IEventTimerCancel<String
 	private final Map<ListenerRegisterType, Set<Integer>> _registeredIds = new ConcurrentHashMap<>();
 	private final Queue<AbstractEventListener> _listeners = new PriorityBlockingQueue<>();
 	private final Map<Predicate<Player>, String> _startCondition = new LinkedHashMap<>(1);
-	private final Map<String, List<QuestTimer>> _questTimers = new HashMap<>();
+	// The inner lists are copy-on-write, so the intent was already concurrent; the outer
+	// map was not. startQuestTimer wrote it under a lock that getQuestTimer, cancelQuestTimer,
+	// removeQuestTimer and unload never took -- and removeQuestTimer runs on the timer thread,
+	// while three event scripts and an admin command iterate the map handed out by getQuestTimers.
+	private final Map<String, List<QuestTimer>> _questTimers = new ConcurrentHashMap<>();
 	private volatile TimerExecutor<String> _timerExecutor;
 
 	private final int _questId;
@@ -515,15 +519,15 @@ public class Quest implements IEventTimerEvent<String>, IEventTimerCancel<String
 			return;
 		}
 
+		// The lock stays: the test below and the add that follows it have to be one step
+		// against another thread starting the same timer.
 		synchronized (_questTimers) {
-			if (!_questTimers.containsKey(name)) {
-				_questTimers.put(name, new CopyOnWriteArrayList<>());
-			}
+			final List<QuestTimer> timers = _questTimers.computeIfAbsent(name, k -> new CopyOnWriteArrayList<>());
 
 			// If there exists a timer with this name, allow the timer only if the [npc,
 			// player] set is unique nulls act as wildcards.
 			if (getQuestTimer(name, npc, player) == null) {
-				_questTimers.get(name).add(new QuestTimer(this, name, time, npc, player, repeating));
+				timers.add(new QuestTimer(this, name, time, npc, player, repeating));
 			}
 		}
 	}

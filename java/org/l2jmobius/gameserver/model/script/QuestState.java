@@ -21,8 +21,8 @@
 package org.l2jmobius.gameserver.model.script;
 
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -66,8 +66,16 @@ public class QuestState
 	/** The current condition of the quest */
 	private int _cond = 0;
 	
-	/** A map of key->value pairs containing the quest state variables and their values */
-	private Map<String, String> _vars;
+	/**
+	 * A map of key->value pairs containing the quest state variables and their values.
+	 * <p>
+	 * Quest events reach one state from several threads at once: a quest timer fires on a
+	 * pool thread while the owner's own packet thread answers a bypass, and this class takes
+	 * no lock anywhere. The map was a plain HashMap built lazily, so two threads could each
+	 * build one and one set of variables was dropped; exitQuest also nulls the field while
+	 * readers were between their null check and their read of it.
+	 */
+	private volatile Map<String, String> _vars;
 	
 	/**
 	 * boolean flag letting QuestStateManager know to exit quest when cleaning up
@@ -189,20 +197,40 @@ public class QuestState
 	}
 	
 	/**
+	 * @return this state's variable map, building it on first use. Double-checked the way
+	 *         Quest builds its timer executor, so two threads setting the first variable of
+	 *         the same quest cannot each build a map and lose one of them.
+	 */
+	private Map<String, String> takeVars()
+	{
+		Map<String, String> vars = _vars;
+		if (vars == null)
+		{
+			synchronized (this)
+			{
+				vars = _vars;
+				if (vars == null)
+				{
+					vars = new ConcurrentHashMap<>();
+					_vars = vars;
+				}
+			}
+		}
+		
+		return vars;
+	}
+	
+	/**
 	 * Add parameter used in quests.
 	 * @param variable String pointing out the name of the variable for quest
 	 * @param value String pointing out the value of the variable for quest
 	 */
 	public void setInternal(String variable, String value)
 	{
-		if (_vars == null)
-		{
-			_vars = new HashMap<>();
-		}
-		
+		final Map<String, String> vars = takeVars();
 		if (value == null)
 		{
-			_vars.put(variable, "");
+			vars.put(variable, "");
 			return;
 		}
 		
@@ -217,7 +245,7 @@ public class QuestState
 			}
 		}
 		
-		_vars.put(variable, value);
+		vars.put(variable, value);
 	}
 	
 	public void set(String variable, int value)
@@ -241,18 +269,14 @@ public class QuestState
 	 */
 	public void set(String variable, String value)
 	{
-		if (_vars == null)
-		{
-			_vars = new HashMap<>();
-		}
-		
+		final Map<String, String> vars = takeVars();
 		String newValue = value;
 		if (newValue == null)
 		{
 			newValue = "";
 		}
 		
-		final String old = _vars.put(variable, newValue);
+		final String old = vars.put(variable, newValue);
 		if (old != null)
 		{
 			Quest.updateQuestVarInDb(this, variable, newValue);
@@ -391,12 +415,13 @@ public class QuestState
 	 */
 	public void unset(String variable)
 	{
-		if (_vars == null)
+		final Map<String, String> vars = _vars;
+		if ((vars == null) || (variable == null))
 		{
 			return;
 		}
 		
-		final String old = _vars.remove(variable);
+		final String old = vars.remove(variable);
 		if (old != null)
 		{
 			if (COND_VAR.equals(variable))
@@ -414,12 +439,13 @@ public class QuestState
 	 */
 	public String get(String variable)
 	{
-		if (_vars == null)
+		final Map<String, String> vars = _vars;
+		if ((vars == null) || (variable == null))
 		{
 			return null;
 		}
 		
-		return _vars.get(variable);
+		return vars.get(variable);
 	}
 	
 	/**
@@ -428,12 +454,13 @@ public class QuestState
 	 */
 	public int getInt(String variable)
 	{
-		if (_vars == null)
+		final Map<String, String> vars = _vars;
+		if ((vars == null) || (variable == null))
 		{
 			return 0;
 		}
 		
-		final String varStr = _vars.get(variable);
+		final String varStr = vars.get(variable);
 		if ((varStr == null) || varStr.isEmpty())
 		{
 			return 0;

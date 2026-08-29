@@ -33,7 +33,10 @@ public class QuestTimer
 	protected final Npc _npc;
 	protected final Player _player;
 	protected final boolean _isRepeating;
-	protected ScheduledFuture<?> _scheduler;
+	// Written by whoever builds or cancels the timer and read by the pool thread that
+	// runs it, with no lock on either side: without volatile the task can see the null
+	// this field held before the constructor assigned it and return without firing.
+	protected volatile ScheduledFuture<?> _scheduler;
 	
 	public QuestTimer(Quest quest, String name, long time, Npc npc, Player player, boolean repeating)
 	{

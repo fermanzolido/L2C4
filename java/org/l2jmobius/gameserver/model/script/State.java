@@ -65,6 +65,16 @@ public class State
 	 */
 	public static byte getStateId(String statename)
 	{
+		// playerEnter reads this straight out of character_quests.value, which the schema
+		// declares nullable, and a switch over a null String throws. That throw is caught
+		// far above by the loader's catch(Exception), so one bad row would silently cost
+		// the character every quest it had not read yet. An unknown name already answers
+		// the default state; a missing one is the same kind of answer.
+		if (statename == null)
+		{
+			return CREATED;
+		}
+		
 		switch (statename)
 		{
 			case "Started":
