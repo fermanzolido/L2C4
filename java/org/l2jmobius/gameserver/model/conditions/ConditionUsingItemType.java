@@ -93,6 +93,11 @@ public class ConditionUsingItemType extends Condition
 				
 				return (ArmorType.NONE.mask() & _mask) == ArmorType.NONE.mask();
 			}
+			
+			// Legs on and no chest. Every other armour case returns above, so this one
+			// alone fell through to the worn mask below -- and that mask ORs in every
+			// paperdoll slot, so it answered yes to the half set that chest-only denies.
+			return (ArmorType.NONE.mask() & _mask) == ArmorType.NONE.mask();
 		}
 		
 		return (_mask & inv.getWearedMask()) != 0;

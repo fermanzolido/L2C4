@@ -23,6 +23,7 @@ import org.l2jmobius.gameserver.model.actor.Summon;
 import org.l2jmobius.gameserver.model.clan.Clan;
 import org.l2jmobius.gameserver.model.item.ItemTemplate;
 import org.l2jmobius.gameserver.model.siege.Siege;
+import org.l2jmobius.gameserver.model.siege.SiegeClan;
 import org.l2jmobius.gameserver.model.skill.Skill;
 import org.l2jmobius.gameserver.network.SystemMessageId;
 import org.l2jmobius.gameserver.network.serverpackets.SystemMessage;
@@ -90,6 +91,10 @@ public class ConditionPlayerCanResurrect extends Condition
 				if ((siege != null) && siege.isInProgress())
 				{
 					final Clan clan = player.getClan();
+					// checkIsAttacker is defined as getAttackerClan(clan) != null, so the
+					// branch below tested the lookup and then read it again. One lookup
+					// answers both, and nothing can drop the clan between the two calls.
+					final SiegeClan attackerClan = siege.getAttackerClan(clan);
 					if (clan == null)
 					{
 						canResurrect = false;
@@ -106,7 +111,7 @@ public class ConditionPlayerCanResurrect extends Condition
 							effector.sendPacket(SystemMessageId.THE_GUARDIAN_TOWER_HAS_BEEN_DESTROYED_AND_RESURRECTION_IS_NOT_POSSIBLE);
 						}
 					}
-					else if (siege.checkIsAttacker(clan) && (siege.getAttackerClan(clan).getNumFlags() == 0))
+					else if ((attackerClan != null) && (attackerClan.getNumFlags() == 0))
 					{
 						canResurrect = false;
 						if (effector.isPlayer())

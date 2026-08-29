@@ -58,6 +58,14 @@ public class ConditionSiegeZone extends Condition
 	public boolean testImpl(Creature effector, Creature effected, Skill skill, ItemTemplate item)
 	{
 		final Creature target = _self ? effector : effected;
+		if (target == null)
+		{
+			// The target form of this condition takes the effected creature, and
+			// CastleManager.getCastle reads its coordinates without checking it.
+			// Answer what no castle answers: this is not a siege zone.
+			return (_value & COND_NOT_ZONE) != 0;
+		}
+		
 		final Castle castle = CastleManager.getInstance().getCastle(target);
 		if (castle == null)
 		{

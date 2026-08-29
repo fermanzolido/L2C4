@@ -472,7 +472,18 @@ public abstract class DocumentBase
 		{
 			if (n.getNodeType() == Node.ELEMENT_NODE)
 			{
-				return new ConditionLogicNot(parseCondition(n, template));
+				// parseCondition answers null for a child this parser does not recognise, and
+				// the two sibling combinators drop such a child instead of keeping it: both
+				// ConditionLogicAnd.add and ConditionLogicOr.add open by returning on null.
+				// Wrapping it stores the null and dereferences it on every test of the skill.
+				final Condition condition = parseCondition(n, template);
+				if (condition == null)
+				{
+					LOGGER.severe("Unknown <not> condition child in " + _file);
+					return null;
+				}
+				
+				return new ConditionLogicNot(condition);
 			}
 		}
 		
