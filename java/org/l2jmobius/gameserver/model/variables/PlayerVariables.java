@@ -215,7 +215,9 @@ public class PlayerVariables extends AbstractVariables
 		catch (SQLException e)
 		{
 			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Could not update variables for: " + _objectId, e);
-			_saveLock.unlock();
+			// The unlock that stood here ran in addition to the one in the finally below,
+			// so a database hiccup threw IllegalMonitorStateException out of the finally
+			// and buried the failure it was reporting.
 			return false;
 		}
 		finally
@@ -237,19 +239,24 @@ public class PlayerVariables extends AbstractVariables
 		{
 			st.setInt(1, _objectId);
 			st.execute();
+			
+			// Clear all variables. Kept inside the lock, where set and remove mutate these
+			// same structures.
+			getSet().clear();
+			clearChangeTracking();
 		}
 		catch (Exception e)
 		{
 			LOGGER.log(Level.WARNING, getClass().getSimpleName() + ": Could not delete variables for: " + _objectId, e);
-			_saveLock.unlock();
 			return false;
 		}
+		finally
+		{
+			// Held with no finally, so anything throwing between the lock and the unlock
+			// stranded it for the life of the object.
+			_saveLock.unlock();
+		}
 		
-		// Clear all variables.
-		getSet().clear();
-		clearChangeTracking();
-		
-		_saveLock.unlock();
 		return true;
 	}
 }
