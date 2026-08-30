@@ -5194,3 +5194,57 @@ Quedan cuatro declarados sin manejador en ninguna parte: `tracert`,
 sobre comandos que no existen, lo que es inofensivo pero engañoso. Se dejan: no sé si
 son restos de algo retirado o el hueco de algo por venir, y borrar entradas de una
 configuración que el dueño puede haber editado es su decisión.
+
+### La cola larga de `quests/`: qué se intentó y qué funcionó
+
+Las clases decidibles estaban agotadas y quedaban 296 ficheros de lógica de quest.
+En vez de leerlos uno a uno se aplicó el método que había pagado toda la auditoría
+—**enumerar la población y mirar a quién le falta la guarda que llevan los demás**—
+apostando a que 296 quests casi idénticas hacen que un atípico signifique algo.
+
+**Cuatro barridos. Tres no sirvieron, y por qué no sirvieron importa.**
+
+| barrido | resultado | por qué |
+|---|---|---|
+| `exitQuest(true)` tras entregar recompensa (repetible = farmeable) | **descartado** | 152 repetibles / 103 de una vez / 8 mixtas es una distribución sana. Las 8 mixtas comprueban bien: `false` en la ruta de premio, `true` en la de abandono. Los 2 marcados eran mi ventana de "diez líneas atrás" cruzando la frontera entre dos `case` |
+| npc registrado con `addKillId` y sin rama en `onKill` | **descartado tras 4 revisiones** | ver abajo |
+| recompensa en `onKill` sin comprobar el estado de la quest | **descartado** | 198 a 0 tras reconocer `getRandomPlayerFromParty` como guarda |
+| umbral con decimales contra una tirada entera | **1 de 398** | ver abajo |
+
+#### El que no se pudo hacer funcionar, y la lección
+
+El de `addKillId` pasó por cuatro versiones y **cada una redujo los falsos positivos
+sin llegar a cero**:
+
+1. Primera: **0 aciertos** — pero el denominador, añadido a propósito, reveló que
+   había examinado **cero de 211 quests**. La firma real es `public void onKill`, no
+   `public String onKill`.
+2. Segunda: 41 de 121 — el patrón `== N` capturaba **cualquier** comparación
+   numérica, así que `getQuestItemsCount(...) == 30` contaba como "distingue el npc 30".
+3. Tercera: 29 de 93, restringido a `switch (npc.getId())` y `npc.getId() == X`.
+4. Al leerlas: los `npc.getId() == X` estaban dentro de **ternarios que eligen
+   cantidad o probabilidad**, no en ramas excluyentes. En `Q00264_KeenClaws` el
+   goblin da el doble de garras que el lobo; **los dos dan**.
+
+**Se descarta el barrido entero.** "Atender a un npc" tiene demasiadas formas para
+detectarlo por patrón, y presentar 29 aciertos que no se sostienen sería peor que no
+presentar ninguno.
+
+#### El que sí funcionó
+
+`getRandom(N)` devuelve un **entero**. Compararlo con un umbral decimal descarta la
+fracción en silencio. De **398** comparaciones de esa forma en el repositorio,
+**397 usan un entero y una no**:
+
+`Q00386_StolenDignity:712` — `getRandom(1000) < 20.200001`, que no tira 20,2 en mil
+sino **21**. Todas las demás probabilidades de ese mismo fichero son enteras contra
+la misma tirada. Alineada a `20`: 2,0% frente al 2,1% que corría, contra el 2,02%
+que el número pretendía decir.
+
+#### La conclusión sobre el método
+
+El método funciona cuando **la guarda tiene una forma uniforme** —un candado, una
+comprobación de nulo, un tipo de colección, un umbral entero—. Deja de funcionar
+cuando lo buscado se puede escribir de muchas maneras igual de válidas. Los cuatro
+barridos de esta tanda separan limpiamente los dos casos, y por eso se registran los
+tres que fallaron: para no volver a intentarlos.

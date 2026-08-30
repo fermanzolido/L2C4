@@ -709,7 +709,10 @@ public class Q00386_StolenDignity extends Quest
 			{
 				case CRIMSON_DRAKE:
 				{
-					if (getRandom(1000) < 20.200001)
+					// getRandom answers an int, so the fraction never mattered: this rolled 21
+					// in 1000, not 20.2. Every other chance in this file, and 397 of the 398
+					// in the repository, is an integer against the same roll.
+					if (getRandom(1000) < 20)
 					{
 						giveItemRandomly(qs.getPlayer(), npc, Q_STOLEN_INF_ORE, 1, 0, 1, true);
 					}
