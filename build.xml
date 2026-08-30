@@ -143,11 +143,19 @@
 			</manifest>
 		</jar>
 		<jar destfile="${build.dist.databaseinstaller}/DatabaseInstaller.jar" level="9">
+			<!--
+				The class this jar declares as its Main-Class lives in org/l2jmobius/tools.
+				There is no databaseinstaller package and no SQLFilter class, so those two
+				includes matched nothing and the jar shipped without the class it is meant
+				to run. DatabaseFactory and the config it reads are pulled in because
+				DatabaseInstaller imports them.
+			-->
 			<fileset dir="${build.bin}">
-				<include name="**/databaseinstaller/**" />
+				<include name="**/tools/DatabaseInstaller*" />
+				<include name="**/commons/config/**" />
+				<include name="**/commons/database/**" />
 				<include name="**/commons/ui/**" />
 				<include name="**/commons/util/**" />
-				<include name="**/SQLFilter**" />
 			</fileset>
 			<manifest>
 				<attribute name="Build-By" value="${user.name}" />
