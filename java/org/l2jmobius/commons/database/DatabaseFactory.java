@@ -218,20 +218,25 @@ public class DatabaseFactory {
 	 * 
 	 * @return A valid database connection.
 	 */
-	public static Connection getConnection() {
+	public static Connection getConnection() throws SQLException {
 		// init() logs and swallows a pool that failed to build, leaving this field null. Without
 		// this check callers got a bare NullPointerException from here instead of the
-		// RuntimeException the method promises below.
+		// SQLException the method declares.
 		final HikariDataSource pool = DATABASE_POOL;
 		if (pool == null) {
-			throw new RuntimeException("Unable to obtain a database connection: the pool is not initialized.");
+			throw new SQLException("Unable to obtain a database connection: the pool is not initialized.");
 		}
 
 		try {
 			return pool.getConnection();
 		} catch (SQLException e) {
+			// Rethrown rather than rewrapped in a RuntimeException. Every one of the 354
+			// call sites opens the connection in a try-with-resources and so already has
+			// to handle SQLException from close(); wrapping meant the 86 of them that
+			// catch SQLException alone could not catch the pool failing, and it escaped
+			// past their handling as an unchecked exception instead.
 			LOGGER.log(Level.SEVERE, "Database: Could not get a connection.", e);
-			throw new RuntimeException("Unable to obtain a database connection.", e);
+			throw e;
 		}
 	}
 

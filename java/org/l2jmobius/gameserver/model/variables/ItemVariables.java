@@ -43,7 +43,7 @@ public class ItemVariables extends AbstractVariables
 	private static final String SELECT_COUNT = "SELECT COUNT(*) FROM item_variables WHERE id = ?";
 	private static final String DELETE_QUERY = "DELETE FROM item_variables WHERE id = ? AND var = ?";
 	private static final String DELETE_ALL_QUERY = "DELETE FROM item_variables WHERE id = ?";
-	private static final String INSERT_QUERY = "INSERT INTO item_variables (id, var, val) VALUES (?, ?, ?)";
+	private static final String INSERT_QUERY = "INSERT INTO item_variables (id, var, val) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE val = VALUES(val)";
 	private static final String UPDATE_QUERY = "UPDATE item_variables SET val = ? WHERE id = ? AND var = ?";
 	
 	// Asynchronous persistence.
@@ -240,11 +240,15 @@ public class ItemVariables extends AbstractVariables
 		}
 		finally
 		{
-			clearChangeTracking();
-			compareAndSetChanges(true, false);
 			_saveLock.unlock();
 		}
 		
+		// Only on the way out through success. Clearing this in the finally discarded
+		// the pending changes when the write had failed, so they were never retried and
+		// memory silently diverged from the database. The insert above is an upsert now,
+		// so a retry after a half-applied batch no longer collides.
+		clearChangeTracking();
+		compareAndSetChanges(true, false);
 		return true;
 	}
 	

@@ -42,7 +42,7 @@ public class AccountVariables extends AbstractVariables
 	private static final String SELECT_QUERY = "SELECT * FROM account_gsdata WHERE account_name = ?";
 	private static final String DELETE_QUERY = "DELETE FROM account_gsdata WHERE account_name = ? AND var = ?";
 	private static final String DELETE_ALL_QUERY = "DELETE FROM account_gsdata WHERE account_name = ?";
-	private static final String INSERT_QUERY = "INSERT INTO account_gsdata (account_name, var, value) VALUES (?, ?, ?)";
+	private static final String INSERT_QUERY = "INSERT INTO account_gsdata (account_name, var, value) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE value = VALUES(value)";
 	private static final String UPDATE_QUERY = "UPDATE account_gsdata SET value = ? WHERE account_name = ? AND var = ?";
 	private static final String DELETE_QUERY_VAR = "DELETE FROM account_gsdata WHERE var = ?";
 	
@@ -217,11 +217,15 @@ public class AccountVariables extends AbstractVariables
 		}
 		finally
 		{
-			clearChangeTracking();
-			compareAndSetChanges(true, false);
 			_saveLock.unlock();
 		}
 		
+		// Only on the way out through success. Clearing this in the finally discarded
+		// the pending changes when the write had failed, so they were never retried and
+		// memory silently diverged from the database. The insert above is an upsert now,
+		// so a retry after a half-applied batch no longer collides.
+		clearChangeTracking();
+		compareAndSetChanges(true, false);
 		return true;
 	}
 	

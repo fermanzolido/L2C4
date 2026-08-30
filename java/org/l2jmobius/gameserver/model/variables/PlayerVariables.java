@@ -42,7 +42,7 @@ public class PlayerVariables extends AbstractVariables
 	private static final String SELECT_QUERY = "SELECT * FROM character_variables WHERE charId = ?";
 	private static final String DELETE_QUERY = "DELETE FROM character_variables WHERE charId = ? AND var = ?";
 	private static final String DELETE_ALL_QUERY = "DELETE FROM character_variables WHERE charId = ?";
-	private static final String INSERT_QUERY = "INSERT INTO character_variables (charId, var, val) VALUES (?, ?, ?)";
+	private static final String INSERT_QUERY = "INSERT INTO character_variables (charId, var, val) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE val = VALUES(val)";
 	private static final String UPDATE_QUERY = "UPDATE character_variables SET val = ? WHERE charId = ? AND var = ?";
 	
 	// Asynchronous persistence.
@@ -222,11 +222,15 @@ public class PlayerVariables extends AbstractVariables
 		}
 		finally
 		{
-			clearChangeTracking();
-			compareAndSetChanges(true, false);
 			_saveLock.unlock();
 		}
 		
+		// Only on the way out through success. Clearing this in the finally discarded
+		// the pending changes when the write had failed, so they were never retried and
+		// memory silently diverged from the database. The insert above is an upsert now,
+		// so a retry after a half-applied batch no longer collides.
+		clearChangeTracking();
+		compareAndSetChanges(true, false);
 		return true;
 	}
 	

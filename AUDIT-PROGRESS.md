@@ -5624,3 +5624,63 @@ registran unicamente npcs de C4.
 arrastrado del datapack original; escribirlas serian 53 ficheros que nada puede alcanzar,
 y ademas el cliente C4 no tiene datos para ids 32xxx. Eso no es habilitar contenido
 pendiente, que es lo que la regla pide: es cambiar de cronica.
+
+## El guardado de variables, y lo que había debajo
+
+Estaba en la lista de "señalado y no cambiado" porque conservar los cambios tras un fallo
+exigía que el `INSERT` fuese idempotente, y era un `INSERT` liso. Al ir a hacerlo
+idempotente apareció por qué no podía serlo.
+
+### La tabla no tenía clave
+
+`ON DUPLICATE KEY UPDATE` **no hace nada sin un índice único**. Y de las tres tablas de
+variables, sólo una lo tenía:
+
+| tabla | clave |
+|---|---|
+| `account_gsdata` | `PRIMARY KEY (account_name, var)` |
+| `character_variables` | **ninguna** — sólo `idx_charId` e `idx_var` sueltos |
+| `item_variables` | **ninguna** — sólo `KEY (id)` e `idx_id` |
+
+Sin esa clave las dos tablas pueden acumular **más de una fila para la misma variable**, y
+entonces el valor que un jugador lee depende del orden de las filas. `account_gsdata` ya
+enseñaba la forma correcta; las otras dos la copian ahora. `item_variables` se recrea en
+cada instalación, así que no necesita migración; `character_variables` usa
+`CREATE TABLE IF NOT EXISTS`, que no toca una tabla existente, así que el fichero lleva
+escrito el procedimiento de una sola vez —copiar con `INSERT IGNORE` a una tabla con la
+clave y renombrar— como **comentario**, no como sentencia que el instalador ejecutaría.
+
+### El descarte
+
+```java
+finally
+{
+    clearChangeTracking();
+    compareAndSetChanges(true, false);
+    _saveLock.unlock();
+}
+```
+
+El `finally` corría **también cuando el SQL había fallado**: los cambios pendientes se
+tiraban, nunca se reintentaban, y la memoria divergía en silencio de la base de datos
+hasta que algo volviera a tocar esa variable. Ahora sólo se limpian en la salida por
+éxito, y el `INSERT` es un upsert, así que un reintento tras un lote a medias ya no choca
+por clave. Las tres clases que persisten —`PlayerVariables`, `AccountVariables`,
+`ItemVariables`— tenían la forma idéntica; `NpcVariables` no persiste.
+
+## Un fallo comprobable que se reportaba como no comprobable
+
+Al escribir lo anterior salió que `DatabaseFactory.getConnection()` atrapaba la
+`SQLException` del pool y la relanzaba envuelta en una `RuntimeException`. Medido:
+
+- **354** `try-with-resources` abren una conexión
+- **266** llevan un `catch` amplio, que sí atrapaba el fallo del pool
+- **86** llevan sólo `catch (SQLException)` — a los que el fallo del pool **se les escapaba
+  por encima** de su manejo, como excepción no comprobada
+- 2 no llevan `catch` propio
+
+El arreglo no son 86 sitios: es uno. `getConnection` declara `throws SQLException` y
+relanza la original. Todos los sitios ya tenían que manejar `SQLException`, porque el
+`close()` de la conexión en un `try-with-resources` lo obliga — y **la prueba es que el
+core y el datapack compilan con cero errores** tras cambiar la firma. Los 86 pasan de no
+poder atrapar el fallo a atraparlo sin que se les toque una línea.
