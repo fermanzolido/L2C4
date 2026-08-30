@@ -70,7 +70,9 @@ public class RequestSetSeed extends ClientPacket
 	@Override
 	protected void runImpl()
 	{
-		if (_items.isEmpty())
+		// The list is only allocated once the header passes, so a bad count leaves it null
+		// here. Both sibling manor packets test theirs for null before reading it.
+		if ((_items == null) || _items.isEmpty())
 		{
 			return;
 		}

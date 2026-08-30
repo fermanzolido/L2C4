@@ -160,9 +160,18 @@ public class RequestProcureCropList extends ClientPacket {
 			}
 
 			final CropProcure cp = i.getCropProcure();
-			if (!cp.decreaseAmount(i.getCount())
-					|| ((fee > 0) && !player.reduceAdena(ItemProcessType.FEE, fee, manager, true))
+			if (!cp.decreaseAmount(i.getCount())) {
+				continue;
+			}
+
+			// The castle books the sale before the crops are taken from the player, and a
+			// packet naming the same object id twice destroys nothing the second time round.
+			// Booked and undelivered, the castle still hands its clan the mature crops for
+			// that amount at the period change and keeps the reserved adena spent, so put the
+			// amount back whenever the player's half of the trade does not go through.
+			if (((fee > 0) && !player.reduceAdena(ItemProcessType.FEE, fee, manager, true))
 					|| !player.destroyItem(ItemProcessType.FEE, i.getObjectId(), i.getCount(), manager, true)) {
+				cp.setAmount(cp.getAmount() + i.getCount());
 				continue;
 			}
 

@@ -86,16 +86,21 @@ public class CastleManorManager implements IXmlReader
 			load(); // Load seed data (XML)
 			loadDb(); // Load castle manor data (DB)
 			
-			// Set mode and start timer
+			// Set mode and start timer.
+			// The hour and the minute have to be weighed together. Comparing the minute on
+			// its own left every restart past the refresh hour whose minute was below the
+			// end of maintenance (21:03 against the default 20:06) in the APPROVED mode it
+			// starts in, and the timer for that mode aims at a refresh time that already
+			// passed today, so it fires at once and rolls a whole period over a day early.
 			final Calendar currentTime = Calendar.getInstance();
-			final int hour = currentTime.get(Calendar.HOUR_OF_DAY);
-			final int min = currentTime.get(Calendar.MINUTE);
-			final int maintenanceMin = GeneralConfig.ALT_MANOR_REFRESH_MIN + GeneralConfig.ALT_MANOR_MAINTENANCE_MIN;
-			if (((hour >= GeneralConfig.ALT_MANOR_REFRESH_TIME) && (min >= maintenanceMin)) || (hour < GeneralConfig.ALT_MANOR_APPROVE_TIME) || ((hour == GeneralConfig.ALT_MANOR_APPROVE_TIME) && (min <= GeneralConfig.ALT_MANOR_APPROVE_MIN)))
+			final int currentMinute = (currentTime.get(Calendar.HOUR_OF_DAY) * 60) + currentTime.get(Calendar.MINUTE);
+			final int approveMinute = (GeneralConfig.ALT_MANOR_APPROVE_TIME * 60) + GeneralConfig.ALT_MANOR_APPROVE_MIN;
+			final int refreshMinute = (GeneralConfig.ALT_MANOR_REFRESH_TIME * 60) + GeneralConfig.ALT_MANOR_REFRESH_MIN;
+			if ((currentMinute >= (refreshMinute + GeneralConfig.ALT_MANOR_MAINTENANCE_MIN)) || (currentMinute < approveMinute))
 			{
 				_mode = ManorMode.MODIFIABLE;
 			}
-			else if ((hour == GeneralConfig.ALT_MANOR_REFRESH_TIME) && (min >= GeneralConfig.ALT_MANOR_REFRESH_MIN) && (min < maintenanceMin))
+			else if (currentMinute >= refreshMinute)
 			{
 				_mode = ManorMode.MAINTENANCE;
 			}
@@ -352,18 +357,23 @@ public class CastleManorManager implements IXmlReader
 					}
 					else
 					{
-						final List<SeedProduction> production = new ArrayList<>(nextProduction);
-						for (SeedProduction s : production)
+						// Copies of the list, not of its entries: both periods ended up sharing the
+						// same objects, so every seed sold this period also drained the amount the
+						// next period reports, and the refill below only reached the current period
+						// through that same sharing -- which is why the branch above, that skips it,
+						// left the period the castle had already paid for starting out sold out.
+						final List<SeedProduction> production = new ArrayList<>(nextProduction.size());
+						for (SeedProduction s : nextProduction)
 						{
-							s.setAmount(s.getStartAmount());
+							production.add(new SeedProduction(s.getId(), s.getStartAmount(), s.getPrice(), s.getStartAmount()));
 						}
 						
 						_productionNext.put(castleId, production);
 						
-						final List<CropProcure> procure = new ArrayList<>(nextProcure);
-						for (CropProcure cr : procure)
+						final List<CropProcure> procure = new ArrayList<>(nextProcure.size());
+						for (CropProcure cr : nextProcure)
 						{
-							cr.setAmount(cr.getStartAmount());
+							procure.add(new CropProcure(cr.getId(), cr.getStartAmount(), cr.getReward(), cr.getStartAmount(), cr.getPrice()));
 						}
 						
 						_procureNext.put(castleId, procure);
@@ -409,14 +419,19 @@ public class CastleManorManager implements IXmlReader
 					final ItemContainer cwh = owner.getWarehouse();
 					for (CropProcure crop : _procureNext.get(castleId))
 					{
-						if ((crop.getStartAmount() > 0) && (cwh.getAllItemsByItemId(getSeedByCrop(crop.getId()).getMatureId()) == null))
+						// getAllItemsByItemId returns an empty collection, never null, so this
+						// counted no slots at all and the capacity test below was decorative.
+						if ((crop.getStartAmount() > 0) && cwh.getAllItemsByItemId(getSeedByCrop(crop.getId()).getMatureId()).isEmpty())
 						{
 							slots++;
 						}
 					}
 					
+					// Either shortage stops the period. With both required, a castle that could
+					// not pay still ran the period: the charge below reports the failure through
+					// a return value nobody reads, so the manor simply operated for free.
 					final long manorCost = getManorCost(castleId, true);
-					if (!cwh.validateCapacity(slots) && (castle.getTreasury() < manorCost))
+					if (!cwh.validateCapacity(slots) || (castle.getTreasury() < manorCost))
 					{
 						_productionNext.get(castleId).clear();
 						_procureNext.get(castleId).clear();
@@ -569,7 +584,12 @@ public class CastleManorManager implements IXmlReader
 	
 	public List<SeedProduction> getSeedProduction(int castleId, boolean nextPeriod)
 	{
-		return nextPeriod ? _productionNext.get(castleId) : _production.get(castleId);
+		// The castle id reaches this from the client: the manor bypass passes its second
+		// parameter through untouched and RequestProcureCropList reads one per item. Only
+		// a real castle is a key here, so anything else used to hand the callers a null
+		// list to iterate.
+		final List<SeedProduction> list = nextPeriod ? _productionNext.get(castleId) : _production.get(castleId);
+		return (list == null) ? Collections.emptyList() : list;
 	}
 	
 	public SeedProduction getSeedProduct(int castleId, int seedId, boolean nextPeriod)
@@ -587,7 +607,9 @@ public class CastleManorManager implements IXmlReader
 	
 	public List<CropProcure> getCropProcure(int castleId, boolean nextPeriod)
 	{
-		return nextPeriod ? _procureNext.get(castleId) : _procure.get(castleId);
+		// Same client controlled castle id as above.
+		final List<CropProcure> list = nextPeriod ? _procureNext.get(castleId) : _procure.get(castleId);
+		return (list == null) ? Collections.emptyList() : list;
 	}
 	
 	public CropProcure getCropProcure(int castleId, int cropId, boolean nextPeriod)
@@ -769,6 +791,13 @@ public class CastleManorManager implements IXmlReader
 	
 	public String getNextModeChange()
 	{
+		// No timer is armed while the manor is disabled, and //manor asks for this line
+		// without testing the setting first.
+		if (_nextModeChange == null)
+		{
+			return "never";
+		}
+		
 		return new SimpleDateFormat("dd/MM HH:mm:ss").format(_nextModeChange.getTime());
 	}
 	
