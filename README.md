@@ -1,5 +1,7 @@
 # L2C4 — Chronicle 4: Scions of Destiny
 
+**English** · [Español](README.es.md)
+
 A Lineage 2 Chronicle 4 server, built on [L2J Mobius](http://www.l2jmobius.org/), running on **Java 25**.
 
 What separates this fork from the pack is not a feature list. It is that **every claim below was measured, with a denominator**, and the measurement is in the commit history where you can check it.
