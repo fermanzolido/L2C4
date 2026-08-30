@@ -1100,6 +1100,16 @@ public class SevenSigns
 	public int getAncientAdenaReward(int objectId, boolean removeReward)
 	{
 		final StatSet currPlayer = _signsPlayerData.get(objectId);
+		// Reachable with a tied competition score (the default before anyone has scored):
+		// getCabalHighestScore() then answers CABAL_NULL, which equals getPlayerCabal() of
+		// a player who never joined a cabal, so callers that gate on that equality let an
+		// unregistered objectId through here. Every sibling getter in this class already
+		// guards the same lookup; this one and addPlayerStoneContrib did not.
+		if (currPlayer == null)
+		{
+			return 0;
+		}
+
 		final int rewardAmount = currPlayer.getInt("ancient_adena_amount");
 		currPlayer.set("red_stones", 0);
 		currPlayer.set("green_stones", 0);
@@ -1131,6 +1141,11 @@ public class SevenSigns
 	public int addPlayerStoneContrib(int objectId, int blueCount, int greenCount, int redCount)
 	{
 		final StatSet currPlayer = _signsPlayerData.get(objectId);
+		if (currPlayer == null)
+		{
+			return 0;
+		}
+
 		final int contribScore = calcContributionScore(blueCount, greenCount, redCount);
 		final int totalAncientAdena = currPlayer.getInt("ancient_adena_amount") + calcAncientAdenaReward(blueCount, greenCount, redCount);
 		final int totalContribScore = currPlayer.getInt("contribution_score") + contribScore;

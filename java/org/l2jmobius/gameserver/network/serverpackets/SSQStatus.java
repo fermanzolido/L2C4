@@ -153,9 +153,14 @@ public class SSQStatus extends ServerPacket
 					// Dusk Score \\
 					buffer.writeInt(duskScore);
 					StatSet highScoreData = SevenSignsFestival.getInstance().getHighestScoreData(SevenSigns.CABAL_DUSK, i);
-					String[] partyMembers = highScoreData.getString("members").split(",");
-					if (partyMembers != null)
+					// String.split() never returns null -- on an empty "members" (no record yet
+					// this cycle) it answers a 1-element array holding "", so the old null check
+					// always took this branch and sent a phantom party of one with a blank name
+					// instead of the intended "no record" (0 members).
+					String membersStr = highScoreData.getString("members");
+					if (!membersStr.isEmpty())
 					{
+						final String[] partyMembers = membersStr.split(",");
 						buffer.writeByte(partyMembers.length);
 						for (String partyMember : partyMembers)
 						{
@@ -166,13 +171,14 @@ public class SSQStatus extends ServerPacket
 					{
 						buffer.writeByte(0);
 					}
-					
+
 					// Dawn Score \\
 					buffer.writeInt(dawnScore);
 					highScoreData = SevenSignsFestival.getInstance().getHighestScoreData(SevenSigns.CABAL_DAWN, i);
-					partyMembers = highScoreData.getString("members").split(",");
-					if (partyMembers != null)
+					membersStr = highScoreData.getString("members");
+					if (!membersStr.isEmpty())
 					{
+						final String[] partyMembers = membersStr.split(",");
 						buffer.writeByte(partyMembers.length);
 						for (String partyMember : partyMembers)
 						{

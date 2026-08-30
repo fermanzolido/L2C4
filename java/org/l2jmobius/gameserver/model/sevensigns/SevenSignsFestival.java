@@ -21,6 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -894,7 +895,11 @@ public class SevenSignsFestival {
 	 * @return boolean isChest
 	 */
 	protected static boolean isFestivalChest(int npcId) {
-		return ((npcId < 18109) || (npcId > 18118));
+		// Chest IDs run 18109-18118 inclusive (see FESTIVAL_*_CHEST_SPAWNS above). Unlike
+		// isFestivalArcher just above, this had been inverted: it answered true for every
+		// id outside that range and false for actual chests. Currently unused, but wrong
+		// either way if anything ever calls it.
+		return (npcId >= 18109) && (npcId <= 18118);
 	}
 
 	/**
@@ -1460,11 +1465,15 @@ public class SevenSignsFestival {
 		final Map<Integer, StatSet> festivalDataMap = _festivalData.get(_signsCycle);
 		if (festivalDataMap != null) {
 			for (StatSet festivalData : festivalDataMap.values()) {
-				if (festivalData.getString("members").contains(playerName)) {
+				// This used to match with String.contains(playerName), so a name that is a
+				// substring of a real entry (e.g. "Ada" inside "Adalia,Bob") was paid a share
+				// of a bonus it never earned. Match a full token in the comma-separated list
+				// instead.
+				final String[] members = festivalData.getString("members").split(",");
+				if (Arrays.asList(members).contains(playerName)) {
 					final int festivalId = festivalData.getInt("festivalId");
-					final int numPartyMembers = festivalData.getString("members").split(",").length;
 					final int totalAccumBonus = _accumulatedBonuses.get(festivalId);
-					playerBonus = totalAccumBonus / numPartyMembers;
+					playerBonus = totalAccumBonus / members.length;
 					_accumulatedBonuses.set(festivalId, totalAccumBonus - playerBonus);
 					break;
 				}
