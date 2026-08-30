@@ -721,8 +721,11 @@ public class AdminSpawn implements IAdminCommandHandler
 			{
 				if (template.isType("RaidBoss"))
 				{
-					spawn.setRespawnMinDelay(43200);
-					spawn.setRespawnMaxDelay(129600);
+					// These two fields are milliseconds, not seconds: Spawn.setRespawnDelay is what
+					// multiplies by 1000, and every reader of them divides by 1000 to print seconds.
+					// Passing the raw 12 and 36 hour figures gave the boss a 43 to 130 second respawn.
+					spawn.setRespawnMinDelay(43200 * 1000);
+					spawn.setRespawnMaxDelay(129600 * 1000);
 					RaidBossSpawnManager.getInstance().addNewSpawn(spawn, 0, template.getBaseHpMax(), template.getBaseMpMax(), permanent);
 				}
 				else

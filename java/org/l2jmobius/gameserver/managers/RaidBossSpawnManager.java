@@ -123,22 +123,38 @@ public class RaidBossSpawnManager
 		@Override
 		public void run()
 		{
-			final RaidBoss raidboss = (RaidBoss) _spawns.get(bossId).doSpawn();
-			if (raidboss != null)
+			try
 			{
-				raidboss.setRaidStatus(RaidBossStatus.ALIVE);
+				final Spawn spawn = _spawns.get(bossId);
+				if (spawn == null)
+				{
+					LOGGER.warning(getClass().getSimpleName() + ": No spawn defined for raid boss " + bossId + ", respawn skipped.");
+					return;
+				}
 				
-				final StatSet info = new StatSet();
-				info.set("currentHP", raidboss.getCurrentHp());
-				info.set("currentMP", raidboss.getCurrentMp());
-				info.set("respawnTime", 0);
-				_storedInfo.put(bossId, info);
-				
-				LOGGER.info(getClass().getSimpleName() + ": Spawning Raid Boss " + raidboss.getName());
-				_bosses.put(bossId, raidboss);
+				final RaidBoss raidboss = (RaidBoss) spawn.doSpawn();
+				if (raidboss != null)
+				{
+					raidboss.setRaidStatus(RaidBossStatus.ALIVE);
+					
+					final StatSet info = new StatSet();
+					info.set("currentHP", raidboss.getCurrentHp());
+					info.set("currentMP", raidboss.getCurrentMp());
+					info.set("respawnTime", 0);
+					_storedInfo.put(bossId, info);
+					
+					LOGGER.info(getClass().getSimpleName() + ": Spawning Raid Boss " + raidboss.getName());
+					_bosses.put(bossId, raidboss);
+				}
 			}
-			
-			_schedules.remove(bossId);
+			finally
+			{
+				// The schedule has to be dropped even when the spawn above fails, because
+				// updateStatus refuses to arm a new respawn while _schedules still holds the
+				// boss. A leftover entry keeps it reported DEAD and unspawnable for the rest
+				// of the server's uptime.
+				_schedules.remove(bossId);
+			}
 		}
 	}
 	
@@ -205,6 +221,12 @@ public class RaidBossSpawnManager
 		final int bossId = spawnDat.getId();
 		final long currentTime = System.currentTimeMillis();
 		SpawnTable.getInstance().addSpawn(spawnDat);
+		
+		// Published before the branch below, not after it. A respawn time that has just
+		// about expired schedules SpawnSchedule with a delay of zero, and that task reads
+		// _spawns on a pool thread: it could get there first and find nothing to spawn.
+		_spawns.put(bossId, spawnDat);
+		
 		if ((respawnTime == 0) || (currentTime > respawnTime))
 		{
 			final RaidBoss raidboss = (RaidBoss) spawnDat.doSpawn();
@@ -227,8 +249,6 @@ public class RaidBossSpawnManager
 		{
 			_schedules.put(bossId, ThreadPool.schedule(new SpawnSchedule(bossId), respawnTime - currentTime));
 		}
-		
-		_spawns.put(bossId, spawnDat);
 		
 		if (storeInDb)
 		{

@@ -603,8 +603,10 @@ public class AdminTeleport implements IAdminCommandHandler
 				spawnDat.setXYZ(activeChar);
 				spawnDat.setAmount(1);
 				spawnDat.setHeading(activeChar.getHeading());
-				spawnDat.setRespawnMinDelay(43200);
-				spawnDat.setRespawnMaxDelay(129600);
+				// Milliseconds, not seconds, same as in AdminSpawn: the raw 12 and 36 hour
+				// figures gave the moved boss a 43 to 130 second respawn.
+				spawnDat.setRespawnMinDelay(43200 * 1000);
+				spawnDat.setRespawnMaxDelay(129600 * 1000);
 				
 				RaidBossSpawnManager.getInstance().addNewSpawn(spawnDat, 0, curHP, curMP, true);
 			}

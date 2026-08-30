@@ -67,7 +67,7 @@ public class RaidBossPointsManager
 				Map<Integer, Integer> values = _list.get(charId);
 				if (values == null)
 				{
-					values = new HashMap<>();
+					values = new ConcurrentHashMap<>();
 				}
 				
 				values.put(bossId, points);
@@ -101,7 +101,11 @@ public class RaidBossPointsManager
 	
 	public void addPoints(Player player, int bossId, int points)
 	{
-		final Map<Integer, Integer> tmpPoint = _list.computeIfAbsent(player.getObjectId(), unused -> new HashMap<>());
+		// Concurrent like the map holding it. getList hands this very map to ExGetBossRecord,
+		// which writes its size and then walks it on the network thread, while a raid dying
+		// merges into it from the combat thread. A plain HashMap there can be resized mid-walk,
+		// so the packet either throws or reports a size it does not go on to write.
+		final Map<Integer, Integer> tmpPoint = _list.computeIfAbsent(player.getObjectId(), unused -> new ConcurrentHashMap<>());
 		updatePointsInDB(player, bossId, tmpPoint.merge(bossId, points, Integer::sum));
 		_totalPoints.merge(player.getObjectId(), points, Integer::sum);
 	}

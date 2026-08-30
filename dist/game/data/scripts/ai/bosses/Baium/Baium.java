@@ -679,7 +679,14 @@ public class Baium extends Script
 	
 	private void setRespawn(long respawnTime)
 	{
-		GrandBossManager.getInstance().getStatSet(BAIUM).set("respawn_time", System.currentTimeMillis() + respawnTime);
+		// Same as the other grand bosses: setStatSet writes the row out. Only setting it on
+		// the StatSet leaves the new respawn time in memory until the manager's five minute
+		// save task runs, while setStatus(DEAD) is written at once, so a crash in that window
+		// stores DEAD next to the previous cycle's respawn time, which is already in the past,
+		// and Baium comes back immediately on the next boot.
+		final StatSet info = GrandBossManager.getInstance().getStatSet(BAIUM);
+		info.set("respawn_time", System.currentTimeMillis() + respawnTime);
+		GrandBossManager.getInstance().setStatSet(BAIUM, info);
 	}
 	
 	private void manageSkills(Npc npc)

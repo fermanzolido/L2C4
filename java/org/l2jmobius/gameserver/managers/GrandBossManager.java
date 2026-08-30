@@ -131,7 +131,17 @@ public class GrandBossManager
 		{
 			while (rs.next())
 			{
-				zones.get(rs.getInt("zone")).add(rs.getInt("player_id"));
+				final List<Integer> allowed = zones.get(rs.getInt("zone"));
+				if (allowed == null)
+				{
+					// A stored row for a zone this build no longer registers. Adding to the null
+					// threw straight into the catch below, which ended the read, so every row
+					// after it was dropped as well and those zones came up allowing nobody in.
+					LOGGER.warning(getClass().getSimpleName() + ": Ignoring grandboss_list row for unknown zone " + rs.getInt("zone") + ".");
+					continue;
+				}
+				
+				allowed.add(rs.getInt("player_id"));
 			}
 			
 			LOGGER.info(getClass().getSimpleName() + ": Initialized " + _zones.size() + " Grand Boss Zones");

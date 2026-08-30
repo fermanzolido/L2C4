@@ -178,7 +178,11 @@ public class BossZone extends ZoneType
 					}
 				}
 				
-				getSettings().getPlayersAllowed().remove(getSettings().getPlayersAllowed().indexOf(player.getObjectId()));
+				// Removed by value, the way removePlayer below does it. indexOf answers -1 once
+				// something else has already taken the player out between the contains above and
+				// here -- oustAllPlayers clears the whole list from the boss AI threads -- and
+				// remove(-1) throws out of the zone enter handler instead of doing nothing.
+				getSettings().getPlayersAllowed().remove(Integer.valueOf(player.getObjectId()));
 			}
 			
 			// teleport out all players who attempt "illegal" (re-)entry
@@ -239,7 +243,8 @@ public class BossZone extends ZoneType
 			{
 				if (getSettings().getPlayersAllowed().contains(player.getObjectId()))
 				{
-					getSettings().getPlayersAllowed().remove(getSettings().getPlayersAllowed().indexOf(player.getObjectId()));
+					// Same by-value removal as in onEnter and removePlayer.
+					getSettings().getPlayersAllowed().remove(Integer.valueOf(player.getObjectId()));
 				}
 				
 				getSettings().getPlayerAllowedReEntryTimes().remove(player.getObjectId());

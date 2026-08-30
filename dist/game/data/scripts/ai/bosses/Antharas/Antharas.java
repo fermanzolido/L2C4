@@ -751,7 +751,14 @@ public class Antharas extends Script
 	
 	private void setRespawn(long respawnTime)
 	{
-		GrandBossManager.getInstance().getStatSet(ANTHARAS).set("respawn_time", System.currentTimeMillis() + respawnTime);
+		// The new respawn time has to reach the database now, the way Valakas, Zaken, Core,
+		// Orfen and Queen Ant all write theirs. Only setting it on the StatSet leaves it in
+		// memory until the manager's five minute save task runs, while setStatus(DEAD) below
+		// is written at once: a crash in that window stores DEAD next to the previous cycle's
+		// respawn time, which is already in the past, so Antharas respawns on the next boot.
+		final StatSet info = GrandBossManager.getInstance().getStatSet(ANTHARAS);
+		info.set("respawn_time", System.currentTimeMillis() + respawnTime);
+		GrandBossManager.getInstance().setStatSet(ANTHARAS, info);
 	}
 	
 	private void refreshAiParams(Player attacker, int damage)
