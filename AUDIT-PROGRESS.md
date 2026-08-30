@@ -5603,3 +5603,24 @@ este servidor no publica, y decidir qué significa `cond == 12` es diseñar fluj
 Eso se señala, no se inventa. Queda igualmente pendiente `quest_accept`, único bypass sin
 implementar que sobrevive, en la huérfana `30864-14.htm`: es protocolo del cliente
 retail, no un bypass de servidor.
+
+### Comprobado: el cambio de clase de C4 esta completo
+
+Ante la pregunta de si escribir las paginas que faltan haria que funcionaran en C4, la
+respuesta se midio en vez de suponerse. Las referencias de `village_master/` son
+**etiquetas `case` en cascada** de un mismo `switch`: comparten cuerpo con las paginas de
+los npcs C4, y para alcanzar una de las otras harian falta tres cosas que no existen -- el
+npc en los datos, algo que lo spawnee, y una pagina que enlace a ella. Los scripts
+registran unicamente npcs de C4.
+
+| | |
+|---|---|
+| paginas referenciadas por los village_master | **283** |
+| de npcs que **existen** en C4 | 222 -> **faltan 0** |
+| de npcs que no existen en C4 | 61 -> faltan 53, inalcanzables |
+
+**222 de 222.** El cambio de clase funciona en C4 tal cual esta, en las seis carpetas. Las
+53 ausentes son el mismo dialogo duplicado para los npcs equivalentes de Interlude,
+arrastrado del datapack original; escribirlas serian 53 ficheros que nada puede alcanzar,
+y ademas el cliente C4 no tiene datos para ids 32xxx. Eso no es habilitar contenido
+pendiente, que es lo que la regla pide: es cambiar de cronica.
