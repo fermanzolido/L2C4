@@ -213,7 +213,12 @@ class OlympiadManager implements Runnable {
 			try {
 				wait(30000);
 			} catch (InterruptedException e) {
-				// Ignore.
+				// This thread is not a daemon and the only other way out of this loop is
+				// every game reporting itself terminated, so swallowing the interrupt left
+				// one stuck game able to hold the JVM open with no way to ask it to stop.
+				// Break rather than return, so the cleanup below still runs.
+				Thread.currentThread().interrupt();
+				break;
 			}
 
 			if (gamesQueue.isEmpty()) {

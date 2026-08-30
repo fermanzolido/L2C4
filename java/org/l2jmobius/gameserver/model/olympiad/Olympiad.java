@@ -765,7 +765,10 @@ public class Olympiad extends ListenersContainer {
 			LOGGER_OLYMPIAD
 					.info("Result,Player1,Player2,Player1 HP,Player2 HP,Player1 Damage,Player2 Damage,Points,Classed");
 
-			final Thread olyCycle = new Thread(om);
+			// Named so it can be told apart in a thread dump: it is not a pool thread, it
+			// runs for the whole competition period, and it is the one that has to be
+			// interrupted to end a cycle early.
+			final Thread olyCycle = new Thread(om, "OlympiadCycle");
 			olyCycle.start();
 
 			final long regEnd = getMillisToCompEnd() - 600000;

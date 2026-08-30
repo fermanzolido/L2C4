@@ -262,6 +262,10 @@ public class LogPanel extends JFrame
 						}
 						catch (InterruptedException ex)
 						{
+							// Stop the fade rather than keep animating a thread that was
+							// asked to stop.
+							Thread.currentThread().interrupt();
+							break;
 						}
 					}
 					
@@ -279,6 +283,10 @@ public class LogPanel extends JFrame
 						}
 						catch (InterruptedException ex)
 						{
+							// Stop the fade rather than keep animating a thread that was
+							// asked to stop.
+							Thread.currentThread().interrupt();
+							break;
 						}
 					}
 				}).start();

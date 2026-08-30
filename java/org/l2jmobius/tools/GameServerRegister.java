@@ -575,7 +575,8 @@ public class GameServerRegister extends JFrame
 						}
 						catch (InterruptedException e)
 						{
-							
+							// Exiting anyway; put the flag back rather than drop it.
+							Thread.currentThread().interrupt();
 						}
 						
 						System.exit(0);

@@ -1250,7 +1250,8 @@ public class AccountManager extends JFrame
 						}
 						catch (InterruptedException e)
 						{
-							// Who dares interrupt my dramatic exit?!
+							// Exiting anyway; put the flag back rather than drop it.
+							Thread.currentThread().interrupt();
 						}
 						
 						System.exit(0);

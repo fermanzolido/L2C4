@@ -122,7 +122,11 @@ public class GameTimeTaskManager extends Thread
 			}
 			catch (InterruptedException e)
 			{
-				// Ignore.
+				// Swallowing this made the clock loop unstoppable: nothing interrupts it
+				// today, so leaving on request costs nothing and is what the rest of the
+				// interrupt handling in the server does.
+				Thread.currentThread().interrupt();
+				return;
 			}
 		}
 	}

@@ -5491,3 +5491,52 @@ es que ahora se ve.
 prueba de la tarea periódica **falla** ahí y pasa con él. La de una sola vez pasa en
 ambas —el ejecutor de hilos virtuales absorbe la excepción de todos modos—, y se deja
 justamente como control.
+
+## Primitivas de concurrencia, y la interrupción que nadie escuchaba
+
+### Lo que salió limpio
+
+| comprobación | resultado |
+|---|---|
+| `Thread.sleep` dentro de un `synchronized` (dormir con el candado tomado) | **0** de 20 sleeps, sobre 102 bloques `synchronized` |
+| `join` dentro de un `synchronized` | **0** |
+| `notify()` donde tocaba `notifyAll()` | **0** — no hay ninguno de los dos en todo el repositorio |
+
+Las **4** llamadas a `wait()` están todas en `OlympiadManager.run()`, que es
+`synchronized`, así que son legales. Como no existe ningún `notify` en el repositorio,
+son esperas con temporizador usadas como pausas que sueltan el candado. No es un defecto.
+
+### La clase que sí había: `InterruptedException` tragada
+
+Interrumpir un hilo es **pedirle que pare**. Un `catch` que no sale, no relanza y no
+vuelve a poner la bandera convierte esa petición en nada.
+
+**10 de 16 respondían. Seis la tragaban enteras**, y una de ellas importaba de verdad:
+
+- **`OlympiadManager:215`** — dentro de `while (!allGamesTerminated)`, cuya única otra
+  salida es que **todos** los juegos se declaren terminados. El hilo lo crea
+  `Olympiad.java` con `new Thread(om)`: **no es demonio**. Un solo juego colgado bastaba
+  para que ese hilo mantuviera la JVM abierta sin forma de pedirle que parara. Ahora
+  hace `break` —no `return`, para que la limpieza posterior siga corriendo— y repone la
+  bandera.
+- **`GameTimeTaskManager:123`** — el reloj del juego, un `while (true)`. Es demonio, así
+  que no bloqueaba el cierre, pero el bucle era sencillamente ininterrumpible.
+- **`LogPanel` ×2** — la animación de desvanecido de la interfaz; ahora corta.
+- **`AccountManager`, `GameServerRegister`** — una pausa de dos segundos justo antes de
+  `System.exit`. Inofensivas; se repone la bandera igual, para que la clase quede
+  uniforme.
+
+**16 de 16.**
+
+El entorno: ese hilo de la olimpiada se creaba **sin nombre**, indistinguible en un
+volcado de hilos, siendo el que hay que interrumpir para cortar un ciclo. Ahora se llama
+`OlympiadCycle`.
+
+### Los `catch` vacíos: medidos, y no son una clase
+
+**117 de 1.139** `catch` están vacíos, lo que parece mucho hasta mirarlos: **96 llevan un
+comentario que dice por qué**. De los 21 restantes, los dos de aspecto más serio se
+sostienen —`LoginServer:202` traga un `Throwable` durante el apagado para que el resto de
+la limpieza siga, y `QuestState:243` es un parseo defensivo de datos persistidos con la
+variable llamada `ignored`—. Es una carencia de comentarios, no de corrección, y no se
+tocan 21 sitios por eso.
