@@ -171,13 +171,19 @@ public class DimensionalRiftManager
 											mobId = Integer.parseInt(attrs.getNamedItem("mobId").getNodeValue());
 											delay = Integer.parseInt(attrs.getNamedItem("delay").getNodeValue());
 											count = Integer.parseInt(attrs.getNamedItem("count").getNodeValue());
+											// Skip the entry instead of falling through to the room lookup below,
+											// which dereferences the very map entry that was just reported missing.
 											if (!_rooms.containsKey(type))
 											{
 												LOGGER.warning("Type " + type + " not found!");
+												countBad += count;
+												continue;
 											}
 											else if (!_rooms.get(type).containsKey(roomId))
 											{
 												LOGGER.warning("Room " + roomId + " in Type " + type + " not found!");
+												countBad += count;
+												continue;
 											}
 											
 											for (int i = 0; i < count; i++)

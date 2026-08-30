@@ -123,12 +123,20 @@ public class Wedding extends Script
 				}
 				else
 				{
+					// Resolved before any adena is taken: the fee is charged to both players and
+					// there is no way to give it back once a missing couple aborts the wedding.
+					final Couple couple = CoupleManager.getInstance().getCouple(player.getCoupleId());
+					if (couple == null)
+					{
+						player.sendMessage("Your engagement could not be found in the Database - Inform a Gamemaster.");
+						break;
+					}
+					
 					player.reduceAdena(ItemProcessType.FEE, WeddingConfig.WEDDING_PRICE, player.getLastFolkNPC(), true);
 					partner.reduceAdena(ItemProcessType.FEE, WeddingConfig.WEDDING_PRICE, player.getLastFolkNPC(), true);
 					
 					// Accept the wedding request
 					player.setMarryAccepted(true);
-					final Couple couple = CoupleManager.getInstance().getCouple(player.getCoupleId());
 					couple.marry();
 					
 					// Messages to the couple

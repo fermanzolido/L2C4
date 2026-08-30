@@ -150,20 +150,21 @@ public class Fishing implements Runnable
 		
 		if (win)
 		{
+			// The fish is the reward whenever no monster actually took the bait, including when
+			// no monster covers the fisher level and when the spawn itself could not be made.
+			// Otherwise a won fight silently paid nothing, and a failed spawn threw here and
+			// left the fisher immobilized because endFishing below was never reached.
 			final FishingMonster fishingMonster = FishingMonstersData.getInstance().getFishingMonster(_fisher.getLevel());
-			if (fishingMonster != null)
+			final Npc monster = ((fishingMonster != null) && (Rnd.get(100) <= fishingMonster.getProbability())) ? Quest.addSpawn(fishingMonster.getFishingMonsterId(), _fisher) : null;
+			if (monster != null)
 			{
-				if (Rnd.get(100) <= fishingMonster.getProbability())
-				{
-					_fisher.sendPacket(SystemMessageId.YOU_HAVE_CAUGHT_A_MONSTER);
-					final Npc monster = Quest.addSpawn(fishingMonster.getFishingMonsterId(), _fisher);
-					monster.setTarget(_fisher);
-				}
-				else
-				{
-					_fisher.sendPacket(SystemMessageId.SUCCEEDED_IN_FISHING);
-					_fisher.addItem(ItemProcessType.PICKUP, _fishId, 1, null, true);
-				}
+				_fisher.sendPacket(SystemMessageId.YOU_HAVE_CAUGHT_A_MONSTER);
+				monster.setTarget(_fisher);
+			}
+			else
+			{
+				_fisher.sendPacket(SystemMessageId.SUCCEEDED_IN_FISHING);
+				_fisher.addItem(ItemProcessType.PICKUP, _fishId, 1, null, true);
 			}
 		}
 		
@@ -235,17 +236,19 @@ public class Fishing implements Runnable
 	
 	public void useReeling(int dmg, int pen)
 	{
+		// Checked before the first use of the fisher: the fight can end on the ai task between
+		// the caller reading this combat and reaching here, which leaves the fisher null.
+		if (_fisher == null)
+		{
+			return;
+		}
+		
 		_anim = 2;
 		if (Rnd.get(100) > 90)
 		{
 			_fisher.sendPacket(SystemMessageId.FISH_HAS_RESISTED);
 			_goodUse = 0;
 			changeHp(0, pen);
-			return;
-		}
-		
-		if (_fisher == null)
-		{
 			return;
 		}
 		
@@ -306,17 +309,19 @@ public class Fishing implements Runnable
 	
 	public void usePumping(int dmg, int pen)
 	{
+		// Checked before the first use of the fisher: the fight can end on the ai task between
+		// the caller reading this combat and reaching here, which leaves the fisher null.
+		if (_fisher == null)
+		{
+			return;
+		}
+		
 		_anim = 1;
 		if (Rnd.get(100) > 90)
 		{
 			_fisher.sendPacket(SystemMessageId.FISH_HAS_RESISTED);
 			_goodUse = 0;
 			changeHp(0, pen);
-			return;
-		}
-		
-		if (_fisher == null)
-		{
 			return;
 		}
 		

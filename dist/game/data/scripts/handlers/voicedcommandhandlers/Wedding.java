@@ -98,7 +98,11 @@ public class Wedding implements IVoicedCommandHandler
 		{
 			activeChar.sendMessage("You are now divorced.");
 			adenaAmount = (activeChar.getAdena() / 100) * WeddingConfig.WEDDING_DIVORCE_COSTS;
-			activeChar.getInventory().reduceAdena(ItemProcessType.FEE, adenaAmount, activeChar, null);
+			if (!activeChar.getInventory().reduceAdena(ItemProcessType.FEE, adenaAmount, activeChar, null))
+			{
+				// Nothing was taken, so there is nothing to hand over to the partner below.
+				adenaAmount = 0;
+			}
 		}
 		else
 		{

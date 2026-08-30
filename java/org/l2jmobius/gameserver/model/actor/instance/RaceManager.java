@@ -75,8 +75,10 @@ public class RaceManager extends Npc
 			// "BuyTicket " threw from substring, a non numeric one threw from parseInt, and the
 			// value itself went unchecked into two arrays of eight. val picks a lane and val - 10
 			// picks a ticket price, so 9 and 19 both index one past the end.
+			// 21 is the confirmation page's buy button and the only value that reaches the
+			// branch which actually sells the ticket, so the bound has to leave it through.
 			int val = (command.length() > 10) ? StringUtil.parseInt(command.substring(10), -1) : -1;
-			if ((val < 0) || (val == 9) || (val == 19) || (val > 20))
+			if ((val < 0) || (val == 9) || (val == 19) || (val > 21))
 			{
 				super.onBypassFeedback(player, "Chat 0");
 				return;
@@ -291,7 +293,7 @@ public class RaceManager extends Npc
 		else if (command.startsWith("ShowTicket"))
 		{
 			// Retrieve ticket objectId.
-			final int val = Integer.parseInt(command.substring(11));
+			final int val = (command.length() > 11) ? StringUtil.parseInt(command.substring(11), 0) : 0;
 			if (!GeneralConfig.ALLOW_RACE || (val == 0))
 			{
 				super.onBypassFeedback(player, "Chat 0");
@@ -300,7 +302,7 @@ public class RaceManager extends Npc
 			
 			// Retrieve ticket on player's inventory.
 			final Item ticket = player.getInventory().getItemByObjectId(val);
-			if (ticket == null)
+			if ((ticket == null) || (ticket.getId() != 4443))
 			{
 				super.onBypassFeedback(player, "Chat 0");
 				return;
@@ -310,13 +312,17 @@ public class RaceManager extends Npc
 			final int lane = ticket.getCustomType1();
 			final int bet = ticket.getCustomType2() * 100;
 			
-			// Retrieve HistoryInfo for that race.
-			final HistoryInfo info = MonsterRaceManager.getInstance().getHistory().get(raceId - 1);
-			if (info == null)
+			// Retrieve HistoryInfo for that race. The list is indexed by race number, and a
+			// ticket older than the records that are left throws out of it rather than
+			// returning the null this used to test for.
+			final List<HistoryInfo> history = MonsterRaceManager.getInstance().getHistory();
+			if ((raceId < 1) || (raceId > history.size()))
 			{
 				super.onBypassFeedback(player, "Chat 0");
 				return;
 			}
+			
+			final HistoryInfo info = history.get(raceId - 1);
 			
 			final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 			html.setFile(player, getHtmlPath(getId(), 8));
@@ -333,7 +339,7 @@ public class RaceManager extends Npc
 		else if (command.startsWith("CalculateWin"))
 		{
 			// Retrieve ticket objectId.
-			final int val = Integer.parseInt(command.substring(13));
+			final int val = (command.length() > 13) ? StringUtil.parseInt(command.substring(13), 0) : 0;
 			if (!GeneralConfig.ALLOW_RACE || (val == 0))
 			{
 				super.onBypassFeedback(player, "Chat 0");
@@ -342,7 +348,7 @@ public class RaceManager extends Npc
 			
 			// Delete ticket on player's inventory.
 			final Item ticket = player.getInventory().getItemByObjectId(val);
-			if (ticket == null)
+			if ((ticket == null) || (ticket.getId() != 4443))
 			{
 				super.onBypassFeedback(player, "Chat 0");
 				return;
@@ -352,13 +358,17 @@ public class RaceManager extends Npc
 			final int lane = ticket.getCustomType1();
 			final int bet = ticket.getCustomType2() * 100;
 			
-			// Retrieve HistoryInfo for that race.
-			final HistoryInfo info = MonsterRaceManager.getInstance().getHistory().get(raceId - 1);
-			if (info == null)
+			// Retrieve HistoryInfo for that race. The list is indexed by race number, and a
+			// ticket older than the records that are left throws out of it rather than
+			// returning the null this used to test for.
+			final List<HistoryInfo> history = MonsterRaceManager.getInstance().getHistory();
+			if ((raceId < 1) || (raceId > history.size()))
 			{
 				super.onBypassFeedback(player, "Chat 0");
 				return;
 			}
+			
+			final HistoryInfo info = history.get(raceId - 1);
 			
 			// Destroy the ticket.
 			if (player.destroyItem(ItemProcessType.FEE, ticket, this, true))

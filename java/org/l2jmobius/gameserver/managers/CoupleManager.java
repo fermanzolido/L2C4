@@ -93,7 +93,14 @@ public class CoupleManager
 	
 	public void deleteCouple(int coupleId)
 	{
+		// An unknown couple id yields -1, which the list lookup below turns into an
+		// exception long before the null check it was supposed to reach.
 		final int index = getCoupleIndex(coupleId);
+		if (index < 0)
+		{
+			return;
+		}
+		
 		final Couple couple = _couples.get(index);
 		if (couple == null)
 		{
