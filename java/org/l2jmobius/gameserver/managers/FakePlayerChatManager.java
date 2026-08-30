@@ -21,8 +21,8 @@
 package org.l2jmobius.gameserver.managers;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
 import org.w3c.dom.Document;
@@ -49,7 +49,9 @@ public class FakePlayerChatManager implements IXmlReader
 {
 	private static final Logger LOGGER = Logger.getLogger(FakePlayerChatManager.class.getName());
 	
-	private static final List<FakePlayerChatHolder> MESSAGES = new ArrayList<>();
+	// Replies iterate this list from scheduled tasks while "//reload fakeplayerchat"
+	// clears and refills it, which an ArrayList answers with a ConcurrentModificationException.
+	private static final List<FakePlayerChatHolder> MESSAGES = new CopyOnWriteArrayList<>();
 	private static final int MIN_DELAY = 5000;
 	private static final int MAX_DELAY = 15000;
 	

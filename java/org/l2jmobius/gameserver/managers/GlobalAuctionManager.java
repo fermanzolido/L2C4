@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 import org.l2jmobius.commons.database.DatabaseFactory;
 import org.l2jmobius.gameserver.config.PlayerConfig;
+import org.l2jmobius.gameserver.model.World;
 import org.l2jmobius.gameserver.model.actor.Player;
 import org.l2jmobius.gameserver.model.item.enums.ItemLocation;
 import org.l2jmobius.gameserver.model.item.enums.ItemProcessType;
@@ -107,7 +108,16 @@ public class GlobalAuctionManager
 			{
 				if (rs.next())
 				{
-					return Item.restoreFromDb(rs.getInt("owner_id"), rs);
+					final Item item = Item.restoreFromDb(rs.getInt("owner_id"), rs);
+					if (item != null)
+					{
+						// Every other place that restores an item registers it, and this one did
+						// not, so after a restart the listed items were objects the world did not
+						// know about and stayed that way once a buyer received them.
+						World.getInstance().addObject(item);
+					}
+
+					return item;
 				}
 			}
 		}
@@ -186,11 +196,36 @@ public class GlobalAuctionManager
 		{
 			final AuctionListing listing = new AuctionListing(auctionId, player.getObjectId(), droppedItem, price, endTime);
 			_auctions.put(auctionId, listing);
-			player.sendInventoryUpdate(new InventoryUpdate());
+
+			// The update was sent empty, so the client kept showing an item the inventory no
+			// longer held until the next relog.
+			final InventoryUpdate iu = new InventoryUpdate();
+			iu.addRemovedItem(droppedItem);
+			player.sendInventoryUpdate(iu);
+
 			player.sendMessage("Item listed for auction.");
 			return true;
 		}
 
+		// Insert reported no generated key. Without this the row exists but no listing does,
+		// leaving the item out of the inventory and out of reach of its own owner until the
+		// next restart reloads it. Same rollback the failure above performs.
+		LOGGER.severe("GlobalAuctionManager: No auction id returned for item " + droppedItem.getObjectId() + ". Returning it to " + player.getName() + ".");
+		try (Connection con = DatabaseFactory.getConnection();
+			PreparedStatement ps = con.prepareStatement("DELETE FROM global_auctions WHERE item_object_id=?"))
+		{
+			ps.setInt(1, droppedItem.getObjectId());
+			ps.executeUpdate();
+		}
+		catch (Exception e)
+		{
+			LOGGER.log(Level.SEVERE, "Failed to clean up auction row for item " + droppedItem.getObjectId(), e);
+		}
+
+		droppedItem.setItemLocation(ItemLocation.INVENTORY);
+		droppedItem.updateDatabase();
+		player.addItem(ItemProcessType.TRANSFER, droppedItem, null, true);
+		player.sendMessage("Failed to list the item for auction.");
 		return false;
 	}
 
@@ -256,13 +291,23 @@ public class GlobalAuctionManager
 			return false;
 		}
 
+		// The check above lets a GM cancel someone else's listing, and everything below used
+		// to hand the item to whoever ran the command, so moderating a listing quietly
+		// transferred it to the GM. It goes back to the seller, who has to be online for that.
+		final Player seller = listing.getSellerId() == player.getObjectId() ? player : World.getInstance().getPlayer(listing.getSellerId());
+		if (seller == null)
+		{
+			player.sendMessage("The seller must be online to receive the returned item.");
+			return false;
+		}
+
 		// Return item
 		final Item item = listing.getItem();
-		item.setOwnerId(player.getObjectId()); // Should be already set, but confirm
+		item.setOwnerId(seller.getObjectId());
 		item.setItemLocation(ItemLocation.INVENTORY);
 		item.updateDatabase();
 
-		player.addItem(ItemProcessType.TRANSFER, item, null, true);
+		seller.addItem(ItemProcessType.TRANSFER, item, null, true);
 
 		// Remove listing
 		removeAuction(auctionId);

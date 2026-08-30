@@ -136,13 +136,19 @@ public class PremiumManager
 			PreparedStatement stmt = con.prepareStatement(LOAD_SQL))
 		{
 			stmt.setString(1, accountName.toLowerCase());
+			long expiration = 0;
 			try (ResultSet rset = stmt.executeQuery())
 			{
 				while (rset.next())
 				{
-					_premiumData.put(rset.getString(1).toLowerCase(), rset.getLong(2));
+					expiration = rset.getLong(2);
 				}
 			}
+			
+			// The absence of a row is cached too, so that getPremiumExpiration below does not
+			// query again on every read for an account that has no premium. Left inside the
+			// try, so a failed query is never mistaken for "this account has none".
+			_premiumData.put(accountName.toLowerCase(), expiration);
 		}
 		catch (SQLException e)
 		{
@@ -152,7 +158,18 @@ public class PremiumManager
 	
 	public long getPremiumExpiration(String accountName)
 	{
-		return _premiumData.getOrDefault(accountName.toLowerCase(), 0L);
+		// The cache only ever held accounts that logged in since startup, so any account
+		// that was offline read as zero. addPremiumTime builds the new expiration on top of
+		// this answer and then REPLACEs the row, which silently threw away whatever premium
+		// time an offline account still had left.
+		Long expiration = _premiumData.get(accountName.toLowerCase());
+		if (expiration == null)
+		{
+			loadPremiumData(accountName);
+			expiration = _premiumData.get(accountName.toLowerCase());
+		}
+		
+		return expiration == null ? 0L : expiration.longValue();
 	}
 	
 	public void addPremiumTime(String accountName, int timeValue, TimeUnit timeUnit)

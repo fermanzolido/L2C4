@@ -197,6 +197,21 @@ public class SellBuffBypassHandler implements IBypassHandler
 						return false;
 					}
 					
+					// The add branch bounds the price and this one never did, so a crafted
+					// bypass could store a negative one. Quest.takeItems reads a negative count
+					// as "take every one of them" and Quest.giveItems refuses anything below
+					// one, so the buyer's whole payment stack went away with nothing refunded.
+					if (price < SellBuffsConfig.SELLBUFF_MIN_PRICE)
+					{
+						player.sendMessage("Too small price! Minimum price is " + SellBuffsConfig.SELLBUFF_MIN_PRICE);
+						return false;
+					}
+					else if (price > SellBuffsConfig.SELLBUFF_MAX_PRICE)
+					{
+						player.sendMessage("Too big price! Maximum price is " + SellBuffsConfig.SELLBUFF_MAX_PRICE);
+						return false;
+					}
+					
 					final SellBuffHolder holder = player.getSellingBuffs().stream().filter(h -> (h.getSkillId() == skillToChange.getId())).findFirst().orElse(null);
 					if ((holder != null))
 					{

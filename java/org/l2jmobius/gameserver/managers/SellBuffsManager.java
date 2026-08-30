@@ -149,6 +149,14 @@ public class SellBuffsManager implements IXmlReader
 	 */
 	public void startSellBuffs(Player player, String title)
 	{
+		// Nothing called canStartSellBuffs, so every restriction it lists -- olympiad,
+		// events, chaotic state, mount, jail, no-store and non-peace zones -- was never
+		// enforced and a store could be opened anywhere.
+		if (!canStartSellBuffs(player))
+		{
+			return;
+		}
+		
 		player.sitDown();
 		player.setSellingBuffs(true);
 		player.setPrivateStoreType(PrivateStoreType.PACKAGE_SELL);

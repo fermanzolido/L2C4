@@ -78,12 +78,16 @@ public class CustomMailManager
 								final String itemId = split[0];
 								final String itemCount = split[1];
 								final String enchant = split.length > 2 ? split[2] : "0";
-								if (StringUtil.isNumeric(itemId) && StringUtil.isNumeric(itemCount))
+								// The enchant token reached parseInt without the check its two
+								// siblings have, and isNumeric passes digit runs too large for an
+								// int. Either throws out of the enclosing result set loop, so one
+								// malformed row left every mail behind it undelivered for good.
+								if (StringUtil.isInteger(itemId) && StringUtil.isInteger(itemCount) && StringUtil.isInteger(enchant))
 								{
 									itemHolders.add(new ItemEnchantHolder(Integer.parseInt(itemId), Integer.parseInt(itemCount), Integer.parseInt(enchant)));
 								}
 							}
-							else if (StringUtil.isNumeric(str))
+							else if (StringUtil.isInteger(str))
 							{
 								itemHolders.add(new ItemEnchantHolder(Integer.parseInt(str), 1));
 							}
