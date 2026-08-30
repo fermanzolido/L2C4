@@ -21,3 +21,7 @@ AUDIT-PROGRESS.md
 ELO_ANALYSIS.md
 build_errors.txt
 output.txt
+
+# Built by the build, never committed: a stale copy silently shadows the source.
+dist/libs/GameServer.jar
+dist/libs/LoginServer.jar

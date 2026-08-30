@@ -38,9 +38,10 @@
 	</path>
 
 	<path id="test.classpath">
-		<!-- Freshly compiled classes MUST come before ${libs}: dist/libs holds a
-		     prebuilt GameServer.jar of this same project, and javac would resolve
-		     stale copies of our own classes from it if it were searched first. -->
+		<!-- Freshly compiled classes MUST come before ${libs}. An assembled distribution
+		     puts this project's own GameServer.jar into that folder, and javac would
+		     resolve stale copies of our own classes from it if it were searched first.
+		     The jar is no longer committed there for the same reason. -->
 		<pathelement location="${build.bin}" />
 		<path refid="classpath" />
 		<fileset dir="${test.libs}">
