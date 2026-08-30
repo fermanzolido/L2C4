@@ -531,7 +531,10 @@ public class RecipeManager
 			boolean ret = true;
 			for (RecipeStatHolder statUse : _recipeList.getStatUse())
 			{
-				final double modifiedValue = statUse.getValue() / _creationPasses;
+				// Both operands are ints, so this divided as an integer and the double only
+				// received the truncated result: a cost of 3 spread over 5 passes charged
+				// nothing at all, and every cost that did not divide evenly charged short.
+				final double modifiedValue = (double) statUse.getValue() / _creationPasses;
 				if (statUse.getType() == StatType.HP)
 				{
 					// we do not want to kill the player, so its CurrentHP must be greater than the reduce value

@@ -5684,3 +5684,67 @@ relanza la original. Todos los sitios ya tenían que manejar `SQLException`, por
 `close()` de la conexión en un `try-with-resources` lo obliga — y **la prueba es que el
 core y el datapack compilan con cero errores** tras cambiar la firma. Los 86 pasan de no
 poder atrapar el fallo a atraparlo sin que se les toque una línea.
+
+## `IdManager`: que se niegue en vez de adivinar
+
+Estaba en "señalado y no cambiado" con el argumento de que introducir un aborto de
+arranque es decisión del dueño del servidor. Ese argumento sigue siendo cierto — y no
+hacía falta un aborto de arranque.
+
+Hay **dos** modos de fallo, y el segundo es el que hace daño:
+
+1. La reserva del `BitSet` falla → `_freeIds` queda nulo, se registra SEVERE, y el primer
+   `getNextId()` revienta con un nulo. Ruidoso.
+2. `DatabaseIdManager.getUsedIds()` falla **a medias**. Cada una de las cinco consultas
+   corre en su propio hilo con un `catch` que **registraba y tragaba**, así que si una no
+   terminaba, los ids de esa tabla entera **no entraban al conjunto** y el método devolvía
+   un resultado parcial con el mismo aspecto que uno completo. El servidor repartía
+   entonces ids que filas vivas ya tenían: colisiones de id de objeto, en silencio, y de
+   las que no se deshacen.
+
+El arreglo no inventa ningún mecanismo nuevo: hace que el gestor **se niegue a hacer lo
+único que no puede hacer bien**.
+
+- `getUsedIds()` marca si alguna consulta falló, no terminó o fue interrumpida, y lanza en
+  vez de devolver un conjunto parcial. Un conjunto parcial es peor que ninguno: parece
+  completo.
+- `IdManager` sólo pone `_initialized` a cierto al final de una inicialización entera, y
+  `getNextId()` lanza `IllegalStateException` mientras no lo esté.
+
+Un fallo inmediato y con mensaje, en lugar de corrupción callada.
+
+## Los dos últimos barridos
+
+### `compareTo` incoherente con `equals`
+
+**2 clases con `compareTo`, ninguna con `equals`.** Pero dos casos no son una población: no
+hay convención de la casa de la que diverjan. Y la coherencia con `equals` sólo muerde en
+una colección ordenada que use `compareTo` **en lugar de** `equals` — un `TreeSet` o un
+`TreeMap`. Comprobado: **ninguna de las dos** aparece en uno. `NodeRecord` se ordena en el
+buscador de caminos y `AbstractEventListener` por prioridad. Sin defecto.
+
+### División entera aterrizando en un tipo decimal
+
+**69 divisiones** cuyo resultado va a un `double` o un `float`. La primera pasada marcó 24,
+y **23 eran falsos positivos míos**: mi heurística no resuelve tipos, así que marcaba
+expresiones cuyos operandos son variables `double`. Comprobados uno a uno —`distance` sale
+de `Math.hypot`, `getChance()` devuelve `double`, `sqLevel` está declarado `double`,
+`_overhitDamage` y `_hpUpdateInterval` son `double`, `milliToStart / 1000` es una división
+entera **querida**, para pasar a segundos—.
+
+Quedó **una**, `RecipeManager:534`:
+
+```java
+private int _creationPasses = 1;
+...
+final double modifiedValue = statUse.getValue() / _creationPasses;
+```
+
+`RecipeStatHolder.getValue()` devuelve `int`. Los dos operandos son enteros, así que la
+división trunca y el `double` sólo recibe el resto perdido: es el coste de HP o MP **por
+pasada** de una receta, de modo que un coste de 3 repartido en 5 pasadas cobraba **cero**,
+y cualquier coste que no dividiera exacto cobraba de menos. Uno de 69.
+
+El barrido, como el de `killasym`, casi no discrimina por sí solo — pero a diferencia de
+aquél, el trabajo de resolver los tipos a mano era acotado (24 casos) y **encontró algo**,
+así que se completó en vez de abandonarse.

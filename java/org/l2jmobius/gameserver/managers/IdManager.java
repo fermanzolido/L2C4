@@ -43,6 +43,8 @@ public class IdManager
 	private int _freeIdCount;
 	private int _nextFreeId;
 	private final Lock _lock = new ReentrantLock();
+	/** False until the whole id space is known, which is the only state in which an id can be handed out safely. */
+	private volatile boolean _initialized;
 	
 	public IdManager()
 	{
@@ -86,7 +88,11 @@ public class IdManager
 			LOGGER.severe("IdManager: No id set was built; the server cannot hand out object ids.");
 			return;
 		}
-		
+
+		// Reached only when every used id was read back. Getting here with some of them
+		// missing is what would let the server issue an id a live row already holds, and
+		// that damage is not undoable, so getNextId refuses rather than guess.
+		_initialized = true;
 		LOGGER.info("IdManager: " + _freeIds.size() + " ids available.");
 	}
 	
@@ -117,6 +123,11 @@ public class IdManager
 	 */
 	public int getNextId()
 	{
+		if (!_initialized)
+		{
+			throw new IllegalStateException("IdManager: The id space was not built, so no object id can be issued without risking a collision. The failure is logged above.");
+		}
+
 		_lock.lock();
 		try
 		{

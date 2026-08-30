@@ -32,6 +32,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -227,10 +228,18 @@ public class DatabaseIdManager
 	 * Retrieves a set of used IDs by querying database tables that store object IDs. The retrieved IDs are used to initialize the ID manager's allocation system, ensuring that existing IDs are not reallocated.
 	 * @return a set of IDs that are currently in use across relevant database tables
 	 */
+	/**
+	 * Collects every object id the database already hands out.
+	 * @return the used ids
+	 * @throws IllegalStateException if any of the queries failed, which would leave a set
+	 *         that looks complete but is not. Handing that to the id manager would let the
+	 *         server reissue ids belonging to live rows.
+	 */
 	public static Set<Integer> getUsedIds()
 	{
 		final Set<Integer> usedIds = ConcurrentHashMap.newKeySet();
-		
+		final AtomicBoolean incomplete = new AtomicBoolean();
+
 		final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 		final List<Future<?>> futures = new ArrayList<>();
 		for (String query : EXTRACT_USED_OBJECT_ID_QUERIES)
@@ -256,6 +265,7 @@ public class DatabaseIdManager
 				}
 				catch (Exception e)
 				{
+					incomplete.set(true);
 					LOGGER.log(Level.SEVERE, "DatabaseIdManager: Could not initialize used IDs for query " + query + ": " + e.getMessage(), e);
 				}
 			}));
@@ -269,7 +279,8 @@ public class DatabaseIdManager
 			}
 			catch (Exception e)
 			{
-				LOGGER.log(Level.WARNING, "Failed to parse file: " + e.getMessage(), e);
+				incomplete.set(true);
+				LOGGER.log(Level.WARNING, "DatabaseIdManager: A used id query did not finish: " + e.getMessage(), e);
 			}
 		}
 		
@@ -281,9 +292,17 @@ public class DatabaseIdManager
 		catch (InterruptedException e)
 		{
 			Thread.currentThread().interrupt();
+			incomplete.set(true);
 			LOGGER.log(Level.WARNING, "DatabaseIdManager: Extraction interrupted: " + e.getMessage(), e);
 		}
-		
+
+		// A partial set is worse than no set: it looks complete, and every id it failed to
+		// collect is one the server will hand out to a second object.
+		if (incomplete.get())
+		{
+			throw new IllegalStateException("DatabaseIdManager: The used id extraction did not complete; the id space cannot be trusted.");
+		}
+
 		return usedIds;
 	}
 }
