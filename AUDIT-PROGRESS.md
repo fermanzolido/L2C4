@@ -5145,3 +5145,52 @@ un nombre desconocido: una errata ahí no falla en silencio, rompe la carga.
   huérfanas. (La primera pasada dio 781 discrepancias porque leí el formato al revés:
   en `Recipes.xml` el `id` es la lista de receta y `recipeId` es el ítem del libro,
   no al contrario.)
+
+### Decimocuarta clase: comandos de administración sin derechos declarados
+
+`AdminData.hasAccess` con un comando que no conoce **lo deniega**, salvo que quien lo
+teclee esté en el nivel de acceso más alto, en cuyo caso se lo auto-concede y lo
+registra. O sea: un comando implementado pero no declarado **solo lo puede usar el GM
+máximo**; para todos los demás no existe.
+
+Cruzando los 422 comandos declarados con los 431 que implementan los manejadores:
+
+- **17 implementados y sin declarar.**
+- **8 declarados sin manejador** — y cuatro de ellos explican a cuatro de los 17.
+
+#### Las cuatro grafías que no encontraban a nadie
+
+`AdminPunishment` registra **`ban_chat`** y **`unban_chat`**. El XML declaraba
+`banchat`, `chatban`, `unbanchat` y `chatunban`: **cuatro formas, ninguna la real**.
+El resultado es que las entradas concedían nivel 30 a comandos que no existen, y los
+que sí existen quedaban sin entrada — así que **ningún GM por debajo del máximo podía
+silenciar a nadie**, teniendo el servidor la intención declarada de permitírselo.
+
+Sustituidas por los dos nombres verdaderos, al mismo nivel 30 que llevaban.
+
+#### Los otros trece
+
+También sin declarar: `jail`, `unjail`, `ban_hwid`, `unban_hwid` (los otros cuatro de
+la familia de castigos), `set`, `delete_item`, `use_item`, `msgx`, `donate`,
+`donation` y los cuatro de puntos de juego.
+
+Los niveles **no se inventaron**: salen de los hermanos que ya estaban declarados en
+el mismo fichero. La familia de castigos a **30**, como `ban_acc`, `unban_acc`,
+`ban_char` y `punishment` (y con `confirmDlg` los que castigan, como sus hermanos).
+Los de ítem y mensaje a **100**, como `create_item` y `msg`.
+
+Tras el arreglo: **0 comandos implementados sin declarar.**
+
+#### Y un error propio que el validador atrapó al momento
+
+La primera versión del arreglo **rompió el esquema**: escribí `--` dentro de un
+comentario XML, que no es legal. Lo cazó la comprobación de XSD de la ronda anterior
+en la misma sesión, antes de commitear. Los 7 ficheros de configuración validan.
+
+#### Señalado y **no** cambiado
+
+Quedan cuatro declarados sin manejador en ninguna parte: `tracert`,
+`add_clan_skill`, `give_clan_skills` y `give_all_clan_skills`. Conceden derechos
+sobre comandos que no existen, lo que es inofensivo pero engañoso. Se dejan: no sé si
+son restos de algo retirado o el hueco de algo por venir, y borrar entradas de una
+configuración que el dueño puede haber editado es su decisión.

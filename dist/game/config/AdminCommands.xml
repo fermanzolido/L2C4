@@ -555,10 +555,11 @@
 	<admin command="serverinfo" description="Open server info panel." accessLevel="30" />
 
 	<!-- VOICE COMMANDS -->
-	<admin command="banchat" description="Temporarily bans a player from using chat." accessLevel="30" />
-	<admin command="chatban" description="Temporarily bans a player from using chat." accessLevel="30" />
-	<admin command="unbanchat" description="Unban a player from chat." accessLevel="30" />
-	<admin command="chatunban" description="Unban a player from chat." accessLevel="30" />
+	<!-- AdminPunishment registers ban_chat and unban_chat. The four spellings that stood
+	     here (banchat, chatban, unbanchat, chatunban) match no command it registers, so
+	     the real ones had no rights entry and only the highest access level could use them. -->
+	<admin command="ban_chat" description="Temporarily bans a player from using chat." accessLevel="30" />
+	<admin command="unban_chat" description="Unban a player from chat." accessLevel="30" />
 
 	<!-- HIDE -->
 	<admin command="hide" description="Hide OFF/ON." accessLevel="30" />
@@ -569,4 +570,25 @@
 	<admin command="removefence" description="Removes the selected fence." accessLevel="100" />
 	<admin command="listfence" description="List of all fances." accessLevel="100" />
 	<admin command="gofence" description="Teleports you to the selected fence's location." accessLevel="100" />
+
+	<!-- Implemented by a handler but with no rights entry until now: hasAccess denies a
+	     command it does not know unless the caller is at the highest access level, so these
+	     were unusable for every other GM. Levels follow their siblings above: the punishment
+	     family at 30 like ban_acc and ban_char, item and message commands at 100 like
+	     create_item and msg. Note: a double hyphen is not legal inside an xml comment. -->
+	<admin command="jail" description="Jail a player." accessLevel="30" confirmDlg="true" />
+	<admin command="unjail" description="Release a player from jail." accessLevel="30" confirmDlg="true" />
+	<admin command="ban_hwid" description="Ban a hardware id." accessLevel="30" confirmDlg="true" />
+	<admin command="unban_hwid" description="Unban a hardware id." accessLevel="30" confirmDlg="true" />
+	<admin command="set" description="Set a server setting." accessLevel="30" />
+	<admin command="delete_item" description="Delete an item from the target." accessLevel="100" />
+	<admin command="use_item" description="Make the target use an item." accessLevel="100" />
+	<admin command="msgx" description="Displays a system message with parameters." accessLevel="100" />
+	<admin command="donate" description="Deliver a donation to a player." accessLevel="100" />
+	<admin command="donation" description="Donation panel." accessLevel="100" />
+	<admin command="gamepoints" description="Game points panel." accessLevel="100" />
+	<admin command="add_game_points" description="Add game points to a player." accessLevel="100" />
+	<admin command="subtract_game_points" description="Subtract game points from a player." accessLevel="100" />
+	<admin command="set_game_points" description="Set a player's game points." accessLevel="100" />
+	<admin command="count_game_points" description="Show a player's game points." accessLevel="100" />
 </list>
