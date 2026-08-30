@@ -290,9 +290,18 @@ public class ThreadPool {
 			try {
 				_wrappedRunnable.run();
 			} catch (Throwable t) {
+				// Containing the throwable is what keeps a recurring task alive, since a
+				// scheduled task that throws is cancelled and never runs again. But no
+				// thread here carries a handler of its own and none is installed globally,
+				// so this used to reach the thread group and print to stderr, missing the
+				// log the rest of the server writes to. Log it, and still defer to a real
+				// handler if one is ever installed.
+				LOGGER.log(Level.WARNING, StringUtil.concat("ThreadPool: ",
+						_wrappedRunnable.getClass().getName(), " threw and was contained."), t);
+
 				final Thread currentThread = Thread.currentThread();
 				final UncaughtExceptionHandler exceptionHandler = currentThread.getUncaughtExceptionHandler();
-				if (exceptionHandler != null) {
+				if ((exceptionHandler != null) && (exceptionHandler != currentThread.getThreadGroup())) {
 					exceptionHandler.uncaughtException(currentThread, t);
 				}
 			}

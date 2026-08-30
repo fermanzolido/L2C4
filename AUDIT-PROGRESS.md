@@ -5441,3 +5441,53 @@ hash. La disciplina ya existía; solo no estaba escrita. Ahora lo está, en el j
 `WorldObjectHashTest`, cinco casos, validado contra la versión sin `hashCode`: **cuatro
 fallan** ahí y pasan con el arreglo. El quinto —ids distintos no son iguales— pasa en
 ambas: es el control que confirma que el test no está simplemente roto.
+
+## Comparar referencias donde había que comparar valores
+
+Clásico y de forma única: `String` con `==`, y envoltorio contra envoltorio con `==`
+(contra un primitivo se desenvuelve y es correcto, así que hay que distinguirlo).
+
+**5.146 comparaciones examinadas, cero defectos**, y esta vez el cero se puede afirmar
+sin depender de mi tabla de tipos:
+
+- **0** comparaciones contra un literal de texto, en cualquiera de los dos lados
+- frente a **1.244** comparaciones por valor (`.equals(` 670, `.equalsIgnoreCase(` 574)
+
+Los 31 casos que el barrido marcó con un `String` a un lado resultaron ser homónimos:
+`order == A2Z` en `SortedWareHouseWithdrawalList` son **`byte`**, `cabal ==
+SevenSigns.CABAL_DAWN` es **`int`**. Mi tabla los confundió con variables llamadas igual
+declaradas `String` en otro punto del mismo fichero. Ninguno es un defecto.
+
+## Las tareas periódicas: el mecanismo estaba, la visibilidad no
+
+Un `scheduleAtFixedRate` cuya tarea lanza queda **cancelado para siempre** por el
+ejecutor, sin decir nada. Con 69 tareas periódicas en el servidor —guardias de asedio,
+IA de invocaciones, guardado del manor, reinicio diario, alimentación de monturas— es de
+las cosas que matan un servidor despacio.
+
+No pasa aquí. Los cinco puntos de entrada de `ThreadPool` (`schedule`,
+`scheduleAtFixedRate`, `schedulePriorityTaskAtFixedRate`, `execute`) envuelven cada
+`Runnable` en un `RunnableWrapper` que atrapa `Throwable` y no lo relanza, y el barrido
+confirma que **ninguna** tarea periódica se programa fuera de `ThreadPool`. Los tres
+ejecutores que sí se crean por fuera (`PacketExecutor`, `IXmlReader`,
+`DatabaseIdManager`) no programan nada periódico.
+
+### Lo que sí faltaba
+
+El envoltorio entregaba el `Throwable` a
+`Thread.currentThread().getUncaughtExceptionHandler()`. Pero `ThreadProvider.newThread`
+fija nombre, prioridad y condición de demonio y **no instala manejador**, y no hay
+ninguno global —comprobado: cero `setDefaultUncaughtExceptionHandler` en el repositorio—.
+Así que ese manejador era siempre el `ThreadGroup`, que imprime a **stderr**: todo fallo
+de tarea del servidor caía fuera del log donde escribe el resto.
+
+Ahora el envoltorio lo registra en el log con el nombre de la tarea, y sigue cediendo a
+un manejador real si alguna vez se instala uno. La tarea sobrevivía igual; lo que cambia
+es que ahora se ve.
+
+### El test
+
+`ThreadPoolContainmentTest`, validado contra la versión sin el `try` del envoltorio: la
+prueba de la tarea periódica **falla** ahí y pasa con él. La de una sola vez pasa en
+ambas —el ejecutor de hilos virtuales absorbe la excepción de todos modos—, y se deja
+justamente como control.
