@@ -5,3 +5,19 @@ build/
 .DS_Store
 nbproject/
 *.class
+
+# Eclipse project metadata: local to whoever opened the project, not to the project.
+.settings/
+.classpath
+.project
+
+# Agent and bot instruction folders.
+.agents/
+.jules/
+
+# Working notes and build scratch, kept out of the tree that ships.
+AUDIT-PROGRESS.md
+*-DECISIONS.md
+ELO_ANALYSIS.md
+build_errors.txt
+output.txt
