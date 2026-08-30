@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list enabled="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/spawns.xsd">
+	<!--
+		Rex the Cat, the scheme buffer, one per town. Each position is taken from that
+		town's own gatekeeper and moved seventy units east, so the buffer stands beside a
+		spot the game already treats as walkable and in the square every player passes
+		through. Verify each one in game and nudge it if it ends up inside scenery.
+	-->
+	<spawn name="SchemeBuffers">
+		<npc id="50008" x="-84038" y="244604" z="-3728" heading="16384" respawnDelay="60" /> <!-- Talking Island Village, beside Roxxy -->
+		<npc id="50008" x="-80682" y="149776" z="-3044" heading="16384" respawnDelay="60" /> <!-- Gludin Village, beside Richlin -->
+		<npc id="50008" x="-12666" y="122816" z="-3114" heading="16384" respawnDelay="60" /> <!-- Town of Gludio, beside Bella -->
+		<npc id="50008" x="15701" y="142885" z="-2704" heading="16384" respawnDelay="60" /> <!-- Town of Dion, beside Trisha -->
+		<npc id="50008" x="83466" y="147904" z="-3404" heading="16384" respawnDelay="60" /> <!-- Town of Giran, beside Clarissa -->
+		<npc id="50008" x="84884" y="15886" z="-4291" heading="16384" respawnDelay="60" /> <!-- Town of Oren, beside Karin -->
+		<npc id="50008" x="146807" y="25807" z="-2013" heading="16384" respawnDelay="60" /> <!-- Town of Aden, beside Elisa -->
+		<npc id="50008" x="111456" y="219413" z="-3536" heading="16384" respawnDelay="60" /> <!-- Heine, beside Flauen -->
+		<npc id="50008" x="148036" y="-55228" z="-2728" heading="16384" respawnDelay="60" /> <!-- Town of Goddard, beside Tatiana -->
+		<npc id="50008" x="43894" y="-47664" z="-800" heading="16384" respawnDelay="60" /> <!-- Rune Township, beside Ilyana -->
+		<npc id="50008" x="117199" y="76917" z="-2689" heading="16384" respawnDelay="60" /> <!-- Hunters Village, beside Esmeralda -->
+		<npc id="50008" x="46996" y="51511" z="-2976" heading="16384" respawnDelay="60" /> <!-- Elven Village, beside Mirabel -->
+		<npc id="50008" x="9740" y="15537" z="-4568" heading="16384" respawnDelay="60" /> <!-- Dark Elf Village, beside Jasmine -->
+		<npc id="50008" x="115142" y="-178176" z="-880" heading="16384" respawnDelay="60" /> <!-- Dwarven Village, beside Wirphy -->
+		<npc id="50008" x="-45194" y="-112512" z="-240" heading="16384" respawnDelay="60" /> <!-- Orc Village, beside Tamil -->
+	</spawn>
+</list>

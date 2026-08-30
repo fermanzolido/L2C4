@@ -35,6 +35,8 @@ public class SchemeBufferConfig
 	public static int BUFFER_MAX_SCHEMES;
 	public static int BUFFER_ITEM_ID;
 	public static int BUFFER_STATIC_BUFF_COST;
+	public static int BUFFER_FREE_UNTIL_LEVEL;
+	public static int BUFFER_BUFF_TIME;
 	
 	public static void load()
 	{
@@ -42,5 +44,7 @@ public class SchemeBufferConfig
 		BUFFER_MAX_SCHEMES = config.getInt("BufferMaxSchemesPerChar", 4);
 		BUFFER_ITEM_ID = config.getInt("BufferItemId", 57);
 		BUFFER_STATIC_BUFF_COST = config.getInt("BufferStaticCostPerBuff", -1);
+		BUFFER_FREE_UNTIL_LEVEL = config.getInt("BufferFreeUntilLevel", 30);
+		BUFFER_BUFF_TIME = config.getInt("BufferBuffTime", 3600);
 	}
 }

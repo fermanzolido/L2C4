@@ -55,6 +55,11 @@ public class SchemeBuffer extends Npc
 	@Override
 	public void onBypassFeedback(Player player, String commandValue)
 	{
+		if (!canBeUsedBy(player))
+		{
+			return;
+		}
+
 		final StringTokenizer st = new StringTokenizer(commandValue, ";");
 		final String currentCommand = st.nextToken();
 		if (currentCommand.startsWith("menu"))
@@ -125,7 +130,9 @@ public class SchemeBuffer extends Npc
 			{
 				for (int skillId : SchemeBufferTable.getInstance().getScheme(player.getObjectId(), schemeName))
 				{
-					SkillData.getInstance().getSkill(skillId, SchemeBufferTable.getInstance().getAvailableBuff(skillId).getLevel()).applyEffects(this, target);
+					// A time of zero or less is ignored by applyEffects, so the skill keeps its
+					// own duration when the config asks for that.
+					SkillData.getInstance().getSkill(skillId, SchemeBufferTable.getInstance().getAvailableBuff(skillId).getLevel()).applyEffects(this, target, true, SchemeBufferConfig.BUFFER_BUFF_TIME);
 				}
 			}
 		}
@@ -261,6 +268,38 @@ public class SchemeBuffer extends Npc
 		}
 	}
 	
+	/**
+	 * The buffer is meant as a start-up aid, not as a substitute for a buffer class, so
+	 * it serves everyone up to a configured level and only premium accounts above it.
+	 * @param player the player talking to this npc
+	 * @return {@code true} when the npc will serve this player
+	 */
+	private boolean canBeUsedBy(Player player)
+	{
+		if ((player.getLevel() <= SchemeBufferConfig.BUFFER_FREE_UNTIL_LEVEL) || player.hasPremiumStatus())
+		{
+			return true;
+		}
+
+		final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
+		html.setFile(player, "data/html/mods/SchemeBuffer/" + getId() + "-premium.htm");
+		html.replace("%objectId%", getObjectId());
+		html.replace("%freeLevel%", SchemeBufferConfig.BUFFER_FREE_UNTIL_LEVEL);
+		player.sendPacket(html);
+		return false;
+	}
+
+	@Override
+	public void showChatWindow(Player player, int value)
+	{
+		if (!canBeUsedBy(player))
+		{
+			return;
+		}
+
+		super.showChatWindow(player, value);
+	}
+
 	@Override
 	public String getHtmlPath(int npcId, int value)
 	{

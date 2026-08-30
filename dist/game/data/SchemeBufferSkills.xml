@@ -22,9 +22,6 @@
 		<buff id="1268" level="1" price="0" desc="Restores HP using inflicted damage." /> <!-- Vampiric Rage -->
 		<buff id="1303" level="1" price="0" desc="Increases crit. rate of magic attacks." /> <!-- Wild Magic -->
 		<buff id="1304" level="1" price="0" desc="Increases shield defense power." /> <!-- Advanced Block -->
-		<buff id="1352" level="1" price="0" desc="Increases resistance to atures." /> <!-- Elemental Protection -->
-		<buff id="1353" level="1" price="0" desc="Increases resistance to dark attack." /> <!-- Divine Protection -->
-		<buff id="1354" level="1" price="0" desc="Increases resistance to de-buff attack." /> <!-- Arcane Protection -->
 	</category>
 	<category type="Dances">
 		<buff id="271" level="1" price="0" desc="Increases P. Atk." /> <!-- Dance of the Warrior -->
@@ -38,7 +35,6 @@
 		<buff id="309" level="1" price="0" desc="Increases earth resistance." /> <!-- Dance of Earth Guard -->
 		<buff id="310" level="1" price="0" desc="Restores HP by inflicted damage." /> <!-- Dance of the Vampire -->
 		<buff id="311" level="1" price="0" desc="Increases resistance to terrain damage." /> <!-- Dance of Protection -->
-		<buff id="365" level="1" price="0" desc="Increases rate of magic crit. damage." /> <!-- Siren's Dance -->
 	</category>
 	<category type="Songs">
 		<buff id="264" level="1" price="0" desc="Increases P. Def." /> <!-- Song of Earth -->
@@ -52,8 +48,5 @@
 		<buff id="305" level="1" price="0" desc="Reflects damage received." /> <!-- Song of Vengeance -->
 		<buff id="306" level="1" price="0" desc="Increases resistance to fire." /> <!-- Song of Flame Guard -->
 		<buff id="308" level="1" price="0" desc="Increases resistance to wind." /> <!-- Song of Storm Guard -->
-		<buff id="349" level="1" price="0" desc="Decreases re-use time." /> <!-- Song of Renewal -->
-		<buff id="363" level="1" price="0" desc="Increases MP regeneration rate." /> <!-- Song of Meditation -->
-		<buff id="364" level="1" price="0" desc="Decreases re-use time of physical skills." /> <!-- Song of Champion -->
 	</category>
 </list>
