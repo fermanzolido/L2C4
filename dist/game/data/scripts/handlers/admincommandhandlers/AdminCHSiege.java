@@ -150,11 +150,15 @@ public class AdminCHSiege implements IAdminCommandHandler
 						final int year = parseInt(day[2]);
 						final int h = parseInt(hour[0]);
 						final int min = parseInt(hour[1]);
-						if (((month == 2) && (d > 28)) || (d > 31) || (d <= 0) || (month <= 0) || (month > 12) || (year < Calendar.getInstance().get(Calendar.YEAR)))
+						// month is already the zero based Calendar value, so February is 1 and
+						// December is 11: tested as if it were one based this refused January
+						// outright and read 31 December as a 28 day month. h is HOUR_OF_DAY,
+						// which runs 0 to 23 like the minute test beside it.
+						if (((month == 1) && (d > 28)) || (d > 31) || (d <= 0) || (month < 0) || (month > 11) || (year < Calendar.getInstance().get(Calendar.YEAR)))
 						{
 							activeChar.sendSysMessage("Wrong day/month/year gave!");
 						}
-						else if ((h <= 0) || (h > 24) || (min < 0) || (min >= 60))
+						else if ((h < 0) || (h >= 24) || (min < 0) || (min >= 60))
 						{
 							activeChar.sendSysMessage("Wrong hour/minutes gave!");
 						}

@@ -364,7 +364,12 @@ public class ClanHallAuction
 					ps.setInt(1, IdManager.getInstance().getNextId());
 					ps.setInt(2, _id);
 					ps.setInt(3, bidder.getClanId());
-					ps.setString(4, bidder.getName());
+					// The update branch above writes the leader name, and setBid recognises the
+					// standing highest bidder by comparing this column against it. Storing the
+					// bidding member instead meant that after a reload the same clan raising its
+					// own bid failed that test and was charged the whole new bid a second time
+					// rather than the difference.
+					ps.setString(4, bidder.getClan().getLeaderName());
 					ps.setInt(5, bid);
 					ps.setString(6, bidder.getClan().getName());
 					ps.setLong(7, System.currentTimeMillis());
@@ -416,7 +421,17 @@ public class ClanHallAuction
 		
 		for (Bidder b : _bidders.values())
 		{
-			if (ClanTable.getInstance().getClanByName(b.getClanName()).getHideoutId() == 0)
+			// returnItem already tolerates a bidder whose clan is gone; these two lookups did
+			// not. endAuction calls this after deleting the auction and before handing the hall
+			// over, so one disbanded losing bidder threw the winner's hall away for good.
+			final Clan bidderClan = ClanTable.getInstance().getClanByName(b.getClanName());
+			if (bidderClan == null)
+			{
+				LOGGER.warning("Clan " + b.getClanName() + " doesn't exist!");
+				continue;
+			}
+			
+			if (bidderClan.getHideoutId() == 0)
 			{
 				returnItem(b.getClanName(), b.getBid(), true); // 10 % tax
 			}
@@ -429,7 +444,7 @@ public class ClanHallAuction
 				}
 			}
 			
-			ClanTable.getInstance().getClanByName(b.getClanName()).setAuctionBiddedAt(0, true);
+			bidderClan.setAuctionBiddedAt(0, true);
 		}
 		
 		_bidders.clear();
@@ -565,6 +580,11 @@ public class ClanHallAuction
 		{
 			LOGGER.log(Level.SEVERE, "Exception: Auction.load(): " + e.getMessage(), e);
 		}
+		
+		// The constructor that loads an auction from the database starts this; the one a clan
+		// selling its hall goes through does not, and this is where that auction becomes real.
+		// Without it the sale only ever closed after a restart picked the row back up.
+		startAutoTask();
 	}
 	
 	/**

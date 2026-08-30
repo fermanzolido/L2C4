@@ -16,9 +16,9 @@
  */
 package conquerablehalls.FortressOfResistance;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.l2jmobius.commons.time.TimeUtil;
 import org.l2jmobius.gameserver.cache.HtmCache;
@@ -48,7 +48,9 @@ public class FortressOfResistance extends ClanHallSiegeEngine
 	};
 	
 	private Spawn _nurka;
-	private final Map<Integer, Long> _damageToNurka = new HashMap<>();
+	// onAttack runs on the combat threads and getWinner reads this from the scheduler, the same
+	// reason DevastatedCastle keeps its damage map concurrent.
+	private final Map<Integer, Long> _damageToNurka = new ConcurrentHashMap<>();
 	private NpcHtmlMessage _messengerMsg;
 	
 	private FortressOfResistance()
@@ -163,6 +165,9 @@ public class FortressOfResistance extends ClanHallSiegeEngine
 	@Override
 	public void onSiegeStarts()
 	{
+		// DevastatedCastle clears its damage map here for the same reason: carried over, the
+		// clan that hit Nurka hardest last fortnight wins a siege it never showed up to.
+		_damageToNurka.clear();
 		_nurka.init();
 	}
 	

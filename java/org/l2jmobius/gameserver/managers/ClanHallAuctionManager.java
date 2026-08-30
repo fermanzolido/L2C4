@@ -23,8 +23,8 @@ package org.l2jmobius.gameserver.managers;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,7 +34,10 @@ import org.l2jmobius.gameserver.model.residences.ClanHallAuction;
 public class ClanHallAuctionManager
 {
 	protected static final Logger LOGGER = Logger.getLogger(ClanHallAuctionManager.class.getName());
-	private final List<ClanHallAuction> _auctions = new ArrayList<>();
+	// Auctions are added and removed after startup, from the scheduler thread that closes them
+	// and from the player thread that lists or cancels them, while the auctioneer walks the same
+	// list to build its page. ClanHallTable holds its halls in concurrent maps for that reason.
+	private final List<ClanHallAuction> _auctions = new CopyOnWriteArrayList<>();
 	
 	private static final String[] ITEM_INIT_DATA =
 	{

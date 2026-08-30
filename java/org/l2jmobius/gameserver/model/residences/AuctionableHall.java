@@ -121,7 +121,10 @@ public class AuctionableHall extends ClanHall
 		{
 			if ((System.currentTimeMillis() + (3600000 * 24)) <= (_paidUntil + CH_RATE))
 			{
-				ThreadPool.schedule(new FeeTask(), System.currentTimeMillis() + (3600000 * 24));
+				// The comparison above is between dates, the schedule below wants a delay. Passing
+				// the date made the fee check land decades away, so an unpaid hall was never
+				// charged again nor repossessed.
+				ThreadPool.schedule(new FeeTask(), 3600000 * 24);
 			}
 			else
 			{
@@ -207,7 +210,8 @@ public class AuctionableHall extends ClanHall
 						clan.broadcastToOnlineMembers(sm);
 						if ((_time + (3600000 * 24)) <= (_paidUntil + CH_RATE))
 						{
-							ThreadPool.schedule(new FeeTask(), _time + (3600000 * 24));
+							// A delay, like the else branch below, not the date the test compares.
+							ThreadPool.schedule(new FeeTask(), 3600000 * 24);
 						}
 						else
 						{

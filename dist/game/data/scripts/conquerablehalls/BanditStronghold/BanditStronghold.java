@@ -567,7 +567,11 @@ public class BanditStronghold extends ClanHallSiegeEngine
 			
 			_hall.getZone().banishNonSiegeParticipants();
 			
-			startSiege();
+			// This override only runs the five minute entry window; the engine below it is what
+			// spawns the guards, marks the hall RUNNING and schedules the end. Calling this
+			// method again instead reopened the doors and re-teleported the owner every five
+			// minutes forever, and the siege never started nor ended.
+			super.startSiege();
 		}, 300000);
 	}
 	

@@ -238,7 +238,10 @@ public abstract class ClanHallSiegeEngine extends Script implements Siegable
 	@Override
 	public SiegeClan getAttackerClan(Clan clan)
 	{
-		return getAttackerClan(clan.getId());
+		// Siege.getAttackerClan, its counterpart for castles, answers null for a clanless
+		// player instead of dereferencing. Both are reached from the same if/else in
+		// RequestRestartPoint (restart to siege HQ) and MapRegionManager (flag teleport).
+		return clan == null ? null : getAttackerClan(clan.getId());
 	}
 	
 	@Override
@@ -307,8 +310,11 @@ public abstract class ClanHallSiegeEngine extends Script implements Siegable
 			onSiegeEnds();
 			_attackers.clear();
 			_hall.updateNextSiege();
-			_siegeTask = ThreadPool.schedule(new PrepareOwner(), _hall.getSiegeDate().getTimeInMillis());
-			_hall.updateSiegeStatus(SiegeStatus.WAITING_BATTLE);
+			// ThreadPool.schedule takes a delay, not a date: handing it the epoch time of the
+			// next siege pushed the task decades out, and WAITING_BATTLE closes registration
+			// until prepareOwner runs. Between them a cancelled siege bricked the hall for good.
+			_siegeTask = ThreadPool.schedule(new PrepareOwner(), _hall.getNextSiegeTime() - System.currentTimeMillis() - 3600000);
+			_hall.updateSiegeStatus(SiegeStatus.REGISTERING);
 			final SystemMessage sm = new SystemMessage(SystemMessageId.THE_SIEGE_OF_S1_HAS_BEEN_CANCELED_DUE_TO_LACK_OF_INTEREST);
 			sm.addString(_hall.getName());
 			Broadcast.toAllOnlinePlayers(sm);
@@ -411,7 +417,9 @@ public abstract class ClanHallSiegeEngine extends Script implements Siegable
 	public void updateSiege()
 	{
 		cancelSiegeTask();
-		_siegeTask = ThreadPool.schedule(new PrepareOwner(), _hall.getNextSiegeTime() - 3600000);
+		// Same delay as the constructor and endSiege compute; without the current time this
+		// is an epoch date, so a siege rescheduled by //chsiege_setSiegeDate never fires.
+		_siegeTask = ThreadPool.schedule(new PrepareOwner(), _hall.getNextSiegeTime() - System.currentTimeMillis() - 3600000);
 		LOGGER.config(_hall.getName() + " siege scheduled for " + _hall.getSiegeDate().getTime() + ".");
 	}
 	
