@@ -5540,3 +5540,66 @@ sostienen —`LoginServer:202` traga un `Throwable` durante el apagado para que 
 la limpieza siga, y `QuestState:243` es un parseo defensivo de datos persistidos con la
 variable llamada `ignored`—. Es una carencia de comentarios, no de corrección, y no se
 tocan 21 sitios por eso.
+
+## La crónica queda decidida: C4, y lo que no se usa se repara
+
+El usuario respondió la pregunta abierta más importante de esta auditoría: el servidor
+publica **C4 (Scions of Destiny)**, y —esto es lo que cambia el criterio— *"aunque no se
+usa me gustaría que esté habilitado igualmente y funcione ya que quizás se use igual"*.
+
+**Regla nueva, que invierte la de por defecto:** ante una ruta muerta, se **repara para
+que funcione**, no se elimina. Lo que sobra no es rama muerta: es contenido pendiente.
+
+### Lo que la decisión desbloqueó
+
+**El npc 900103, reclamado por dos funciones.** Era el hallazgo más serio del registro:
+`custom/core_teleporter.xml` lo declara `Teleporter` y `custom/custom.xml` lo declara
+`Folk` "Race Manager", y `NpcData` **fusiona en vez de reemplazar**, con el `type`
+decidiendo qué clase Java se construye. El npc resultante era un híbrido y una de las dos
+funciones quedaba rota — y **cuál de las dos no era fijo**, porque los ficheros se
+reparten a un pool de hilos. Bajo la regla nueva las dos tienen que funcionar, así que el
+cubo de Core se movió al **900101**, que estaba libre: definición, constante en
+`Core.java`, `teleporters/others/900101.xml` y `html/teleporter/900101.htm` (este último
+obligatorio, porque `Teleporter.getHtmlPath` construye el nombre desde el id). El Race
+Manager conserva el 900103. **5.784 npcs, 0 duplicados.**
+
+**`Q00627_HeartInSearchOfPower:144`** decía `31518-7.htm` sin el cero, y la rama de
+encima escribe `31518-07.htm`. Como `showHtmlFile` sólo envía cuando `getHtm` encontró
+algo, un segundo clic sobre una recompensa —que es como se llega a esa rama— no hacía
+**nada**. Ahora repite la línea de cierre.
+
+**Los tres bypasses muertos.** `talk_select`, en `30949.htm` y `32779.htm`, no lo declara
+nada; el enlace se llama "Quest" y **72 páginas** del propio repositorio usan
+`npc_%objectId%_questlist` para exactamente ese botón, que sí está implementado. No hubo
+que inventar el destino: era la convención de la casa.
+
+Los `menu_select?ask=348` de `Q00348_AnArrogantSearch` fueron igual de determinables una
+vez leído el texto: en `30864-12` y `30864-15` el botón dice *"What do you want me to
+do?"* y `30864-17` responde literalmente —nombra a los tres buscadores y entrega las tres
+cartas—, además de ser ya un caso de `onEvent`. En `30864-48` el botón dice *"What do I
+need to do?"* y `30864-51` responde *"ve a matar Guardian Angels y Seal Angels"*, también
+un caso de `onEvent`. Cero `menu_select` fuera del manor.
+
+**`data/html/admin/game_points.htm`.** Los cinco comandos de puntos están declarados en
+`AdminCommands.xml`, así que `//gamepoints` está autorizado — y abría una página que no
+existía: silencio para el GM. Escrita siguiendo el estilo de sus hermanas, con la
+sintaxis exacta que `AdminGamePoints` implementa.
+
+### Lo que la decisión **no** convierte en trabajo
+
+Las 88 referencias literales a páginas inexistentes se descomponen así, y sólo una era un
+clic muerto real:
+
+| grupo | por qué no rompe nada |
+|---|---|
+| fragmentos como `-01.htm`, `.htm` | falsos positivos míos: son el sufijo de un nombre que se concatena en ejecución |
+| npcs **32094, 32095, 32098, 31963** (~45 páginas) | **no existen** en los datos C4; el script nunca corre |
+| `30570-07b`, `30585-11c`, `30556-06c`, `30527-08b`, `30587-09b` | ramas cuya condición es inalcanzable: en `Q00417` la página se muestra en `cond == 12` y el `setCond` más alto de la quest es **11** |
+| las cuatro de `Link.java` | son entradas de una **lista blanca** de seguridad; ninguna página enlaza a ellas |
+| `grandboss_frintezza.htm` | el menú de admin no ofrece Frintezza y el npc 29045 no está en los datos C4 |
+
+Escribir las ~45 páginas de los npcs 32xxx sería redactar contenido de una crónica que
+este servidor no publica, y decidir qué significa `cond == 12` es diseñar flujo de quest.
+Eso se señala, no se inventa. Queda igualmente pendiente `quest_accept`, único bypass sin
+implementar que sobrevive, en la huérfana `30864-14.htm`: es protocolo del cliente
+retail, no un bypass de servidor.

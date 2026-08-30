@@ -141,7 +141,11 @@ public class Q00627_HeartInSearchOfPower extends Quest
 			}
 			else
 			{
-				htmltext = "31518-7.htm";
+				// The page is 31518-07, as the branch above spells it. Missing the zero
+				// meant getHtm found nothing and showHtmlFile sent nothing, so a second
+				// click on a reward -- the way this branch is actually reached -- did
+				// nothing at all instead of repeating the closing line.
+				htmltext = "31518-07.htm";
 			}
 		}
 		

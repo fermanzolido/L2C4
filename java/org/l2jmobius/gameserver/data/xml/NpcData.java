@@ -554,10 +554,12 @@ public class NpcData implements IXmlReader {
 						// is on and Threads.ini ships it on. Get, create and put as three steps let two
 						// threads meeting the same npc id both find nothing, both build a template, and one
 						// put overwrite the other -- losing that definition entirely rather than merging it.
-						// Counted properly by parsing the xml rather than by pattern: exactly one shipped id
-						// is defined twice, 900103, in custom/core_teleporter.xml and custom/custom.xml. An
-						// earlier version of this comment said 29, which counted <npc> references inside
-						// <minions> blocks as definitions. One is enough to exercise this.
+						// Counted properly by parsing the xml rather than by pattern: no shipped id is
+						// defined twice any more. One was -- 900103, claimed by both Core's teleport
+						// cube and the Race Manager -- and the cube has since moved to 900101. An
+						// earlier version of this comment said 29, which counted <npc> references
+						// inside <minions> blocks as definitions. The lock stays regardless: it guards
+						// the merge below against a duplicate arriving from any future data.
 						// Reads elsewhere go through the ConcurrentHashMap and do not take this lock.
 						final NpcTemplate template;
 						synchronized (_npcs) {

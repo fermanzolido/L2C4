@@ -52,7 +52,12 @@ public class Core extends Script
 	private static final int DEATH_KNIGHT = 29007;
 	private static final int DOOM_WRAITH = 29008;
 	private static final int SUSCEPTOR = 29011;
-	private static final int TELEPORT_CUBE = 900103;
+	// 900103 was claimed by two different npcs: this cube and the Race Manager in
+	// custom.xml. NpcData merges rather than replaces, and type decides which Java
+	// class is built, so the surviving npc was a hybrid and one of the two features
+	// was broken -- and which one was not fixed, since the loader parses on a thread
+	// pool. The cube moved to the free 900101; the Race Manager keeps 900103.
+	private static final int TELEPORT_CUBE = 900101;
 	
 	// Spawns
 	private static final Map<Integer, Location> MINNION_SPAWNS = new HashMap<>();
