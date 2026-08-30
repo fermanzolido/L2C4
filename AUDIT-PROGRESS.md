@@ -5748,3 +5748,30 @@ y cualquier coste que no dividiera exacto cobraba de menos. Uno de 69.
 El barrido, como el de `killasym`, casi no discrimina por sí solo — pero a diferencia de
 aquél, el trabajo de resolver los tipos a mano era acotado (24 casos) y **encontró algo**,
 así que se completó en vez de abandonarse.
+
+## Las dos decisiones de balance, resueltas
+
+**Skill 4522 "Eye of Assassin" — se confirma correcta.** El usuario: un daguero pegando
+por la espalda debe pegar mejor cuando un mago o un tanque intenta escapar. Es exactamente
+lo que el dato pedia y lo que el `<and>` restaura, asi que la correccion se queda.
+
+**`buffDebuffMod` — medido, y no es grave.** La pregunta era si dejarlo corregido pasaba
+factura. Los numeros dicen que no, y hay un dato que lo cierra: **ninguna de las 1.976
+skills fija su propio `minChance` o `maxChance`**, asi que todas usan el de configuracion,
+y `Player.ini` trae `MinAbnormalStateSuccessRate = 0` y
+`MaxAbnormalStateSuccessRate = 25`. La probabilidad final es siempre `clamp(rate, 0, 25)`.
+
+`buffDebuffMod` no suma: multiplica, y mueve `rate` un **1% relativo**.
+
+| situacion | efecto de la correccion |
+|---|---|
+| `rate` >= 25 (el caso comun: `baseMod` ronda 70+ y en magia se multiplica por `mAtkMod`) | antes y despues se recorta a 25 exacto. **Cero diferencia** |
+| `rate` < 25 | 1% relativo: un debuff al 20% pasa a 19,8% |
+| casi siempre | solo **2 ficheros de skills** declaran `debuffVuln`/`buffVuln`, asi que domina el caso neutro: 1,01 antes, 1,00 ahora |
+
+Lo que la correccion quito fue **un +1% gratis en el caso neutro**, que ademas hacia que
+cada resistencia declarada prendiera un punto distinto de lo escrito. `calcCancelEffects`
+lee el mismo tipo de estadistica de porcentaje y ya arrancaba en cero: la convencion de la
+casa era esa y este sitio era el unico que divergia.
+
+**Las dos se quedan.** No queda ninguna decision abierta del dueno del servidor.
