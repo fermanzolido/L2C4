@@ -839,6 +839,12 @@ public class CastleChamberlain extends Script {
 					final int level = Integer.parseInt(st.nextToken());
 					if (level == 0) {
 						castle.updateFunctions(player, func, level, 0, 0, false);
+					} else if (getFunctionRatio(func) <= 0) {
+						// func arrives from the bypass and nothing before this point bounds it. A
+						// type the tables above do not list has no billing period, and the castle
+						// schedules the fee task of a new function with the period as its delay:
+						// zero, and the task reschedules itself with the same zero forever.
+						htmltext = "chamberlain-09.html";
 					} else if (!castle.updateFunctions(player, func, level, getFunctionFee(func, level),
 							getFunctionRatio(func), castle.getFunction(func) == null)) {
 						htmltext = "chamberlain-09.html";

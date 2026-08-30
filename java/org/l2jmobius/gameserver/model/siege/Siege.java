@@ -950,6 +950,13 @@ public class Siege implements Siegable
 	
 	public void registerDefender(Player player, boolean force)
 	{
+		// Same guard as registerAttacker: the forced path skips checkIfCanRegister, which is
+		// where the clanless player is otherwise turned away, and saveSiegeClan reads the clan.
+		if (player.getClan() == null)
+		{
+			return;
+		}
+		
 		if (getCastle().getOwnerId() <= 0)
 		{
 			player.sendMessage("You cannot register as a defender because " + getCastle().getName() + " is owned by NPC.");
@@ -1496,7 +1503,15 @@ public class Siege implements Siegable
 			{
 				final Spawn spawn = new Spawn(ts.getId());
 				spawn.setLocation(ts.getLocation());
-				_controlTowers.add((ControlTower) spawn.doSpawn(false));
+				
+				// doSpawn answers null instead of throwing when it cannot build the npc, and
+				// that null was counted as a standing tower: the count never reached zero, and
+				// removeTowers threw halfway through endSiege, leaving the siege zone active.
+				final ControlTower tower = (ControlTower) spawn.doSpawn(false);
+				if (tower != null)
+				{
+					_controlTowers.add(tower);
+				}
 			}
 			catch (Exception e)
 			{

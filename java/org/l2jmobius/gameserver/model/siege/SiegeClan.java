@@ -56,7 +56,10 @@ public class SiegeClan
 	
 	public void removeFlags()
 	{
-		_flag.forEach(Npc::decayMe);
+		// deleteMe, like the single flag removal above: decayMe drops the flag out of the
+		// world but leaves it registered in the zones it stands in, so every siege left its
+		// headquarters behind in the castle zone's character list.
+		_flag.forEach(Npc::deleteMe);
 		_flag.clear();
 	}
 	

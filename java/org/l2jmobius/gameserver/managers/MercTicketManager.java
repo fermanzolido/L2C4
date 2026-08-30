@@ -118,7 +118,13 @@ public class MercTicketManager
 				}
 			}
 			
-			if ((itemId >= ITEM_IDS[50]) && (itemId <= ITEM_IDS[51]))
+			// The last two ticket types of a castle sit at offsets 50 and 51 of that castle's
+			// own block. Without the block offset this only ever matched Gludio's pair, so the
+			// last two ticket types of the other six castles resolved to no castle: the lord
+			// could not place them, they were never cleared from the ground when the siege
+			// started, and anyone could pick them up because the owner check is skipped when
+			// no castle is found.
+			if ((itemId >= ITEM_IDS[50 + (i * GUARDIAN_TYPES_COUNT)]) && (itemId <= ITEM_IDS[51 + (i * GUARDIAN_TYPES_COUNT)]))
 			{
 				return i + 1;
 			}

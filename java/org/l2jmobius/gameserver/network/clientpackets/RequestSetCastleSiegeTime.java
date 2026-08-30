@@ -100,7 +100,10 @@ public class RequestSetCastleSiegeTime extends ClientPacket
 		for (int hour : FeatureConfig.SIEGE_HOUR_LIST)
 		{
 			cal1.set(Calendar.HOUR_OF_DAY, hour);
-			if (isEqual(cal1, cal2, Calendar.YEAR, Calendar.MONTH, Calendar.DAY_OF_MONTH, Calendar.HOUR, Calendar.MINUTE, Calendar.SECOND))
+			// The offered hours are set as HOUR_OF_DAY and have to be compared as such.
+			// Calendar.HOUR is the 12 hour clock and no AM/PM field was compared with it, so a
+			// client sending 08:00 was accepted against the 20:00 the castle was offered.
+			if (isEqual(cal1, cal2, Calendar.YEAR, Calendar.MONTH, Calendar.DAY_OF_MONTH, Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND))
 			{
 				return true;
 			}

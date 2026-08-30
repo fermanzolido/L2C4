@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -99,6 +100,7 @@ public class Castle extends AbstractResidence
 		long _endDate;
 		protected boolean _inDebt;
 		public boolean _cwh;
+		private ScheduledFuture<?> _task;
 		
 		public CastleFunction(int type, int lvl, int lease, int tempLease, long rate, long time, boolean cwh)
 		{
@@ -161,11 +163,27 @@ public class Castle extends AbstractResidence
 			final long currentTime = System.currentTimeMillis();
 			if (_endDate > currentTime)
 			{
-				ThreadPool.schedule(new FunctionTask(cwh), _endDate - currentTime);
+				_task = ThreadPool.schedule(new FunctionTask(cwh), _endDate - currentTime);
 			}
 			else
 			{
-				ThreadPool.schedule(new FunctionTask(cwh), 0);
+				_task = ThreadPool.schedule(new FunctionTask(cwh), 0);
+			}
+		}
+		
+		/**
+		 * Stops the fee task of a function that is no longer the castle's. The task reschedules
+		 * itself for as long as the castle has an owner, so a function dropped from the map
+		 * without this kept charging the owner clan's warehouse and put its deleted row back
+		 * with every dbSave. Losing the castle removes every function at once, which handed the
+		 * new owner the fees of the old one.
+		 */
+		protected void cancelTask()
+		{
+			if (_task != null)
+			{
+				_task.cancel(false);
+				_task = null;
 			}
 		}
 		
@@ -201,7 +219,7 @@ public class Castle extends AbstractResidence
 							ClanTable.getInstance().getClan(getOwnerId()).getWarehouse().destroyItemByItemId(ItemProcessType.FEE, Inventory.ADENA_ID, fee, null, null);
 						}
 						
-						ThreadPool.schedule(new FunctionTask(true), _rate);
+						_task = ThreadPool.schedule(new FunctionTask(true), _rate);
 					}
 					else
 					{
@@ -683,7 +701,12 @@ public class Castle extends AbstractResidence
 	 */
 	public void removeFunction(int functionType)
 	{
-		_function.remove(functionType);
+		final CastleFunction function = _function.remove(functionType);
+		if (function != null)
+		{
+			function.cancelTask();
+		}
+		
 		try (Connection con = DatabaseFactory.getConnection();
 			PreparedStatement ps = con.prepareStatement("DELETE FROM castle_functions WHERE castle_id=? AND type=?"))
 		{
@@ -727,6 +750,14 @@ public class Castle extends AbstractResidence
 			if ((function == null) || ((lease - function.getLease()) > 0))
 			{
 				_function.remove(type);
+				if (function != null)
+				{
+					// The replaced function keeps its own fee task, so without this an upgraded
+					// function was billed twice per period and the two tasks overwrote each
+					// other's row.
+					function.cancelTask();
+				}
+				
 				_function.put(type, new CastleFunction(type, lvl, lease, 0, rate, -1, false));
 			}
 			else
