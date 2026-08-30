@@ -4789,11 +4789,12 @@ que no vino**, nunca dato que se contradiga a sí mismo.
 ### Una comprobación que salió nula, y se dice
 
 Se intentó una quinta —**los secuaces que invoca un jefe**— y examinó **cero
-referencias**. No es que estén bien: es que **no hay ninguna**. Un npc entra en
-`_masterMonsterIDs` solo si declara un `<param name="Privates">`, y ningún npc del
-dato distribuido lo declara, así que la ruta de invocación de secuaces de
-`Spawn.doSpawn` está muerta en este datapack. Un cero sin denominador no es un
-aprobado, y por eso se separa de la tabla de arriba.
+referencias**, y se dio por nula. **Eso era un error de la comprobación, no del
+dato**: buscaba `<param name="Privates">` y la forma real es `<minions
+name="Privates">`. Rehecha, la cifra es **260 npcs que declaran secuaces, 467
+referencias, 0 rotas**. La ruta de invocación de `Spawn.doSpawn` está viva y su dato
+es correcto. Se deja escrito el error porque un cero sin denominador sigue sin ser un
+aprobado — pero éste sí tenía denominador y había que ir a buscarlo.
 
 ### Y una que sí tuvo denominador
 
@@ -5059,3 +5060,57 @@ Arreglarlos exige saber **a qué página debe llevar cada botón**, y eso no est
 repositorio: el `onEvent` de la quest solo tiene casos para páginas concretas y
 `30864-13.htm` no es una de ellas. Elegir el destino es reconstruir un flujo de
 diálogo — contenido, no reparación. Misma línea que con `Q00627`.
+
+### Decimotercera clase: ids definidos dos veces
+
+Un id repetido no da error: el cargador se queda con uno, o mezcla los dos, y nadie
+lo dice. Contado **parseando el XML**, no con expresiones:
+
+| tipo | definidos | repetidos |
+|---|---|---|
+| skills | 1.976 | **0** |
+| ítems | 7.852 | 4, todos `base` contra `custom/` |
+| npcs | 5.783 | **1** |
+
+Los cuatro de ítems son el mecanismo de sobreescritura: `custom/` pisa la definición
+base a propósito.
+
+#### El npc 900103, que dos funciones distintas reclaman
+
+| fichero | qué declara |
+|---|---|
+| `custom/core_teleporter.xml` | `Teleportation Cubic`, tipo **Teleporter**, nivel 70 |
+| `custom/custom.xml` | `Start`, título "Race Manager", tipo **Folk** |
+
+Y las dos tienen dueño en el código:
+
+- `Core.java`: `TELEPORT_CUBE = 900103` — el cubo de salida tras matar a Core, con su
+  lista de destinos en `teleporters/others/900103.xml`.
+- `Race.java`: `START_NPC = 900103` — el gestor de la carrera, con sus páginas
+  `900103-signup.htm`, `900103-onlist.htm`, `900103-quit.htm`.
+
+El cargador **no reemplaza: fusiona** (`template.set(set)` sobre el mismo objeto), y
+`type` decide qué clase Java se instancia. Así que el npc final es un híbrido y
+**una de las dos funciones queda rota**.
+
+**Y cuál de las dos, no es fijo.** `parseDirectory` reparte los ficheros a un pool
+cuando `ThreadsForLoading` está activo, y `Threads.ini` lo trae **activo**. El orden
+depende de la planificación de hilos: puede cambiar entre reinicios.
+
+#### Y una corrección a un comentario propio, en código de producción
+
+La fusión ya estaba bajo `synchronized (_npcs)` de una sesión anterior de esta misma
+auditoría, y el candado es correcto. Pero su comentario justificaba la necesidad
+diciendo **"29 de los ids vienen definidos en más de un fichero"**, y eso es falso:
+esa cuenta contaba como definiciones las referencias `<npc id="...">` dentro de los
+bloques `<minions>`. **Es uno.** Corregido en el código, nombrando el caso real.
+
+Uno basta para que el candado haga falta, así que la conclusión no cambia — pero el
+número que la sostenía estaba mal y ahora dice la verdad.
+
+#### Señalado y **no** cambiado
+
+Resolver la colisión es darle otro id a una de las dos, y eso toca el `.java`, el
+`.xml` del npc, sus páginas html, los datos de teletransporte y cualquier spawn o
+fila de base que lo mencione. **Cuál de las dos se mueve es una decisión de
+contenido**, no de reparación.

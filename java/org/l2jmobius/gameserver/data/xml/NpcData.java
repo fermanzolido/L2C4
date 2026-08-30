@@ -554,7 +554,10 @@ public class NpcData implements IXmlReader {
 						// is on and Threads.ini ships it on. Get, create and put as three steps let two
 						// threads meeting the same npc id both find nothing, both build a template, and one
 						// put overwrite the other -- losing that definition entirely rather than merging it.
-						// 29 of the shipped npc ids are defined in more than one file, so this is exercised.
+						// Counted properly by parsing the xml rather than by pattern: exactly one shipped id
+						// is defined twice, 900103, in custom/core_teleporter.xml and custom/custom.xml. An
+						// earlier version of this comment said 29, which counted <npc> references inside
+						// <minions> blocks as definitions. One is enough to exercise this.
 						// Reads elsewhere go through the ConcurrentHashMap and do not take this lock.
 						final NpcTemplate template;
 						synchronized (_npcs) {
