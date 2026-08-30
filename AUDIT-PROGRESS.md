@@ -5114,3 +5114,34 @@ Resolver la colisión es darle otro id a una de las dos, y eso toca el `.java`, 
 `.xml` del npc, sus páginas html, los datos de teletransporte y cualquier spawn o
 fila de base que lo mencione. **Cuál de las dos se mueve es una decisión de
 contenido**, no de reparación.
+
+### Tres comprobaciones más, las tres limpias
+
+Se registran aunque no encuentren nada: un negativo con denominador es un
+resultado, y saber que ya se miró evita volver a mirarlo.
+
+| comprobación | examinadas | rotas |
+|---|---|---|
+| nombres de estadística en `<add>`, `<mul>`, `<set>`… contra el enum `Stat` | **9.343** | **0** |
+| referencias a (skill, nivel) contra los niveles que el dato define | **24.736** | **0** |
+| claves `<set name="…">` de ítem que el código lee | 74.254 declaraciones, 48 claves | **4 sin lector** |
+
+El primero importaba porque `Stat.valueOfXml` **lanza** `NoSuchElementException` ante
+un nombre desconocido: una errata ahí no falla en silencio, rompe la carga.
+
+#### Las cuatro claves sin lector, y por qué ninguna es un defecto
+
+- **`equip_condition`** (9) y **`use_condition`** (11) llevan valores en **formato del
+  cliente retail** —`{{ec_castle;1};{ec_castle_num;{6}}}`— y en los mismos ítems hay,
+  justo debajo, un bloque `<conditions msgId="…">` que es el formato que el servidor
+  sí interpreta. Metadato heredado junto a una implementación que funciona.
+
+- **`item_type`** (6): el tipo real viaja en el atributo `type` del `<item>`.
+
+- **`recipe_id`** (781) es información **duplicada**: el vínculo que el servidor usa
+  vive en `Recipes.xml`. Lo que sí valía la pena era comprobar si las dos copias
+  coinciden, y **coinciden exactamente**: 781 recetas, 781 ítems que la declaran,
+  **cero** que Recipes.xml no conozca, **cero** en desacuerdo y **cero** recetas
+  huérfanas. (La primera pasada dio 781 discrepancias porque leí el formato al revés:
+  en `Recipes.xml` el `id` es la lista de receta y `recipeId` es el ítem del libro,
+  no al contrario.)
