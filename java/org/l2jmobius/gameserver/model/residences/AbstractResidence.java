@@ -69,6 +69,12 @@ public abstract class AbstractResidence extends ListenersContainer
 	{
 		return (obj instanceof AbstractResidence) && (((AbstractResidence) obj).getResidenceId() == getResidenceId());
 	}
+
+	@Override
+	public int hashCode()
+	{
+		return getResidenceId();
+	}
 	
 	@Override
 	public String toString()

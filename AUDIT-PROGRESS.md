@@ -5400,3 +5400,44 @@ comprueban las dos respuestas, y una copia que falló borra su temporal en vez d
 En `SystemPanel` el mismo tipo de detalle: el `catch` decía `// Handled above.` y no
 había nada arriba que lo tratara; un manifiesto sin `Build-Date` lanzaba antes del
 `close`. Ahora el jar se cierra pase lo que pase.
+
+## `equals` sin `hashCode`
+
+Otro invariante de forma única: una clase que define uno de los dos y no el otro rompe
+el contrato de `Object`, y con él cualquier `HashSet` o `HashMap` que la contenga.
+
+**12 de 15 clases definen los dos. Tres definían solo `equals`**, las tres con la misma
+forma —comparar un campo de identidad y heredar el hash de identidad de `Object`—, de
+modo que dos objetos **iguales** caían en cubos **distintos** y una búsqueda con una
+instancia equivalente pero no idéntica no encontraba nada:
+
+| clase | compara por | campo |
+|---|---|---|
+| `WorldObject` | `getObjectId()` | mutable |
+| `AbstractResidence` | `getResidenceId()` | `final` |
+| `ClientHardwareInfoHolder` | `_macAddress` | `final` |
+
+`WorldObject` es la base de **todo** objeto del juego, y el repositorio declara **100**
+colecciones de hash que guardan world objects directamente (`Set<Player>` 30,
+`Map<Player,` 19, `Set<Creature>` 16, y así). El contrato se estaba usando de verdad.
+
+### Por qué el campo mutable no impidió el arreglo
+
+Poner `hashCode` sobre un campo que cambia es cambiar el cubo de un objeto ya guardado.
+Antes de tocarlo se rastrearon las tres rutas que mueven `_objectId`:
+
+- **`refreshId()`** — sus **dos** llamadas están comentadas. Muerto.
+- **`Item.claimNewId()`** — un solo llamador, `ItemManager.createItem`, sobre un ítem
+  recién sacado del pool. Y `destroyItem`, que es quien lo devuelve al pool, hace
+  `World.removeObject` y `IdManager.releaseId` **antes** de encolarlo.
+- **`PlayerInventory:327`** — es un `TradeItem`, que no es un `WorldObject`.
+
+Es decir: ningún world object vivo cambia de id mientras está dentro de una colección de
+hash. La disciplina ya existía; solo no estaba escrita. Ahora lo está, en el javadoc de
+`refreshId`, para quien alguna vez descomente esas dos llamadas.
+
+### El test
+
+`WorldObjectHashTest`, cinco casos, validado contra la versión sin `hashCode`: **cuatro
+fallan** ahí y pasan con el arreglo. El quinto —ids distintos no son iguales— pasa en
+ambas: es el control que confirma que el test no está simplemente roto.

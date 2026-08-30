@@ -299,4 +299,10 @@ public class ClientHardwareInfoHolder
 	{
 		return (obj instanceof ClientHardwareInfoHolder) && _macAddress.equals(((ClientHardwareInfoHolder) obj).getMacAddress());
 	}
+
+	@Override
+	public int hashCode()
+	{
+		return _macAddress.hashCode();
+	}
 }

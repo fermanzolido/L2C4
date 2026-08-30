@@ -149,6 +149,12 @@ public abstract class WorldObject extends ListenersContainer implements IPositio
 		return true;
 	}
 	
+	/**
+	 * The object id is this object's hash, so it can only be changed while the object is
+	 * out of circulation. Every caller has to drop it from the sets and maps holding it
+	 * first, not just from the world, or it stops being findable in them. Both call sites
+	 * of this method are currently commented out.
+	 */
 	public void refreshId()
 	{
 		World.getInstance().removeObject(this);
@@ -1054,6 +1060,18 @@ public abstract class WorldObject extends ListenersContainer implements IPositio
 	public boolean equals(Object obj)
 	{
 		return (obj instanceof WorldObject) && (((WorldObject) obj).getObjectId() == getObjectId());
+	}
+
+	/**
+	 * Equal objects have to answer equal hashes, and around a hundred sets and maps in
+	 * the server hold world objects directly. Without this the inherited identity hash
+	 * sent two objects with the same id to different buckets, so a lookup by an equal
+	 * but distinct instance missed.
+	 */
+	@Override
+	public int hashCode()
+	{
+		return getObjectId();
 	}
 	
 	@Override
