@@ -48,6 +48,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -239,8 +240,9 @@ public class ServerConfig {
 	 * If an error occurs during file reading, a warning message is logged.
 	 */
 	private static void loadChatFilter() {
-		try {
-			FILTER_LIST = Files.lines(Paths.get(CHAT_FILTER_FILE), StandardCharsets.UTF_8).map(String::trim)
+		// Files.lines keeps the file open until the stream is closed.
+		try (Stream<String> lines = Files.lines(Paths.get(CHAT_FILTER_FILE), StandardCharsets.UTF_8)) {
+			FILTER_LIST = lines.map(String::trim)
 					.filter(line -> (!line.isEmpty() && (line.charAt(0) != '#'))).collect(Collectors.toList());
 			FILTER_PATTERNS = FILTER_LIST.stream().map(ServerConfig::compileFilterPattern).filter(Objects::nonNull).collect(Collectors.toList());
 			LOGGER.info("Loaded " + FILTER_LIST.size() + " Filter Words.");

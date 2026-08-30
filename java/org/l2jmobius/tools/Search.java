@@ -754,11 +754,20 @@ public class Search extends JFrame
 			@Override
 			protected Void doInBackground()
 			{
+				// Count total files that are not excluded. This walk used to run inside
+				// the try below without being closed, leaking a handle per search.
+				long totalFiles = 0;
+				try (Stream<Path> counter = Files.walk(START_DIR))
+				{
+					totalFiles = counter.filter(Files::isRegularFile).filter(path -> shouldProcessFile(path)).count();
+				}
+				catch (Exception e)
+				{
+					// Leave the total at zero and let the walk below report progress.
+				}
+
 				try (Stream<Path> stream = Files.walk(START_DIR))
 				{
-					// Count total files that are not excluded.
-					final long totalFiles = Files.walk(START_DIR).filter(Files::isRegularFile).filter(path -> shouldProcessFile(path)).count();
-					
 					long processedFiles = 0;
 					
 					for (Path path : (Iterable<Path>) stream.filter(Files::isRegularFile)::iterator)

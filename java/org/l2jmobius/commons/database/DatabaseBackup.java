@@ -29,6 +29,7 @@ import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import org.l2jmobius.commons.config.DatabaseConfig;
 
@@ -44,9 +45,10 @@ public class DatabaseBackup
 		{
 			final long cut = LocalDateTime.now().minusDays(DatabaseConfig.BACKUP_DAYS).toEpochSecond(ZoneOffset.UTC);
 			final Path path = Paths.get(DatabaseConfig.BACKUP_PATH);
-			try
+			// Files.list keeps the directory open until the stream is closed.
+			try (Stream<Path> files = Files.list(path))
 			{
-				Files.list(path).filter(n ->
+				files.filter(n ->
 				{
 					try
 					{

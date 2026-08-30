@@ -5351,3 +5351,52 @@ mitad de la instalación, con statements ya ejecutados y un mensaje que no dice 
 un `isValidDatabaseName` compartido por las dos entradas exige un identificador MySQL simple
 (letras, dígitos, `_`, `$`, hasta 64 caracteres) y rechaza antes de conectarse, diciendo qué
 está mal.
+
+## Los descriptores de fichero: la misma regla, sin pool que la salve
+
+El barrido de JDBC salió limpio porque HikariCP cierra los statements al devolver la
+conexión. Los recursos de sistema operativo —ficheros, directorios, jars, sockets— **no
+tienen quien los rescate**: lo que no se cierra, se queda abierto hasta que muere el
+proceso. Misma forma única de invariante, consecuencia distinta. Por eso valía repetirlo.
+
+**Antes: 15 de 26 en `try-with-resources`. Después: 25 de 26.** El que queda es el
+`_socket` de `LoginServerThread`, un campo que vive lo que vive el proceso y que se
+cierra en un `finally`; ese es el diseño, no un descuido.
+
+Los diez tenían todos la misma pinta —`close()` como última línea del `try`, y un
+`catch` que solo registra— así que **cualquier excepción a mitad se saltaba el cierre**
+y el servidor seguía con el descriptor colgado:
+
+| dónde | qué se escapaba |
+|---|---|
+| `DatabaseBackup:49` | `Files.list` mantiene abierto el **directorio**; una copia de seguridad por día |
+| `ServerConfig:243` | `Files.lines` mantiene abierto el fichero de filtro de chat |
+| `SpawnData` ×5 | lector y escritor de los XML de spawn, en un **comando de admin repetible** |
+| `ZoneBuildManager:151` | el escritor de la zona dibujada |
+| `SystemPanel:110` | el **jar del servidor entero**, si el manifiesto no trae `Build-Date` |
+| `Search:760` | ver abajo |
+
+`Search` era el más claro de todos: abría `Files.walk` **en** un `try-with-resources` y
+después abría **un segundo `Files.walk` dentro del cuerpo**, solo para contar ficheros,
+que nunca se cerraba. Uno por búsqueda.
+
+### El entorno del hallazgo
+
+En `SpawnData` la fuga no era lo único. Las dos rutas terminan igual:
+
+```java
+writer.close();
+reader.close();
+spawnFile.delete();
+tempFile.renameTo(spawnFile);
+```
+
+Los dos resultados **se descartaban**. Y los descriptores abiertos son precisamente lo
+que hace fallar un `renameTo` en Windows, así que la fuga y el descarte se tapaban entre
+sí: si algo salía mal, el spawn se perdía en silencio y quedaba un `.tmp` al lado. Ahora
+el reemplazo ocurre **fuera** del `try` —donde los descriptores ya están sueltos—, se
+comprueban las dos respuestas, y una copia que falló borra su temporal en vez de dejarlo.
+
+En `SystemPanel` el mismo tipo de detalle: el `catch` decía `// Handled above.` y no
+había nada arriba que lo tratara; un manifiesto sin `Build-Date` lanzaba antes del
+`close`. Ahora el jar se cierra pase lo que pase.

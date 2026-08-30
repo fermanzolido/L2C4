@@ -148,8 +148,6 @@ public class ZoneBuildManager
 			final long currentTime = System.currentTimeMillis();
 			final String fileName = "data/zones/" + player.getName() + "-" + currentTime + ".xml";
 			final File spawnFile = new File(fileName);
-			final BufferedWriter writer = new BufferedWriter(new FileWriter(spawnFile));
-			
 			final StringBuilder sb = new StringBuilder();
 			sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 			sb.append("<list enabled=\"true\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"../xsd/zones.xsd\">\n");
@@ -163,9 +161,13 @@ public class ZoneBuildManager
 			sb.append("\t</zone>\n");
 			sb.append("</list>");
 			
-			writer.write(sb.toString());
-			writer.close();
-			
+			// The writer opens only once the text is built, so a failure while building
+			// it cannot leave a handle behind.
+			try (BufferedWriter writer = new BufferedWriter(new FileWriter(spawnFile)))
+			{
+				writer.write(sb.toString());
+			}
+
 			player.sendMessage("Zone saved at " + fileName);
 			AdminCommandHandler.getInstance().onCommand(player, "admin_zone_build_clear", false);
 		}

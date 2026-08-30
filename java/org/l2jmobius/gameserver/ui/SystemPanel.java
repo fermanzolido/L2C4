@@ -107,10 +107,13 @@ public class SystemPanel extends JPanel
 		try
 		{
 			final File jarName = Locator.getClassSource(GameServer.class);
-			final JarFile jarFile = new JarFile(jarName);
-			final Attributes attrs = jarFile.getManifest().getMainAttributes();
-			lblBuildDate.setText("Build date: " + attrs.getValue("Build-Date").split(" ")[0]);
-			jarFile.close();
+			// A missing Build-Date threw before the close was reached, so the jar stayed
+			// open for the life of the process.
+			try (JarFile jarFile = new JarFile(jarName))
+			{
+				final Attributes attrs = jarFile.getManifest().getMainAttributes();
+				lblBuildDate.setText("Build date: " + attrs.getValue("Build-Date").split(" ")[0]);
+			}
 		}
 		catch (Exception e)
 		{

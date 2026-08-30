@@ -621,10 +621,12 @@ public class SpawnData implements IXmlReader
 		if (spawnFile.exists()) // Update.
 		{
 			final File tempFile = new File(spawnFile.getAbsolutePath().substring(ServerConfig.DATAPACK_ROOT.getAbsolutePath().length() + 1).replace('\\', '/') + ".tmp");
-			try
+			// Both handles have to be released before the replacement below can succeed,
+			// and a failure part way through the copy must not leave them open.
+			boolean copied = false;
+			try (BufferedReader reader = new BufferedReader(new FileReader(spawnFile));
+				BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile)))
 			{
-				final BufferedReader reader = new BufferedReader(new FileReader(spawnFile));
-				final BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
 				String currentLine;
 				while ((currentLine = reader.readLine()) != null)
 				{
@@ -641,31 +643,38 @@ public class SpawnData implements IXmlReader
 					writer.write(currentLine + System.lineSeparator());
 				}
 				
-				writer.close();
-				reader.close();
-				spawnFile.delete();
-				tempFile.renameTo(spawnFile);
+				copied = true;
 			}
 			catch (Exception e)
 			{
 				LOGGER.warning(getClass().getSimpleName() + ": Could not store spawn in the spawn XML files: " + e);
 			}
+
+			// The try above has released both handles by now, which is what lets the
+			// replacement work. Both results used to be discarded, so a rename that
+			// failed lost the spawn without a word and left the .tmp behind.
+			if (!copied)
+			{
+				tempFile.delete();
+			}
+			else if (!spawnFile.delete() || !tempFile.renameTo(spawnFile))
+			{
+				LOGGER.warning(getClass().getSimpleName() + ": Could not replace " + spawnFile.getName() + " with the updated spawn list.");
+			}
 		}
 		else // New file.
 		{
-			try
+			try (BufferedWriter writer = new BufferedWriter(new FileWriter(spawnFile)))
 			{
 				final NpcTemplate template = NpcData.getInstance().getTemplate(spawn.getId());
 				final String title = template.getTitle();
 				final String name = title.isEmpty() ? template.getName() : template.getName() + " - " + title;
-				final BufferedWriter writer = new BufferedWriter(new FileWriter(spawnFile));
 				writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + System.lineSeparator());
 				writer.write("<list enabled=\"true\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"../../xsd/spawns.xsd\">" + System.lineSeparator());
 				writer.write("	<spawn name=\"" + x + "_" + y + "\">" + System.lineSeparator());
 				writer.write("		<npc id=\"" + spawnId + (spawn.getAmount() > 1 ? "\" count=\"" + spawnCount : "") + "\" x=\"" + spawnX + "\" y=\"" + spawnY + "\" z=\"" + spawnZ + (spawn.getHeading() > 0 ? "\" heading=\"" + spawnHeading : "") + "\" respawnDelay=\"" + spawnDelay + "\" /> <!-- " + name + " -->" + System.lineSeparator());
 				writer.write("	</spawn>" + System.lineSeparator());
 				writer.write("</list>" + System.lineSeparator());
-				writer.close();
 				LOGGER.info(getClass().getSimpleName() + ": Created file: " + OTHER_XML_FOLDER + "/" + x + "_" + y + ".xml");
 			}
 			catch (Exception e)
@@ -690,15 +699,16 @@ public class SpawnData implements IXmlReader
 		final Location spawnLocation = spawn.getSpawnLocation();
 		final File spawnFile = npcSpawnTemplateId > 0 ? new File(_spawnTemplates.get(npcSpawnTemplateId)) : new File(OTHER_XML_FOLDER + "/" + x + "_" + y + ".xml");
 		final File tempFile = new File(spawnFile.getAbsolutePath().substring(ServerConfig.DATAPACK_ROOT.getAbsolutePath().length() + 1).replace('\\', '/') + ".tmp");
-		try
+		// Both handles have to be released before the replacement below can succeed,
+		// and a failure part way through the copy must not leave them open.
+		int lineCount = 0;
+		boolean copied = false;
+		try (BufferedReader reader = new BufferedReader(new FileReader(spawnFile));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile)))
 		{
-			final BufferedReader reader = new BufferedReader(new FileReader(spawnFile));
-			final BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
-			
 			boolean found = false; // In XML you can have more than one spawn with same coords.
 			boolean isMultiLine = false; // In case spawn has more stats.
 			boolean lastLineFound = false; // Used to check for empty file.
-			int lineCount = 0;
 			String currentLine;
 			
 			final NpcSpawnTerritory npcSpawnTerritory = spawn.getSpawnTerritory();
@@ -783,21 +793,33 @@ public class SpawnData implements IXmlReader
 				}
 			}
 			
-			writer.close();
-			reader.close();
-			spawnFile.delete();
-			tempFile.renameTo(spawnFile);
-			
-			// Delete empty file.
-			if (lineCount < 5)
-			{
-				LOGGER.info(getClass().getSimpleName() + ": Deleted empty file: " + spawnFile.getAbsolutePath().substring(ServerConfig.DATAPACK_ROOT.getAbsolutePath().length() + 1).replace('\\', '/'));
-				spawnFile.delete();
-			}
+			copied = true;
 		}
 		catch (Exception e)
 		{
 			LOGGER.warning(getClass().getSimpleName() + ": Spawn " + spawn + " could not be removed from the spawn XML files: " + e);
+		}
+
+		// The try above has released both handles by now, which is what lets the
+		// replacement work. Both results used to be discarded, so a rename that failed
+		// left the spawn in the file and the .tmp beside it, without a word.
+		if (!copied)
+		{
+			tempFile.delete();
+			return;
+		}
+
+		if (!spawnFile.delete() || !tempFile.renameTo(spawnFile))
+		{
+			LOGGER.warning(getClass().getSimpleName() + ": Could not replace " + spawnFile.getName() + " with the spawn list minus " + spawn + ".");
+			return;
+		}
+
+		// Delete empty file.
+		if (lineCount < 5)
+		{
+			LOGGER.info(getClass().getSimpleName() + ": Deleted empty file: " + spawnFile.getAbsolutePath().substring(ServerConfig.DATAPACK_ROOT.getAbsolutePath().length() + 1).replace('\\', '/'));
+			spawnFile.delete();
 		}
 	}
 	
