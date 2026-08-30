@@ -329,10 +329,13 @@ public class Olympiad extends ListenersContainer {
 			milliToEnd = getMillisToWeekChange();
 			final double numSecs2 = (milliToEnd / 1000) % 60;
 			double countDown2 = ((milliToEnd / 1000.) - numSecs2) / 60;
-			final int numMins2 = (int) Math.floor(countDown % 60);
-			countDown2 = (countDown2 - numMins) / 60;
+			// This reused the period-end countdown's numMins/numHours/countDown instead of
+			// this block's own numMins2/numHours2/countDown2, so the logged "next weekly
+			// change" figure was really a mix of two different countdowns.
+			final int numMins2 = (int) Math.floor(countDown2 % 60);
+			countDown2 = (countDown2 - numMins2) / 60;
 			final int numHours2 = (int) Math.floor(countDown2 % 24);
-			final int numDays2 = (int) Math.floor((countDown2 - numHours) / 24);
+			final int numDays2 = (int) Math.floor((countDown2 - numHours2) / 24);
 
 			LOGGER.info("Olympiad System: Next weekly change is in " + numDays2 + " days, " + numHours2 + " hours and "
 					+ numMins2 + " mins.");

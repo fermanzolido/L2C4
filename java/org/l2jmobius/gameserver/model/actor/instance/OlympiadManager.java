@@ -169,9 +169,16 @@ public class OlympiadManager extends Npc {
 				case 10: {
 					final int passes = player.getVariables().getInt(Olympiad.UNCLAIMED_OLYMPIAD_PASSES_VAR, 0);
 					if (passes > 0) {
-						player.getVariables().remove(Olympiad.UNCLAIMED_OLYMPIAD_PASSES_VAR);
-						player.addItem(ItemProcessType.REWARD, GATE_PASS, passes * OlympiadConfig.OLYMPIAD_GP_PER_POINT,
-								player, true);
+						// Mirrors the fix in Olympiad.claimSeasonReward(): addItem() returns null
+						// when GATE_PASS no longer resolves to an item template, and removing the
+						// variable regardless discarded the stored points with nothing handed over.
+						if (player.addItem(ItemProcessType.REWARD, GATE_PASS,
+								passes * OlympiadConfig.OLYMPIAD_GP_PER_POINT, player, true) != null) {
+							player.getVariables().remove(Olympiad.UNCLAIMED_OLYMPIAD_PASSES_VAR);
+						} else {
+							_logOlymp.warning("Olympiad System: Could not hand unclaimed points reward (item "
+									+ GATE_PASS + ") to " + player.getName() + "; the variable is kept for a later attempt.");
+						}
 					}
 					break;
 				}
