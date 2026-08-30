@@ -5248,3 +5248,54 @@ comprobación de nulo, un tipo de colección, un umbral entero—. Deja de funci
 cuando lo buscado se puede escribir de muchas maneras igual de válidas. Los cuatro
 barridos de esta tanda separan limpiamente los dos casos, y por eso se registran los
 tres que fallaron: para no volver a intentarlos.
+
+#### Quinto barrido: el `cond` que se pone y nadie lee
+
+Parecía el candidato ideal para el criterio recién anotado —**una guarda de forma
+única**—: el `cond` de una quest se escribe con `setCond(N)` y se lee con `isCond(N)`,
+`getCond() == N` o `case N:`. Un `cond` que se escribe y nadie lee sería una quest que
+se atasca a mitad.
+
+Hizo falta **arreglar el barrido dos veces antes de creerle**:
+
+1. Primera pasada: **184 de 198**. La proporción dada vuelta significa, por la regla de
+   esta auditoría, que no hay clase sino una forma de lectura que no estoy viendo. Era
+   cierta: el `cond` casi siempre se copia a una local (`final int cond = st.getCond();`)
+   y se compara ahí.
+2. Segunda pasada, siguiendo el alias: **184 otra vez**, idéntico. El heredoc de bash se
+   había comido el `\b` de `'|\\b%s\\b'`, así que el patrón buscaba **caracteres de
+   retroceso** en vez de fronteras de palabra. Es el mismo fallo de heredoc ya anotado en
+   este documento; escrito con la herramienta de fichero, funciona.
+3. Tercera pasada, ya correcta: **52 de 132** (69 quedan fuera por leer rangos, 6 por
+   calcular el valor).
+
+Y a los 52 los mata una sola observación. La familia dominante es
+`pone [2], lee [1]`, repetida en decenas de quests de recolección. En `Q00264_KeenClaws`:
+
+```java
+if ((st == null) || !st.isCond(1)) { return; }
+if (getQuestItemsCount(player, WOLF_CLAW) >= 50) { st.setCond(2, true); }
+```
+
+El `cond` 2 se pone al llegar a 50 garras y **la rama que premia lee el contador de
+ítems, no el `cond`**. Ese 2 es el marcador que le dice al cliente "ya podés entregar";
+la autoridad del servidor es `getQuestItemsCount`. Un `cond` huérfano no es un defecto:
+es el diseño.
+
+De paso, los dos únicos `setCond(0)` del repositorio (`Q00334`, `Q00335`) hacen lo mismo
+—limpiar el `cond` junto a un `unset` de variable al reiniciar la quest—, así que
+tampoco son atípicos.
+
+**Quinto barrido descartado.** Cuatro de cinco sobre lógica de quest no produjeron nada.
+
+### Conclusión sobre `quests/`
+
+La superficie comprobable por máquina de las 296 quests está agotada. Los cinco barridos
+lo dicen con precisión: **funcionan cuando el invariante tiene una forma única en todo el
+corpus** (el umbral entero contra `getRandom`, 397 de 398) y **fallan cuando lo buscado
+se puede escribir de varias maneras igual de válidas** (atender un npc, leer un `cond`,
+decidir que una quest terminó). Lo que queda en esos ficheros no se distingue de lo
+correcto sin saber qué debía hacer cada quest, y eso es diseño de juego, no verificación.
+
+Los tres barridos que fallaron quedan escritos con su motivo para que nadie —yo incluido—
+los vuelva a intentar creyendo que son nuevos.
