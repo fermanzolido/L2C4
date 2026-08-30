@@ -5299,3 +5299,55 @@ correcto sin saber qué debía hacer cada quest, y eso es diseño de juego, no v
 
 Los tres barridos que fallaron quedan escritos con su motivo para que nadie —yo incluido—
 los vuelva a intentar creyendo que son nuevos.
+
+## Los recursos JDBC y el SQL construido a mano
+
+Elegido a propósito por el criterio que dejó la tanda de quests: **`DatabaseFactory.getConnection()`
+tiene una única forma correcta** —`try (...)`—, así que es exactamente el tipo de invariante que
+un barrido sí puede comprobar.
+
+### Los recursos
+
+Hizo falta rehacer el detector una vez: la primera versión marcaba como fallo las líneas que son
+la **segunda cláusula** de un `try (` de varias líneas, y daba 369 de 469. Emparejando paréntesis
+para encontrar de verdad el encabezado del `try`, el reparto real es:
+
+| recurso | fuera de `try-with-resources` | total |
+|---|---|---|
+| `Connection` | **0** | 354 |
+| `PreparedStatement` / `Statement` | 20 | 469 |
+| `ResultSet` | 8 | 153 |
+
+Y ninguno de los 28 es una fuga:
+
+- Los **20 statements cierran a mano** (`statement.close()`), medido: **0 de 469 quedan sin cerrar
+  en ningún sitio**. El cierre está fuera de un `finally`, así que una excepción a mitad se lo
+  saltaría —pero el pool es **HikariCP**, que al devolver la conexión cierra los statements
+  abiertos sobre ella, y las 354 conexiones sí están en `try (...)`.
+- Los **8 result sets** están dentro de un `try` cuyo statement sí es recurso, y cerrar un
+  statement cierra su result set por especificación JDBC.
+
+**No se toca nada.** Convertir 20 sitios por estilo es ruido con riesgo, y lo que se pedía era
+que no hubiera fallos, no que todo se escribiera igual. El resultado que queda registrado es el
+útil: **el manejo de recursos JDBC de este repositorio es correcto**, con denominadores.
+
+### El SQL construido por concatenación
+
+De **479** llamadas SQL con argumento, **468 están parametrizadas por completo**. Las 11 que
+concatenan, una por una:
+
+- **2 pegan constantes de compilación**: un ternario entre dos literales de nombre de columna
+  (`AdminEditChar`) y un `private static final String[]` (`ClanHallAuctionManager`).
+- **9 están en `DatabaseInstaller`**, la herramienta local de instalación. Siete pegan el nombre
+  de la base y dos el de una tabla. Las de tabla vienen del `SHOW TABLES` del propio servidor.
+  Y un identificador **no se puede** enlazar con `?` en JDBC: pegarlo es la única forma.
+
+Queda comprobado que no hay una ruta desde entrada remota hacia SQL sin parametrizar.
+
+Lo que sí se reparó es el **entorno** de ese hallazgo. El nombre de la base lo escribe el operador
+—campo de texto en la interfaz, `scanner.nextLine()` en consola— y solo se comprobaba que no
+estuviera vacío. Un nombre con un espacio o un guion producía un error de sintaxis de MySQL a
+mitad de la instalación, con statements ya ejecutados y un mensaje que no dice qué hacer. Ahora
+un `isValidDatabaseName` compartido por las dos entradas exige un identificador MySQL simple
+(letras, dígitos, `_`, `$`, hasta 64 caracteres) y rechaza antes de conectarse, diciendo qué
+está mal.

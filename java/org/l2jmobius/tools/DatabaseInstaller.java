@@ -361,6 +361,12 @@ public class DatabaseInstaller extends JFrame {
 			dbName = "l2jmobiusinterlude";
 		}
 
+		if (!isValidDatabaseName(dbName)) {
+			System.out.println(
+					"[ERROR] Database name may only use letters, digits, '_' and '$', and at most 64 characters.");
+			return;
+		}
+
 		switch (choice) {
 			case 1: {
 				// Option 1: Install both Login and Game tables.
@@ -769,6 +775,32 @@ public class DatabaseInstaller extends JFrame {
 	}
 
 	// Method to create the database.
+	/**
+	 * A database name reaches MySQL as an identifier, and JDBC cannot bind an
+	 * identifier to a parameter, so the name has to be pasted into the statement.
+	 * Refusing anything MySQL would not take unquoted makes a typo fail here, with a
+	 * message that says what is wrong, instead of failing halfway through the install
+	 * with a syntax error and some statements already run.
+	 * @param dbName the name the operator typed
+	 * @return {@code true} when the name is a plain MySQL identifier
+	 */
+	private static boolean isValidDatabaseName(String dbName) {
+		if (dbName.isEmpty() || (dbName.length() > 64)) {
+			return false;
+		}
+
+		for (int i = 0; i < dbName.length(); i++) {
+			final char c = dbName.charAt(i);
+			final boolean allowed = ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))
+					|| ((c >= '0') && (c <= '9')) || (c == '_') || (c == '$');
+			if (!allowed) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	private boolean createDatabase() {
 		final String host = _hostField.getText().trim();
 		final String port = _portField.getText().trim();
@@ -780,6 +812,14 @@ public class DatabaseInstaller extends JFrame {
 
 		if (dbName.isEmpty()) {
 			installationProgress("Error: Database name cannot be empty." + System.lineSeparator(), "Error");
+			return false;
+		}
+
+		if (!isValidDatabaseName(dbName)) {
+			installationProgress(
+					"Error: Database name may only use letters, digits, '_' and '$', and at most 64 characters."
+							+ System.lineSeparator(),
+					"Error");
 			return false;
 		}
 
