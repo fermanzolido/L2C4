@@ -114,6 +114,25 @@ public class CharInfo extends ServerPacket
 		buffer.writeInt(_player.getInventory().getPaperdollItemDisplayId(Inventory.PAPERDOLL_CLOAK));
 		buffer.writeInt(_player.getInventory().getPaperdollItemDisplayId(Inventory.PAPERDOLL_RHAND));
 		buffer.writeInt(_player.getInventory().getPaperdollItemDisplayId(Inventory.PAPERDOLL_HAIR));
+		if (client.isInterlude())
+		{
+			buffer.writeInt(_player.getInventory().getPaperdollItemDisplayId(Inventory.PAPERDOLL_HAIR2));
+			// Paperdoll augmentation block. The ids are always 0: the C4 datapack has no augmentation system.
+			for (int i = 0; i < 4; i++)
+			{
+				buffer.writeShort(0);
+			}
+			buffer.writeInt(0);
+			for (int i = 0; i < 12; i++)
+			{
+				buffer.writeShort(0);
+			}
+			buffer.writeInt(0);
+			for (int i = 0; i < 4; i++)
+			{
+				buffer.writeShort(0);
+			}
+		}
 		buffer.writeInt(_player.getPvpFlag());
 		buffer.writeInt(_player.getKarma());
 		buffer.writeInt(_mAtkSpd);
@@ -177,6 +196,13 @@ public class CharInfo extends ServerPacket
 		buffer.writeInt(_player.getFishZ());
 		
 		buffer.writeInt(appearance.getNameColor());
-		// Add heading?
+		if (client.isInterlude())
+		{
+			buffer.writeInt(_player.getHeading());
+			buffer.writeInt(_player.getPledgeClass());
+			buffer.writeInt(_player.getPledgeType());
+			buffer.writeInt(appearance.getTitleColor());
+			buffer.writeInt(0); // Cursed weapon level. Always 0: the C4 datapack has no cursed weapons.
+		}
 	}
 }

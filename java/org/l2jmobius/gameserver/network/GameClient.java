@@ -54,6 +54,9 @@ public class GameClient extends Client<org.l2jmobius.commons.network.Connection<
 	private static final Logger LOGGER = Logger.getLogger(GameClient.class.getName());
 	private static final Logger LOGGER_ACCOUNTING = Logger.getLogger("accounting");
 	
+	/** Client protocol revision from which the Interlude wire format applies. */
+	public static final int PROTOCOL_INTERLUDE = 746;
+	
 	private static final byte[] CRYPT_KEY =
 	{
 		(byte) 0x94,
@@ -595,6 +598,14 @@ public class GameClient extends Client<org.l2jmobius.commons.network.Connection<
 	public int getProtocolVersion()
 	{
 		return _protocolVersion;
+	}
+	
+	/**
+	 * @return {@code true} if this client speaks the Interlude wire format, {@code false} for C4.
+	 */
+	public boolean isInterlude()
+	{
+		return _protocolVersion >= PROTOCOL_INTERLUDE;
 	}
 	
 	public boolean isProtocolOk()

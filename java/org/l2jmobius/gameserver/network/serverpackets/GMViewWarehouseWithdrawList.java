@@ -60,6 +60,13 @@ public class GMViewWarehouseWithdrawList extends AbstractItemPacket
 		
 		for (Item item : _items)
 		{
+			if (client.isInterlude())
+			{
+				writeItem(item, buffer, client);
+				buffer.writeInt(item.getObjectId());
+				continue;
+			}
+			
 			buffer.writeShort(item.getTemplate().getType1());
 			buffer.writeInt(item.getObjectId());
 			buffer.writeInt(item.getId());

@@ -47,7 +47,7 @@ public class ItemList extends AbstractItemPacket
 		buffer.writeShort(_items.size());
 		for (Item item : _items)
 		{
-			writeItem(item, buffer);
+			writeItem(item, buffer, client);
 		}
 	}
 }

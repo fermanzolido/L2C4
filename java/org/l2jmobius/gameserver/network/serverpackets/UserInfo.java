@@ -80,7 +80,14 @@ public class UserInfo extends ServerPacket
 		buffer.writeInt(appearance.isFemale());
 		buffer.writeInt(_player.getBaseClass());
 		buffer.writeInt(_player.getLevel());
-		buffer.writeInt((int) _player.getExp());
+		if (client.isInterlude())
+		{
+			buffer.writeLong(_player.getExp());
+		}
+		else
+		{
+			buffer.writeInt((int) _player.getExp());
+		}
 		buffer.writeInt(_player.getSTR());
 		buffer.writeInt(_player.getDEX());
 		buffer.writeInt(_player.getCON());
@@ -112,6 +119,10 @@ public class UserInfo extends ServerPacket
 		buffer.writeInt(_player.getInventory().getPaperdollObjectId(Inventory.PAPERDOLL_CLOAK));
 		buffer.writeInt(_player.getInventory().getPaperdollObjectId(Inventory.PAPERDOLL_RHAND));
 		buffer.writeInt(_player.getInventory().getPaperdollObjectId(Inventory.PAPERDOLL_HAIR));
+		if (client.isInterlude())
+		{
+			buffer.writeInt(_player.getInventory().getPaperdollObjectId(Inventory.PAPERDOLL_FACE));
+		}
 		
 		buffer.writeInt(_player.getInventory().getPaperdollItemDisplayId(Inventory.PAPERDOLL_UNDER));
 		buffer.writeInt(_player.getInventory().getPaperdollItemDisplayId(Inventory.PAPERDOLL_REAR));
@@ -129,6 +140,25 @@ public class UserInfo extends ServerPacket
 		buffer.writeInt(_player.getInventory().getPaperdollItemDisplayId(Inventory.PAPERDOLL_CLOAK));
 		buffer.writeInt(_player.getInventory().getPaperdollItemDisplayId(Inventory.PAPERDOLL_RHAND));
 		buffer.writeInt(_player.getInventory().getPaperdollItemDisplayId(Inventory.PAPERDOLL_HAIR));
+		if (client.isInterlude())
+		{
+			buffer.writeInt(_player.getInventory().getPaperdollItemDisplayId(Inventory.PAPERDOLL_FACE));
+			// Paperdoll augmentation block. The ids are always 0: the C4 datapack has no augmentation system.
+			for (int i = 0; i < 14; i++)
+			{
+				buffer.writeShort(0);
+			}
+			buffer.writeInt(0);
+			for (int i = 0; i < 12; i++)
+			{
+				buffer.writeShort(0);
+			}
+			buffer.writeInt(0);
+			for (int i = 0; i < 4; i++)
+			{
+				buffer.writeShort(0);
+			}
+		}
 		
 		buffer.writeInt((int) _player.getPAtk(null));
 		buffer.writeInt((int) _player.getPAtkSpd());
@@ -192,14 +222,17 @@ public class UserInfo extends ServerPacket
 		buffer.writeByte(_player.isInsideZone(ZoneId.WATER));
 		buffer.writeInt(_player.getClanPrivileges().getMask());
 		
-		// C4 addition
-		buffer.writeInt(0); // swim?
-		buffer.writeInt(0);
-		buffer.writeInt(0);
-		buffer.writeInt(0);
-		buffer.writeInt(0);
-		buffer.writeInt(0);
-		buffer.writeInt(0);
+		// C4 addition. Interlude has no counterpart for these, so they are C4 only.
+		if (!client.isInterlude())
+		{
+			buffer.writeInt(0); // swim?
+			buffer.writeInt(0);
+			buffer.writeInt(0);
+			buffer.writeInt(0);
+			buffer.writeInt(0);
+			buffer.writeInt(0);
+			buffer.writeInt(0);
+		}
 		// C4 addition end
 		
 		buffer.writeShort(_player.getRecomLeft()); // c2 recommendations remaining
@@ -222,6 +255,14 @@ public class UserInfo extends ServerPacket
 		buffer.writeInt(_player.getFishZ()); // fishing z
 		
 		buffer.writeInt(appearance.getNameColor());
+		if (client.isInterlude())
+		{
+			buffer.writeByte(_player.isRunning());
+			buffer.writeInt(_player.getPledgeClass());
+			buffer.writeInt(_player.getPledgeType());
+			buffer.writeInt(appearance.getTitleColor());
+			buffer.writeInt(0); // Cursed weapon level. Always 0: the C4 datapack has no cursed weapons.
+		}
 		// Add heading?
 	}
 }

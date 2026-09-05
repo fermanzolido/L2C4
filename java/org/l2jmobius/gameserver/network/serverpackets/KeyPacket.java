@@ -46,7 +46,18 @@ public class KeyPacket extends ServerPacket
 			buffer.writeByte(_key[i]); // key
 		}
 		
-		buffer.writeInt(ServerConfig.SERVER_ID); // server id
-		buffer.writeInt(1);
+		if (client.isInterlude())
+		{
+			// The server always enables the cipher in ProtocolVersion, so encryption is never off here.
+			buffer.writeInt(1); // packet encryption enabled
+			buffer.writeInt(ServerConfig.SERVER_ID); // server id
+			buffer.writeByte(1);
+			buffer.writeInt(0); // obfuscation key
+		}
+		else
+		{
+			buffer.writeInt(ServerConfig.SERVER_ID); // server id
+			buffer.writeInt(1);
+		}
 	}
 }
