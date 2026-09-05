@@ -91,7 +91,7 @@ public class PetInfo extends ServerPacket
 		ServerPackets.PET_INFO.writeId(this, buffer);
 		buffer.writeInt(_summon.getSummonType());
 		buffer.writeInt(_summon.getObjectId());
-		buffer.writeInt(_summon.getTemplate().getDisplayId() + 1000000);
+		buffer.writeInt((client.isInterlude() ? _summon.getTemplate().getRawDisplayId() : _summon.getTemplate().getDisplayId()) + 1000000);
 		buffer.writeInt(0); // 1=attackable
 		buffer.writeInt(_x);
 		buffer.writeInt(_y);

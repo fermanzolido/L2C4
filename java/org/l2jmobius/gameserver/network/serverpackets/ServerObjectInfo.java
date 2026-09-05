@@ -33,6 +33,7 @@ public class ServerObjectInfo extends ServerPacket
 	private final int _z;
 	private final int _heading;
 	private final int _displayId;
+	private final int _rawDisplayId;
 	private final boolean _isAttackable;
 	private final double _collisionHeight;
 	private final double _collisionRadius;
@@ -42,6 +43,7 @@ public class ServerObjectInfo extends ServerPacket
 	{
 		_activeChar = activeChar;
 		_displayId = _activeChar.getTemplate().getDisplayId();
+		_rawDisplayId = _activeChar.getTemplate().getRawDisplayId();
 		_isAttackable = _activeChar.isAutoAttackable(actor);
 		_collisionHeight = _activeChar.getCollisionHeight();
 		_collisionRadius = _activeChar.getCollisionRadius();
@@ -57,7 +59,7 @@ public class ServerObjectInfo extends ServerPacket
 	{
 		ServerPackets.SERVER_OBJECT_INFO.writeId(this, buffer);
 		buffer.writeInt(_activeChar.getObjectId());
-		buffer.writeInt(_displayId + 1000000);
+		buffer.writeInt((client.isInterlude() ? _rawDisplayId : _displayId) + 1000000);
 		buffer.writeString(_name); // name
 		buffer.writeInt(_isAttackable);
 		buffer.writeInt(_x);

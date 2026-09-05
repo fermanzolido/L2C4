@@ -65,6 +65,7 @@ public class NpcTemplate extends CreatureTemplate
 	
 	private int _id;
 	private int _displayId;
+	private int _rawDisplayId;
 	private byte _level;
 	private String _type;
 	private String _name;
@@ -135,7 +136,10 @@ public class NpcTemplate extends CreatureTemplate
 	{
 		super.set(set);
 		_id = set.getInt("id");
-		_displayId = NpcIdConverter.convert(set.getInt("displayId", _id));
+		// The datapack carries CT0 era ids. A C4 client needs them mapped to its own numbering;
+		// an Interlude client uses them as they are, so both values are kept.
+		_rawDisplayId = set.getInt("displayId", _id);
+		_displayId = NpcIdConverter.convert(_rawDisplayId);
 		_level = set.getByte("level", (byte) 70);
 		_type = set.getString("type", "Folk");
 		_name = set.getString("name", "");
@@ -268,6 +272,14 @@ public class NpcTemplate extends CreatureTemplate
 	public int getDisplayId()
 	{
 		return _displayId;
+	}
+	
+	/**
+	 * @return the display id as the datapack declares it, without the C4 client mapping applied.
+	 */
+	public int getRawDisplayId()
+	{
+		return _rawDisplayId;
 	}
 	
 	public byte getLevel()

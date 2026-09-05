@@ -47,6 +47,7 @@ public abstract class AbstractNpcInfo extends ServerPacket
 	protected int _z;
 	protected int _heading;
 	protected int _displayId;
+	protected int _rawDisplayId;
 	protected boolean _isAttackable;
 	protected boolean _isSummoned;
 	protected int _mAtkSpd;
@@ -103,6 +104,7 @@ public abstract class AbstractNpcInfo extends ServerPacket
 			super(cha, attacker.isGM());
 			_npc = cha;
 			_displayId = cha.getTemplate().getDisplayId(); // On every subclass
+			_rawDisplayId = cha.getTemplate().getRawDisplayId();
 			_rhand = cha.getRightHandItem(); // On every subclass
 			_lhand = cha.getLeftHandItem(); // On every subclass
 			_enchantEffect = cha.getEnchantEffect();
@@ -159,7 +161,7 @@ public abstract class AbstractNpcInfo extends ServerPacket
 			
 			ServerPackets.NPC_INFO.writeId(this, buffer);
 			buffer.writeInt(_npc.getObjectId());
-			buffer.writeInt(_displayId + 1000000); // npctype id
+			buffer.writeInt((client.isInterlude() ? _rawDisplayId : _displayId) + 1000000); // npctype id
 			buffer.writeInt(_isAttackable);
 			buffer.writeInt(_x);
 			buffer.writeInt(_y);
@@ -282,6 +284,7 @@ public abstract class AbstractNpcInfo extends ServerPacket
 			super(cha, (attacker != null) && attacker.isGM());
 			_trap = cha;
 			_displayId = cha.getTemplate().getDisplayId();
+			_rawDisplayId = cha.getTemplate().getRawDisplayId();
 			_isAttackable = cha.isAutoAttackable(attacker);
 			_rhand = 0;
 			_lhand = 0;
@@ -300,7 +303,7 @@ public abstract class AbstractNpcInfo extends ServerPacket
 		{
 			ServerPackets.NPC_INFO.writeId(this, buffer);
 			buffer.writeInt(_trap.getObjectId());
-			buffer.writeInt(_displayId + 1000000); // npctype id
+			buffer.writeInt((client.isInterlude() ? _rawDisplayId : _displayId) + 1000000); // npctype id
 			buffer.writeInt(_isAttackable);
 			buffer.writeInt(_x);
 			buffer.writeInt(_y);
@@ -372,6 +375,7 @@ public abstract class AbstractNpcInfo extends ServerPacket
 			_name = cha.getName();
 			_title = (cha.getOwner() != null) && cha.getOwner().isOnline() ? cha.getOwner().getName() : "";
 			_displayId = cha.getTemplate().getDisplayId();
+			_rawDisplayId = cha.getTemplate().getRawDisplayId();
 			_collisionHeight = cha.getTemplate().getFCollisionHeight();
 			_collisionRadius = cha.getTemplate().getFCollisionRadius();
 		}
@@ -381,7 +385,7 @@ public abstract class AbstractNpcInfo extends ServerPacket
 		{
 			ServerPackets.NPC_INFO.writeId(this, buffer);
 			buffer.writeInt(_summon.getObjectId());
-			buffer.writeInt(_displayId + 1000000); // npctype id
+			buffer.writeInt((client.isInterlude() ? _rawDisplayId : _displayId) + 1000000); // npctype id
 			buffer.writeInt(_isAttackable);
 			buffer.writeInt(_x);
 			buffer.writeInt(_y);

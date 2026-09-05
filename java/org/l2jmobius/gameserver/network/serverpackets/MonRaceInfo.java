@@ -53,7 +53,7 @@ public class MonRaceInfo extends ServerPacket
 		for (int i = 0; i < 8; i++)
 		{
 			buffer.writeInt(_monsters[i].getObjectId()); // npcObjectID
-			buffer.writeInt(_monsters[i].getTemplate().getDisplayId() + 1000000); // npcID
+			buffer.writeInt((client.isInterlude() ? _monsters[i].getTemplate().getRawDisplayId() : _monsters[i].getTemplate().getDisplayId()) + 1000000); // npcID
 			buffer.writeInt(14107); // origin X
 			buffer.writeInt(181875 + (58 * (7 - i))); // origin Y
 			buffer.writeInt(-3566); // origin Z
