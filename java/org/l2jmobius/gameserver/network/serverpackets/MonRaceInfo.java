@@ -76,6 +76,12 @@ public class MonRaceInfo extends ServerPacket
 			}
 			
 			buffer.writeInt(0);
+			if (client.isInterlude())
+			{
+				// The Mobius Interlude branch writes this and labels it CT2.3, a later chronicle.
+				// Kept because that branch is the only reference this port has been measured against.
+				buffer.writeInt(0); // special effect
+			}
 		}
 	}
 }

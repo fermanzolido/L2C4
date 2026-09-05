@@ -65,7 +65,14 @@ public class GMViewCharacterInfo extends ServerPacket
 		buffer.writeInt(appearance.isFemale());
 		buffer.writeInt(_player.getPlayerClass().getId());
 		buffer.writeInt(_player.getLevel());
-		buffer.writeInt((int) _player.getExp());
+		if (client.isInterlude())
+		{
+			buffer.writeLong(_player.getExp());
+		}
+		else
+		{
+			buffer.writeInt((int) _player.getExp());
+		}
 		buffer.writeInt(_player.getSTR());
 		buffer.writeInt(_player.getDEX());
 		buffer.writeInt(_player.getCON());
@@ -96,6 +103,10 @@ public class GMViewCharacterInfo extends ServerPacket
 		buffer.writeInt(_player.getInventory().getPaperdollObjectId(Inventory.PAPERDOLL_CLOAK));
 		buffer.writeInt(_player.getInventory().getPaperdollObjectId(Inventory.PAPERDOLL_RHAND));
 		buffer.writeInt(_player.getInventory().getPaperdollObjectId(Inventory.PAPERDOLL_HAIR));
+		if (client.isInterlude())
+		{
+			buffer.writeInt(_player.getInventory().getPaperdollObjectId(Inventory.PAPERDOLL_FACE));
+		}
 		buffer.writeInt(_player.getInventory().getPaperdollItemId(Inventory.PAPERDOLL_UNDER));
 		buffer.writeInt(_player.getInventory().getPaperdollItemId(Inventory.PAPERDOLL_REAR));
 		buffer.writeInt(_player.getInventory().getPaperdollItemId(Inventory.PAPERDOLL_LEAR));
@@ -113,6 +124,14 @@ public class GMViewCharacterInfo extends ServerPacket
 		buffer.writeInt(_player.getInventory().getPaperdollItemId(Inventory.PAPERDOLL_RHAND));
 		buffer.writeInt(_player.getInventory().getPaperdollItemId(Inventory.PAPERDOLL_HAIR));
 		buffer.writeInt(_player.getInventory().getPaperdollItemId(Inventory.PAPERDOLL_FACE));
+		if (client.isInterlude())
+		{
+			// Paperdoll augmentation block. Always 0: the C4 datapack has no augmentation system.
+			for (int i = 0; i < 34; i++)
+			{
+				buffer.writeShort(0);
+			}
+		}
 		buffer.writeInt((int) _player.getPAtk(null));
 		buffer.writeInt((int) _player.getPAtkSpd());
 		buffer.writeInt((int) _player.getPDef(null));
@@ -153,15 +172,21 @@ public class GMViewCharacterInfo extends ServerPacket
 		buffer.writeShort(_player.getRecomLeft());
 		buffer.writeShort(_player.getRecomHave()); // Blue value for name (0 = white, 255 = pure blue)
 		buffer.writeInt(_player.getPlayerClass().getId());
-		// buffer.writeInt(0); // special effects? circles around player...
+		if (client.isInterlude())
+		{
+			buffer.writeInt(0); // special effects? circles around player...
+		}
 		buffer.writeInt(_player.getMaxCp());
 		buffer.writeInt((int) _player.getCurrentCp());
-		// buffer.writeByte(_player.isRunning()); // changes the Speed display on Status Window
-		// buffer.writeByte(321);
-		// buffer.writeInt(_player.getPledgeClass()); // changes the text above CP on Status Window
-		// buffer.writeByte(_player.isNoble());
-		// buffer.writeByte(_player.isHero());
-		// buffer.writeInt(appearance.getNameColor());
-		// buffer.writeInt(appearance.getTitleColor());
+		if (client.isInterlude())
+		{
+			buffer.writeByte(_player.isRunning()); // changes the Speed display on Status Window
+			buffer.writeByte(321);
+			buffer.writeInt(_player.getPledgeClass()); // changes the text above CP on Status Window
+			buffer.writeByte(_player.isNoble());
+			buffer.writeByte(_player.isHero());
+			buffer.writeInt(appearance.getNameColor());
+			buffer.writeInt(appearance.getTitleColor());
+		}
 	}
 }

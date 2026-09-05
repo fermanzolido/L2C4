@@ -44,17 +44,35 @@ public class PledgeShowMemberListAll extends ServerPacket
 	public void writeImpl(GameClient client, WritableBuffer buffer)
 	{
 		ServerPackets.PLEDGE_SHOW_MEMBER_LIST_ALL.writeId(this, buffer);
+		if (client.isInterlude())
+		{
+			buffer.writeInt(0); // main pledge. C4 has no subunits.
+		}
 		buffer.writeInt(_clan.getId());
+		if (client.isInterlude())
+		{
+			buffer.writeInt(0); // pledge type
+		}
 		buffer.writeString(_clan.getName());
 		buffer.writeString(_clan.getLeaderName());
 		buffer.writeInt(_clan.getCrestId()); // crest id .. is used again
 		buffer.writeInt(_clan.getLevel());
 		buffer.writeInt(_clan.getCastleId());
 		buffer.writeInt(_clan.getHideoutId());
-		buffer.writeInt(0); // 0
-		buffer.writeInt(_player.getLevel()); // ??
-		buffer.writeInt(_clan.getDissolvingExpiryTime() > System.currentTimeMillis() ? 3 : 0);
-		buffer.writeInt(0); // 0
+		if (client.isInterlude())
+		{
+			buffer.writeInt(_clan.getRank());
+			buffer.writeInt(0); // Clan reputation score. C4 has no clan reputation.
+			buffer.writeInt(0); // 0
+			buffer.writeInt(0); // 0
+		}
+		else
+		{
+			buffer.writeInt(0); // 0
+			buffer.writeInt(_player.getLevel()); // ??
+			buffer.writeInt(_clan.getDissolvingExpiryTime() > System.currentTimeMillis() ? 3 : 0);
+			buffer.writeInt(0); // 0
+		}
 		buffer.writeInt(_clan.getAllyId());
 		buffer.writeString(_clan.getAllyName());
 		buffer.writeInt(_clan.getAllyCrestId());
@@ -86,6 +104,10 @@ public class PledgeShowMemberListAll extends ServerPacket
 			}
 			
 			buffer.writeInt(member.isOnline() ? member.getObjectId() : 0); // objectId = online 0 = offline
+			if (client.isInterlude())
+			{
+				buffer.writeInt(0); // Sponsor. C4 has no clan academy.
+			}
 		}
 	}
 }

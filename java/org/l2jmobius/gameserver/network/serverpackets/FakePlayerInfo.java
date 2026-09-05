@@ -39,7 +39,7 @@ public class FakePlayerInfo extends ServerPacket
 	private final int _x;
 	private final int _y;
 	private final int _z;
-	// private final int _heading;
+	private final int _heading;
 	private final int _mAtkSpd;
 	private final int _pAtkSpd;
 	private final int _runSpd;
@@ -60,7 +60,7 @@ public class FakePlayerInfo extends ServerPacket
 		_x = npc.getX();
 		_y = npc.getY();
 		_z = npc.getZ();
-		// _heading = npc.getHeading();
+		_heading = npc.getHeading();
 		_mAtkSpd = npc.getMAtkSpd();
 		_pAtkSpd = (int) npc.getPAtkSpd();
 		_attackSpeedMultiplier = npc.getAttackSpeedMultiplier();
@@ -99,6 +99,25 @@ public class FakePlayerInfo extends ServerPacket
 		buffer.writeInt(_fpcHolder.getEquipCloak());
 		buffer.writeInt(_fpcHolder.getEquipRHand()); // dual hand
 		buffer.writeInt(_fpcHolder.getEquipHair());
+		if (client.isInterlude())
+		{
+			buffer.writeInt(_fpcHolder.getEquipHair2());
+			// Paperdoll augmentation block. Always 0: the C4 datapack has no augmentation system.
+			for (int i = 0; i < 4; i++)
+			{
+				buffer.writeShort(0);
+			}
+			buffer.writeInt(0);
+			for (int i = 0; i < 12; i++)
+			{
+				buffer.writeShort(0);
+			}
+			buffer.writeInt(0);
+			for (int i = 0; i < 4; i++)
+			{
+				buffer.writeShort(0);
+			}
+		}
 		
 		buffer.writeInt(_npc.getScriptValue()); // getPvpFlag()
 		buffer.writeInt(_npc.getKarma());
@@ -167,6 +186,13 @@ public class FakePlayerInfo extends ServerPacket
 		buffer.writeInt(_fpcHolder.getBaitLocationY());
 		buffer.writeInt(_fpcHolder.getBaitLocationZ());
 		buffer.writeInt(_fpcHolder.getNameColor());
-		// buffer.writeInt(_heading);
+		if (client.isInterlude())
+		{
+			buffer.writeInt(_heading);
+			buffer.writeInt(_fpcHolder.getPledgeStatus());
+			buffer.writeInt(0); // pledge type. C4 has no sub-pledges.
+			buffer.writeInt(_fpcHolder.getTitleColor());
+			buffer.writeInt(0); // cursed weapon level. C4 has no cursed weapons.
+		}
 	}
 }

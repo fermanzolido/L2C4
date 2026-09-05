@@ -246,6 +246,14 @@ public class ExShowScreenMessage extends ServerPacket
 		buffer.writeInt(_effect);
 		buffer.writeInt(_time);
 		buffer.writeInt(_fade);
+		if (client.isInterlude())
+		{
+			// Interlude closes on the text alone. Its own gate is on an npc string id, which
+			// this datapack has no field for and which is therefore always absent.
+			buffer.writeString(_text);
+			return;
+		}
+
 		buffer.writeString(_text);
 		if (_sysMessageId == -1)
 		{
