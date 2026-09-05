@@ -53,7 +53,8 @@ public class LoginClient extends Thread
 	
 	private InputStream _in = null;
 	private OutputStream _out = null;
-	private final NewCrypt _crypt;
+	private final LoginEncryption _encryption;
+	private final byte[] _blowfishKey;
 	private final Socket _socket;
 	
 	private final ScrambledKeyPair _scrambledPair;
@@ -77,7 +78,12 @@ public class LoginClient extends Thread
 		_scrambledPair = LoginController.getInstance().getScrambledRSAKeyPair();
 		_sessionId = Rnd.nextInt();
 		
-		_crypt = new NewCrypt("_;5.]94-31==-%xT!^[$\000");
+		// Init carries this key to the client, which switches to it for everything that follows.
+		// Init itself goes out under the fixed key both sides already know, so setting the
+		// per-connection key here and sending Init after it is safe.
+		_blowfishKey = LoginController.getInstance().getBlowfishKey();
+		_encryption = new LoginEncryption();
+		_encryption.setKey(_blowfishKey);
 		
 		_hasAgreed = false;
 		
@@ -148,7 +154,7 @@ public class LoginClient extends Thread
 				System.arraycopy(incoming, 2, decrypt, 0, decrypt.length);
 				
 				// decrypt if we have a key
-				_crypt.decrypt(decrypt, 0, decrypt.length);
+				_encryption.decrypt(decrypt, 0, decrypt.length);
 				checksumOk = NewCrypt.verifyChecksum(decrypt);
 				
 				if (!checksumOk)
@@ -198,14 +204,14 @@ public class LoginClient extends Thread
 	{
 		try
 		{
-			byte[] data = sl.getContent();
-			
-			if (!(sl instanceof Init))
-			{
-				NewCrypt.appendChecksum(data);
-				_crypt.crypt(data, 0, data.length);
-			}
-			
+			final byte[] content = sl.getContent();
+
+			// The cipher writes the checksum, the XOR key and the padding past the plain content,
+			// so it needs a buffer sized for the result rather than the tight one the packet built.
+			final byte[] data = new byte[_encryption.getEncryptedSize(content.length)];
+			System.arraycopy(content, 0, data, 0, content.length);
+			_encryption.encrypt(data, 0, content.length);
+
 			final int len = data.length + 2;
 			_out.write(len & 0xff);
 			_out.write((len >> 8) & 0xff);
@@ -250,6 +256,11 @@ public class LoginClient extends Thread
 	public void setSessionKey(SessionKey sessionKey)
 	{
 		_sessionKey = sessionKey;
+	}
+	
+	public byte[] getBlowfishKey()
+	{
+		return _blowfishKey;
 	}
 	
 	public SessionKey getSessionKey()

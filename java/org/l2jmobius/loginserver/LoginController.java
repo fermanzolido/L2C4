@@ -87,6 +87,14 @@ public class LoginController
 		return _instance;
 	}
 	
+	/**
+	 * @return one of the cached Blowfish keys, for a single client connection.
+	 */
+	public byte[] getBlowfishKey()
+	{
+		return _blowfishKeys[Rnd.get(_blowfishKeys.length)];
+	}
+	
 	private LoginController() throws GeneralSecurityException
 	{
 		_accountsInLogin = new ConcurrentHashMap<>();
@@ -107,6 +115,19 @@ public class LoginController
 		}
 		
 		LOGGER.info("Cached 10 KeyPairs for RSA communication.");
+		
+		// The Interlude client reads a Blowfish key off the end of the Init packet and switches
+		// to it, so one is handed out per connection. Twenty are cached the way the RSA pairs are.
+		_blowfishKeys = new byte[20][16];
+		for (byte[] key : _blowfishKeys)
+		{
+			for (int j = 0; j < key.length; j++)
+			{
+				key[j] = (byte) (Rnd.get(255) + 1);
+			}
+		}
+		
+		LOGGER.info("Cached " + _blowfishKeys.length + " BlowFish keys for client communication.");
 		testCipher((RSAPrivateKey) _keyPairs[0]._pair.getPrivate());
 	}
 	
