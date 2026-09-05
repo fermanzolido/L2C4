@@ -32,17 +32,32 @@ public class PledgeReceiveMemberInfo extends ServerPacket
 {
 	private final Clan _clan;
 	private final Player _player;
-	
+	private final ClanMember _member;
+
 	public PledgeReceiveMemberInfo(ClanMember member, Player player)
 	{
 		_clan = member.getClan();
 		_player = player;
+		_member = member;
 	}
-	
+
 	@Override
 	public void writeImpl(GameClient client, WritableBuffer buffer)
 	{
 		ServerPackets.PLEDGE_RECEIVE_MEMBER_INFO.writeId(this, buffer);
+		if (client.isInterlude())
+		{
+			// Interlude answers RequestPledgeMemberInfo with the one member that was asked
+			// about, where C4 answers with the clan and its whole roster.
+			buffer.writeInt(_member.getPledgeType());
+			buffer.writeString(_member.getName());
+			buffer.writeString(_member.getTitle());
+			buffer.writeInt(_member.getPowerGrade());
+			buffer.writeString(_clan.getName()); // C4 has no subunits, so this is always the clan itself.
+			buffer.writeString(""); // Apprentice or sponsor. C4 has no clan academy.
+			return;
+		}
+
 		buffer.writeInt(_clan.getId());
 		buffer.writeString(_clan.getName());
 		buffer.writeString(_clan.getLeaderName());

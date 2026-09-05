@@ -118,6 +118,22 @@ public class EnterWorld extends ClientPacket
 	@Override
 	protected void readImpl()
 	{
+		if (!getClient().isInterlude())
+		{
+			return;
+		}
+
+		// Interlude clients prefix the packet with client fingerprint data and a tracert.
+		// None of it is used here, but it has to be consumed to leave the buffer where the
+		// C4 path leaves it.
+		readBytes(32);
+		readInt();
+		readInt();
+		readInt();
+		readInt();
+		readBytes(32);
+		readInt();
+		readBytes(20); // 5 hops of 4 bytes
 	}
 	
 	@Override

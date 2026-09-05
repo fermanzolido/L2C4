@@ -53,7 +53,7 @@ public class MonRaceInfo extends ServerPacket
 		for (int i = 0; i < 8; i++)
 		{
 			buffer.writeInt(_monsters[i].getObjectId()); // npcObjectID
-			buffer.writeInt(_monsters[i].getTemplate().getDisplayId() + 1000000); // npcID
+			buffer.writeInt((client.isInterlude() ? _monsters[i].getTemplate().getRawDisplayId() : _monsters[i].getTemplate().getDisplayId()) + 1000000); // npcID
 			buffer.writeInt(14107); // origin X
 			buffer.writeInt(181875 + (58 * (7 - i))); // origin Y
 			buffer.writeInt(-3566); // origin Z
@@ -76,6 +76,12 @@ public class MonRaceInfo extends ServerPacket
 			}
 			
 			buffer.writeInt(0);
+			if (client.isInterlude())
+			{
+				// The Mobius Interlude branch writes this and labels it CT2.3, a later chronicle.
+				// Kept because that branch is the only reference this port has been measured against.
+				buffer.writeInt(0); // special effect
+			}
 		}
 	}
 }

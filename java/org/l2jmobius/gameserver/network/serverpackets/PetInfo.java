@@ -91,7 +91,7 @@ public class PetInfo extends ServerPacket
 		ServerPackets.PET_INFO.writeId(this, buffer);
 		buffer.writeInt(_summon.getSummonType());
 		buffer.writeInt(_summon.getObjectId());
-		buffer.writeInt(_summon.getTemplate().getDisplayId() + 1000000);
+		buffer.writeInt((client.isInterlude() ? _summon.getTemplate().getRawDisplayId() : _summon.getTemplate().getDisplayId()) + 1000000);
 		buffer.writeInt(0); // 1=attackable
 		buffer.writeInt(_x);
 		buffer.writeInt(_y);
@@ -141,17 +141,45 @@ public class PetInfo extends ServerPacket
 		buffer.writeInt(_maxMp); // max mp
 		buffer.writeInt((int) _summon.getStat().getSp()); // sp
 		buffer.writeInt(_summon.getLevel()); // level
-		buffer.writeInt((int) _summon.getStat().getExp());
-		if (_summon.getExpForThisLevel() > _summon.getStat().getExp())
+		if (client.isInterlude())
 		{
-			buffer.writeInt((int) _summon.getStat().getExp()); // 0% absolute value
+			buffer.writeLong(_summon.getStat().getExp());
 		}
 		else
 		{
-			buffer.writeInt((int) _summon.getExpForThisLevel()); // 0% absolute value
+			buffer.writeInt((int) _summon.getStat().getExp());
+		}
+		if (_summon.getExpForThisLevel() > _summon.getStat().getExp())
+		{
+			if (client.isInterlude())
+			{
+				buffer.writeLong(_summon.getStat().getExp()); // 0% absolute value
+			}
+			else
+			{
+				buffer.writeInt((int) _summon.getStat().getExp()); // 0% absolute value
+			}
+		}
+		else
+		{
+			if (client.isInterlude())
+			{
+				buffer.writeLong(_summon.getExpForThisLevel()); // 0% absolute value
+			}
+			else
+			{
+				buffer.writeInt((int) _summon.getExpForThisLevel()); // 0% absolute value
+			}
 		}
 		
-		buffer.writeInt((int) _summon.getExpForNextLevel()); // 100% absoulte value
+		if (client.isInterlude())
+		{
+			buffer.writeLong(_summon.getExpForNextLevel()); // 100% absoulte value
+		}
+		else
+		{
+			buffer.writeInt((int) _summon.getExpForNextLevel()); // 100% absoulte value
+		}
 		buffer.writeInt(_summon.isPet() ? _summon.getInventory().getTotalWeight() : 0); // weight
 		buffer.writeInt(_summon.getMaxLoad()); // max weight it can carry
 		buffer.writeInt((int) _summon.getPAtk(null)); // patk

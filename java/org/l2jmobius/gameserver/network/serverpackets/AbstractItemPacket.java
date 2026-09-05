@@ -20,23 +20,24 @@ import org.l2jmobius.commons.network.WritableBuffer;
 import org.l2jmobius.gameserver.model.ItemInfo;
 import org.l2jmobius.gameserver.model.TradeItem;
 import org.l2jmobius.gameserver.model.item.instance.Item;
+import org.l2jmobius.gameserver.network.GameClient;
 
 /**
  * @author UnAfraid
  */
 public abstract class AbstractItemPacket extends ServerPacket
 {
-	protected void writeItem(TradeItem item, WritableBuffer buffer)
+	protected void writeItem(TradeItem item, WritableBuffer buffer, GameClient client)
 	{
-		writeItem(new ItemInfo(item), buffer);
+		writeItem(new ItemInfo(item), buffer, client);
 	}
 	
-	protected void writeItem(Item item, WritableBuffer buffer)
+	protected void writeItem(Item item, WritableBuffer buffer, GameClient client)
 	{
-		writeItem(new ItemInfo(item), buffer);
+		writeItem(new ItemInfo(item), buffer, client);
 	}
 	
-	protected void writeItem(ItemInfo item, WritableBuffer buffer)
+	protected void writeItem(ItemInfo item, WritableBuffer buffer, GameClient client)
 	{
 		buffer.writeShort(item.getItem().getType1());
 		buffer.writeInt(item.getObjectId()); // ObjectId
@@ -48,5 +49,10 @@ public abstract class AbstractItemPacket extends ServerPacket
 		buffer.writeInt(item.getItem().getBodyPart().getMask()); // Slot : 0006-lr.ear, 0008-neck, 0030-lr.finger, 0040-head, 0100-l.hand, 0200-gloves, 0400-chest, 0800-pants, 1000-feet, 4000-r.hand, 8000-r.hand
 		buffer.writeShort(item.getEnchant()); // Enchant level (pet level shown in control item)
 		buffer.writeShort(item.getCustomType2()); // Pet name exists or not shown in control item
+		if (client.isInterlude())
+		{
+			buffer.writeInt(0); // Augmentation bonus. Always 0: the C4 datapack has no augmentation system.
+			buffer.writeInt(item.getMana()); // Shadow item remaining mana, -1 when not a shadow item.
+		}
 	}
 }

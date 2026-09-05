@@ -66,6 +66,11 @@ public class MultiSellList extends ServerPacket
 		{
 			ent = _list.getEntries().get(_index++);
 			buffer.writeInt(ent.getEntryId());
+			if (client.isInterlude())
+			{
+				buffer.writeInt(0); // C6
+				buffer.writeInt(0); // C6
+			}
 			buffer.writeByte(1);
 			buffer.writeShort(ent.getProducts().size());
 			buffer.writeShort(ent.getIngredients().size());
@@ -88,10 +93,20 @@ public class MultiSellList extends ServerPacket
 				if (ing.getItemInfo() != null)
 				{
 					buffer.writeShort(ing.getItemInfo().getEnchantLevel()); // enchant level
+					if (client.isInterlude())
+					{
+						buffer.writeInt(0); // augment id. Always 0: no augmentation system in C4.
+						buffer.writeInt(0); // mana
+					}
 				}
 				else
 				{
 					buffer.writeShort(ing.getEnchantLevel()); // enchant level
+					if (client.isInterlude())
+					{
+						buffer.writeInt(0); // augment id. Always 0: no augmentation system in C4.
+						buffer.writeInt(0); // mana
+					}
 				}
 			}
 			
@@ -103,10 +118,20 @@ public class MultiSellList extends ServerPacket
 				if (ing.getItemInfo() != null)
 				{
 					buffer.writeShort(ing.getItemInfo().getEnchantLevel()); // enchant level
+					if (client.isInterlude())
+					{
+						buffer.writeInt(0); // augment id. Always 0: no augmentation system in C4.
+						buffer.writeInt(0); // mana
+					}
 				}
 				else
 				{
 					buffer.writeShort(ing.getEnchantLevel()); // enchant level
+					if (client.isInterlude())
+					{
+						buffer.writeInt(0); // augment id. Always 0: no augmentation system in C4.
+						buffer.writeInt(0); // mana
+					}
 				}
 			}
 		}

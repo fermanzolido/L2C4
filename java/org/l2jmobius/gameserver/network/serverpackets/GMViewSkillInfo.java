@@ -24,6 +24,7 @@ import java.util.Collection;
 
 import org.l2jmobius.commons.network.WritableBuffer;
 import org.l2jmobius.gameserver.model.actor.Player;
+import org.l2jmobius.gameserver.data.xml.SkillData;
 import org.l2jmobius.gameserver.model.skill.Skill;
 import org.l2jmobius.gameserver.network.GameClient;
 import org.l2jmobius.gameserver.network.ServerPackets;
@@ -50,7 +51,11 @@ public class GMViewSkillInfo extends ServerPacket
 			buffer.writeInt(skill.isPassive());
 			buffer.writeInt(skill.getDisplayLevel());
 			buffer.writeInt(skill.getDisplayId());
-			// buffer.writeByte(0); // c5
+			if (client.isInterlude())
+			{
+				buffer.writeByte(0); // Clan skill disabled by reputation. C4 has no clan skills.
+				buffer.writeByte(SkillData.getInstance().isEnchantable(skill.getDisplayId()));
+			}
 		}
 	}
 }

@@ -70,8 +70,29 @@ public class PetStatusUpdate extends ServerPacket
 		buffer.writeInt((int) _summon.getCurrentMp());
 		buffer.writeInt(_summon.getMaxMp());
 		buffer.writeInt(_summon.getLevel());
-		buffer.writeInt((int) _summon.getStat().getExp());
-		buffer.writeInt((int) _summon.getExpForThisLevel()); // 0% absolute value
-		buffer.writeInt((int) _summon.getExpForNextLevel()); // 100% absolute value
+		if (client.isInterlude())
+		{
+			buffer.writeLong(_summon.getStat().getExp());
+		}
+		else
+		{
+			buffer.writeInt((int) _summon.getStat().getExp());
+		}
+		if (client.isInterlude())
+		{
+			buffer.writeLong(_summon.getExpForThisLevel()); // 0% absolute value
+		}
+		else
+		{
+			buffer.writeInt((int) _summon.getExpForThisLevel()); // 0% absolute value
+		}
+		if (client.isInterlude())
+		{
+			buffer.writeLong(_summon.getExpForNextLevel()); // 100% absolute value
+		}
+		else
+		{
+			buffer.writeInt((int) _summon.getExpForNextLevel()); // 100% absolute value
+		}
 	}
 }

@@ -751,6 +751,11 @@ public class SortedWareHouseWithdrawalList extends ServerPacket
 			buffer.writeShort(0);
 			buffer.writeShort(item.getCustomType2());
 			buffer.writeInt(item.getObjectId());
+			if (client.isInterlude())
+			{
+				// Augmentation id, split high and low in Interlude. Always 0 here: no augmentation system.
+				buffer.writeLong(0);
+			}
 		}
 	}
 }

@@ -44,13 +44,19 @@ public class ExMultiPartyCommandChannelInfo extends ServerPacket
 		
 		ServerPackets.EX_MULTI_PARTY_COMMAND_CHANNEL_INFO.writeId(this, buffer);
 		buffer.writeString(_channel.getLeader().getName());
-		// buffer.writeInt(0); // Channel loot 0 or 1
+		if (client.isInterlude())
+		{
+			buffer.writeInt(0); // Channel loot 0 or 1
+		}
 		buffer.writeInt(_channel.getMemberCount());
 		buffer.writeInt(_channel.getParties().size());
 		for (Party p : _channel.getParties())
 		{
 			buffer.writeString(p.getLeader().getName());
-			// buffer.writeInt(p.getLeaderObjectId());
+			if (client.isInterlude())
+			{
+				buffer.writeInt(p.getLeaderObjectId());
+			}
 			buffer.writeInt(p.getMemberCount());
 		}
 	}

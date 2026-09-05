@@ -57,7 +57,14 @@ public class CharSelected extends ServerPacket
 		buffer.writeDouble(_player.getCurrentHp());
 		buffer.writeDouble(_player.getCurrentMp());
 		buffer.writeInt((int) _player.getSp());
-		buffer.writeInt((int) _player.getExp());
+		if (client.isInterlude())
+		{
+			buffer.writeLong(_player.getExp());
+		}
+		else
+		{
+			buffer.writeInt((int) _player.getExp());
+		}
 		buffer.writeInt(_player.getLevel());
 		buffer.writeInt(_player.getKarma()); // thx evill33t
 		buffer.writeInt(_player.getPkKills());

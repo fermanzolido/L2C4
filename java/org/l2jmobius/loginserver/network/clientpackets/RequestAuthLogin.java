@@ -75,9 +75,11 @@ public class RequestAuthLogin extends AbstractClientPacket
 			return;
 		}
 		
-		_account = new String(decrypted, 0x62, 14).trim();
+		// Offsets into the RSA block the client sends. Reading four bytes late lands past the end
+		// of the account field and picks up its padding plus the head of the password.
+		_account = new String(decrypted, 0x5E, 14).trim();
 		_account = _account.toLowerCase();
-		_password = new String(decrypted, 0x70, 16).trim();
+		_password = new String(decrypted, 0x6C, 16).trim();
 		
 		final LoginController login = LoginController.getInstance();
 		

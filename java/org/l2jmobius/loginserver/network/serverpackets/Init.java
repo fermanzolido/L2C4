@@ -41,6 +41,9 @@ public class Init extends AbstractServerPacket
 		writeInt(0x77C39CFC);
 		writeInt(0x97ADB620);
 		writeInt(0x07BDE0F7);
+		
+		writeBytes(client.getBlowfishKey()); // BlowFish key
+		writeByte(0); // null termination
 	}
 	
 	@Override

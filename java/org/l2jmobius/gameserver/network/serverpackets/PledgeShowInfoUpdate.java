@@ -46,7 +46,18 @@ public class PledgeShowInfoUpdate extends ServerPacket
 		buffer.writeInt(_clan.getCastleId());
 		buffer.writeInt(_clan.getHideoutId());
 		buffer.writeInt(_clan.getRank());
+		if (client.isInterlude())
+		{
+			buffer.writeInt(0); // Clan reputation score. C4 has no clan reputation.
+		}
 		buffer.writeInt(0); // ?
 		buffer.writeInt(0); // ?
+		if (client.isInterlude())
+		{
+			buffer.writeInt(_clan.getAllyId());
+			buffer.writeString(_clan.getAllyName());
+			buffer.writeInt(_clan.getAllyCrestId());
+			buffer.writeInt(_clan.isAtWar());
+		}
 	}
 }

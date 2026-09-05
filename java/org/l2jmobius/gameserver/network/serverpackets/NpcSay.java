@@ -34,6 +34,7 @@ public class NpcSay extends ServerPacket
 	private final int _objectId;
 	private final ChatType _textType;
 	private final int _npcId;
+	private final int _rawNpcId;
 	private final String _text;
 	
 	public NpcSay(int objectId, ChatType messageType, int npcId, String text)
@@ -41,6 +42,7 @@ public class NpcSay extends ServerPacket
 		_objectId = objectId;
 		_textType = messageType;
 		_npcId = 1000000 + npcId;
+		_rawNpcId = _npcId;
 		_text = text;
 	}
 	
@@ -49,6 +51,7 @@ public class NpcSay extends ServerPacket
 		_objectId = npc.getObjectId();
 		_textType = messageType;
 		_npcId = 1000000 + npc.getTemplate().getDisplayId();
+		_rawNpcId = 1000000 + npc.getTemplate().getRawDisplayId();
 		_text = text;
 	}
 	
@@ -58,7 +61,7 @@ public class NpcSay extends ServerPacket
 		ServerPackets.NPC_SAY.writeId(this, buffer);
 		buffer.writeInt(_objectId);
 		buffer.writeInt(_textType.getClientId());
-		buffer.writeInt(_npcId);
+		buffer.writeInt(client.isInterlude() ? _rawNpcId : _npcId);
 		buffer.writeString(_text);
 	}
 }

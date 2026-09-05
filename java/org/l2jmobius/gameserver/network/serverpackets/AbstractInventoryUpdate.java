@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.l2jmobius.commons.network.WritableBuffer;
+import org.l2jmobius.gameserver.network.GameClient;
 import org.l2jmobius.gameserver.model.ItemInfo;
 import org.l2jmobius.gameserver.model.item.instance.Item;
 
@@ -113,7 +114,7 @@ public abstract class AbstractInventoryUpdate extends AbstractItemPacket
 		return _items.values();
 	}
 	
-	protected void writeItems(WritableBuffer buffer)
+	protected void writeItems(WritableBuffer buffer, GameClient client)
 	{
 		synchronized (_items)
 		{
@@ -121,7 +122,7 @@ public abstract class AbstractInventoryUpdate extends AbstractItemPacket
 			for (ItemInfo item : _items.values())
 			{
 				buffer.writeShort(item.getChange()); // Update type : 01-add, 02-modify, 03-remove
-				writeItem(item, buffer);
+				writeItem(item, buffer, client);
 			}
 			
 			_items.clear();

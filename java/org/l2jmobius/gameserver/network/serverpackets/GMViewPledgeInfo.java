@@ -46,16 +46,30 @@ public class GMViewPledgeInfo extends ServerPacket
 		ServerPackets.GM_VIEW_PLEDGE_INFO.writeId(this, buffer);
 		buffer.writeString(_player.getName());
 		buffer.writeInt(_clan.getId());
+		if (client.isInterlude())
+		{
+			buffer.writeInt(0);
+		}
 		buffer.writeString(_clan.getName());
 		buffer.writeString(_clan.getLeaderName());
 		buffer.writeInt(_clan.getCrestId()); // -> no, it's no longer used (nuocnam) fix by game
 		buffer.writeInt(_clan.getLevel());
 		buffer.writeInt(_clan.getCastleId());
 		buffer.writeInt(_clan.getHideoutId());
-		buffer.writeInt(0);
-		buffer.writeInt(_player.getLevel());
-		buffer.writeInt(_clan.getDissolvingExpiryTime() > System.currentTimeMillis() ? 3 : 0);
-		buffer.writeInt(0);
+		if (client.isInterlude())
+		{
+			buffer.writeInt(_clan.getRank());
+			buffer.writeInt(0); // Clan reputation score. C4 has no clan reputation.
+			buffer.writeInt(0);
+			buffer.writeInt(0);
+		}
+		else
+		{
+			buffer.writeInt(0);
+			buffer.writeInt(_player.getLevel());
+			buffer.writeInt(_clan.getDissolvingExpiryTime() > System.currentTimeMillis() ? 3 : 0);
+			buffer.writeInt(0);
+		}
 		buffer.writeInt(_clan.getAllyId()); // c2
 		buffer.writeString(_clan.getAllyName()); // c2
 		buffer.writeInt(_clan.getAllyCrestId()); // c2
@@ -73,6 +87,10 @@ public class GMViewPledgeInfo extends ServerPacket
 				buffer.writeInt(member.getSex());
 				buffer.writeInt(member.getRaceOrdinal());
 				buffer.writeInt(member.isOnline() ? member.getObjectId() : 0);
+				if (client.isInterlude())
+				{
+					buffer.writeInt(0); // Sponsor. C4 has no clan academy.
+				}
 			}
 		}
 	}

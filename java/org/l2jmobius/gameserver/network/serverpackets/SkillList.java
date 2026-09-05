@@ -50,7 +50,10 @@ public class SkillList extends ServerPacket
 			buffer.writeInt(temp.passive);
 			buffer.writeInt(temp.level);
 			buffer.writeInt(temp.id);
-			// buffer.writeByte(temp.disabled); C5
+			if (client.isInterlude())
+			{
+				buffer.writeByte(temp.disabled);
+			}
 		}
 	}
 	
@@ -59,14 +62,14 @@ public class SkillList extends ServerPacket
 		public int id;
 		public int level;
 		public boolean passive;
-		// public boolean disabled;
+		public boolean disabled;
 		
 		Skill(int pId, int pLevel, boolean pPassive, boolean pDisabled)
 		{
 			id = pId;
 			level = pLevel;
 			passive = pPassive;
-			// disabled = pDisabled;
+			disabled = pDisabled;
 		}
 	}
 }

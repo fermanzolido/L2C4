@@ -54,6 +54,9 @@ public class GameClient extends Client<org.l2jmobius.commons.network.Connection<
 	private static final Logger LOGGER = Logger.getLogger(GameClient.class.getName());
 	private static final Logger LOGGER_ACCOUNTING = Logger.getLogger("accounting");
 	
+	/** Client protocol revision from which the Interlude wire format applies. */
+	public static final int PROTOCOL_INTERLUDE = 746;
+	
 	private static final byte[] CRYPT_KEY =
 	{
 		(byte) 0x94,
@@ -158,9 +161,13 @@ public class GameClient extends Client<org.l2jmobius.commons.network.Connection<
 	
 	public byte[] enableCrypt()
 	{
+		// The protocol version is already known here, so the cipher can be picked per chronicle.
+		// Interlude expects a sixteen byte key whose tail the client supplies itself; only the
+		// first eight bytes travel in KeyPacket either way.
+		final byte[] key = isInterlude() ? BlowFishKeygen.getRandomKey() : CRYPT_KEY;
 		_encryption = new Encryption();
-		_encryption.setKey(CRYPT_KEY);
-		return CRYPT_KEY;
+		_encryption.setKey(key);
+		return key;
 	}
 	
 	public Player getPlayer()
@@ -595,6 +602,14 @@ public class GameClient extends Client<org.l2jmobius.commons.network.Connection<
 	public int getProtocolVersion()
 	{
 		return _protocolVersion;
+	}
+	
+	/**
+	 * @return {@code true} if this client speaks the Interlude wire format, {@code false} for C4.
+	 */
+	public boolean isInterlude()
+	{
+		return _protocolVersion >= PROTOCOL_INTERLUDE;
 	}
 	
 	public boolean isProtocolOk()

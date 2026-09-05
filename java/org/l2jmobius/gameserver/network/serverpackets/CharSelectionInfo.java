@@ -116,7 +116,14 @@ public class CharSelectionInfo extends ServerPacket
 			buffer.writeDouble(charInfoPackage.getCurrentHp());
 			buffer.writeDouble(charInfoPackage.getCurrentMp());
 			buffer.writeInt((int) charInfoPackage.getSp());
-			buffer.writeInt((int) charInfoPackage.getExp());
+			if (client.isInterlude())
+			{
+				buffer.writeLong(charInfoPackage.getExp());
+			}
+			else
+			{
+				buffer.writeInt((int) charInfoPackage.getExp());
+			}
 			buffer.writeInt(charInfoPackage.getLevel());
 			buffer.writeInt(charInfoPackage.getKarma());
 			buffer.writeInt(0);
@@ -144,6 +151,10 @@ public class CharSelectionInfo extends ServerPacket
 			buffer.writeInt(charInfoPackage.getPaperdollObjectId(Inventory.PAPERDOLL_CLOAK));
 			buffer.writeInt(charInfoPackage.getPaperdollObjectId(Inventory.PAPERDOLL_RHAND));
 			buffer.writeInt(charInfoPackage.getPaperdollObjectId(Inventory.PAPERDOLL_HAIR));
+			if (client.isInterlude())
+			{
+				buffer.writeInt(charInfoPackage.getPaperdollObjectId(Inventory.PAPERDOLL_HAIR2));
+			}
 			buffer.writeInt(charInfoPackage.getPaperdollItemId(Inventory.PAPERDOLL_UNDER));
 			buffer.writeInt(charInfoPackage.getPaperdollItemId(Inventory.PAPERDOLL_REAR));
 			buffer.writeInt(charInfoPackage.getPaperdollItemId(Inventory.PAPERDOLL_LEAR));
@@ -160,6 +171,10 @@ public class CharSelectionInfo extends ServerPacket
 			buffer.writeInt(charInfoPackage.getPaperdollItemId(Inventory.PAPERDOLL_CLOAK));
 			buffer.writeInt(charInfoPackage.getPaperdollItemId(Inventory.PAPERDOLL_RHAND));
 			buffer.writeInt(charInfoPackage.getPaperdollItemId(Inventory.PAPERDOLL_HAIR));
+			if (client.isInterlude())
+			{
+				buffer.writeInt(charInfoPackage.getPaperdollItemId(Inventory.PAPERDOLL_HAIR2));
+			}
 			buffer.writeInt(charInfoPackage.getHairStyle());
 			buffer.writeInt(charInfoPackage.getHairColor());
 			buffer.writeInt(charInfoPackage.getFace());
@@ -186,6 +201,10 @@ public class CharSelectionInfo extends ServerPacket
 			buffer.writeInt(charInfoPackage.getClassId());
 			buffer.writeInt(i == _activeId);
 			buffer.writeByte(Math.min(charInfoPackage.getEnchantEffect(), 127));
+			if (client.isInterlude())
+			{
+				buffer.writeInt(0); // Right hand augmentation. Always 0: no augmentation system in C4.
+			}
 		}
 	}
 	

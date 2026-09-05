@@ -47,6 +47,6 @@ public class InventoryUpdate extends AbstractInventoryUpdate
 	public void writeImpl(GameClient client, WritableBuffer buffer)
 	{
 		ServerPackets.INVENTORY_UPDATE.writeId(this, buffer);
-		writeItems(buffer);
+		writeItems(buffer, client);
 	}
 }
