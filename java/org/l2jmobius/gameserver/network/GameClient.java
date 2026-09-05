@@ -161,9 +161,13 @@ public class GameClient extends Client<org.l2jmobius.commons.network.Connection<
 	
 	public byte[] enableCrypt()
 	{
+		// The protocol version is already known here, so the cipher can be picked per chronicle.
+		// Interlude expects a sixteen byte key whose tail the client supplies itself; only the
+		// first eight bytes travel in KeyPacket either way.
+		final byte[] key = isInterlude() ? BlowFishKeygen.getRandomKey() : CRYPT_KEY;
 		_encryption = new Encryption();
-		_encryption.setKey(CRYPT_KEY);
-		return CRYPT_KEY;
+		_encryption.setKey(key);
+		return key;
 	}
 	
 	public Player getPlayer()

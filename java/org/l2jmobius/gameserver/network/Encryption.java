@@ -23,14 +23,24 @@ import org.l2jmobius.commons.network.Buffer;
  */
 public class Encryption
 {
-	private final byte[] _inKey = new byte[8];
-	private final byte[] _outKey = new byte[8];
+	private byte[] _inKey;
+	private byte[] _outKey;
+	private int _keyMask;
+	private int _shiftOffset;
 	private boolean _isEnabled;
 	
+	/**
+	 * Takes the key length from the key itself, because the two chronicles differ on it: C4 cycles
+	 * the cipher over eight bytes and rolls its counter at the front, Interlude cycles over sixteen
+	 * -- eight sent to the client plus a tail it already knows -- and rolls the counter at byte 8.
+	 * @param key the key handed to the client in KeyPacket, 8 or 16 bytes long
+	 */
 	public void setKey(byte[] key)
 	{
-		System.arraycopy(key, 0, _inKey, 0, 8);
-		System.arraycopy(key, 0, _outKey, 0, 8);
+		_inKey = key.clone();
+		_outKey = key.clone();
+		_keyMask = key.length - 1;
+		_shiftOffset = key.length == 16 ? 8 : 0;
 	}
 	
 	public void encrypt(Buffer data, int offset, int size)
@@ -45,20 +55,20 @@ public class Encryption
 		for (int i = 0; i < size; i++)
 		{
 			final int raw = data.readByte(offset + i);
-			encrypted = raw ^ _outKey[i & 7] ^ encrypted;
+			encrypted = raw ^ _outKey[i & _keyMask] ^ encrypted;
 			data.writeByte(offset + i, (byte) encrypted);
 		}
 		
 		// Shift key.
-		int old = _outKey[0] & 0xff;
-		old |= (_outKey[1] << 8) & 0xff00;
-		old |= (_outKey[2] << 16) & 0xff0000;
-		old |= (_outKey[3] << 24) & 0xff000000;
+		int old = _outKey[_shiftOffset + 0] & 0xff;
+		old |= (_outKey[_shiftOffset + 1] << 8) & 0xff00;
+		old |= (_outKey[_shiftOffset + 2] << 16) & 0xff0000;
+		old |= (_outKey[_shiftOffset + 3] << 24) & 0xff000000;
 		old += size;
-		_outKey[0] = (byte) (old & 0xff);
-		_outKey[1] = (byte) ((old >> 8) & 0xff);
-		_outKey[2] = (byte) ((old >> 16) & 0xff);
-		_outKey[3] = (byte) ((old >> 24) & 0xff);
+		_outKey[_shiftOffset + 0] = (byte) (old & 0xff);
+		_outKey[_shiftOffset + 1] = (byte) ((old >> 8) & 0xff);
+		_outKey[_shiftOffset + 2] = (byte) ((old >> 16) & 0xff);
+		_outKey[_shiftOffset + 3] = (byte) ((old >> 24) & 0xff);
 	}
 	
 	public void decrypt(Buffer data, int offset, int size)
@@ -72,19 +82,19 @@ public class Encryption
 		for (int i = 0; i < size; i++)
 		{
 			final int encrypted = data.readByte(offset + i);
-			data.writeByte(offset + i, (byte) (encrypted ^ _inKey[i & 7] ^ xOr));
+			data.writeByte(offset + i, (byte) (encrypted ^ _inKey[i & _keyMask] ^ xOr));
 			xOr = encrypted;
 		}
 		
 		// Shift key.
-		int old = _inKey[0] & 0xff;
-		old |= (_inKey[1] << 8) & 0xff00;
-		old |= (_inKey[2] << 16) & 0xff0000;
-		old |= (_inKey[3] << 24) & 0xff000000;
+		int old = _inKey[_shiftOffset + 0] & 0xff;
+		old |= (_inKey[_shiftOffset + 1] << 8) & 0xff00;
+		old |= (_inKey[_shiftOffset + 2] << 16) & 0xff0000;
+		old |= (_inKey[_shiftOffset + 3] << 24) & 0xff000000;
 		old += size;
-		_inKey[0] = (byte) (old & 0xff);
-		_inKey[1] = (byte) ((old >> 8) & 0xff);
-		_inKey[2] = (byte) ((old >> 16) & 0xff);
-		_inKey[3] = (byte) ((old >> 24) & 0xff);
+		_inKey[_shiftOffset + 0] = (byte) (old & 0xff);
+		_inKey[_shiftOffset + 1] = (byte) ((old >> 8) & 0xff);
+		_inKey[_shiftOffset + 2] = (byte) ((old >> 16) & 0xff);
+		_inKey[_shiftOffset + 3] = (byte) ((old >> 24) & 0xff);
 	}
 }
