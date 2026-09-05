@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Replaces Player sendMessage method messages with translated text. -->
+<!-- No pretty way of doing something like this. Consider using proper SystemMessages where possible. Keep this list short. -->
+<!-- XXX marks the variable part. The message is split on it and each piece is replaced in turn, so the -->
+<!-- translation has to keep the variable between the same two fragments or the pieces will not line up. -->
+<list xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/SendMessageLocalisation.xsd">
+	<localisation message="Entering world in Invulnerable mode." translation="Entrando al mundo en modo invulnerable." />
+	<localisation message="Entering world in Invisible mode." translation="Entrando al mundo en modo invisible." />
+	<localisation message="Entering world in Silence mode." translation="Entrando al mundo en modo silencio." />
+	<localisation message="You have learned XXX new skills." translation="Aprendiste XXX habilidades nuevas." />
+</list>

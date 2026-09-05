@@ -1,0 +1,832 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/NpcNameLocalisation.xsd">
+	<!-- Town NPCs. Names are proper nouns and stay; the titles are roles and are translated. -->
+	<!-- Titles that inflect take the form matching each NPC's own sex tag in the datapack. -->
+	<localisation id="20120" name="Lobo" title="" />
+	<localisation id="50008" name="Rex el Gato" title="Potenciador" />
+	<localisation id="30001" name="Lector" title="Mercader" />
+	<localisation id="30002" name="Jackson" title="Mercader" />
+	<localisation id="30003" name="Silvia" title="Mercader" />
+	<localisation id="30004" name="Katerina" title="Mercader" />
+	<localisation id="30005" name="Wilford" title="Encargado del Almacén" />
+	<localisation id="30006" name="Roxxy" title="Guardiana de la Puerta" />
+	<localisation id="30008" name="Roien" title="Gran Maestro" />
+	<localisation id="30010" name="Auron" title="Maestro" />
+	<localisation id="30014" name="Celma" title="Maestra" />
+	<localisation id="30017" name="Gallint" title="Gran Magíster" />
+	<localisation id="30022" name="Zigaunt" title="Sacerdote" />
+	<localisation id="30026" name="Bitz" title="Gran Maestro" />
+	<localisation id="30027" name="Gwinter" title="Maestro" />
+	<localisation id="30028" name="Pintage" title="Maestro" />
+	<localisation id="30029" name="Minia" title="Maestra" />
+	<localisation id="30030" name="Vivyan" title="Sacerdotisa" />
+	<localisation id="30031" name="Biotin" title="Sumo Sacerdote" />
+	<localisation id="30032" name="Yohanes" title="Sacerdote" />
+	<localisation id="30033" name="Baulro" title="Magíster" />
+	<localisation id="30034" name="Iris" title="Magíster" />
+	<localisation id="30035" name="Harrys" title="Magíster" />
+	<localisation id="30036" name="Petron" title="Sacerdote" />
+	<localisation id="30037" name="Levian" title="Suma Sacerdotisa" />
+	<localisation id="30047" name="Firon" title="Encargado del Muelle" />
+	<localisation id="30054" name="Rant" title="Encargado del Almacén" />
+	<localisation id="30055" name="Rolfe" title="Encargado del Almacén" />
+	<localisation id="30057" name="Aldo" title="Encargado del Almacén" />
+	<localisation id="30058" name="Holvas" title="Encargado del Almacén" />
+	<localisation id="30059" name="Trisha" title="Guardiana de la Puerta" />
+	<localisation id="30060" name="Sabrin" title="Mercader" />
+	<localisation id="30061" name="Casey" title="Mercader" />
+	<localisation id="30062" name="Sonia" title="Mercader" />
+	<localisation id="30063" name="Lara" title="Mercader" />
+	<localisation id="30064" name="Terry" title="Maestro" />
+	<localisation id="30065" name="Arnelle" title="Maestra" />
+	<localisation id="30066" name="Pabris" title="Gran Maestro" />
+	<localisation id="30067" name="Glyvka" title="Sacerdotisa" />
+	<localisation id="30068" name="Shegfield" title="Sacerdote" />
+	<localisation id="30069" name="Rollant" title="Magíster" />
+	<localisation id="30070" name="Sylvain" title="Sumo Sacerdote" />
+	<localisation id="30078" name="Pano" title="Almacenero" />
+	<localisation id="30079" name="Barder" title="Encargado del Almacén" />
+	<localisation id="30080" name="Clarissa" title="Guardiana de la Puerta" />
+	<localisation id="30081" name="Helvetia" title="Almacenera" />
+	<localisation id="30082" name="Denkus" title="Almacenero" />
+	<localisation id="30083" name="Pochi" title="Encargado del Almacén" />
+	<localisation id="30084" name="Graham" title="Mercader de Armas" />
+	<localisation id="30085" name="Stanford" title="Mercader de Armas" />
+	<localisation id="30086" name="Taurin" title="Encargado del Almacén" />
+	<localisation id="30087" name="Peta" title="Mercader de Armaduras" />
+	<localisation id="30088" name="Radia" title="Mercader de Armaduras" />
+	<localisation id="30090" name="Sandra" title="Joyera" />
+	<localisation id="30091" name="Ellie" title="Joyera" />
+	<localisation id="30092" name="Collob" title="Encargado del Almacén" />
+	<localisation id="30093" name="Groot" title="Mercader de Magia" />
+	<localisation id="30094" name="Gentler" title="Mercader de Magia" />
+	<localisation id="30095" name="Randolf" title="Encargado del Almacén" />
+	<localisation id="30097" name="Galladucci" title="Mercader" />
+	<localisation id="30098" name="Alexandria" title="Mercader" />
+	<localisation id="30103" name="Valkon" title="Encargado del Almacén" />
+	<localisation id="30104" name="Parman" title="Encargado del Almacén" />
+	<localisation id="30105" name="Genwitter" title="Maestro" />
+	<localisation id="30106" name="Dufner" title="Maestro" />
+	<localisation id="30107" name="Goldian" title="Maestro" />
+	<localisation id="30108" name="Macken" title="Maestro" />
+	<localisation id="30109" name="Hannavalt" title="Gran Maestro" />
+	<localisation id="30110" name="Iker" title="Magíster" />
+	<localisation id="30111" name="Dieter" title="Magíster" />
+	<localisation id="30112" name="Maurius" title="Magíster" />
+	<localisation id="30113" name="Juris" title="Magíster" />
+	<localisation id="30114" name="Roa" title="Magíster" />
+	<localisation id="30115" name="Jurek" title="Gran Magíster" />
+	<localisation id="30116" name="Dustin" title="Sacerdote" />
+	<localisation id="30117" name="Primos" title="Sacerdote" />
+	<localisation id="30118" name="Pupina" title="Sacerdotisa" />
+	<localisation id="30119" name="Isabellin" title="Sacerdotisa" />
+	<localisation id="30120" name="Maximilian" title="Sumo Sacerdote" />
+	<localisation id="30129" name="Mitraell" title="Hierarca" />
+	<localisation id="30130" name="Undrias" title="Celebrante Abisal" />
+	<localisation id="30132" name="Cecktinon" title="Celebrante Abisal" />
+	<localisation id="30133" name="Kartia" title="Celebrante Abisal" />
+	<localisation id="30134" name="Jasmine" title="Guardiana de la Puerta" />
+	<localisation id="30135" name="Iria" title="Mercader" />
+	<localisation id="30136" name="Payne" title="Mercader" />
+	<localisation id="30137" name="Vollodos" title="Mercader" />
+	<localisation id="30138" name="Minaless" title="Mercader" />
+	<localisation id="30139" name="Dorankus" title="Encargado del Almacén" />
+	<localisation id="30140" name="Erviante" title="Encargado del Almacén" />
+	<localisation id="30141" name="Talloth" title="Tetrarca" />
+	<localisation id="30143" name="Trudy" title="Maestra" />
+	<localisation id="30144" name="Harne" title="Magíster" />
+	<localisation id="30145" name="Vlasty" title="Magíster" />
+	<localisation id="30146" name="Mirabel" title="Guardiana de la Puerta" />
+	<localisation id="30147" name="Unoren" title="Mercader" />
+	<localisation id="30148" name="Ariel" title="Mercader" />
+	<localisation id="30149" name="Creamees" title="Mercader" />
+	<localisation id="30150" name="Herbiel" title="Mercader" />
+	<localisation id="30151" name="Chad" title="Encargado del Almacén" />
+	<localisation id="30152" name="Julia" title="Encargada del Almacén" />
+	<localisation id="30153" name="Markius" title="Encargado del Almacén" />
+	<localisation id="30154" name="Asterios" title="Hierarca" />
+	<localisation id="30155" name="Ellenia" title="Maestra" />
+	<localisation id="30156" name="Cobendell" title="Maestro" />
+	<localisation id="30157" name="Greenis" title="Magíster" />
+	<localisation id="30158" name="Esrandell" title="Magíster" />
+	<localisation id="30162" name="Karin" title="Guardiana de la Puerta" />
+	<localisation id="30163" name="Rex" title="Mercader" />
+	<localisation id="30164" name="Ian" title="Mercader" />
+	<localisation id="30165" name="Ralford" title="Mercader" />
+	<localisation id="30166" name="Wesley" title="Mercader de Magia" />
+	<localisation id="30169" name="Marty" title="Encargado del Almacén" />
+	<localisation id="30170" name="Radic" title="Encargado del Almacén" />
+	<localisation id="30171" name="Galios" title="Magíster" />
+	<localisation id="30174" name="Arkenias" title="Gran Magíster" />
+	<localisation id="30175" name="Fairen" title="Gran Magíster" />
+	<localisation id="30176" name="Valleria" title="Gran Magíster" />
+	<localisation id="30177" name="Valentina" title="Guardiana de la Puerta" />
+	<localisation id="30178" name="Zenkin" title="Mercader" />
+	<localisation id="30179" name="Raudia" title="Mercader" />
+	<localisation id="30180" name="Sara" title="Mercader" />
+	<localisation id="30181" name="Galibredo" title="Mercader" />
+	<localisation id="30182" name="Cliff" title="Encargado del Almacén" />
+	<localisation id="30183" name="Hagger" title="Encargado del Almacén" />
+	<localisation id="30184" name="Rigol" title="Maestro" />
+	<localisation id="30185" name="Taniac Blackbird" title="Maestro" />
+	<localisation id="30186" name="Bhan" title="Maestro" />
+	<localisation id="30187" name="Klaus Blackbird" title="Gran Maestro" />
+	<localisation id="30188" name="Vadin" title="Sacerdote" />
+	<localisation id="30189" name="Rovia" title="Magíster" />
+	<localisation id="30190" name="Phanovia" title="Magíster" />
+	<localisation id="30191" name="Hollint" title="Sumo Sacerdote" />
+	<localisation id="30192" name="Darya" title="Maestra" />
+	<localisation id="30194" name="Gideon" title="Magíster" />
+	<localisation id="30195" name="Brecson" title="Gran Maestro" />
+	<localisation id="30207" name="Arodin" title="Mercader" />
+	<localisation id="30208" name="Damion" title="Mercader" />
+	<localisation id="30209" name="Colleen" title="Mercader" />
+	<localisation id="30210" name="Norman" title="Encargado del Almacén" />
+	<localisation id="30230" name="Edroc" title="Mercader" />
+	<localisation id="30231" name="Garette" title="Mercader" />
+	<localisation id="30232" name="Sorint" title="Encargado del Almacén" />
+	<localisation id="30233" name="Esmeralda" title="Guardiana de la Puerta" />
+	<localisation id="30253" name="Simplon" title="Mercader" />
+	<localisation id="30254" name="Harmony" title="Mercader" />
+	<localisation id="30255" name="Haprock" title="Encargado del Almacén" />
+	<localisation id="30256" name="Bella" title="Guardiana de la Puerta" />
+	<localisation id="30283" name="Altran" title="Herrero" />
+	<localisation id="30288" name="Rains" title="Gran Maestro" />
+	<localisation id="30289" name="Raymond" title="Sumo Sacerdote" />
+	<localisation id="30290" name="Xenos" title="Gran Maestro" />
+	<localisation id="30291" name="Alex" title="Capitán" />
+	<localisation id="30293" name="Manuel" title="Sacerdote" />
+	<localisation id="30294" name="Varan" title="Mercader" />
+	<localisation id="30297" name="Tobias" title="Gran Maestro" />
+	<localisation id="30298" name="Pinter" title="Herrero" />
+	<localisation id="30300" name="Pushkin" title="Herrero" />
+	<localisation id="30301" name="Hally" title="Mercader" />
+	<localisation id="30305" name="Vellior" title="Tetrarca" />
+	<localisation id="30307" name="Karrod" title="Herrero" />
+	<localisation id="30312" name="Rockswell" title="Farero" />
+	<localisation id="30313" name="Asha" title="Mercader" />
+	<localisation id="30314" name="Nestle" title="Mercader" />
+	<localisation id="30315" name="Poesia" title="Mercader" />
+	<localisation id="30316" name="Raut" title="Encargado del Almacén" />
+	<localisation id="30317" name="Kluto" title="Herrero" />
+	<localisation id="30320" name="Richlin" title="Guardiana de la Puerta" />
+	<localisation id="30321" name="Sydnia" title="Mercader" />
+	<localisation id="30322" name="Ballin" title="Encargado del Almacén" />
+	<localisation id="30325" name="Audiberti" title="Maestro" />
+	<localisation id="30326" name="Leona" title="Maestra" />
+	<localisation id="30327" name="Sorius" title="Maestro" />
+	<localisation id="30328" name="Reisa" title="Maestra" />
+	<localisation id="30329" name="Virgil" title="Maestro" />
+	<localisation id="30330" name="Sidra" title="Magíster" />
+	<localisation id="30344" name="Rohmer" title="Magíster" />
+	<localisation id="30345" name="Ramoniell" title="Magíster" />
+	<localisation id="30350" name="Collette" title="Encargado del Almacén" />
+	<localisation id="30358" name="Thifiell" title="Tetrarca" />
+	<localisation id="30359" name="Kaitar" title="Tetrarca" />
+	<localisation id="30360" name="Harant" title="Maestro" />
+	<localisation id="30363" name="Aios" title="Herrero" />
+	<localisation id="30369" name="Baenedes" title="Maestro" />
+	<localisation id="30373" name="Ramos" title="Gran Maestro" />
+	<localisation id="30374" name="Rhodiell" title="Maestra" />
+	<localisation id="30375" name="Adonius" title="Sacerdote" />
+	<localisation id="30376" name="Nell" title="Magíster" />
+	<localisation id="30377" name="Talbot" title="Magíster" />
+	<localisation id="30378" name="Estella" title="Maestra" />
+	<localisation id="30387" name="Clancy" title="Encargado del Muelle" />
+	<localisation id="30419" name="Arkenia" title="Bruja" />
+	<localisation id="30421" name="Varika" title="Bruja" />
+	<localisation id="30422" name="Kalinta" title="Celebrante Abisal" />
+	<localisation id="30427" name="Siff" title="Guardiana de la Puerta" />
+	<localisation id="30429" name="Tiramisa" title="Guardiana de la Puerta" />
+	<localisation id="30436" name="Sarien" title="Mercader" />
+	<localisation id="30437" name="Rolento" title="Mercader" />
+	<localisation id="30458" name="Poitan" title="Herrero" />
+	<localisation id="30459" name="Wandius" title="Maestro" />
+	<localisation id="30460" name="Cardien" title="Maestra" />
+	<localisation id="30461" name="Mirien" title="Magíster" />
+	<localisation id="30462" name="Tronix" title="Gran Maestro" />
+	<localisation id="30463" name="Ixia" title="Maestra" />
+	<localisation id="30464" name="Clayton" title="Magíster" />
+	<localisation id="30471" name="Rupio" title="Herrero" />
+	<localisation id="30472" name="Rosheria" title="Maestra" />
+	<localisation id="30473" name="Bandellos" title="Sacerdote" />
+	<localisation id="30474" name="Angus" title="Gran Maestro" />
+	<localisation id="30475" name="Stapin" title="Maestro" />
+	<localisation id="30476" name="Kaira" title="Magíster" />
+	<localisation id="30483" name="Mozella" title="Guardiana de la Puerta" />
+	<localisation id="30484" name="Ponti" title="Guardiana de la Puerta" />
+	<localisation id="30485" name="Capella" title="Guardiana de la Puerta" />
+	<localisation id="30486" name="Hanna" title="Guardiana de la Puerta" />
+	<localisation id="30487" name="Penelope" title="Guardiana de la Puerta" />
+	<localisation id="30498" name="Moke" title="Jefe de Almacén" />
+	<localisation id="30499" name="Tapoy" title="Herrero Mayor" />
+	<localisation id="30500" name="Osborn" title="Prefecto Superior" />
+	<localisation id="30501" name="Kasman" title="Prefecto" />
+	<localisation id="30502" name="Umos" title="Vidente" />
+	<localisation id="30503" name="Rikadio" title="Jefe de Almacén" />
+	<localisation id="30504" name="Mendio" title="Herrero Mayor" />
+	<localisation id="30505" name="Drikus" title="Prefecto Superior" />
+	<localisation id="30506" name="Buka" title="Prefecto" />
+	<localisation id="30507" name="Racoy" title="Vidente" />
+	<localisation id="30508" name="Castor" title="Prefecto Superior" />
+	<localisation id="30509" name="Dowki" title="Prefecto" />
+	<localisation id="30510" name="Somak" title="Vidente" />
+	<localisation id="30511" name="Gesto" title="Jefe de Almacén" />
+	<localisation id="30512" name="Kusto" title="Herrero Mayor" />
+	<localisation id="30513" name="Penatus" title="Prefecto Superior" />
+	<localisation id="30514" name="Vokian" title="Prefecto" />
+	<localisation id="30515" name="Manakia" title="Vidente" />
+	<localisation id="30516" name="Reep" title="Mercader" />
+	<localisation id="30517" name="Shari" title="Mercader" />
+	<localisation id="30518" name="Garita" title="Mercader" />
+	<localisation id="30519" name="Mion" title="Mercader" />
+	<localisation id="30520" name="Reed" title="Jefe de Almacén" />
+	<localisation id="30521" name="Murdoc" title="Encargado del Almacén" />
+	<localisation id="30522" name="Airy" title="Encargada del Almacén" />
+	<localisation id="30523" name="Gouph" title="Recaudador" />
+	<localisation id="30524" name="Pippi" title="Recaudadora" />
+	<localisation id="30525" name="Bronk" title="Herrero Mayor" />
+	<localisation id="30526" name="Brunon" title="Herrero" />
+	<localisation id="30527" name="Silvera" title="Herrera" />
+	<localisation id="30528" name="Laferon" title="Capataz" />
+	<localisation id="30529" name="Maron" title="Minero" />
+	<localisation id="30531" name="Lockirin" title="de la Puerta de Hierro" />
+	<localisation id="30532" name="Spiron" title="de la Rueda Dorada" />
+	<localisation id="30533" name="Balanki" title="de la Escama de Plata" />
+	<localisation id="30534" name="Keef" title="de la Llave de Bronce" />
+	<localisation id="30535" name="Filaur" title="Miembro del Pilar Gris" />
+	<localisation id="30536" name="Arin" title="del Yunque Negro" />
+	<localisation id="30537" name="Daichir" title="Sacerdote de la Tierra" />
+	<localisation id="30538" name="Zimenf" title="Sacerdote de la Tierra" />
+	<localisation id="30539" name="Chichirin" title="Sacerdotisa de la Tierra" />
+	<localisation id="30540" name="Wirphy" title="Guardiana de la Puerta" />
+	<localisation id="30554" name="Bolter" title="Minero" />
+	<localisation id="30555" name="Torocco" title="Portador" />
+	<localisation id="30556" name="Toma" title="Maestro" />
+	<localisation id="30558" name="Jakal" title="Mercader" />
+	<localisation id="30559" name="Kunai" title="Mercader" />
+	<localisation id="30560" name="Uska" title="Mercader" />
+	<localisation id="30561" name="Papuma" title="Mercader" />
+	<localisation id="30562" name="Grookin" title="Encargado del Almacén" />
+	<localisation id="30563" name="Imantu" title="Encargado del Almacén" />
+	<localisation id="30564" name="Sumari" title="Herrero" />
+	<localisation id="30565" name="Kakai" title="Señor de la Llama" />
+	<localisation id="30566" name="Varkees" title="Jefe Atuba" />
+	<localisation id="30567" name="Tantus" title="Jefe Neruga" />
+	<localisation id="30568" name="Hatos" title="Jefe Urutu" />
+	<localisation id="30569" name="Brukurse" title="Prefecto" />
+	<localisation id="30570" name="Karukia" title="Prefecta" />
+	<localisation id="30571" name="Tanapi" title="Vidente" />
+	<localisation id="30572" name="Livina" title="Vidente" />
+	<localisation id="30573" name="Vulkus" title="Guardián de la Llama" />
+	<localisation id="30576" name="Tamil" title="Guardiana de la Puerta" />
+	<localisation id="30590" name="Rosheek" title="Khavatari" />
+	<localisation id="30591" name="Toruku" title="Khavatari" />
+	<localisation id="30594" name="Ranspo" title="Jefe de Almacén" />
+	<localisation id="30595" name="Opix" title="Herrero Mayor" />
+	<localisation id="30609" name="Creta" title="Astróloga" />
+	<localisation id="30610" name="Cronos" title="Anciano" />
+	<localisation id="30611" name="Triff" title="Borracho" />
+	<localisation id="30612" name="Casian" title="Anciano" />
+	<localisation id="30614" name="Metheus" title="Hermano" />
+	<localisation id="30615" name="Voltar" title="Jefe Breka" />
+	<localisation id="30616" name="Kepra" title="Jefe Enku" />
+	<localisation id="30617" name="Burai" title="Jefe Turek" />
+	<localisation id="30618" name="Harak" title="Jefe Leunt" />
+	<localisation id="30619" name="Driko" title="Jefe Vuku" />
+	<localisation id="30621" name="Nikola" title="Maestro" />
+	<localisation id="30623" name="Kaien" title="Duelista" />
+	<localisation id="30624" name="Ascalon" title="Veterano" />
+	<localisation id="30626" name="Hamil" title="Sagitario" />
+	<localisation id="30629" name="Rukal" title="Bardo" />
+	<localisation id="30630" name="Orim of the Shadow" title="Sombra" />
+	<localisation id="30631" name="Roderik" title="Alcaide" />
+	<localisation id="30632" name="Endrigo" title="Alcaide" />
+	<localisation id="30633" name="Evert" title="Pescador" />
+	<localisation id="30634" name="Galatea" title="Invocadora Suprema" />
+	<localisation id="30635" name="Almors" title="Invocador" />
+	<localisation id="30636" name="Camoniell" title="Invocadora" />
+	<localisation id="30637" name="Belthus" title="Invocador" />
+	<localisation id="30638" name="Basilla" title="Invocadora" />
+	<localisation id="30639" name="Celestiel" title="Invocador" />
+	<localisation id="30640" name="Brynthea" title="Invocadora" />
+	<localisation id="30641" name="Takuna" title="Jefe Duda-Mara" />
+	<localisation id="30642" name="Chianta" title="Jefe Gandi" />
+	<localisation id="30646" name="Raldo" title="Campeón" />
+	<localisation id="30648" name="Santiago" title="Ermitaño" />
+	<localisation id="30650" name="Geraldine" title="Sacerdote de la Tierra" />
+	<localisation id="30651" name="Dorf" title="Errante" />
+	<localisation id="30657" name="Seresin" title="Cardenal" />
+	<localisation id="30658" name="Gupu" title="Padre" />
+	<localisation id="30665" name="Kristina" title="Santa" />
+	<localisation id="30666" name="Sla" title="Predicadora" />
+	<localisation id="30671" name="Croto" title="Jefe" />
+	<localisation id="30672" name="Dubabah" title="Carcelero" />
+	<localisation id="30673" name="Lorain" title="Investigadora" />
+	<localisation id="30676" name="Croop" title="Jefe de Almacén" />
+	<localisation id="30677" name="Flutter" title="Herrero Mayor" />
+	<localisation id="30678" name="Helton" title="Herrero" />
+	<localisation id="30679" name="Roameria" title="Maestra" />
+	<localisation id="30680" name="Priest Egnos" title="Sacerdote" />
+	<localisation id="30681" name="Karia" title="Prefecta Superior" />
+	<localisation id="30682" name="Pekiron" title="Vidente" />
+	<localisation id="30683" name="Daunt" title="Prefecto" />
+	<localisation id="30684" name="Viktor" title="Mercader" />
+	<localisation id="30685" name="Baxt" title="Jefe de Almacén" />
+	<localisation id="30686" name="Silva" title="Encargada del Almacén" />
+	<localisation id="30687" name="Vergara" title="Herrero Mayor" />
+	<localisation id="30688" name="Duning" title="Herrero" />
+	<localisation id="30689" name="Siria" title="Gran Maestra" />
+	<localisation id="30690" name="Luther" title="Maestro" />
+	<localisation id="30691" name="Aren Atebalt" title="Maestro" />
+	<localisation id="30692" name="Stedmiel" title="Maestro" />
+	<localisation id="30693" name="Queenien" title="Maestra" />
+	<localisation id="30694" name="Scraide" title="Gran Magíster" />
+	<localisation id="30695" name="Moses" title="Magíster" />
+	<localisation id="30696" name="Page" title="Magíster" />
+	<localisation id="30697" name="Videlrien" title="Magíster" />
+	<localisation id="30698" name="Evelyn" title="Magíster" />
+	<localisation id="30699" name="Medown" title="Gran Maestro" />
+	<localisation id="30700" name="Prestan" title="Maestra" />
+	<localisation id="30701" name="Errickin" title="Magíster" />
+	<localisation id="30702" name="Bernard" title="Presidente del Gremio" />
+	<localisation id="30703" name="Colin" title="Presidente del Gremio" />
+	<localisation id="30704" name="Garvarentz" title="Prefecto Superior" />
+	<localisation id="30705" name="Chakiris" title="Prefecto" />
+	<localisation id="30706" name="Lazenby" title="Vidente" />
+	<localisation id="30715" name="Marina" title="Magíster" />
+	<localisation id="30716" name="Cecile" title="Guardiana de la Puerta" />
+	<localisation id="30717" name="Gauen" title="Magíster" />
+	<localisation id="30718" name="Joan" title="Magíster" />
+	<localisation id="30719" name="Mariell" title="Guardiana de la Puerta" />
+	<localisation id="30720" name="Kaiena" title="Magíster" />
+	<localisation id="30721" name="Ladd" title="Magíster" />
+	<localisation id="30722" name="Merian" title="Guardiana de la Puerta" />
+	<localisation id="30727" name="Verona" title="Guardiana de la Puerta" />
+	<localisation id="30728" name="Leirynn" title="Miliciana" />
+	<localisation id="30729" name="Borys" title="Borracho" />
+	<localisation id="30730" name="Jax" title="Guardaespaldas" />
+	<localisation id="30731" name="Martin" title="Encargado de Mascotas" />
+	<localisation id="30735" name="Sophya" title="Capitana Mercenaria" />
+	<localisation id="30736" name="Redfoot" title="Mercenario" />
+	<localisation id="30737" name="Morgan" title="Miembro del Gremio" />
+	<localisation id="30738" name="Matild" title="Alquimista" />
+	<localisation id="30739" name="Keltir" title="Sirviente Real" />
+	<localisation id="30740" name="Toad" title="Sirviente Real" />
+	<localisation id="30741" name="Rabbit" title="Sirviente Real" />
+	<localisation id="30742" name="Rupina" title="Hada del Amor" />
+	<localisation id="30744" name="Grey" title="Miembro del Gremio" />
+	<localisation id="30745" name="Tor" title="Miembro del Gremio" />
+	<localisation id="30747" name="Mymyu" title="Hada" />
+	<localisation id="30748" name="Exarion" title="Draco" />
+	<localisation id="30749" name="Zwov" title="Draco" />
+	<localisation id="30750" name="Kalibran" title="Draco" />
+	<localisation id="30751" name="Suzet" title="Wyrm" />
+	<localisation id="30752" name="Shamhai" title="Wyrm" />
+	<localisation id="30754" name="Gilmore" title="Vigía de Antharas" />
+	<localisation id="30755" name="Theodric" title="Vigía de Antharas" />
+	<localisation id="30758" name="Athrea" title="Bruja" />
+	<localisation id="30759" name="Kalis" title="Bruja" />
+	<localisation id="30766" name="Cleo" title="Bruja" />
+	<localisation id="30827" name="Lundy" title="Encargado de Mascotas" />
+	<localisation id="30828" name="Waters" title="Encargado de Mascotas" />
+	<localisation id="30829" name="Cooper" title="Encargado de Mascotas" />
+	<localisation id="30830" name="Joey" title="Encargado de Mascotas" />
+	<localisation id="30831" name="Nelson" title="Encargado de Mascotas" />
+	<localisation id="30833" name="Kaspar" title="Magíster" />
+	<localisation id="30834" name="Cema" title="Mercader de Magia" />
+	<localisation id="30835" name="Icarus" title="Rey Liche" />
+	<localisation id="30836" name="Minerva" title="Guardiana de la Puerta" />
+	<localisation id="30837" name="Woodrow" title="Mercader" />
+	<localisation id="30838" name="Woodley" title="Mercader" />
+	<localisation id="30839" name="Holly" title="Mercader" />
+	<localisation id="30840" name="Lorenzo" title="Mercader" />
+	<localisation id="30841" name="Carson" title="Mercader" />
+	<localisation id="30842" name="Alexis" title="Mercader" />
+	<localisation id="30843" name="Romp" title="Encargado del Almacén" />
+	<localisation id="30844" name="Walderal" title="Encargado del Almacén" />
+	<localisation id="30845" name="Klump" title="Jefe de Almacén" />
+	<localisation id="30846" name="Wilbert" title="Herrero" />
+	<localisation id="30847" name="Ferris" title="Herrero Mayor" />
+	<localisation id="30848" name="Elisa" title="Guardiana de la Puerta" />
+	<localisation id="30849" name="Sedrick" title="Gran Maestro" />
+	<localisation id="30850" name="Aiken" title="Maestro" />
+	<localisation id="30851" name="Kendra" title="Maestra" />
+	<localisation id="30852" name="Sinden" title="Maestro" />
+	<localisation id="30853" name="Raien" title="Maestra" />
+	<localisation id="30854" name="Drikiyan" title="Gran Magíster" />
+	<localisation id="30855" name="Desmond" title="Magíster" />
+	<localisation id="30856" name="Winonin" title="Magíster" />
+	<localisation id="30857" name="Orven" title="Sumo Sacerdote" />
+	<localisation id="30858" name="Ross" title="Sacerdote" />
+	<localisation id="30859" name="Vevina" title="Sacerdotisa" />
+	<localisation id="30860" name="Flownia" title="Sacerdotisa" />
+	<localisation id="30861" name="Linette" title="Sacerdote" />
+	<localisation id="30862" name="Oltlin" title="Gran Maestro" />
+	<localisation id="30863" name="Ghest" title="Maestro" />
+	<localisation id="30864" name="Hanellin" title="Magíster" />
+	<localisation id="30865" name="Ladanza" title="Prefecto Superior" />
+	<localisation id="30866" name="Marestella" title="Prefecta" />
+	<localisation id="30867" name="Reva" title="Vidente" />
+	<localisation id="30869" name="Lemper" title="Encargado de Mascotas" />
+	<localisation id="30878" name="Angelina" title="Guardiana de la Puerta" />
+	<localisation id="30879" name="Felton" title="Encargado del Muelle" />
+	<localisation id="30890" name="Espen" title="Mercader" />
+	<localisation id="30891" name="Verona" title="Mercader" />
+	<localisation id="30892" name="Enverun" title="Mercader" />
+	<localisation id="30893" name="Payel" title="Mercader" />
+	<localisation id="30894" name="Natools" title="Jefe de Almacén" />
+	<localisation id="30895" name="Kluck" title="Encargado del Almacén" />
+	<localisation id="30896" name="Mia" title="Encargada del Almacén" />
+	<localisation id="30897" name="Roman" title="Herrero Mayor" />
+	<localisation id="30898" name="Morning" title="Herrera" />
+	<localisation id="30899" name="Flauen" title="Guardiana de la Puerta" />
+	<localisation id="30900" name="Marcus" title="Gran Maestra" />
+	<localisation id="30901" name="Arti" title="Maestro" />
+	<localisation id="30902" name="Karuna" title="Maestro" />
+	<localisation id="30903" name="Traus" title="Maestro" />
+	<localisation id="30904" name="Naiel" title="Maestra" />
+	<localisation id="30905" name="Squillari" title="Sumo Sacerdote" />
+	<localisation id="30906" name="Ranton" title="Sacerdote" />
+	<localisation id="30907" name="Minevia" title="Magíster" />
+	<localisation id="30908" name="Tanios" title="Sacerdote" />
+	<localisation id="30909" name="Anabel" title="Magíster" />
+	<localisation id="30910" name="Xairakin" title="Gran Maestro" />
+	<localisation id="30911" name="Brikus" title="Maestro" />
+	<localisation id="30912" name="Xenovia" title="Magíster" />
+	<localisation id="30913" name="Tushku" title="Prefecto Superior" />
+	<localisation id="30914" name="Sorbo" title="Prefecta" />
+	<localisation id="30915" name="Takina" title="Vidente" />
+	<localisation id="30924" name="Nedy" title="Encargado del Muelle" />
+	<localisation id="30925" name="Morelyn" title="Suma Sacerdotisa" />
+	<localisation id="30926" name="Restina" title="Sacerdotisa" />
+	<localisation id="30927" name="Alicia" title="Sacerdotisa" />
+	<localisation id="30928" name="Fenster" title="Mercenario" />
+	<localisation id="30929" name="Patrin" title="Anticuario" />
+	<localisation id="30930" name="Rogent" title="Tasador de Antigüedades" />
+	<localisation id="30934" name="Marsha" title="Recaudadora" />
+	<localisation id="30935" name="Trumpin" title="Recaudador" />
+	<localisation id="30944" name="Malcom9" title="Príncipe Humano" />
+	<localisation id="30945" name="Malcom10" title="Príncipe" />
+	<localisation id="30949" name="Keplon" title="Investigador" />
+	<localisation id="30950" name="Euclie" title="Investigadora" />
+	<localisation id="30951" name="Pithgon" title="Investigador" />
+	<localisation id="30956" name="Nanarin" title="Música" />
+	<localisation id="30957" name="Swan" title="Bardo" />
+	<localisation id="30959" name="Barbado" title="Músico" />
+	<localisation id="30968" name="Jennifer" title="Dama Orca" />
+	<localisation id="30970" name="Dorothy" title="Cerrajera" />
+	<localisation id="30971" name="Orpheus" title="Doctor Loco" />
+	<localisation id="30974" name="Oliver" title="Aventurero Resucitado" />
+	<localisation id="30975" name="Clarine" title="Aventurera Resucitada" />
+	<localisation id="30988" name="Verce" title="Curtidor" />
+	<localisation id="31002" name="Reorin" title="Maestro" />
+	<localisation id="31042" name="Kantabilon" title="Maestro de Melodías" />
+	<localisation id="31043" name="Octavia" title="Maestra de Melodías" />
+	<localisation id="31044" name="Galman" title="Mercader del Valle" />
+	<localisation id="31045" name="Kitzka" title="Mercader del Valle" />
+	<localisation id="31046" name="Marsden" title="Tatuador" />
+	<localisation id="31047" name="Kelly" title="Tatuador" />
+	<localisation id="31048" name="McDermott" title="Tatuador" />
+	<localisation id="31049" name="Pepper" title="Tatuador" />
+	<localisation id="31050" name="Thora" title="Tatuador" />
+	<localisation id="31051" name="Keach" title="Tatuador" />
+	<localisation id="31052" name="Heid" title="Tatuador" />
+	<localisation id="31053" name="Kidder" title="Tatuadora" />
+	<localisation id="31067" name="Rood" title="Encargado de Mascotas" />
+	<localisation id="31127" name="Festival Guide" title="Nivel 31 o menos" />
+	<localisation id="31128" name="Festival Guide" title="Nivel 42 o menos" />
+	<localisation id="31129" name="Festival Guide" title="Nivel 53 o menos" />
+	<localisation id="31130" name="Festival Guide" title="Nivel 64 o menos" />
+	<localisation id="31131" name="Festival Guide" title="Sin límite de nivel" />
+	<localisation id="31137" name="Festival Guide" title="Nivel 31 o menos" />
+	<localisation id="31138" name="Festival Guide" title="Nivel 42 o menos" />
+	<localisation id="31139" name="Festival Guide" title="Nivel 53 o menos" />
+	<localisation id="31140" name="Festival Guide" title="Nivel 64 o menos" />
+	<localisation id="31141" name="Festival Guide" title="Sin límite de nivel" />
+	<localisation id="31147" name="Sobling" title="Investigador Jefe" />
+	<localisation id="31227" name="Puss the Cat" title="Encargado de Eventos" />
+	<localisation id="31228" name="Roy the Cat" title="Encargado de Eventos" />
+	<localisation id="31229" name="Winnie the Cat" title="Encargada de Eventos" />
+	<localisation id="31230" name="Wendy the Cat" title="Encargado de Eventos" />
+	<localisation id="31255" name="Puss the Cat" title="Encargado de Eventos" />
+	<localisation id="31256" name="Leon" title="Mercader" />
+	<localisation id="31257" name="Veronica" title="Mercader" />
+	<localisation id="31258" name="Helmut" title="Mercader" />
+	<localisation id="31259" name="Janne" title="Mercader" />
+	<localisation id="31260" name="Judith" title="Mercader" />
+	<localisation id="31261" name="Renee" title="Mercader" />
+	<localisation id="31262" name="Rupert" title="Mercader" />
+	<localisation id="31263" name="Liesel" title="Mercader" />
+	<localisation id="31264" name="Olsun" title="Tatuador" />
+	<localisation id="31265" name="Annette" title="Encargada de Mascotas" />
+	<localisation id="31267" name="Lietta" title="Encargada del Almacén" />
+	<localisation id="31268" name="Hakon" title="Encargado del Almacén" />
+	<localisation id="31269" name="Mona" title="Jefa de Almacén" />
+	<localisation id="31270" name="Stefano" title="Encargado del Almacén" />
+	<localisation id="31271" name="Hilda" title="Herrera" />
+	<localisation id="31272" name="Noel" title="Herrero Mayor" />
+	<localisation id="31273" name="Borodin" title="Vendedor de Planos" />
+	<localisation id="31274" name="Fundin" title="Mercader de Minerales" />
+	<localisation id="31275" name="Tatiana" title="Guardiana de la Puerta" />
+	<localisation id="31276" name="Bernhard" title="Gran Maestro" />
+	<localisation id="31277" name="Felix" title="Maestro" />
+	<localisation id="31278" name="Bronwyn" title="Maestro" />
+	<localisation id="31279" name="Gregory" title="Sumo Sacerdote" />
+	<localisation id="31280" name="Bastian" title="Sacerdote" />
+	<localisation id="31281" name="Cerenas" title="Sacerdote" />
+	<localisation id="31282" name="Justin" title="Magíster" />
+	<localisation id="31283" name="Alminas" title="Magíster" />
+	<localisation id="31284" name="Elena" title="Vendedora de Grimorios" />
+	<localisation id="31285" name="Samael" title="Gran Maestro" />
+	<localisation id="31286" name="Drakon" title="Maestro" />
+	<localisation id="31287" name="Kamilen" title="Magíster" />
+	<localisation id="31288" name="Aklan" title="Prefecto Superior" />
+	<localisation id="31289" name="Lakan" title="Prefecto" />
+	<localisation id="31290" name="Skahi" title="Vidente" />
+	<localisation id="31291" name="Terava" title="Vendedora de Amuletos" />
+	<localisation id="31300" name="Drumond" title="Mercader" />
+	<localisation id="31301" name="Nils" title="Mercader" />
+	<localisation id="31302" name="Vladimir" title="Mercader" />
+	<localisation id="31303" name="Alisha" title="Mercader" />
+	<localisation id="31304" name="Astrid" title="Mercader" />
+	<localisation id="31305" name="Candice" title="Mercader" />
+	<localisation id="31306" name="Natasha" title="Mercader" />
+	<localisation id="31307" name="Weber" title="Mercader" />
+	<localisation id="31308" name="Achim" title="Tatuador" />
+	<localisation id="31309" name="Woods" title="Encargado de Mascotas" />
+	<localisation id="31311" name="Hugin" title="Encargado del Almacén" />
+	<localisation id="31312" name="Durin" title="Encargado del Almacén" />
+	<localisation id="31313" name="Lunin" title="Encargado del Almacén" />
+	<localisation id="31314" name="Donal" title="Jefe de Almacén" />
+	<localisation id="31315" name="Daisy" title="Encargada del Almacén" />
+	<localisation id="31316" name="Vincenz" title="Herrero" />
+	<localisation id="31317" name="Lombert" title="Herrero Mayor" />
+	<localisation id="31318" name="Greta" title="Vendedora de Planos" />
+	<localisation id="31319" name="Hans" title="Mercader de Minerales" />
+	<localisation id="31320" name="Ilyana" title="Guardiana de la Puerta" />
+	<localisation id="31321" name="Siegmund" title="Gran Maestro" />
+	<localisation id="31322" name="Erian" title="Maestro" />
+	<localisation id="31323" name="Beryl" title="Maestra" />
+	<localisation id="31324" name="Andromeda" title="Gran Maestra" />
+	<localisation id="31325" name="Themis" title="Maestra" />
+	<localisation id="31326" name="Lambac" title="Prefecto Superior" />
+	<localisation id="31327" name="Tazki" title="Prefecto" />
+	<localisation id="31328" name="Innocentin" title="Sumo Sacerdote" />
+	<localisation id="31329" name="Eliyah" title="Sacerdote" />
+	<localisation id="31330" name="Wagner" title="Sacerdote" />
+	<localisation id="31331" name="Valdis" title="Gran Magíster" />
+	<localisation id="31332" name="Amelia" title="Magíster" />
+	<localisation id="31333" name="Rumiel" title="Magíster" />
+	<localisation id="31334" name="Tifaren" title="Gran Magíster" />
+	<localisation id="31335" name="Kayan" title="Magíster" />
+	<localisation id="31336" name="Rahorakti" title="Gran Vidente" />
+	<localisation id="31337" name="Mekara" title="Vidente" />
+	<localisation id="31338" name="Anton" title="Vendedor de Grimorios" />
+	<localisation id="31339" name="Hakran" title="Vendedor de Amuletos" />
+	<localisation id="31348" name="Agripel" title="Sumo Sacerdote" />
+	<localisation id="31349" name="Benedict" title="Sacerdote" />
+	<localisation id="31350" name="Dominic" title="Sacerdote" />
+	<localisation id="31351" name="Volker" title="Encargado del Muelle" />
+	<localisation id="31356" name="Remy" title="Portero" />
+	<localisation id="31357" name="Leandro" title="Secretario" />
+	<localisation id="31358" name="Kasiel" title="Bardo" />
+	<localisation id="31359" name="Jaradine" title="Guardián del Árbol Madre" />
+	<localisation id="31360" name="Alhena" title="Agente del Tetrarca" />
+	<localisation id="31361" name="Kreed" title="Verdugo del Tetrarca" />
+	<localisation id="31362" name="Tate" title="Portador" />
+	<localisation id="31363" name="Rogin" title="Repartidor" />
+	<localisation id="31364" name="Rokar" title="Guardián de la Llama" />
+	<localisation id="31365" name="Yakand" title="Guardián de la Llama" />
+	<localisation id="31368" name="Mikellan" title="Monje del Silencio" />
+	<localisation id="31369" name="Mennon" title="Monje del Silencio" />
+	<localisation id="31370" name="Kadun Zu Ketra" title="Hierarca" />
+	<localisation id="31371" name="Wahkan" title="Mensajero de Ketra" />
+	<localisation id="31372" name="Asefa" title="Guía de Almas" />
+	<localisation id="31373" name="Atan" title="Almacenero" />
+	<localisation id="31374" name="Jaff" title="Encargado del Almacén" />
+	<localisation id="31375" name="Jumara" title="Mercader" />
+	<localisation id="31376" name="Kurfa" title="Guardián de la Puerta" />
+	<localisation id="31377" name="Ashas Varka Durai" title="Hierarca" />
+	<localisation id="31378" name="Naran Ashanuk" title="Mensajero de Varka" />
+	<localisation id="31379" name="Udan Mardui" title="Guía de Almas" />
+	<localisation id="31380" name="Diyabu" title="Almacenero" />
+	<localisation id="31381" name="Hagos" title="Encargado del Almacén" />
+	<localisation id="31382" name="Shikon" title="Mercader" />
+	<localisation id="31383" name="Teranu Mardui" title="Guardián de la Puerta" />
+	<localisation id="31386" name="Violet" title="Mercader" />
+	<localisation id="31404" name="Monster Race Guide" title="Ciudad de Gludio" />
+	<localisation id="31405" name="Monster Race Guide" title="Ciudad de Dion" />
+	<localisation id="31406" name="Monster Race Guide" title="Ciudad de Giran" />
+	<localisation id="31407" name="Monster Race Guide" title="Heine" />
+	<localisation id="31408" name="Monster Race Guide" title="Ciudad de Oren" />
+	<localisation id="31409" name="Monster Race Guide" title="Aldea de los Cazadores" />
+	<localisation id="31410" name="Monster Race Guide" title="Ciudad de Aden" />
+	<localisation id="31411" name="Monster Race Guide" title="Ciudad de Goddard" />
+	<localisation id="31412" name="Monster Race Guide" title="Villa de Rune" />
+	<localisation id="31413" name="Antonio" title="Vendedor de Grimorios" />
+	<localisation id="31414" name="Lynn" title="Vendedora de Grimorios" />
+	<localisation id="31415" name="Triya" title="Vendedor de Grimorios" />
+	<localisation id="31416" name="Aren" title="Vendedor de Grimorios" />
+	<localisation id="31417" name="Berynel" title="Vendedor de Grimorios" />
+	<localisation id="31418" name="Rouke" title="Vendedor de Grimorios" />
+	<localisation id="31419" name="Lorel" title="Vendedor de Grimorios" />
+	<localisation id="31420" name="Tomanel" title="Vendedor de Grimorios" />
+	<localisation id="31421" name="Ratriya" title="Vendedora de Grimorios" />
+	<localisation id="31422" name="Migel" title="Vendedor de Grimorios" />
+	<localisation id="31423" name="Romas" title="Vendedor de Grimorios" />
+	<localisation id="31424" name="Shantra" title="Vendedora de Amuletos" />
+	<localisation id="31425" name="Koram" title="Vendedor de Amuletos" />
+	<localisation id="31426" name="Jaka" title="Vendedor de Amuletos" />
+	<localisation id="31427" name="Urgal" title="Vendedor de Amuletos" />
+	<localisation id="31428" name="Shafa" title="Vendedora de Amuletos" />
+	<localisation id="31429" name="Shitara" title="Vendedora de Amuletos" />
+	<localisation id="31430" name="Donai" title="Vendedor de Amuletos" />
+	<localisation id="31431" name="Karai" title="Vendedor de Amuletos" />
+	<localisation id="31432" name="Reeya" title="Vendedora de Planos" />
+	<localisation id="31433" name="Ronaldo" title="Vendedor de Planos" />
+	<localisation id="31434" name="Shaling" title="Vendedora de Planos" />
+	<localisation id="31435" name="Daeger" title="Vendedor de Planos" />
+	<localisation id="31436" name="Dani" title="Vendedora de Planos" />
+	<localisation id="31437" name="Luka" title="Vendedor de Planos" />
+	<localisation id="31438" name="Lara" title="Vendedora de Planos" />
+	<localisation id="31439" name="Rogen" title="Mercader de Minerales" />
+	<localisation id="31440" name="Lanna" title="Mercader de Minerales" />
+	<localisation id="31441" name="Gordo" title="Mercader de Minerales" />
+	<localisation id="31442" name="Kiki" title="Mercader de Minerales" />
+	<localisation id="31443" name="Raban" title="Mercader de Minerales" />
+	<localisation id="31444" name="Cona" title="Mercader de Minerales" />
+	<localisation id="31445" name="Shutner" title="Mercader de Minerales" />
+	<localisation id="31520" name="Leikar" title="Doncella" />
+	<localisation id="31521" name="Jeremy" title="Cocinero" />
+	<localisation id="31537" name="Tunatun" title="Pastor de Bestias" />
+	<localisation id="31539" name="Vulcan" title="Herrero de la Llama" />
+	<localisation id="31540" name="Klein" title="Vigía de Valakas" />
+	<localisation id="31553" name="Pierce" title="Capitán Mercenario" />
+	<localisation id="31554" name="Kahman" title="Mercenario" />
+	<localisation id="31555" name="Abercrombie" title="Proveedor Mercenario" />
+	<localisation id="31556" name="Selina" title="Médica Mercenaria" />
+	<localisation id="31562" name="Klufe" title="Miembro del Gremio de Pesca" />
+	<localisation id="31563" name="Perelin" title="Miembro del Gremio de Pesca" />
+	<localisation id="31564" name="Mishini" title="Miembro del Gremio de Pesca" />
+	<localisation id="31565" name="Ogord" title="Miembro del Gremio de Pesca" />
+	<localisation id="31566" name="Ropfi" title="Miembro del Gremio de Pesca" />
+	<localisation id="31567" name="Bleaker" title="Miembro del Gremio de Pesca" />
+	<localisation id="31568" name="Pamfus" title="Miembro del Gremio de Pesca" />
+	<localisation id="31569" name="Cyano" title="Miembro del Gremio de Pesca" />
+	<localisation id="31570" name="Lanosco" title="Miembro del Gremio de Pesca" />
+	<localisation id="31571" name="Hufs" title="Miembro del Gremio de Pesca" />
+	<localisation id="31572" name="O'Fulle" title="Miembro del Gremio de Pesca" />
+	<localisation id="31573" name="Monakan" title="Miembro del Gremio de Pesca" />
+	<localisation id="31574" name="Willie" title="Miembro del Gremio de Pesca" />
+	<localisation id="31575" name="Litulon" title="Miembro del Gremio de Pesca" />
+	<localisation id="31576" name="Berix" title="Miembro del Gremio de Pesca" />
+	<localisation id="31577" name="Linnaeus" title="Miembro del Gremio de Pesca" />
+	<localisation id="31578" name="Hilgendorf" title="Miembro del Gremio de Pesca" />
+	<localisation id="31579" name="Klaus" title="Miembro del Gremio de Pesca" />
+	<localisation id="31580" name="Galadrid" title="Maestro" />
+	<localisation id="31581" name="Anastia" title="Magíster" />
+	<localisation id="31582" name="Mordred" title="Caballero Oscuro" />
+	<localisation id="31583" name="Feynn" title="Herrero" />
+	<localisation id="31584" name="Valentine" title="Cervecero" />
+	<localisation id="31585" name="Sparky the Cat" title="Sirviente de Keats" />
+	<localisation id="31586" name="Sparky the Cat" title="Sirviente de Keats" />
+	<localisation id="31587" name="Gedrik" title="Lapidario" />
+	<localisation id="31588" name="Agnes" title="Santa de la Luz" />
+	<localisation id="31592" name="Telson" title="Maestro Constructor de Gólems" />
+	<localisation id="31593" name="Dorothy" title="Gólem de Telson" />
+	<localisation id="31594" name="Mond" title="Inspector Jefe" />
+	<localisation id="31596" name="Tobald" title="Maestro" />
+	<localisation id="31597" name="Tobald" title="Maestro" />
+	<localisation id="31602" name="Sharona Artemia" title="Guardaespaldas" />
+	<localisation id="31603" name="Black Cat" title="Miembro del Gremio de Cazadores" />
+	<localisation id="31604" name="Grimst" title="Informante" />
+	<localisation id="31605" name="Kinsley" title="Invocador Mayor" />
+	<localisation id="31606" name="Alice de Catrina" title="Sirviente de Kinsley" />
+	<localisation id="31608" name="Belinda" title="Invocadora" />
+	<localisation id="31609" name="Unicorn Aurora" title="Sirviente de Belinda" />
+	<localisation id="31613" name="Noctisse" title="Invocadora" />
+	<localisation id="31614" name="Radyss" title="Invocador Mayor" />
+	<localisation id="31622" name="Keats" title="Invocador Maldito" />
+	<localisation id="31623" name="Bavarin" title="Informante" />
+	<localisation id="31624" name="Donath" title="Chef Principal" />
+	<localisation id="31625" name="Yeti" title="Ayudante de Cocina de Donath" />
+	<localisation id="31626" name="Duncan" title="Cocinero" />
+	<localisation id="31627" name="Mist" title="Informante" />
+	<localisation id="31628" name="Lilly" title="Nieta de Mist" />
+	<localisation id="31666" name="Lumen" title="Vendedor de Grimorios" />
+	<localisation id="31667" name="Raik" title="Vendedor de Amuletos" />
+	<localisation id="31668" name="Tangen" title="Vendedor de Planos" />
+	<localisation id="31669" name="Onyx" title="Mercader de Minerales" />
+	<localisation id="31670" name="Burns" title="Vendedor de Grimorios" />
+	<localisation id="31679" name="Eustace Van Essen" title="Capitán de la Guardia Fronteriza" />
+	<localisation id="31696" name="Platis" title="Miembro del Gremio de Pesca" />
+	<localisation id="31697" name="Eindarkner" title="Miembro del Gremio de Pesca" />
+	<localisation id="31698" name="Arisha" title="Guardiana de la Puerta" />
+	<localisation id="31699" name="Stanislava" title="Guardiana de la Puerta" />
+	<localisation id="31755" name="Halaster" title="Gran Magíster" />
+	<localisation id="31756" name="Mr. Cat" title="Asistente del Servidor de Pruebas" />
+	<localisation id="31757" name="Miss Queen" title="Asistente del Servidor de Pruebas" />
+	<localisation id="31760" name="Miss Queen" title="Guía de Aventureros" />
+	<localisation id="31761" name="Miss Queen" title="Guía de Aventureros" />
+	<localisation id="31762" name="Miss Queen" title="Guía de Aventureros" />
+	<localisation id="31763" name="Miss Queen" title="Guía de Aventureros" />
+	<localisation id="31764" name="Miss Queen" title="Guía de Aventureros" />
+	<localisation id="31765" name="Miss Queen" title="Guía de Aventureros" />
+	<localisation id="31766" name="Miss Queen" title="Guía de Aventureros" />
+	<localisation id="31773" name="Sonin" title="Encargada del Almacén" />
+	<localisation id="31774" name="Beryl the Cat" title="Encargada de Eventos" />
+	<localisation id="31860" name="Puss the Cat" title="Encargada de Eventos" />
+	<localisation id="32075" name="Sandy the Cat" title="Asistente del Torneo" />
+	<localisation id="35095" name="Mass Gatekeeper" title="Gludio" />
+	<localisation id="35098" name="Blacksmith" title="Gludio" />
+	<localisation id="35099" name="Warehouse Keeper" title="Gludio" />
+	<localisation id="35100" name="Sayres" title="Chambelán" />
+	<localisation id="35101" name="Grad" title="Encargado de Wyverns" />
+	<localisation id="35102" name="Greenspan" title="Encargado de Mercenarios" />
+	<localisation id="35103" name="Manor Manager" title="Gludio" />
+	<localisation id="35104" name="Tyron" title="Sir" />
+	<localisation id="35137" name="Mass Gatekeeper" title="Dion" />
+	<localisation id="35140" name="Blacksmith" title="Dion" />
+	<localisation id="35141" name="Warehouse Keeper" title="Dion" />
+	<localisation id="35142" name="Crosby" title="Chambelán" />
+	<localisation id="35143" name="Hodler" title="Encargado de Wyverns" />
+	<localisation id="35144" name="Mercenary Manager Sanford" title="Encargado de Mercenarios" />
+	<localisation id="35145" name="Manor Manager" title="Dion" />
+	<localisation id="35146" name="Gibbson" title="Heraldo" />
+	<localisation id="35179" name="Mass Gatekeeper" title="Giran" />
+	<localisation id="35182" name="Blacksmith" title="Giran" />
+	<localisation id="35183" name="Warehouse Keeper" title="Giran" />
+	<localisation id="35184" name="Saul" title="Chambelán" />
+	<localisation id="35185" name="Bryce" title="Encargada de Wyverns" />
+	<localisation id="35186" name="Arvid" title="Encargado de Mercenarios" />
+	<localisation id="35187" name="Manor Manager" title="Giran" />
+	<localisation id="35188" name="Holmes" title="Sir" />
+	<localisation id="35221" name="Mass Gatekeeper" title="Oren" />
+	<localisation id="35224" name="Blacksmith" title="Oren" />
+	<localisation id="35225" name="Warehouse Keeper" title="Oren" />
+	<localisation id="35226" name="Brasseur" title="Chambelán" />
+	<localisation id="35227" name="Finrod" title="Encargado de Wyverns" />
+	<localisation id="35228" name="Morrison" title="Encargado de Mercenarios" />
+	<localisation id="35229" name="Manor Manager" title="Oren" />
+	<localisation id="35230" name="Manor Manager" title="Oren" />
+	<localisation id="35231" name="Manor Manager" title="Oren" />
+	<localisation id="35232" name="Sherwood" title="Mensajero" />
+	<localisation id="35266" name="Mass Gatekeeper" title="Aden" />
+	<localisation id="35272" name="Blacksmith" title="Aden" />
+	<localisation id="35273" name="Warehouse Keeper" title="Aden" />
+	<localisation id="35274" name="Logan" title="Chambelán" />
+	<localisation id="35275" name="Kruger" title="Encargado de Wyverns" />
+	<localisation id="35276" name="Eldon" title="Encargado de Mercenarios" />
+	<localisation id="35277" name="Manor Manager" title="Aden" />
+	<localisation id="35278" name="Messenger Ruford" title="Mensajero" />
+	<localisation id="35311" name="Mass Gatekeeper" title="Innadril" />
+	<localisation id="35314" name="Blacksmith" title="Innadril" />
+	<localisation id="35315" name="Warehouse Keeper" title="Innadril" />
+	<localisation id="35316" name="Neurath" title="Chambelán" />
+	<localisation id="35317" name="Tate" title="Encargado de Wyverns" />
+	<localisation id="35318" name="Solinus" title="Encargado de Mercenarios" />
+	<localisation id="35319" name="Manor Manager" title="Innadril" />
+	<localisation id="35320" name="Raybell" title="Sir" />
+	<localisation id="35355" name="Mass Gatekeeper" title="Goddard" />
+	<localisation id="35361" name="Blacksmith" title="Goddard" />
+	<localisation id="35362" name="Warehouse Keeper" title="Goddard" />
+	<localisation id="35363" name="Alfred" title="Chambelán" />
+	<localisation id="35364" name="Hadley" title="Encargado de Wyverns" />
+	<localisation id="35365" name="Rowell" title="Encargado de Mercenarios" />
+	<localisation id="35366" name="Manor Manager" title="Goddard" />
+	<localisation id="35367" name="Daven" title="Mensajero" />
+	<localisation id="35382" name="Brakel" title="Heraldo Partisano" />
+	<localisation id="35383" name="Tamutak" title="Mayordomo Ol Mahum" />
+	<localisation id="35384" name="Black" title="Encargado del Salón de Clan" />
+	<localisation id="35386" name="Boyer" title="Encargado del Salón de Clan" />
+	<localisation id="35388" name="Tim" title="Encargado del Salón de Clan" />
+	<localisation id="35390" name="Dillon" title="Encargado del Salón de Clan" />
+	<localisation id="35392" name="Bremmer" title="Encargado del Salón de Clan" />
+	<localisation id="35394" name="Kalis" title="Encargado del Salón de Clan" />
+	<localisation id="35396" name="Winker" title="Encargado del Salón de Clan" />
+	<localisation id="35398" name="Ruben" title="Encargado del Salón de Clan" />
+	<localisation id="35400" name="Horner" title="Encargado del Salón de Clan" />
+	<localisation id="35403" name="Ron" title="Encargado del Salón de Clan" />
+	<localisation id="35405" name="Flynn" title="Encargado del Salón de Clan" />
+	<localisation id="35407" name="Seth" title="Encargado del Salón de Clan" />
+	<localisation id="35419" name="Hephaeston" title="Encargado de Wyverns" />
+	<localisation id="35420" name="Loken" title="Mensajero" />
+	<localisation id="35421" name="Biggerstaff" title="Mayordomo" />
+	<localisation id="35439" name="Carey" title="Encargada del Salón de Clan" />
+	<localisation id="35441" name="Dianne" title="Encargada del Salón de Clan" />
+	<localisation id="35443" name="Crissy" title="Encargada del Salón de Clan" />
+	<localisation id="35445" name="Albert" title="Encargado del Salón de Clan" />
+	<localisation id="35447" name="Korgen" title="Encargado del Salón de Clan" />
+	<localisation id="35449" name="DiMaggio" title="Encargado del Salón de Clan" />
+	<localisation id="35451" name="Emma" title="Encargada del Salón de Clan" />
+	<localisation id="35453" name="Adrienne" title="Encargada del Salón de Clan" />
+	<localisation id="35455" name="Bianca" title="Encargada del Salón de Clan" />
+	<localisation id="35457" name="Gladys" title="Encargada del Salón de Clan" />
+	<localisation id="35459" name="Regina" title="Encargada del Salón de Clan" />
+	<localisation id="35461" name="Aida" title="Encargada del Salón de Clan" />
+	<localisation id="35463" name="Helga" title="Encargada del Salón de Clan" />
+	<localisation id="35465" name="Millicent" title="Encargada del Salón de Clan" />
+	<localisation id="35467" name="Branhillde" title="Encargada del Salón de Clan" />
+	<localisation id="35512" name="Manor Manager" title="Rune" />
+</list>
