@@ -40,8 +40,19 @@ public class PledgeStatusChanged extends ServerPacket
 		ServerPackets.PLEDGE_STATUS_CHANGED.writeId(this, buffer);
 		buffer.writeInt(_clan.getLeaderId());
 		buffer.writeInt(_clan.getId());
-		buffer.writeInt(0);
-		buffer.writeInt(_clan.getLevel());
-		buffer.writeInt(0);
+		if (client.isInterlude())
+		{
+			buffer.writeInt(_clan.getCrestId());
+			buffer.writeInt(_clan.getAllyId());
+			buffer.writeInt(_clan.getAllyCrestId());
+			buffer.writeInt(0);
+			buffer.writeInt(0);
+		}
+		else
+		{
+			buffer.writeInt(0);
+			buffer.writeInt(_clan.getLevel());
+			buffer.writeInt(0);
+		}
 	}
 }

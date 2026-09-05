@@ -74,7 +74,14 @@ public class ExEnchantSkillInfo extends ServerPacket
 		buffer.writeInt(_id);
 		buffer.writeInt(_level);
 		buffer.writeInt(_spCost);
-		buffer.writeInt(_xpCost);
+		if (client.isInterlude())
+		{
+			buffer.writeLong(_xpCost);
+		}
+		else
+		{
+			buffer.writeInt(_xpCost);
+		}
 		buffer.writeInt(_rate);
 		buffer.writeInt(_reqs.size());
 		for (Req temp : _reqs)

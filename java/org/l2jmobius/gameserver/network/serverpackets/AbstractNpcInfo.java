@@ -266,6 +266,10 @@ public abstract class AbstractNpcInfo extends ServerPacket
 			buffer.writeDouble(_collisionRadius);
 			buffer.writeDouble(_collisionHeight);
 			buffer.writeInt(_enchantEffect); // C4
+			if (client.isInterlude())
+			{
+				buffer.writeInt(_npc.isFlying()); // C6
+			}
 		}
 	}
 	
@@ -340,6 +344,10 @@ public abstract class AbstractNpcInfo extends ServerPacket
 			buffer.writeDouble(_collisionRadius);
 			buffer.writeDouble(_collisionHeight);
 			buffer.writeInt(0); // C4
+			if (client.isInterlude())
+			{
+				buffer.writeInt(0); // C6
+			}
 		}
 	}
 	
@@ -417,6 +425,10 @@ public abstract class AbstractNpcInfo extends ServerPacket
 			buffer.writeDouble(_collisionRadius);
 			buffer.writeDouble(_collisionHeight);
 			buffer.writeInt(_enchantEffect); // C4
+			if (client.isInterlude())
+			{
+				buffer.writeInt(0); // C6
+			}
 		}
 	}
 }

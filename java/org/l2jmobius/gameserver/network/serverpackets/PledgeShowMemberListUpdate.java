@@ -80,5 +80,9 @@ public class PledgeShowMemberListUpdate extends ServerPacket
 			buffer.writeInt(0);
 			buffer.writeInt(0);
 		}
+		if (client.isInterlude())
+		{
+			buffer.writeInt(0); // Sponsor flag. Always 0: C4 has no clan academy.
+		}
 	}
 }

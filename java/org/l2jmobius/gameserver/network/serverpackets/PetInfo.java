@@ -141,17 +141,45 @@ public class PetInfo extends ServerPacket
 		buffer.writeInt(_maxMp); // max mp
 		buffer.writeInt((int) _summon.getStat().getSp()); // sp
 		buffer.writeInt(_summon.getLevel()); // level
-		buffer.writeInt((int) _summon.getStat().getExp());
-		if (_summon.getExpForThisLevel() > _summon.getStat().getExp())
+		if (client.isInterlude())
 		{
-			buffer.writeInt((int) _summon.getStat().getExp()); // 0% absolute value
+			buffer.writeLong(_summon.getStat().getExp());
 		}
 		else
 		{
-			buffer.writeInt((int) _summon.getExpForThisLevel()); // 0% absolute value
+			buffer.writeInt((int) _summon.getStat().getExp());
+		}
+		if (_summon.getExpForThisLevel() > _summon.getStat().getExp())
+		{
+			if (client.isInterlude())
+			{
+				buffer.writeLong(_summon.getStat().getExp()); // 0% absolute value
+			}
+			else
+			{
+				buffer.writeInt((int) _summon.getStat().getExp()); // 0% absolute value
+			}
+		}
+		else
+		{
+			if (client.isInterlude())
+			{
+				buffer.writeLong(_summon.getExpForThisLevel()); // 0% absolute value
+			}
+			else
+			{
+				buffer.writeInt((int) _summon.getExpForThisLevel()); // 0% absolute value
+			}
 		}
 		
-		buffer.writeInt((int) _summon.getExpForNextLevel()); // 100% absoulte value
+		if (client.isInterlude())
+		{
+			buffer.writeLong(_summon.getExpForNextLevel()); // 100% absoulte value
+		}
+		else
+		{
+			buffer.writeInt((int) _summon.getExpForNextLevel()); // 100% absoulte value
+		}
 		buffer.writeInt(_summon.isPet() ? _summon.getInventory().getTotalWeight() : 0); // weight
 		buffer.writeInt(_summon.getMaxLoad()); // max weight it can carry
 		buffer.writeInt((int) _summon.getPAtk(null)); // patk

@@ -61,5 +61,10 @@ public class ExStorageMaxCount extends ServerPacket
 		buffer.writeInt(_receipeD);
 		buffer.writeInt(_recipe);
 		buffer.writeInt(_inventoryExtraSlots); // Belt inventory slots increase count
+		if (client.isInterlude())
+		{
+			// C4 stores quest items in the ordinary inventory, so they share its limit.
+			buffer.writeInt(_inventory);
+		}
 	}
 }

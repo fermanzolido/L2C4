@@ -67,7 +67,14 @@ public class ExEnchantSkillList extends ServerPacket
 			buffer.writeInt(sk.id);
 			buffer.writeInt(sk.nextLevel);
 			buffer.writeInt(sk.sp);
-			buffer.writeInt(sk.exp);
+			if (client.isInterlude())
+			{
+				buffer.writeLong(sk.exp);
+			}
+			else
+			{
+				buffer.writeInt(sk.exp);
+			}
 		}
 	}
 }

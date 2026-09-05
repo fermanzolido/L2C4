@@ -43,6 +43,9 @@ public class MyTargetSelected extends ServerPacket
 		ServerPackets.MY_TARGET_SELECTED.writeId(this, buffer);
 		buffer.writeInt(_objectId);
 		buffer.writeShort(_color);
-		// buffer.writeInt(0);
+		if (client.isInterlude())
+		{
+			buffer.writeInt(0);
+		}
 	}
 }

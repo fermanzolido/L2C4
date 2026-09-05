@@ -43,7 +43,10 @@ public class AskJoinAlly extends ServerPacket
 		ServerPackets.ASK_JOIN_ALLIANCE.writeId(this, buffer);
 		buffer.writeInt(_requestorId);
 		buffer.writeString(_requestorName);
-		buffer.writeString("");
-		buffer.writeString(_requestorAllyName);
+		if (!client.isInterlude())
+		{
+			buffer.writeString("");
+			buffer.writeString(_requestorAllyName);
+		}
 	}
 }
