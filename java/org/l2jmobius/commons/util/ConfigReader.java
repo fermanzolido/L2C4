@@ -27,9 +27,15 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,6 +48,21 @@ import org.l2jmobius.commons.time.TimeUtil;
 public class ConfigReader
 {
 	private static final Logger LOGGER = Logger.getLogger(ConfigReader.class.getName());
+	
+	/**
+	 * Every key each configuration file declares, and every key some code asked for, by file name.
+	 * A key in the first set and not the second is one an administrator can edit all day without
+	 * effect: a typo, or a setting whose code is gone. Nothing else in the server can tell the two
+	 * apart, because a misspelled key is indistinguishable from an absent one at the point of use.
+	 * <p>
+	 * Recording the question rather than the answer is what makes this exact where reading the
+	 * sources is not: keys built at runtime -- "FloodProtector" + name + suffix, a castle's name,
+	 * the buffer pool names walked through {@link #getStringPropertyNames()} -- arrive here spelled
+	 * out, and a key read only when a feature is switched on is correctly seen as unread when it
+	 * is off.
+	 */
+	private static final Map<String, Set<String>> DECLARED_KEYS = new TreeMap<>();
+	private static final Map<String, Set<String>> REQUESTED_KEYS = new TreeMap<>();
 	
 	private final Properties _properties = new Properties();
 	private final File _file;
@@ -69,6 +90,90 @@ public class ConfigReader
 		{
 			LOGGER.log(Level.WARNING, "Failed to load configurations from " + _file.getName() + ": " + e.getMessage(), e);
 		}
+		
+		synchronized (DECLARED_KEYS)
+		{
+			// Merged, not replaced: a file opened by more than one reader is one file to an
+			// administrator, and its keys are answered by whichever reader was asked.
+			DECLARED_KEYS.computeIfAbsent(_file.getName(), _ -> new LinkedHashSet<>()).addAll(_properties.stringPropertyNames());
+		}
+	}
+	
+	/**
+	 * Records that some code asked this file for a key, whether or not the file declares it.
+	 * @param config the configuration key that was asked for
+	 */
+	private void markRequested(String config)
+	{
+		synchronized (DECLARED_KEYS)
+		{
+			REQUESTED_KEYS.computeIfAbsent(_file.getName(), _ -> new LinkedHashSet<>()).add(config);
+		}
+	}
+	
+	/**
+	 * Returns the keys each configuration file declares that nothing has asked for, by file name.
+	 * <p>
+	 * Call this once the server has finished starting. Configuration is not read in one pass:
+	 * managers read their own files as they load, so asking earlier reports keys as unused that are
+	 * merely not read yet.
+	 * @return a {@link Map} of file name to the unread keys it declares, in declaration order,
+	 *         holding only the files that have at least one
+	 */
+	public static Map<String, List<String>> getUnreadSettings()
+	{
+		final Map<String, List<String>> result = new TreeMap<>();
+		synchronized (DECLARED_KEYS)
+		{
+			for (Map.Entry<String, Set<String>> entry : DECLARED_KEYS.entrySet())
+			{
+				final Set<String> requested = REQUESTED_KEYS.get(entry.getKey());
+				final List<String> unread = new ArrayList<>();
+				for (String key : entry.getValue())
+				{
+					if ((requested == null) || !requested.contains(key))
+					{
+						unread.add(key);
+					}
+				}
+				
+				if (!unread.isEmpty())
+				{
+					result.put(entry.getKey(), unread);
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Logs the settings no code asked for, one line per configuration file.
+	 * <p>
+	 * Deliberately not a warning. A setting can go unread because a feature that reads it is
+	 * switched off, which is normal and not worth alarming anyone about; the list is for whoever
+	 * is looking into why an edit did nothing.
+	 */
+	public static void logUnreadSettings()
+	{
+		final Map<String, List<String>> unread = getUnreadSettings();
+		if (unread.isEmpty())
+		{
+			LOGGER.info("ConfigReader: Every setting in every configuration file was read.");
+			return;
+		}
+		
+		int total = 0;
+		for (List<String> keys : unread.values())
+		{
+			total += keys.size();
+		}
+		
+		LOGGER.info("ConfigReader: " + total + " setting(s) in " + unread.size() + " file(s) were not read by anything. Editing them has no effect; a misspelled key looks exactly like this.");
+		for (Map.Entry<String, List<String>> entry : unread.entrySet())
+		{
+			LOGGER.info("ConfigReader: " + entry.getKey() + ": " + String.join(", ", entry.getValue()));
+		}
 	}
 	
 	/**
@@ -78,6 +183,7 @@ public class ConfigReader
 	 */
 	public boolean containsKey(String config)
 	{
+		markRequested(config);
 		return _properties.containsKey(config);
 	}
 	
@@ -88,6 +194,7 @@ public class ConfigReader
 	 */
 	public String getValue(String config)
 	{
+		markRequested(config);
 		return _properties.getProperty(config);
 	}
 	
@@ -311,6 +418,7 @@ public class ConfigReader
 	 */
 	public String getString(String config, String defaultValue)
 	{
+		markRequested(config);
 		final String value = _properties.getProperty(config);
 		if (value == null)
 		{
@@ -388,6 +496,7 @@ public class ConfigReader
 	 */
 	public int[] getIntArray(String config, String delimiter, String defaultValue)
 	{
+		markRequested(config);
 		final String value = _properties.getProperty(config);
 		if (value != null)
 		{
@@ -430,6 +539,7 @@ public class ConfigReader
 	 */
 	private String getTrimmedValue(String config)
 	{
+		markRequested(config);
 		final String value = _properties.getProperty(config);
 		return value == null ? null : value.trim();
 	}
