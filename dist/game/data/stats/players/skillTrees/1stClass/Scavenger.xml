@@ -144,5 +144,15 @@
 		<skill skillName="Vicious Stance" skillId="312" skillLevel="5" getLevel="36" levelUpSp="31000" learnedByNpc="true" />
 		<skill skillName="Boost Attack Speed" skillId="168" skillLevel="1" getLevel="36" levelUpSp="31000" learnedByNpc="true" />
 		<skill skillName="Esprit" skillId="171" skillLevel="1" getLevel="36" levelUpSp="31000" learnedByNpc="true" />
+		<!-- Lower levels from HumanFighter: the chains above start past level 1 and the trainer offers one level at a time. -->
+		<skill skillName="Mortal Blow" skillId="16" skillLevel="1" getLevel="5" levelUpSp="50" learnedByNpc="true" />
+		<skill skillName="Mortal Blow" skillId="16" skillLevel="2" getLevel="5" levelUpSp="50" learnedByNpc="true" />
+		<skill skillName="Mortal Blow" skillId="16" skillLevel="3" getLevel="5" levelUpSp="50" learnedByNpc="true" />
+		<skill skillName="Mortal Blow" skillId="16" skillLevel="4" getLevel="10" levelUpSp="370" learnedByNpc="true" />
+		<skill skillName="Mortal Blow" skillId="16" skillLevel="5" getLevel="10" levelUpSp="370" learnedByNpc="true" />
+		<skill skillName="Mortal Blow" skillId="16" skillLevel="6" getLevel="10" levelUpSp="370" learnedByNpc="true" />
+		<skill skillName="Mortal Blow" skillId="16" skillLevel="7" getLevel="15" levelUpSp="1300" learnedByNpc="true" />
+		<skill skillName="Mortal Blow" skillId="16" skillLevel="8" getLevel="15" levelUpSp="1300" learnedByNpc="true" />
+		<skill skillName="Mortal Blow" skillId="16" skillLevel="9" getLevel="15" levelUpSp="1300" learnedByNpc="true" />
 	</skillTree>
 </list>
