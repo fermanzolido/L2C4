@@ -1,0 +1,7 @@
+<html><body>Sacerdotisa del Crepusculo:<br>
+<font color="LEVEL">[Entregar piedras de sello %contribStoneColor%]</font><br>
+Ahora tenes %stoneCount% piedras de sello %stoneColor%. Cuantas queres entregar?<br>
+[Ingresa la cantidad que quieras entregar.]<br>
+<edit var="amount" width=100>
+<button value="Present" action="bypass -h npc_%objectId%_SevenSigns 21 %stoneItemId% $amount" back="L2UI.DefaultButton_click" fore="L2UI.DefaultButton" width=67 height=19>
+</body></html>
