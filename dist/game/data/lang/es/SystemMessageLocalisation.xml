@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $s1 and friends are the client's own placeholders and must survive the translation. -->
+<list xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/localisations.xsd">
+	<localisation id="34" translation="Bienvenido al mundo de Lineage II." />
+	<localisation id="44" translation="¡Golpe crítico!" />
+	<localisation id="45" translation="Ganaste $s1 de experiencia." />
+	<localisation id="48" translation="$s1 no está disponible en este momento: se está recargando." />
+	<localisation id="121" translation="$s1 confirmó el intercambio." />
+	<localisation id="357" translation="Ya fue saqueado." />
+	<localisation id="1509" translation="Esta habilidad no está disponible en el evento de Olimpiada." />
+</list>
