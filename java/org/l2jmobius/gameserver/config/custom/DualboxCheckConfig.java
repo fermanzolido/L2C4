@@ -42,6 +42,7 @@ public class DualboxCheckConfig
 	
 	// Constants
 	public static int DUALBOX_CHECK_MAX_PLAYERS_PER_IP;
+	public static int DUALBOX_CHECK_MAX_PLAYERS_PREMIUM_PER_IP;
 	public static int DUALBOX_CHECK_MAX_OLYMPIAD_PARTICIPANTS_PER_IP;
 	public static int DUALBOX_CHECK_MAX_L2EVENT_PARTICIPANTS_PER_IP;
 	public static int DUALBOX_CHECK_MAX_OFFLINEPLAY_PER_IP;
@@ -53,6 +54,7 @@ public class DualboxCheckConfig
 	{
 		final ConfigReader config = new ConfigReader(DUALBOX_CHECK_CONFIG_FILE);
 		DUALBOX_CHECK_MAX_PLAYERS_PER_IP = config.getInt("DualboxCheckMaxPlayersPerIP", 0);
+		DUALBOX_CHECK_MAX_PLAYERS_PREMIUM_PER_IP = config.getInt("DualboxCheckMaxPlayersPremiumPerIP", 0);
 		DUALBOX_CHECK_MAX_OLYMPIAD_PARTICIPANTS_PER_IP = config.getInt("DualboxCheckMaxOlympiadParticipantsPerIP", 0);
 		DUALBOX_CHECK_MAX_L2EVENT_PARTICIPANTS_PER_IP = config.getInt("DualboxCheckMaxL2EventParticipantsPerIP", 0);
 		DUALBOX_CHECK_MAX_OFFLINEPLAY_PER_IP = config.getInt("DualboxCheckMaxOfflinePlayPerIP", 0);
