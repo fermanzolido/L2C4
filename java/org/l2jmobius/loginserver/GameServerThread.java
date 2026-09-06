@@ -36,17 +36,20 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.commons.crypt.NewCrypt;
+import org.l2jmobius.commons.enums.PasswordChangeResult;
 import org.l2jmobius.commons.util.TraceUtil;
 import org.l2jmobius.loginserver.config.LoginConfig;
 import org.l2jmobius.loginserver.network.AbstractServerPacket;
 import org.l2jmobius.loginserver.network.gameserverpackets.BlowFishKey;
 import org.l2jmobius.loginserver.network.gameserverpackets.ChangeAccessLevel;
+import org.l2jmobius.loginserver.network.gameserverpackets.ChangePassword;
 import org.l2jmobius.loginserver.network.gameserverpackets.GameServerAuth;
 import org.l2jmobius.loginserver.network.gameserverpackets.PlayerAuthRequest;
 import org.l2jmobius.loginserver.network.gameserverpackets.PlayerInGame;
 import org.l2jmobius.loginserver.network.gameserverpackets.PlayerLogout;
 import org.l2jmobius.loginserver.network.gameserverpackets.ServerStatus;
 import org.l2jmobius.loginserver.network.loginserverpackets.AuthResponse;
+import org.l2jmobius.loginserver.network.loginserverpackets.ChangePasswordResponse;
 import org.l2jmobius.loginserver.network.loginserverpackets.InitLS;
 import org.l2jmobius.loginserver.network.loginserverpackets.KickPlayer;
 import org.l2jmobius.loginserver.network.loginserverpackets.LoginServerFail;
@@ -371,6 +374,24 @@ public class GameServerThread extends Thread
 						// Handle server status update.
 						@SuppressWarnings("unused")
 						final ServerStatus serverStatusPacket = new ServerStatus(packetData, _serverId); // Performs actions automatically.
+						break;
+					}
+					case 0x0B:
+					{
+						if (!_isAuthed)
+						{
+							final LoginServerFail failPacket = new LoginServerFail(LoginServerFail.NOT_AUTHED);
+							sendPacket(failPacket);
+							_socket.close();
+							break;
+						}
+
+						// Handle a password change asked for by a player in game. The game server has
+						// already checked that the player owns the account it names, by virtue of the
+						// player being logged into it; the current password is checked here.
+						final ChangePassword changePasswordPacket = new ChangePassword(packetData);
+						final PasswordChangeResult result = LoginController.getInstance().changePassword(changePasswordPacket.getAccount(), changePasswordPacket.getCurrentPassword(), changePasswordPacket.getNewPassword());
+						sendPacket(new ChangePasswordResponse(changePasswordPacket.getCharacterName(), result));
 						break;
 					}
 				}

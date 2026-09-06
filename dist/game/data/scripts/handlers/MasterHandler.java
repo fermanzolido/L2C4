@@ -31,6 +31,7 @@ import org.l2jmobius.gameserver.config.custom.MultilingualSupportConfig;
 import org.l2jmobius.gameserver.config.custom.OfflinePlayConfig;
 import org.l2jmobius.gameserver.config.custom.OfflineTradeConfig;
 import org.l2jmobius.gameserver.config.custom.OnlineInfoConfig;
+import org.l2jmobius.gameserver.config.custom.PasswordChangeConfig;
 import org.l2jmobius.gameserver.config.custom.PremiumSystemConfig;
 import org.l2jmobius.gameserver.config.custom.WeddingConfig;
 import org.l2jmobius.gameserver.handler.ActionHandler;
@@ -269,6 +270,7 @@ import handlers.voicedcommandhandlers.Lang;
 import handlers.voicedcommandhandlers.Offline;
 import handlers.voicedcommandhandlers.OfflinePlay;
 import handlers.voicedcommandhandlers.Online;
+import handlers.voicedcommandhandlers.PasswordChange;
 import handlers.voicedcommandhandlers.Premium;
 import handlers.voicedcommandhandlers.Wedding;
 
@@ -520,6 +522,7 @@ public class MasterHandler {
 									? Offline.class
 									: null,
 					OnlineInfoConfig.ENABLE_ONLINE_COMMAND ? Online.class : null,
+					PasswordChangeConfig.ALLOW_CHANGE_PASSWORD ? PasswordChange.class : null,
 					PremiumSystemConfig.PREMIUM_SYSTEM_ENABLED ? Premium.class : null,
 					AutoPotionsConfig.AUTO_POTIONS_ENABLED ? AutoPotion.class : null,
 			},
