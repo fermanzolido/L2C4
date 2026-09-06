@@ -54,7 +54,8 @@ public class AdminMobGroup implements IAdminCommandHandler
 		"admin_mobgroup_casting",
 		"admin_mobgroup_nomove",
 		"admin_mobgroup_attackgrp",
-		"admin_mobgroup_invul"
+		"admin_mobgroup_invul",
+		"admin_mobgroup_teleport"
 	};
 	
 	@Override

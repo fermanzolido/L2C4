@@ -120,7 +120,6 @@
 	<admin command="find_account" description="Lists all characters belonging to specified account." accessLevel="30" />
 	<admin command="find_dualbox" description="Detect multiple characters logged in from the same IP (dualbox detection)." accessLevel="30" />
 	<admin command="strict_find_dualbox" description="Strict dualbox detection including connection tracing." accessLevel="30" />
-	<admin command="tracert" description="Shows network route information for targeted player." accessLevel="30" />
 	<admin command="rec" description="Give a recommendation to the targeted playe." accessLevel="100" />
 	<admin command="settitle" description="Set or change the title of the targeted player." accessLevel="100" />
 	<admin command="changename" description="Change the name of the targeted player." accessLevel="100" />
@@ -351,6 +350,7 @@
 	<admin command="mobgroup_nomove" description="Disable movement for the mob group." accessLevel="100" />
 	<admin command="mobgroup_attackgrp" description="Set the mob group to attack another mob group." accessLevel="100" />
 	<admin command="mobgroup_invul" description="Make the mob group invulnerable to damage." accessLevel="100" />
+	<admin command="mobgroup_teleport" description="Teleport the mob group to a player." accessLevel="100" />
 
 	<!-- ADMIN ONLINE -->
 	<admin command="online" description="Display a list of all currently online players." accessLevel="100" />
@@ -460,10 +460,7 @@
 	<admin command="reset_skills" description="Restores your original skills after using get_skills." accessLevel="100" />
 	<admin command="give_all_skills" description="Gives target player all skills available for their level/class." accessLevel="100" />
 	<admin command="give_all_skills_fs" description="Gives all skills including Forgotten Scroll skills." accessLevel="100" />
-	<admin command="give_clan_skills" description="Gives clan skills to target player's clan." accessLevel="100" />
-	<admin command="give_all_clan_skills" description="Gives all available clan skills." accessLevel="100" />
 	<admin command="remove_all_skills" description="Removes all skills from target player." accessLevel="100" />
-	<admin command="add_clan_skill" description="Adds specific clan skill." accessLevel="100" />
 	<admin command="setskill" description="Adds skill to yourself." accessLevel="100" />
 
 	<!-- ADMIN SPAWN -->
