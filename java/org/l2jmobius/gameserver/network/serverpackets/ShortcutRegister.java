@@ -55,6 +55,10 @@ public class ShortcutRegister extends ServerPacket
 			{
 				buffer.writeInt(_shortcut.getId());
 				buffer.writeInt(_shortcut.getLevel());
+				if (client.isInterlude())
+				{
+					buffer.writeByte(0); // C5
+				}
 				break;
 			}
 			case ACTION:

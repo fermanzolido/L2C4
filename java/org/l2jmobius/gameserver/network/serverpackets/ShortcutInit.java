@@ -56,16 +56,36 @@ public class ShortcutInit extends ServerPacket
 				{
 					buffer.writeInt(sc.getId());
 					buffer.writeInt(sc.getLevel());
+					if (client.isInterlude())
+					{
+						buffer.writeByte(0); // C5
+					}
 					buffer.writeInt(1);
 					break;
 				}
 				case ITEM:
+				{
+					buffer.writeInt(sc.getId());
+					buffer.writeInt(1);
+					if (client.isInterlude())
+					{
+						// Augmentation and mana of the shortcut item. Always empty: the C4
+						// datapack has no augmentation, and the client only needs the room.
+						buffer.writeInt(-1);
+						buffer.writeInt(0);
+						buffer.writeInt(0);
+						buffer.writeShort(0);
+						buffer.writeShort(0);
+					}
+					break;
+				}
 				case ACTION:
 				case MACRO:
 				case RECIPE:
 				{
 					buffer.writeInt(sc.getId());
 					buffer.writeInt(1);
+					break;
 				}
 				default:
 				{
