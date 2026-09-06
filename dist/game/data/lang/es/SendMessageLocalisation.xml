@@ -45,4 +45,15 @@
 	<localisation message="You cannot add more than XXX songs/dances to this scheme." translation="No podes agregar mas de XXX cantos/danzas a este esquema." />
 	<localisation message="You don't have a pet." translation="No tenes mascota." />
 	<localisation message="You haven't defined any scheme." translation="Todavia no creaste ningun esquema." />
+	<localisation message="Changing your password is not allowed on this server." translation="Cambiar la contrasena no esta permitido en este servidor." />
+	<localisation message="Usage: .changepassword &lt;current password&gt; &lt;new password&gt; &lt;new password again&gt;" translation="Uso: .changepassword &lt;contrasena actual&gt; &lt;contrasena nueva&gt; &lt;contrasena nueva otra vez&gt;" />
+	<localisation message="The two new passwords do not match." translation="Las dos contrasenas nuevas no coinciden." />
+	<localisation message="Your new password is too short." translation="La contrasena nueva es demasiado corta." />
+	<localisation message="Your new password is too long." translation="La contrasena nueva es demasiado larga." />
+	<localisation message="Your new password is the same as your current one." translation="La contrasena nueva es igual a la actual." />
+	<localisation message="Your password change has been sent." translation="Se envio el pedido de cambio de contrasena." />
+	<localisation message="Your password has been changed." translation="Se cambio tu contrasena." />
+	<localisation message="That is not your current password." translation="Esa no es tu contrasena actual." />
+	<localisation message="Your account could not be found." translation="No se encontro tu cuenta." />
+	<localisation message="The password could not be changed. Try again later." translation="No se pudo cambiar la contrasena. Proba de nuevo mas tarde." />
 </list>

@@ -36,11 +36,13 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.crypto.Cipher;
 
 import org.l2jmobius.commons.database.DatabaseFactory;
+import org.l2jmobius.commons.enums.PasswordChangeResult;
 import org.l2jmobius.commons.util.BCrypt;
 import org.l2jmobius.commons.util.Rnd;
 import org.l2jmobius.loginserver.config.LoginConfig;
@@ -255,6 +257,81 @@ public class LoginController
 		catch (Exception e)
 		{
 			LOGGER.warning("Could not set accessLevel:" + e);
+		}
+	}
+
+	/**
+	 * Replaces an account's password, after checking the current one.
+	 * <p>
+	 * The check accepts both hash formats {@link #isLoginValid} accepts, because an account that
+	 * has not logged in since the move to BCrypt still holds a SHA digest, and its owner would
+	 * otherwise be unable to change the very password that is due to be migrated. Whichever format
+	 * the old password was in, the new one is written as BCrypt, so a change also migrates.
+	 * @param account the account name
+	 * @param currentPassword the password the player claims is theirs
+	 * @param newPassword the password to store, already checked for shape by the caller
+	 * @return what happened, to be reported to the player
+	 */
+	public PasswordChangeResult changePassword(String account, String currentPassword, String newPassword)
+	{
+		if ((account == null) || (currentPassword == null) || (newPassword == null))
+		{
+			return PasswordChangeResult.ACCOUNT_NOT_FOUND;
+		}
+
+		try (Connection con = DatabaseFactory.getConnection())
+		{
+			String expected = null;
+			try (PreparedStatement statement = con.prepareStatement("SELECT password FROM accounts WHERE login=?"))
+			{
+				statement.setString(1, account);
+				try (ResultSet rset = statement.executeQuery())
+				{
+					if (rset.next())
+					{
+						expected = rset.getString("password");
+					}
+				}
+			}
+
+			if (expected == null)
+			{
+				return PasswordChangeResult.ACCOUNT_NOT_FOUND;
+			}
+
+			final boolean matches;
+			if (expected.startsWith("$2"))
+			{
+				matches = BCrypt.checkpw(currentPassword, expected);
+			}
+			else
+			{
+				final MessageDigest md = MessageDigest.getInstance("SHA");
+				matches = MessageDigest.isEqual(md.digest(currentPassword.getBytes("UTF-8")), Base64.getDecoder().decode(expected));
+			}
+
+			if (!matches)
+			{
+				LOGGER.warning("Refused a password change for account " + account + ": the current password did not match.");
+				return PasswordChangeResult.WRONG_CURRENT_PASSWORD;
+			}
+
+			try (PreparedStatement statement = con.prepareStatement("UPDATE accounts SET password=? WHERE login=?"))
+			{
+				statement.setString(1, BCrypt.hashpw(newPassword, BCrypt.gensalt()));
+				statement.setString(2, account);
+				statement.executeUpdate();
+			}
+
+			LOGGER.info("Changed the password of account " + account + ".");
+			return PasswordChangeResult.SUCCESS;
+		}
+		catch (Exception e)
+		{
+			// Deliberately without the exception's message in the account's log line: it can carry
+			// the statement, and the statement carries the hash.
+			LOGGER.log(Level.WARNING, "Could not change the password of account " + account + ".", e);
+			return PasswordChangeResult.DATABASE_ERROR;
 		}
 	}
 	

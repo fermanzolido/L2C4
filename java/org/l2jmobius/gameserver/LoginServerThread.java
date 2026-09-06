@@ -42,6 +42,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.l2jmobius.commons.crypt.NewCrypt;
+import org.l2jmobius.commons.enums.PasswordChangeResult;
 import org.l2jmobius.commons.network.base.BaseWritablePacket;
 import org.l2jmobius.commons.util.HexUtil;
 import org.l2jmobius.commons.util.TraceUtil;
@@ -54,11 +55,13 @@ import org.l2jmobius.gameserver.network.GameClient;
 import org.l2jmobius.gameserver.network.loginserverpackets.game.AuthRequest;
 import org.l2jmobius.gameserver.network.loginserverpackets.game.BlowFishKey;
 import org.l2jmobius.gameserver.network.loginserverpackets.game.ChangeAccessLevel;
+import org.l2jmobius.gameserver.network.loginserverpackets.game.ChangePassword;
 import org.l2jmobius.gameserver.network.loginserverpackets.game.PlayerAuthRequest;
 import org.l2jmobius.gameserver.network.loginserverpackets.game.PlayerInGame;
 import org.l2jmobius.gameserver.network.loginserverpackets.game.PlayerLogout;
 import org.l2jmobius.gameserver.network.loginserverpackets.game.ServerStatus;
 import org.l2jmobius.gameserver.network.loginserverpackets.login.AuthResponse;
+import org.l2jmobius.gameserver.network.loginserverpackets.login.ChangePasswordResponse;
 import org.l2jmobius.gameserver.network.loginserverpackets.login.InitLS;
 import org.l2jmobius.gameserver.network.loginserverpackets.login.KickPlayer;
 import org.l2jmobius.gameserver.network.loginserverpackets.login.LoginServerFail;
@@ -345,6 +348,16 @@ public class LoginServerThread extends Thread
 							doKickPlayer(kp.getAccount());
 							break;
 						}
+						case 0x05: // ChangePasswordResponse - Outcome of a player's password change.
+						{
+							final ChangePasswordResponse cpr = new ChangePasswordResponse(incoming);
+							final Player player = World.getInstance().getPlayer(cpr.getCharacterName());
+							if (player != null)
+							{
+								player.sendMessage(getPasswordChangeMessage(cpr.getResult()));
+							}
+							break;
+						}
 					}
 				}
 			}
@@ -485,6 +498,37 @@ public class LoginServerThread extends Thread
 	public void sendAccessLevel(String account, int level)
 	{
 		sendPacket(new ChangeAccessLevel(account, level));
+	}
+
+	/**
+	 * Asks the login server to change an account's password. Only the login server holds passwords,
+	 * so this game server can neither check the current one nor store the new one; it forwards both
+	 * and waits for a {@code ChangePasswordResponse} addressed to the character that asked.
+	 * @param account the account to change, which is the account the asking player is logged into
+	 * @param characterName the character to send the answer back to
+	 * @param currentPassword the password the player says is theirs
+	 * @param newPassword the password they want instead
+	 */
+	public void sendChangePassword(String account, String characterName, String currentPassword, String newPassword)
+	{
+		sendPacket(new ChangePassword(account, characterName, currentPassword, newPassword));
+	}
+
+	/**
+	 * Turns the login server's verdict into something to say to the player, translated for whatever
+	 * language they picked.
+	 * @param result the login server's verdict
+	 * @return the line to send
+	 */
+	private static String getPasswordChangeMessage(PasswordChangeResult result)
+	{
+		return switch (result)
+		{
+			case SUCCESS -> "Your password has been changed.";
+			case WRONG_CURRENT_PASSWORD -> "That is not your current password.";
+			case ACCOUNT_NOT_FOUND -> "Your account could not be found.";
+			case DATABASE_ERROR -> "The password could not be changed. Try again later.";
+		};
 	}
 	
 	/**
