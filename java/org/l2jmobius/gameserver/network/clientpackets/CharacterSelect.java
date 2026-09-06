@@ -24,12 +24,14 @@ import java.util.logging.Logger;
 
 import org.l2jmobius.gameserver.config.GeneralConfig;
 import org.l2jmobius.gameserver.config.custom.DualboxCheckConfig;
+import org.l2jmobius.gameserver.config.custom.PremiumSystemConfig;
 import org.l2jmobius.gameserver.config.custom.FactionSystemConfig;
 import org.l2jmobius.gameserver.config.custom.OfflinePlayConfig;
 import org.l2jmobius.gameserver.data.sql.CharInfoTable;
 import org.l2jmobius.gameserver.data.sql.OfflinePlayTable;
 import org.l2jmobius.gameserver.data.xml.AdminData;
 import org.l2jmobius.gameserver.managers.AntiFeedManager;
+import org.l2jmobius.gameserver.managers.PremiumManager;
 import org.l2jmobius.gameserver.managers.PunishmentManager;
 import org.l2jmobius.gameserver.model.World;
 import org.l2jmobius.gameserver.model.actor.Player;
@@ -142,11 +144,11 @@ public class CharacterSelect extends ClientPacket
 							client.sendPacket(msg);
 							return;
 						}
-						else if ((DualboxCheckConfig.DUALBOX_CHECK_MAX_PLAYERS_PER_IP > 0) && !AntiFeedManager.getInstance().tryAddClient(AntiFeedManager.GAME_ID, client, DualboxCheckConfig.DUALBOX_CHECK_MAX_PLAYERS_PER_IP))
+						else if ((maxPlayersPerIp(client) > 0) && !AntiFeedManager.getInstance().tryAddClient(AntiFeedManager.GAME_ID, client, maxPlayersPerIp(client)))
 						{
 							final NpcHtmlMessage msg = new NpcHtmlMessage();
 							msg.setFile(null, "data/html/mods/IPRestriction.htm");
-							msg.replace("%max%", String.valueOf(AntiFeedManager.getInstance().getLimit(client, DualboxCheckConfig.DUALBOX_CHECK_MAX_PLAYERS_PER_IP)));
+							msg.replace("%max%", String.valueOf(AntiFeedManager.getInstance().getLimit(client, maxPlayersPerIp(client))));
 							client.sendPacket(msg);
 							return;
 						}
@@ -226,5 +228,21 @@ public class CharacterSelect extends ClientPacket
 			
 			LOGGER_ACCOUNTING.info("Logged in, " + client);
 		}
+	}
+	/**
+	 * The per-IP login limit for this account. At character selection there is no Player yet --
+	 * World only holds one if the character is already in the world -- so premium is read by
+	 * account name, which PremiumManager answers from its cache or a single load.
+	 * @param client the connecting client
+	 * @return the premium limit when the account is premium and one is configured, else the plain one
+	 */
+	private static int maxPlayersPerIp(GameClient client)
+	{
+		if (PremiumSystemConfig.PREMIUM_SYSTEM_ENABLED && (DualboxCheckConfig.DUALBOX_CHECK_MAX_PLAYERS_PREMIUM_PER_IP > 0)
+			&& (PremiumManager.getInstance().getPremiumExpiration(client.getAccountName()) > System.currentTimeMillis()))
+		{
+			return DualboxCheckConfig.DUALBOX_CHECK_MAX_PLAYERS_PREMIUM_PER_IP;
+		}
+		return DualboxCheckConfig.DUALBOX_CHECK_MAX_PLAYERS_PER_IP;
 	}
 }
