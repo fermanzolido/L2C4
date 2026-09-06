@@ -23,30 +23,4 @@
 		<buff id="1303" level="1" price="0" desc="Increases crit. rate of magic attacks." /> <!-- Wild Magic -->
 		<buff id="1304" level="1" price="0" desc="Increases shield defense power." /> <!-- Advanced Block -->
 	</category>
-	<category type="Dances">
-		<buff id="271" level="1" price="0" desc="Increases P. Atk." /> <!-- Dance of the Warrior -->
-		<buff id="272" level="1" price="0" desc="Increases Accuracy." /> <!-- Dance of Inspiration -->
-		<buff id="273" level="1" price="0" desc="Increases M. Atk." /> <!-- Dance of the Mystic -->
-		<buff id="274" level="1" price="0" desc="Increases critical damage." /> <!-- Dance of Fire -->
-		<buff id="275" level="1" price="0" desc="Increases attack speed." /> <!-- Dance of Fury -->
-		<buff id="276" level="1" price="0" desc="Increases Casting Spd." /> <!-- Dance of Concentration -->
-		<buff id="277" level="1" price="0" desc="Sacred power to physical attack." /> <!-- Dance of Light -->
-		<buff id="307" level="1" price="0" desc="Increases water resistance." /> <!-- Dance of Aqua Guard -->
-		<buff id="309" level="1" price="0" desc="Increases earth resistance." /> <!-- Dance of Earth Guard -->
-		<buff id="310" level="1" price="0" desc="Restores HP by inflicted damage." /> <!-- Dance of the Vampire -->
-		<buff id="311" level="1" price="0" desc="Increases resistance to terrain damage." /> <!-- Dance of Protection -->
-	</category>
-	<category type="Songs">
-		<buff id="264" level="1" price="0" desc="Increases P. Def." /> <!-- Song of Earth -->
-		<buff id="265" level="1" price="0" desc="Increases HP regeneration." /> <!-- Song of Life -->
-		<buff id="266" level="1" price="0" desc="Increases Evasion." /> <!-- Song of Water -->
-		<buff id="267" level="1" price="0" desc="Increases M. Def." /> <!-- Song of Warding -->
-		<buff id="268" level="1" price="0" desc="Increases movement." /> <!-- Song of Wind -->
-		<buff id="269" level="1" price="0" desc="Increases critical rate." /> <!-- Song of Hunter -->
-		<buff id="270" level="1" price="0" desc="Increases resistance to dark magic." /> <!-- Song of Invocation -->
-		<buff id="304" level="1" price="0" desc="Increases maximum HP." /> <!-- Song of Vitality -->
-		<buff id="305" level="1" price="0" desc="Reflects damage received." /> <!-- Song of Vengeance -->
-		<buff id="306" level="1" price="0" desc="Increases resistance to fire." /> <!-- Song of Flame Guard -->
-		<buff id="308" level="1" price="0" desc="Increases resistance to wind." /> <!-- Song of Storm Guard -->
-	</category>
 </list>
