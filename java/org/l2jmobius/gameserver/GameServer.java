@@ -34,6 +34,7 @@ import org.l2jmobius.commons.config.InterfaceConfig;
 import org.l2jmobius.commons.database.DatabaseFactory;
 import org.l2jmobius.commons.network.ConnectionManager;
 import org.l2jmobius.commons.threads.ThreadPool;
+import org.l2jmobius.commons.util.ConfigReader;
 import org.l2jmobius.commons.util.DeadlockWatcher;
 import org.l2jmobius.gameserver.cache.HtmCache;
 import org.l2jmobius.gameserver.config.ConfigLoader;
@@ -400,6 +401,9 @@ public class GameServer
 			deadlockWatcher.start();
 		}
 		
+		// Last, so that managers which read their own configuration files as they load have done so.
+		ConfigReader.logUnreadSettings();
+
 		final long totalMem = Runtime.getRuntime().maxMemory() / 1048576;
 		LOGGER.info(getClass().getSimpleName() + ": Started, using " + getUsedMemoryMB() + " of " + totalMem + " MB total memory.");
 		LOGGER.info(getClass().getSimpleName() + ": Maximum number of connected players is " + ServerConfig.MAXIMUM_ONLINE_USERS + ".");

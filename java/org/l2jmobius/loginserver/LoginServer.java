@@ -34,6 +34,7 @@ import org.l2jmobius.commons.config.InterfaceConfig;
 import org.l2jmobius.commons.database.DatabaseBackup;
 import org.l2jmobius.commons.database.DatabaseFactory;
 import org.l2jmobius.commons.threads.ThreadPool;
+import org.l2jmobius.commons.util.ConfigReader;
 import org.l2jmobius.loginserver.config.LoginConfig;
 import org.l2jmobius.loginserver.network.AbstractClientPacket;
 import org.l2jmobius.loginserver.network.LoginClient;
@@ -93,6 +94,9 @@ public class LoginServer extends FloodProtectorListener
 			LOGGER.log(Level.SEVERE, "FATAL: Failed to start the Game Server Listener. Reason: " + e.getMessage(), e);
 			System.exit(1);
 		}
+
+		// Last, once everything that reads a configuration file has read it.
+		ConfigReader.logUnreadSettings();
 	}
 	
 	public static GameServerListener getGameServerListener()
