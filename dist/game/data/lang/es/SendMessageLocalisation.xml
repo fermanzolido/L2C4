@@ -8,4 +8,41 @@
 	<localisation message="Entering world in Invisible mode." translation="Entrando al mundo en modo invisible." />
 	<localisation message="Entering world in Silence mode." translation="Entrando al mundo en modo silencio." />
 	<localisation message="You have learned XXX new skills." translation="Aprendiste XXX habilidades nuevas." />
+	<!-- Scheme buffer: skill descriptions, menu labels and its own messages. -->
+	<localisation message="Delete" translation="Borrar" />
+	<localisation message="Edit" translation="Editar" />
+	<localisation message="Increases Accuracy." translation="Aumenta la Precision." />
+	<localisation message="Increases Atk. Spd." translation="Aumenta la Vel. de Ataque." />
+	<localisation message="Increases Casting Spd." translation="Aumenta la Vel. de Lanzamiento." />
+	<localisation message="Increases Evasion." translation="Aumenta la Evasion." />
+	<localisation message="Increases M. Atk." translation="Aumenta el Atq. M." />
+	<localisation message="Increases M. Def." translation="Aumenta la Def. M." />
+	<localisation message="Increases P. Atk." translation="Aumenta el Atq. F." />
+	<localisation message="Increases P. Def." translation="Aumenta la Def. F." />
+	<localisation message="Increases Speed." translation="Aumenta la Velocidad." />
+	<localisation message="Increases crit. rate of magic attacks." translation="Aumenta la tasa critica de los ataques magicos." />
+	<localisation message="Increases critical attack rate." translation="Aumenta la tasa de golpe critico." />
+	<localisation message="Increases critical attack." translation="Aumenta el dano critico." />
+	<localisation message="Increases magic concentration." translation="Aumenta la concentracion magica." />
+	<localisation message="Increases maximum HP." translation="Aumenta el HP maximo." />
+	<localisation message="Increases maximum MP." translation="Aumenta el MP maximo." />
+	<localisation message="Increases resistance to mental attacks." translation="Aumenta la resistencia a ataques mentales." />
+	<localisation message="Increases resistance to stun attack." translation="Aumenta la resistencia al aturdimiento." />
+	<localisation message="Increases shield defense power." translation="Aumenta el poder de bloqueo del escudo." />
+	<localisation message="Increases shield defense rate." translation="Aumenta la tasa de bloqueo con escudo." />
+	<localisation message="Maximum schemes amount is already reached." translation="Ya llegaste al maximo de esquemas." />
+	<localisation message="Next" translation="Siguiente" />
+	<localisation message="Please use plain alphanumeric characters." translation="Usa solo letras y numeros." />
+	<localisation message="Previous" translation="Anterior" />
+	<localisation message="Reduces def. and increase atk. power." translation="Reduce la defensa y aumenta el poder de ataque." />
+	<localisation message="Restores HP using inflicted damage." translation="Recupera HP con el dano infligido." />
+	<localisation message="That group doesn't contain any skills." translation="Ese grupo no tiene habilidades." />
+	<localisation message="The scheme name already exists." translation="Ese nombre de esquema ya existe." />
+	<localisation message="This scheme has reached the maximum amount of buffs." translation="Este esquema llego al maximo de buffs." />
+	<localisation message="This scheme name is invalid." translation="Ese nombre de esquema no es valido." />
+	<localisation message="Use on Me" translation="Usar en mi" />
+	<localisation message="Use on Pet" translation="Usar en la mascota" />
+	<localisation message="You cannot add more than XXX songs/dances to this scheme." translation="No podes agregar mas de XXX cantos/danzas a este esquema." />
+	<localisation message="You don't have a pet." translation="No tenes mascota." />
+	<localisation message="You haven't defined any scheme." translation="Todavia no creaste ningun esquema." />
 </list>
