@@ -36,10 +36,12 @@ export async function createPreference(env, { orderId, months, price, login }) {
         },
       ],
       external_reference: orderId,
+      // Without the extension, matching the site's cleanUrls: sending a buyer to
+      // /account.html would bounce them through a redirect on the way back.
       back_urls: {
-        success: `${env.SITE_ORIGIN}/account.html?paid=1`,
-        pending: `${env.SITE_ORIGIN}/account.html?pending=1`,
-        failure: `${env.SITE_ORIGIN}/account.html?failed=1`,
+        success: `${env.SITE_ORIGIN}/account?paid=1`,
+        pending: `${env.SITE_ORIGIN}/account?pending=1`,
+        failure: `${env.SITE_ORIGIN}/account?failed=1`,
       },
       auto_return: 'approved',
       statement_descriptor: 'L2C4',

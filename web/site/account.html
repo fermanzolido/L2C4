@@ -12,10 +12,10 @@
   <div class="wrap">
     <span class="brand">L2C4</span>
     <nav>
-      <a href="index.html">Server</a>
-      <a href="register.html">Register</a>
-      <a href="login.html">Log in</a>
-      <a href="account.html">My account</a>
+      <a href="/">Server</a>
+      <a href="/register">Register</a>
+      <a href="/login">Log in</a>
+      <a href="/account">My account</a>
     </nav>
   </div>
 </header>
@@ -169,7 +169,7 @@ async function renderPlans() {
   try {
     me = await api('/api/me');
   } catch {
-    location.href = 'login.html';
+    location.href = '/login';
     return;
   }
 
@@ -217,7 +217,7 @@ async function renderPlans() {
 
   document.querySelector('#logout').addEventListener('click', async () => {
     await api('/api/logout', { method: 'POST' }).catch(() => {});
-    location.href = 'index.html';
+    location.href = '/';
   });
 })();
 </script>

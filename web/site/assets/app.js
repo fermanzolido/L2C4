@@ -67,9 +67,11 @@ async function paintStatus(element) {
 document.addEventListener('DOMContentLoaded', () => {
   paintStatus(document.querySelector('#status'));
 
-  const path = location.pathname.split('/').pop() || 'index.html';
+  // Hosting has cleanUrls on, so the browser is at /register rather than at
+  // /register.html. Comparing resolved paths works either way; comparing the href
+  // to a file name silently stops matching anything.
   document.querySelectorAll('nav a').forEach((link) => {
-    if (link.getAttribute('href') === path) link.classList.add('active');
+    if (new URL(link.href).pathname === location.pathname) link.classList.add('active');
   });
 });
 

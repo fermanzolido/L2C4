@@ -12,10 +12,10 @@
   <div class="wrap">
     <span class="brand">L2C4</span>
     <nav>
-      <a href="index.html">Server</a>
-      <a href="register.html">Register</a>
-      <a href="login.html">Log in</a>
-      <a href="account.html">My account</a>
+      <a href="/">Server</a>
+      <a href="/register">Register</a>
+      <a href="/login">Log in</a>
+      <a href="/account">My account</a>
     </nav>
   </div>
 </header>
@@ -67,7 +67,7 @@ form.addEventListener('submit', async (event) => {
     // The account exists on the site immediately; the game account is written by
     // the agent a moment later, which the account page reports honestly.
     say(msg, 'Account created. Setting up your game login…', 'ok');
-    setTimeout(() => { location.href = 'account.html'; }, 1200);
+    setTimeout(() => { location.href = '/account'; }, 1200);
   } catch (error) {
     say(msg, error.code ?? 'internal_error');
     submit.disabled = false;
