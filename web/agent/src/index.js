@@ -6,7 +6,8 @@
  *
  *   npm install && npm run keygen && node src/index.js
  */
-import { readFileSync } from 'node:fs';
+import { appendFileSync, readFileSync, renameSync, statSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { constants, privateDecrypt } from 'node:crypto';
 import { connect } from 'node:net';
 
@@ -16,6 +17,17 @@ import { GameDatabase, hashGamePassword } from './mysql.js';
 const config = JSON.parse(readFileSync(new URL('../config.json', import.meta.url), 'utf8'));
 const privateKey = readFileSync(new URL(`../${config.privateKeyFile.replace('./', '')}`, import.meta.url), 'utf8');
 const accountNamePattern = new RegExp(config.accountNamePattern);
+
+/**
+ * Where log lines go besides the console.
+ *
+ * Task Scheduler discards stdout, so on the machine this actually runs on the
+ * console goes nowhere and a failure leaves no trace. Rotation is one file deep:
+ * enough that a crash loop cannot fill the disk, without keeping history nobody
+ * reads.
+ */
+const logPath = fileURLToPath(new URL(`../${config.logFile.replace('./', '')}`, import.meta.url));
+const rotatedLogPath = `${logPath}.1`;
 
 const firestore = new Firestore(config.firestore);
 const database = new GameDatabase(config);
@@ -231,7 +243,21 @@ async function publishStatus() {
 }
 
 function log(message) {
-  console.log(`[${new Date().toISOString()}] ${message}`);
+  const line = `[${new Date().toISOString()}] ${message}`;
+  console.log(line);
+
+  try {
+    if (statSync(logPath).size >= config.logMaxBytes) renameSync(logPath, rotatedLogPath);
+  } catch {
+    // Not existing yet is the ordinary case on a first run, and a rotation that
+    // fails is not worth losing the line that triggered it.
+  }
+
+  try {
+    appendFileSync(logPath, line + '\n');
+  } catch {
+    // A log that cannot be written must not take the agent down with it.
+  }
 }
 
 /** Keeps a slow pass from overlapping the next one, which polling with setInterval would allow. */
@@ -256,6 +282,16 @@ async function shutdown(signal) {
 
 process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
+
+// Without this an uncaught error kills the agent silently, and the only evidence
+// is that jobs stopped being applied. Exiting non-zero is deliberate: the
+// scheduled task treats it as a failure and starts the agent again.
+for (const event of ['uncaughtException', 'unhandledRejection']) {
+  process.on(event, (error) => {
+    log(`${event}: ${error?.stack ?? error}`);
+    process.exit(1);
+  });
+}
 
 log(`agent started, polling every ${config.pollIntervalMs}ms`);
 await Promise.all([

@@ -33,6 +33,10 @@
   "_privateKeyFile": "RSA private key that decrypts passwords the Worker encrypted. Generate with: npm run keygen",
   "privateKeyFile": "./agent-private.pem",
 
+  "_logFile": "El agente corre bajo el Programador de tareas, que descarta stdout. Sin este archivo, una falla no deja rastro. Rota a .1 al superar logMaxBytes.",
+  "logFile": "./agent.log",
+  "logMaxBytes": 5242880,
+
   "_pollIntervalMs": "How often to look for pending jobs. 5s is responsive enough for a purchase and trivial load on Firestore.",
   "pollIntervalMs": 5000,
 
