@@ -2,12 +2,21 @@ name = "l2c4-api"
 main = "src/index.js"
 compatibility_date = "2026-01-01"
 
+# The API has to sit on the same registrable domain as the site, not on
+# workers.dev. The session cookie is SameSite=Lax, and a browser will not send a
+# Lax cookie on a cross-site fetch -- site on l2jsaked.com.ar calling an API on
+# workers.dev is cross-site, so nobody would ever appear logged in. A subdomain of
+# the site's own domain is same-site, and the cookie travels.
+routes = [
+  { pattern = "api.l2jsaked.com.ar", custom_domain = true }
+]
+
 # nodejs_compat is not needed: everything here runs on WebCrypto and fetch.
 
 [vars]
 # Where the site is served from. Used for CORS and for the URLs Mercado Pago
 # returns the buyer to.
-SITE_ORIGIN = "https://l2c4.example.com"
+SITE_ORIGIN = "https://l2jsaked.com.ar"
 
 FIRESTORE_PROJECT_ID = "saked-805e9"
 

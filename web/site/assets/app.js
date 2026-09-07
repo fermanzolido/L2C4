@@ -1,5 +1,10 @@
-/** Point this at the deployed Worker. */
-const API = 'https://l2c4-api.your-subdomain.workers.dev';
+/**
+ * The Worker, which must be a subdomain of this site's own domain rather than a
+ * workers.dev address. The session cookie is SameSite=Lax and a browser will not
+ * send it on a cross-site fetch, so an API on workers.dev would leave every visitor
+ * permanently logged out.
+ */
+const API = 'https://api.l2jsaked.com.ar';
 
 /** Credentials are included so the session cookie travels; the Worker allows this origin only. */
 async function api(path, options = {}) {

@@ -44,7 +44,20 @@ npm install
 npx wrangler deploy
 ```
 
-Put the resulting URL into `site/assets/app.js` as `API`.
+`wrangler.toml` claims `api.l2jsaked.com.ar` as a custom domain. The zone has to be
+on Cloudflare for that to resolve; Wrangler creates the DNS record itself.
+
+**Do not fall back to the workers.dev address.** The session cookie is
+`SameSite=Lax`, and browsers do not send a Lax cookie on a cross-site fetch. The
+site on `l2jsaked.com.ar` calling an API on `workers.dev` is cross-site by the
+registrable-domain rule, so login would appear to succeed — the Worker sets the
+cookie, the response is 200 — and every request after it would arrive
+unauthenticated. A subdomain of the site's own domain is same-site, and the cookie
+travels normally.
+
+Relaxing this with `SameSite=None` is not the fix. That works until a browser
+blocks third-party cookies, which Safari already does and Chrome is phasing in, and
+then it breaks for those users only.
 
 ## 4. Mercado Pago
 

@@ -1,8 +1,14 @@
 # Secrets. None of these belong in the repository.
+#
+# Matched by pattern rather than by exact path, because naming one file was not
+# enough: Firebase names a service account key after the project plus a random
+# suffix, and it lands wherever the browser saved it. One such key sat untracked
+# in web/ and was a single `git add web/` away from being public.
+**/*firebase-adminsdk*.json
+**/service-account*.json
+**/*-private.pem
+**/*-public.pem
 agent/config.json
-agent/service-account.json
-agent/agent-private.pem
-agent/agent-public.pem
 
 node_modules/
 .wrangler/
