@@ -334,6 +334,14 @@ public class HomeBoard implements IParseBoardHandler
 		}
 		else if (command.startsWith("_bbspremium"))
 		{
+			// Premium is sold outside the game. getCommandList() already leaves this command
+			// unregistered while the config is off, but CUSTOM_COMMANDS is filled once at class
+			// load, so the grant itself checks rather than relying on that registration.
+			if (!CommunityBoardConfig.COMMUNITY_PREMIUM_SYSTEM_ENABLED || !PremiumSystemConfig.PREMIUM_SYSTEM_ENABLED)
+			{
+				return false;
+			}
+
 			final String fullBypass = command.replace("_bbspremium;", "");
 			final String[] buypassOptions = fullBypass.split(",");
 			// The day count is whatever the client put in the bypass; parseInt took it raw.

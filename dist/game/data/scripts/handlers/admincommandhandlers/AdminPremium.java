@@ -131,7 +131,7 @@ public class AdminPremium implements IAdminCommandHandler
 		{
 			for (Player player : World.getInstance().getPlayers())
 			{
-				if (player.getAccountName().matches(accountName))
+				if (accountName.equalsIgnoreCase(player.getAccountName()))
 				{
 					PcCafePointsManager.getInstance().run(player);
 					break;
