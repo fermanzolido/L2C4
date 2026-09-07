@@ -100,29 +100,47 @@ status/server            online, players, checkedAt
 document instead of granting twice. Mercado Pago retries webhooks, so this is not
 hypothetical.
 
-## Replacing what is on the domain now
+## Where this runs
 
-This is not a deployment onto empty space. `l2jsaked.com.ar` currently serves a
-High Five server's site from Firebase Hosting on the same project, and that site
-reads Firestore from the browser. Two steps here take it down, so their order is
-what keeps the old site alive until the new one is ready rather than during a gap:
+`l2jsaked.com.ar` serves `site/` from Cloudflare Pages, project `l2c4-site`. The API
+answers on `api.l2jsaked.com.ar`, and the agent runs on the server machine as a
+scheduled task. `www` is a 301 to the apex.
 
-**Publishing the deny-all rules breaks the old site immediately.** The rules are
-what stop a stranger writing a `jobs` document and granting themselves premium, so
-they are not optional — but they also end the old site's Firestore access the
-moment they land. Publish them at the cutover, not while preparing.
+**Pages rather than Firebase Hosting, even though `firebase.json` still configures
+Hosting.** That block is dead; the `firestore` block in the same file is not, and is
+how rules and indexes are deployed. The reason is not preference: this domain had its
+free Hosting quota consumed by an attack. Pages bills no bandwidth on the free plan,
+so a flood of traffic costs nothing and takes nothing down.
 
-**Pointing the apex at Pages is what actually swaps the site.** Until the DNS
-record changes, the old site keeps serving no matter what else is deployed.
+**The `www` redirect is a Redirect Rule on the zone, not a `_redirects` file and not a
+Pages Function.** `_redirects` cannot do it — Pages matches those on path alone and
+ignores a rule with a hostname in the source, silently. A `functions/_middleware.js`
+can, but it intercepts every visit to the site and spends a Workers invocation on each
+one, from the same free allowance the API draws on. A zone rule is evaluated at the
+edge for free.
 
-So: build everything else first — Firestore database, indexes, agent, Worker on
-`api.l2jsaked.com.ar` — and verify the API answers. Only then publish the rules and
-move the apex, in that order and close together.
+One origin is deliberate too. The Worker answers `Access-Control-Allow-Origin` with
+`SITE_ORIGIN` exactly, so a page served from `www` would have every call to the API
+blocked by the browser. Redirecting rather than serving both keeps the site, the CORS
+header and the URLs Mercado Pago returns buyers to all naming the same origin.
 
-One thing to check in the console before any of it: this project already holds the
-old site's collections. If any of them is named `users`, `orders`, `jobs` or
-`status`, the two applications would be writing into the same place, and the
-collections here need a prefix first.
+### What the cutover was actually like
+
+The apex used to serve a High Five server's site from Firebase Hosting. A warning
+stood here saying the deny-all rules would break it, because that site read Firestore
+from the browser. It did not: the database held no collections at all, so the old site
+never touched it, and the rules were published without disturbing anything.
+
+The DNS is what bit. Attaching the apex to Pages removed the record pointing at
+Hosting before the replacement existed, and the domain answered nothing for the
+minutes the custom domain spent activating. Note the record before replacing it — the
+apex pointed at `199.36.158.100` — so a rollback is restoring one A record rather than
+a reconstruction.
+
+Expect the domain to look broken from your own machine for a while afterwards, and do
+not chase it: a resolver that asked during the gap caches the empty answer and keeps
+serving `NXDOMAIN` until that negative TTL expires. Check against the authoritative
+nameservers, or from a phone on mobile data, before believing the site is down.
 
 ## Setup
 
@@ -131,7 +149,10 @@ Each part has its own README. Order matters:
 1. `agent/` — generate the RSA keypair and a Firestore service account first;
    the Worker needs the public key and cannot be configured without it.
 2. `worker/` — deploy with secrets set.
-3. `site/` — point Cloudflare Pages at this directory.
+3. `site/` — `npx wrangler pages deploy site --project-name=l2c4-site`, then
+   attach the apex as a custom domain from the dashboard and add the `www`
+   Redirect Rule. Rules and indexes go up separately, with
+   `firebase deploy --only firestore:rules` and `--only firestore:indexes`.
 
 ## What is not handled here
 
