@@ -1,0 +1,23 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Deny everything, deliberately.
+    //
+    // Nothing reaches Firestore from a browser here. The site talks to a Cloudflare
+    // Worker, and both the Worker and the agent authenticate as a service account --
+    // which bypasses these rules entirely, so denying all costs this project nothing.
+    //
+    // It is not optional, either. The Firebase web config is public by design, so
+    // anyone who has it can call the Firestore API as an unauthenticated client. If
+    // these rules allowed writes, that person could put a document in `jobs` and the
+    // agent would grant them premium: it has no way to tell a job written by the
+    // Worker from one written by a stranger.
+    //
+    // Deploy with:  firebase deploy --only firestore:rules
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

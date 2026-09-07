@@ -2,7 +2,7 @@
   "_comment": "Copy to config.json and fill in. config.json is gitignored.",
 
   "firestore": {
-    "projectId": "your-firebase-project-id",
+    "projectId": "saked-805e9",
     "serviceAccountKeyFile": "./service-account.json"
   },
 

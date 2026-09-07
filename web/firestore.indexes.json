@@ -1,0 +1,31 @@
+{
+  "_comment": [
+    "Firestore needs a composite index whenever a query filters on one field and orders by",
+    "another. Both queries in this project do. Without these, the first call fails at runtime",
+    "with an error carrying a link to create the index by hand -- which works, but means the",
+    "agent silently processes nothing until someone notices.",
+    "",
+    "Deploy with:  firebase deploy --only firestore:indexes"
+  ],
+  "indexes": [
+    {
+      "_comment": "agent/src/firestore.js pendingJobs(): status == 'pending', oldest first.",
+      "collectionGroup": "jobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "_comment": "worker/src/index.js me(): this account's orders, newest first.",
+      "collectionGroup": "orders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "login", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

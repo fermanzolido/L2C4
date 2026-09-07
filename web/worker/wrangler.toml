@@ -9,7 +9,7 @@ compatibility_date = "2026-01-01"
 # returns the buyer to.
 SITE_ORIGIN = "https://l2c4.example.com"
 
-FIRESTORE_PROJECT_ID = "your-firebase-project-id"
+FIRESTORE_PROJECT_ID = "saked-805e9"
 
 # Premium plans. Prices are in the currency the Mercado Pago account settles in and
 # are yours to set; the durations are not arbitrary -- 1, 2 and 3 months are what the
