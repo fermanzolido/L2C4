@@ -96,11 +96,17 @@ export class Firestore {
     });
   }
 
+  /**
+   * Replaces a document outright, unlike patch().
+   *
+   * Sent without an updateMask on purpose: with one, Firestore leaves untouched any
+   * field the write does not mention, so a field written once survives forever. The
+   * status document gains an `error` field when a reading fails, and under merge
+   * semantics that error stayed on the document long after the trouble passed.
+   * Without the mask the document is exactly what the last write said it was.
+   */
   async setDocument(collection, id, fields) {
-    const mask = Object.keys(fields)
-      .map((key) => `updateMask.fieldPaths=${encodeURIComponent(key)}`)
-      .join('&');
-    return this.#request(`${this.base}/${collection}/${id}?${mask}`, {
+    return this.#request(`${this.base}/${collection}/${id}`, {
       method: 'PATCH',
       body: JSON.stringify({ fields: encodeFields(fields) }),
     });

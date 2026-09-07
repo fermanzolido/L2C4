@@ -120,12 +120,14 @@ export class GameDatabase {
   }
 
   /**
-   * What the website shows as "server status". Reaching the game database is the
-   * signal: the game server is what sets `online`, so if it is down the number is
-   * stale rather than wrong, and staleness is reported by checkedAt.
+   * How many characters the game server currently has flagged as online.
+   *
+   * Only meaningful while the server is actually up: these flags are set by the
+   * game server and cleared on a clean shutdown, so a crash leaves them set. The
+   * caller checks the server ports first and does not ask otherwise.
    */
-  async serverStatus() {
+  async onlinePlayers() {
     const [rows] = await this.game.execute('SELECT COUNT(*) AS players FROM characters WHERE online > 0');
-    return { online: true, players: Number(rows[0].players) };
+    return Number(rows[0].players);
   }
 }

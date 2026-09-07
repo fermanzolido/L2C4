@@ -7,6 +7,7 @@
 import { Firestore } from './firestore.js';
 import { createPreference, fetchPayment, verifyWebhookSignature } from './mercadopago.js';
 import {
+  ABSENT_USER_VERIFIER,
   clearedSessionCookie,
   cookieValue,
   createSession,
@@ -130,7 +131,7 @@ async function login(request, env) {
 
   // Verify even when the user is missing, so a wrong name and a wrong password
   // take the same time and cannot be told apart.
-  const valid = await verifyPassword(password, user?.passwordHash ?? 'pbkdf2$210000$AAAA$AAAA');
+  const valid = await verifyPassword(password, user?.passwordHash ?? ABSENT_USER_VERIFIER);
   if (!user || !valid) return json({ error: 'invalid_credentials' }, 401);
 
   return json({ ok: true, login: user.login }, 200, {

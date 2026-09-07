@@ -8,6 +8,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { constants, privateDecrypt } from 'node:crypto';
+import { connect } from 'node:net';
 
 import { Firestore } from './firestore.js';
 import { GameDatabase, hashGamePassword } from './mysql.js';
@@ -168,10 +169,57 @@ async function drainJobs() {
   }
 }
 
+/**
+ * Whether a port on the server machine accepts a connection.
+ *
+ * Resolves rather than rejects: a refused connection is the ordinary answer when
+ * the server is down, not an error to handle.
+ */
+function portOpen(host, port, timeoutMs) {
+  return new Promise((resolve) => {
+    const socket = connect({ host, port });
+    const settle = (open) => {
+      socket.destroy();
+      resolve(open);
+    };
+    socket.setTimeout(timeoutMs);
+    socket.once('connect', () => settle(true));
+    socket.once('timeout', () => settle(false));
+    socket.once('error', () => settle(false));
+  });
+}
+
+/**
+ * Publishes what the website shows as server status.
+ *
+ * Availability is read from the ports the client itself connects to, not from
+ * whether MySQL answers -- the database runs whether or not the server does, and
+ * reporting "online" from it told players the server was up while it was down.
+ *
+ * Both ports must answer. With the login server down nobody gets in even if the
+ * game server is fine, and with the game server down the player is stranded after
+ * picking a character; either way there is no playing.
+ *
+ * The player count is only read when the server is up. The game server sets
+ * characters.online and clears it on a clean shutdown, so after a crash those flags
+ * stay set and the table would report a crowd inside a server nobody is in.
+ */
 async function publishStatus() {
+  const { host, loginPort, gamePort, probeTimeoutMs } = config.gameServer;
   let status;
   try {
-    status = await database.serverStatus();
+    const [login, game] = await Promise.all([
+      portOpen(host, loginPort, probeTimeoutMs),
+      portOpen(host, gamePort, probeTimeoutMs),
+    ]);
+    const online = login && game;
+    status = {
+      online,
+      players: online ? await database.onlinePlayers() : 0,
+      // Which half is down, so a partial outage is diagnosable from the outside.
+      loginServer: login,
+      gameServer: game,
+    };
   } catch (error) {
     status = { online: false, players: 0, error: error.code ?? 'unreachable' };
   }

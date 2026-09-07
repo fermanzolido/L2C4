@@ -8,7 +8,23 @@
  * every login for no security gain at these parameters.
  */
 
-const PBKDF2_ITERATIONS = 210_000;
+/**
+ * The Workers runtime refuses PBKDF2 above 100k iterations -- deriveBits throws
+ * NotSupportedError -- so this is the platform ceiling, not a chosen figure. OWASP
+ * suggests 210k for PBKDF2-SHA256; that cannot be reached here.
+ *
+ * The stored format carries its own iteration count, so raising this later only
+ * affects new hashes and old ones keep verifying.
+ */
+const PBKDF2_ITERATIONS = 100_000;
+/**
+ * A well-formed verifier that no password matches, for logins naming a user that
+ * does not exist. Built from the constant above rather than written out: a literal
+ * here once drifted from it and made every such login a 500, which told an attacker
+ * exactly which names were real.
+ */
+export const ABSENT_USER_VERIFIER = `pbkdf2$${PBKDF2_ITERATIONS}$AAAA$AAAA`;
+
 const SALT_BYTES = 16;
 const KEY_BITS = 256;
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 14;

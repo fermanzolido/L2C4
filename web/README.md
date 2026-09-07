@@ -60,8 +60,10 @@ and Workers bill CPU time), and the plaintext must not sit in Firestore.
 
 So registration produces two things from one password:
 
-- **Firestore** stores a PBKDF2-SHA256 verifier (210k iterations, WebCrypto native
-  and fast in a Worker). This is what the website logs you in against.
+- **Firestore** stores a PBKDF2-SHA256 verifier (100k iterations, WebCrypto native
+  and fast in a Worker). This is what the website logs you in against. 100k is the
+  Workers ceiling, not a preference: the runtime throws `NotSupportedError` above
+  it, so the 210k OWASP suggests for PBKDF2-SHA256 is out of reach here.
 - **MySQL** gets the bcrypt `$2a$` hash the game requires, computed by the agent.
 
 The password reaches the agent encrypted with **RSA-OAEP** using a public key the

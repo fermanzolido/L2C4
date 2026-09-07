@@ -22,6 +22,14 @@
     "database": "l2c4_game"
   },
 
+  "_gameServer": "Puertos a los que se conecta el cliente. Se comprueban por TCP para saber si el servidor esta arriba: la base de datos responde aunque el servidor este caido, asi que preguntarle a MySQL no sirve. Deben coincidir con LoginserverPort de login/config/Server.ini y GameserverPort de game/config/Server.ini.",
+  "gameServer": {
+    "host": "127.0.0.1",
+    "loginPort": 2106,
+    "gamePort": 7777,
+    "probeTimeoutMs": 1500
+  },
+
   "_privateKeyFile": "RSA private key that decrypts passwords the Worker encrypted. Generate with: npm run keygen",
   "privateKeyFile": "./agent-private.pem",
 
