@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log in — L2C4</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="brand">L2C4</span>
+    <nav>
+      <a href="index.html">Server</a>
+      <a href="register.html">Register</a>
+      <a href="login.html">Log in</a>
+      <a href="account.html">My account</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <section>
+    <h2>Log in</h2>
+    <form id="form">
+      <label for="login">Account name</label>
+      <input id="login" name="login" autocomplete="username" required>
+
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+      <button type="submit" id="submit">Log in</button>
+      <div class="msg" id="msg"></div>
+    </form>
+    <p style="color:var(--muted);font-size:14px;margin-top:22px">
+      No account yet? <a href="register.html">Create one</a>.
+    </p>
+  </section>
+</div>
+
+<script type="module">
+import { api, say, clear } from './assets/app.js';
+
+const form = document.querySelector('#form');
+const submit = document.querySelector('#submit');
+const msg = document.querySelector('#msg');
+
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  clear(msg);
+  submit.disabled = true;
+
+  try {
+    const data = Object.fromEntries(new FormData(form));
+    await api('/api/login', { method: 'POST', body: JSON.stringify(data) });
+    location.href = 'account.html';
+  } catch (error) {
+    say(msg, error.code ?? 'internal_error');
+    submit.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

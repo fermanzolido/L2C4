@@ -1,0 +1,20 @@
+{
+  "name": "l2c4-agent",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Applies Firestore jobs to the L2C4 game database. Outbound connections only.",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "keygen": "node src/keygen.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "google-auth-library": "^9.14.1",
+    "mysql2": "^3.11.3"
+  }
+}

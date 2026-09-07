@@ -1,0 +1,39 @@
+{
+  "_comment": "Copy to config.json and fill in. config.json is gitignored.",
+
+  "firestore": {
+    "projectId": "your-firebase-project-id",
+    "serviceAccountKeyFile": "./service-account.json"
+  },
+
+  "loginDb": {
+    "host": "127.0.0.1",
+    "port": 3306,
+    "user": "l2c4",
+    "password": "",
+    "database": "l2c4_login"
+  },
+
+  "gameDb": {
+    "host": "127.0.0.1",
+    "port": 3306,
+    "user": "l2c4",
+    "password": "",
+    "database": "l2c4_game"
+  },
+
+  "_privateKeyFile": "RSA private key that decrypts passwords the Worker encrypted. Generate with: npm run keygen",
+  "privateKeyFile": "./agent-private.pem",
+
+  "_pollIntervalMs": "How often to look for pending jobs. 5s is responsive enough for a purchase and trivial load on Firestore.",
+  "pollIntervalMs": 5000,
+
+  "_statusIntervalMs": "How often to publish server status for the website to show.",
+  "statusIntervalMs": 30000,
+
+  "_maxAttempts": "A job that fails this many times is parked as 'failed' rather than retried forever.",
+  "maxAttempts": 5,
+
+  "_accountNamePattern": "Must agree with the Worker's validation. The C4 client will not send anything longer than 14 characters.",
+  "accountNamePattern": "^[a-z0-9]{4,14}$"
+}

@@ -1,0 +1,10 @@
+# Secrets. None of these belong in the repository.
+agent/config.json
+agent/service-account.json
+agent/agent-private.pem
+agent/agent-public.pem
+
+node_modules/
+.wrangler/
+.dev.vars
+*.log

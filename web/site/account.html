@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My account — L2C4</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="brand">L2C4</span>
+    <nav>
+      <a href="index.html">Server</a>
+      <a href="register.html">Register</a>
+      <a href="login.html">Log in</a>
+      <a href="account.html">My account</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <section id="loading"><p style="color:var(--muted)">Loading…</p></section>
+
+  <section id="panel" hidden>
+    <h2>Account <span class="sub" id="account-name"></span></h2>
+    <div class="grid">
+      <div class="card">
+        <h3>GAME LOGIN</h3>
+        <div id="game-state"></div>
+        <p id="game-note"></p>
+      </div>
+      <div class="card">
+        <h3>EMAIL</h3>
+        <div style="font-size:15px" id="email"></div>
+        <p>Used only to reach you about your account.</p>
+      </div>
+    </div>
+    <button class="ghost" id="logout" style="margin-top:18px">Log out</button>
+  </section>
+
+  <section id="buy" hidden>
+    <h2>Buy premium</h2>
+    <p style="color:var(--muted);max-width:560px">
+      Premium applies to every character on this account. Buying while you are online works:
+      the server picks it up within a minute, no reconnect needed.
+    </p>
+    <div class="plans" id="plans"></div>
+    <div class="msg" id="msg"></div>
+  </section>
+
+  <section id="orders-section" hidden>
+    <h2>Orders</h2>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Date</th><th>Plan</th><th class="num">Amount</th><th>Status</th></tr></thead>
+        <tbody id="orders"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="password-section" hidden>
+    <h2>Change password</h2>
+    <p style="color:var(--muted);max-width:560px">
+      Changes it here and in the game at once. The in-game <code>.changepassword</code>
+      only reaches the game, and would leave you unable to sign in here.
+    </p>
+    <form id="password-form">
+      <label for="currentPassword">Current password</label>
+      <input id="currentPassword" name="currentPassword" type="password" autocomplete="current-password" required>
+
+      <label for="newPassword">New password</label>
+      <input id="newPassword" name="newPassword" type="password" autocomplete="new-password" required
+             minlength="8" maxlength="16">
+      <div class="hint">8 to 16 characters — the game client's field stops at 16.</div>
+
+      <button type="submit" id="password-submit">Change password</button>
+      <div class="msg" id="password-msg"></div>
+    </form>
+  </section>
+</div>
+
+<script type="module">
+import { api, say, clear } from './assets/app.js';
+
+const msg = document.querySelector('#msg');
+
+const ORDER_STATUS = {
+  pending: ['wait', 'Awaiting payment'],
+  paid: ['ok', 'Granted'],
+  rejected: ['err', 'Rejected'],
+  cancelled: ['err', 'Cancelled'],
+  underpaid: ['err', 'Underpaid — contact us'],
+  in_process: ['wait', 'In process'],
+};
+
+function renderGameState(me) {
+  const state = document.querySelector('#game-state');
+  const note = document.querySelector('#game-note');
+
+  if (me.gameAccountReady) {
+    state.innerHTML = '<span class="pill ok">Ready</span>';
+    note.textContent = 'Log in to the game with this account name and password.';
+  } else if (me.gameAccountError) {
+    state.innerHTML = '<span class="pill err">Failed</span>';
+    // Naming the reason beats a spinner that never resolves.
+    note.textContent = `Could not create your game login (${me.gameAccountError}). Contact us and we will sort it out.`;
+  } else {
+    state.innerHTML = '<span class="pill wait">Being created</span>';
+    note.textContent = 'This usually takes a few seconds. Reload the page in a moment.';
+  }
+}
+
+function renderOrders(orders) {
+  const tbody = document.querySelector('#orders');
+  if (!orders.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted)">No orders yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = orders
+    .map((order) => {
+      const [kind, label] = ORDER_STATUS[order.status] ?? ['', order.status];
+      const date = new Date(order.createdAt).toLocaleDateString();
+      const plan = order.months === 1 ? '1 month' : `${order.months} months`;
+      return `<tr><td>${date}</td><td>${plan}</td>
+              <td class="num">${order.amount.toLocaleString()}</td>
+              <td><span class="pill ${kind}">${label}</span></td></tr>`;
+    })
+    .join('');
+}
+
+async function renderPlans() {
+  const { plans, currency } = await api('/api/plans');
+  const container = document.querySelector('#plans');
+  container.innerHTML = plans
+    .map(
+      (plan) => `<div class="plan">
+        <div class="days">${plan.months}<span>${plan.months === 1 ? 'month' : 'months'}</span></div>
+        <div class="price">${currency} ${plan.price.toLocaleString()}</div>
+        <button data-months="${plan.months}">Buy</button>
+      </div>`
+    )
+    .join('');
+
+  container.addEventListener('click', async (event) => {
+    const button = event.target.closest('button[data-months]');
+    if (!button) return;
+
+    clear(msg);
+    button.disabled = true;
+    button.textContent = 'Opening…';
+    try {
+      const { checkoutUrl } = await api('/api/checkout', {
+        method: 'POST',
+        body: JSON.stringify({ months: Number(button.dataset.months) }),
+      });
+      location.href = checkoutUrl;
+    } catch (error) {
+      say(msg, error.code ?? 'internal_error');
+      button.disabled = false;
+      button.textContent = 'Buy';
+    }
+  });
+}
+
+(async () => {
+  let me;
+  try {
+    me = await api('/api/me');
+  } catch {
+    location.href = 'login.html';
+    return;
+  }
+
+  document.querySelector('#account-name').textContent = me.login;
+  document.querySelector('#email').textContent = me.email;
+  renderGameState(me);
+  renderOrders(me.orders);
+  await renderPlans();
+
+  document.querySelector('#loading').hidden = true;
+  for (const id of ['panel', 'buy', 'orders-section', 'password-section']) {
+    document.querySelector(`#${id}`).hidden = false;
+  }
+
+  const passwordMsg = document.querySelector('#password-msg');
+  const passwordSubmit = document.querySelector('#password-submit');
+  document.querySelector('#password-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    clear(passwordMsg);
+    passwordSubmit.disabled = true;
+    try {
+      await api('/api/change-password', {
+        method: 'POST',
+        body: JSON.stringify(Object.fromEntries(new FormData(event.target))),
+      });
+      event.target.reset();
+      say(passwordMsg, 'Changed here. The game password follows within a few seconds.', 'ok');
+    } catch (error) {
+      say(passwordMsg, error.code ?? 'internal_error');
+    } finally {
+      passwordSubmit.disabled = false;
+    }
+  });
+
+  // Mercado Pago returns the buyer here with a flag. The webhook is what actually
+  // grants premium, so this only sets expectations -- it never claims success.
+  const params = new URLSearchParams(location.search);
+  if (params.has('paid')) {
+    say(msg, 'Payment received. Premium is applied within a minute of Mercado Pago confirming it.', 'ok');
+  } else if (params.has('pending')) {
+    say(msg, 'Your payment is still being processed. Premium is granted as soon as it clears.', 'ok');
+  } else if (params.has('failed')) {
+    say(msg, 'The payment did not go through. Nothing was charged.');
+  }
+
+  document.querySelector('#logout').addEventListener('click', async () => {
+    await api('/api/logout', { method: 'POST' }).catch(() => {});
+    location.href = 'index.html';
+  });
+})();
+</script>
+</body>
+</html>

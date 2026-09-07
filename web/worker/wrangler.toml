@@ -1,0 +1,29 @@
+name = "l2c4-api"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+
+# nodejs_compat is not needed: everything here runs on WebCrypto and fetch.
+
+[vars]
+# Where the site is served from. Used for CORS and for the URLs Mercado Pago
+# returns the buyer to.
+SITE_ORIGIN = "https://l2c4.example.com"
+
+FIRESTORE_PROJECT_ID = "your-firebase-project-id"
+
+# Premium plans. Prices are in the currency the Mercado Pago account settles in and
+# are yours to set; the durations are not arbitrary -- 1, 2 and 3 months are what the
+# server itself grants through //premium_add1/2/3, at 30 days to the month.
+#
+# `days` is what the agent writes; `months` is what the buyer is sold. Keep them
+# consistent (months * 30) so a purchase and a GM grant mean the same thing.
+PREMIUM_PLANS = '[{"months":1,"days":30,"price":8000},{"months":2,"days":60,"price":15000},{"months":3,"days":90,"price":21000}]'
+CURRENCY_ID = "ARS"
+
+# Secrets, set with `wrangler secret put NAME` -- never in this file:
+#
+#   SESSION_SECRET          random 32+ bytes, signs session cookies
+#   AGENT_PUBLIC_KEY        agent-public.pem, from the agent's `npm run keygen`
+#   GCP_SERVICE_ACCOUNT     the whole Firebase service account JSON, one line
+#   MP_ACCESS_TOKEN         Mercado Pago access token
+#   MP_WEBHOOK_SECRET       Mercado Pago webhook signing secret
