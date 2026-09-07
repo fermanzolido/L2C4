@@ -98,6 +98,30 @@ status/server            online, players, checkedAt
 document instead of granting twice. Mercado Pago retries webhooks, so this is not
 hypothetical.
 
+## Replacing what is on the domain now
+
+This is not a deployment onto empty space. `l2jsaked.com.ar` currently serves a
+High Five server's site from Firebase Hosting on the same project, and that site
+reads Firestore from the browser. Two steps here take it down, so their order is
+what keeps the old site alive until the new one is ready rather than during a gap:
+
+**Publishing the deny-all rules breaks the old site immediately.** The rules are
+what stop a stranger writing a `jobs` document and granting themselves premium, so
+they are not optional — but they also end the old site's Firestore access the
+moment they land. Publish them at the cutover, not while preparing.
+
+**Pointing the apex at Pages is what actually swaps the site.** Until the DNS
+record changes, the old site keeps serving no matter what else is deployed.
+
+So: build everything else first — Firestore database, indexes, agent, Worker on
+`api.l2jsaked.com.ar` — and verify the API answers. Only then publish the rules and
+move the apex, in that order and close together.
+
+One thing to check in the console before any of it: this project already holds the
+old site's collections. If any of them is named `users`, `orders`, `jobs` or
+`status`, the two applications would be writing into the same place, and the
+collections here need a prefix first.
+
 ## Setup
 
 Each part has its own README. Order matters:
