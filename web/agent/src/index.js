@@ -124,10 +124,16 @@ const handlers = {
       return { ok: false, reason: 'invalid_grant' };
     }
 
-    // A payment for an account that no longer exists should be visible, not
-    // silently written into a table nothing reads.
+    // The account may not exist *yet*. A payment can be approved before the
+    // registration job ahead of it has been applied, and this agent comes back from
+    // a machine being off with both queued at once. Giving up on the first look
+    // takes the money and grants nothing.
+    //
+    // A wider allowance than the default because the retries are cheap and fast --
+    // one per poll -- while what is being waited for is not: five attempts would
+    // give up twenty-five seconds in.
     if (!(await database.accountExists(accountName))) {
-      return { ok: false, reason: 'account_not_found' };
+      return { ok: false, reason: 'account_not_found', retry: true, maxAttempts: 60 };
     }
 
     const expiresAt = await database.grantPremium({ accountName, days });
@@ -160,7 +166,9 @@ async function drainJobs() {
       outcome = { ok: false, reason: 'error', retry: true, detail: error.message };
     }
 
-    const parked = !outcome.ok && outcome.retry && attempts < config.maxAttempts;
+    // A handler may ask for more room than the default when what it waits on is
+    // slower than the poll interval.
+    const parked = !outcome.ok && outcome.retry && attempts < (outcome.maxAttempts ?? config.maxAttempts);
     const fields = {
       status: outcome.ok ? 'done' : parked ? 'pending' : 'failed',
       attempts,
@@ -177,6 +185,26 @@ async function drainJobs() {
       await firestore.patch(job.name, fields, { ifUnchangedSince: job.updateTime });
     } catch (error) {
       log(`could not record the outcome of job ${job.id}: ${error.message}`);
+    }
+
+    // A grant out of attempts means somebody paid and did not get what they paid
+    // for. A failed job is a quiet place for that to sit: nothing reads the jobs
+    // collection, and the order still says `paid`. Marking the order puts it where
+    // the buyer looks and where it will be found when they come asking.
+    if (!outcome.ok && !parked && job.type === 'grant_premium' && job.orderId) {
+      log(`ATTENTION: order ${job.orderId} was paid and premium was not granted (${outcome.reason})`);
+      try {
+        // patch, not setDocument: setDocument replaces the document outright, which
+        // would erase the login, amount, payment id and date -- the very record
+        // needed to work out what happened and who to refund.
+        await firestore.patch(`${firestore.root}/orders/${job.orderId}`, {
+          status: 'needs_attention',
+          failureReason: String(outcome.reason ?? 'unknown'),
+          failedAt: new Date(),
+        });
+      } catch (error) {
+        log(`could not flag order ${job.orderId}: ${error.message}`);
+      }
     }
   }
 }
