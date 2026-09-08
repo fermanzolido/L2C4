@@ -14,4 +14,6 @@ node_modules/
 .wrangler/
 .dev.vars
 *.log
+# ...and what rotation leaves behind: *.log alone does not match agent.log.1.
+*.log.*
 .firebase/
