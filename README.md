@@ -37,7 +37,7 @@ Each of these is a count taken by parsing the actual data or source, not an esti
 | Spawn points inside the world grid | **10,167 / 10,167** |
 | Class-change dialogue pages present for C4 NPCs | **222 / 222** |
 
-Plus **54 unit tests** across 15 classes, and a CI workflow that compiles the core, runs the tests, **and separately compiles all 784 datapack scripts** — because `build.xml` only builds `java/`, so a core change that breaks a script would otherwise pass a green build.
+Plus **54 unit tests** across 15 classes, and a CI workflow that compiles the core, runs the tests, **and separately compiles all 785 datapack scripts** — because `build.xml` only builds `java/`, so a core change that breaks a script would otherwise pass a green build.
 
 ---
 
@@ -111,7 +111,13 @@ Then set up the database with `db_installer/DatabaseInstaller`, and start `login
 
 Stated plainly, because the numbers above are only worth what their limits are worth.
 
-**The server has never been started.** Everything here is compilation, XSD validation, cross-referenced data, and unit tests. Nothing has been observed with a client connected. The changes that would most benefit from a live pass are the buffer NPC positions, which are placed beside each gatekeeper but not eyeballed in game, and the primary key added to `character_variables`, which on a database that already holds duplicate rows needs the one-time migration written into that schema file.
+**The server has been started now**, and the website in [`web/`](web/) that sells premium for it is in production. That changes what can be claimed, though less than it sounds: every figure in the table above still rests on compilation, XSD validation, cross-referenced data and unit tests. Not one of them was re-measured with a client connected.
+
+What was watched live is the website's chain, each part of it once. A registration reaches MySQL carrying a `$2a$` hash. A valid login succeeds, while a wrong password and a name that does not exist both answer 401. A real Mercado Pago payment granted premium within six seconds. A grant job delivered twice is refused by document id. A second purchase extends the expiry instead of replacing it. The status document reports offline with both game ports shut, online with both open, and offline with only the game port answering.
+
+About the game itself the claim is weaker, and that should show. **Most of what is implemented behaves well with a client connected.** That is the impression of the person running the server, not a systematic pass — there is no denominator behind it, so it is not worth what the figures above are worth, and it is written here rather than up there for that reason.
+
+Two things flagged before a client ever connected are still unverified, and running the server did not settle either. **The buffer NPC positions**, placed beside each gatekeeper and still not eyeballed in game. And **the primary key added to `character_variables`**, whose one-time migration matters only on a database that already holds duplicate rows — the production database was created clean, so that path has never run.
 
 Balance beyond the rate curve is untouched: no skill damage, no drop tables, no NPC stats were rebalanced. This is a Chronicle 4 server with C4 numbers.
 

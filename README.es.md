@@ -37,7 +37,7 @@ Cada una de estas cifras es un conteo hecho leyendo los datos o el código de ve
 | Puntos de spawn dentro de la grilla del mundo | **10.167 / 10.167** |
 | Páginas de diálogo de cambio de clase presentes para NPCs de C4 | **222 / 222** |
 
-Más **54 pruebas unitarias** repartidas en 15 clases, y un flujo de CI que compila el core, corre las pruebas **y aparte compila los 784 scripts del datapack** — porque `build.xml` solo construye `java/`, así que un cambio en el core que rompa un script pasaría igual con la compilación en verde.
+Más **54 pruebas unitarias** repartidas en 15 clases, y un flujo de CI que compila el core, corre las pruebas **y aparte compila los 785 scripts del datapack** — porque `build.xml` solo construye `java/`, así que un cambio en el core que rompa un script pasaría igual con la compilación en verde.
 
 ---
 
@@ -111,7 +111,13 @@ Después preparás la base de datos con `db_installer/DatabaseInstaller`, y arra
 
 Dicho de frente, porque los números de arriba valen lo que valgan sus límites.
 
-**El servidor nunca se arrancó.** Todo esto es compilación, validación contra XSD, datos cruzados entre sí, y pruebas unitarias. Nada se observó con un cliente conectado. Los cambios que más ganarían con una pasada en vivo son las posiciones del NPC buffer, que están puestas al lado de cada gatekeeper pero no se miraron dentro del juego, y la clave primaria agregada a `character_variables`, que en una base que ya tenga filas duplicadas necesita la migración de una sola vez que quedó escrita en ese mismo archivo de esquema.
+**El servidor ya se arrancó**, y la web de [`web/`](web/) que le vende premium está en producción. Eso cambia lo que se puede afirmar, aunque menos de lo que suena: cada cifra de la tabla de arriba sigue apoyada en compilación, validación contra XSD, datos cruzados y pruebas unitarias. Ninguna se volvió a medir con un cliente conectado.
+
+Lo que sí se miró en vivo es la cadena de la web, cada parte una vez. Un registro llega a MySQL con un hash `$2a$`. Un login válido entra, y tanto una contraseña equivocada como un nombre que no existe responden 401. Un pago real de Mercado Pago otorgó premium en seis segundos. Un job de otorgamiento entregado dos veces se rechaza por id de documento. Una segunda compra extiende el vencimiento en vez de reemplazarlo. El documento de estado reporta caído con los dos puertos del juego cerrados, arriba con los dos abiertos, y caído con solo el de juego respondiendo.
+
+Del juego en sí la afirmación es más floja, y conviene que se note. **La mayoría de lo implementado responde bien con un cliente conectado.** Esa es la impresión de quien corre el servidor, no una pasada sistemática — no hay un denominador detrás, así que no vale lo que valen las cifras de arriba, y por eso está escrita acá y no allá.
+
+Dos cosas señaladas antes de que se conectara ningún cliente siguen sin verificarse, y arrancar el servidor no resolvió ninguna. **Las posiciones de los NPC buffer**, puestas al lado de cada gatekeeper y todavía no miradas dentro del juego. Y **la clave primaria agregada a `character_variables`**, cuya migración de una sola vez solo importa en una base que ya tenga filas duplicadas — la base de producción se creó limpia, así que ese camino nunca se ejecutó.
 
 El balance más allá de la curva de rates está sin tocar: no se rebalanceó daño de habilidades, ni tablas de drop, ni estadísticas de NPCs. Este es un servidor Chronicle 4 con números de C4.
 
