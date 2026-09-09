@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Configuracion de red del game server.
+     Este archivo existe para que el servidor NO use su auto-configuracion, que
+     resuelve la IP publica pidiendosela a checkip.amazonaws.com una sola vez, al
+     arrancar. Eso tiene dos problemas con una IP dinamica: si ese servicio no
+     contesta, el servidor se queda con 127.0.0.1 y no entra nadie de afuera; y
+     la IP que averigua queda fija hasta el proximo reinicio.
+
+     Poniendo el hostname de No-IP en vez de una IP, es el login server el que lo
+     resuelve por DNS (InetAddress.getByName), asi que toma lo que No-IP tenga
+     publicado en ese momento.
+
+     OJO con el orden: AuthRequest manda hosts.get(2) como host externo y
+     hosts.get(0) como interno. El parser agrega los <define> en orden y recien
+     al final el address del <gameserver>. Con exactamente dos <define>, el
+     externo queda en el indice 2. Agregar o sacar uno rompe esa cuenta. -->
+<gameserver address="l2jsaked.servegame.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../data/xsd/ipconfig.xsd">
+	<!-- indice 0: la LAN, para clientes en la misma red -->
+	<define subnet="10.10.10.0/24" address="10.10.10.181" />
+	<!-- indice 1: loopback -->
+	<define subnet="127.0.0.0/8" address="127.0.0.1" />
+</gameserver>
