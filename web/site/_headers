@@ -1,5 +1,11 @@
 # Cloudflare Pages reads this at deploy time. Evaluated at the edge, so none of it
 # costs a Workers invocation.
+#
+# Pages MERGES every rule whose path matches -- it does not let the most specific one
+# win. Two rules setting Cache-Control on the same file arrive as one header reading
+# "max-age=600, public, max-age=3600", and a browser takes the first value, so the
+# specific rule loses silently. That is why the /* block below carries no
+# Cache-Control at all and every path that wants one names itself.
 
 /*
   X-Content-Type-Options: nosniff
@@ -11,7 +17,19 @@
   # external origin at all, which is what an injected <script src> would need.
   # connect-src names the Worker because that is the only host the pages call.
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://api.l2jsaked.com.ar; form-action 'self'; base-uri 'self'; frame-ancestors 'none'
-  Cache-Control: public, max-age=600
+
+# The pages are not fingerprinted, so they revalidate every visit: a deploy reaches a
+# returning visitor at once, and a page that has not changed costs one 304 rather than
+# a download. Listed one by one because a glob here would match the assets too and
+# merge into their rules.
+/
+  Cache-Control: public, max-age=0, must-revalidate
+/register
+  Cache-Control: public, max-age=0, must-revalidate
+/login
+  Cache-Control: public, max-age=0, must-revalidate
+/account
+  Cache-Control: public, max-age=0, must-revalidate
 
 # Art changes only when it is redrawn, and then under a new deploy.
 /assets/og.jpg
@@ -23,8 +41,9 @@
 /assets/apple-touch-icon.png
   Cache-Control: public, max-age=2592000
 
-# The stylesheet and the scripts are not fingerprinted, so they stay short-lived:
-# a deploy has to reach a returning visitor on their next load, not in a year.
+# The stylesheet and the scripts are not fingerprinted either, so they stay
+# short-lived: a deploy has to reach a returning visitor on their next load, not in a
+# year. An hour is the window in which new markup can meet old CSS.
 /assets/style.css
   Cache-Control: public, max-age=3600, must-revalidate
 /assets/app.js
