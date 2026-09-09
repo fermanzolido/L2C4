@@ -1,50 +1,60 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Log in — L2C4</title>
+<title>Ingresar — L2C4</title>
 <link rel="stylesheet" href="assets/style.css">
 </head>
-<body>
+<body data-title-key="title.login">
 
 <header>
   <div class="wrap">
-    <span class="brand">L2C4</span>
+    <a class="brand" href="/">L2C4</a>
     <nav>
-      <a href="/">Server</a>
-      <a href="/register">Register</a>
-      <a href="/login">Log in</a>
-      <a href="/account">My account</a>
+      <a href="/" data-i18n="nav.server">Servidor</a>
+      <a href="/register" data-i18n="nav.register">Registrarse</a>
+      <a href="/login" data-i18n="nav.login">Ingresar</a>
+      <a href="/account" data-i18n="nav.account">Mi cuenta</a>
     </nav>
+    <div class="lang" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang-option="es">ES</button>
+      <button type="button" data-lang-option="en">EN</button>
+    </div>
   </div>
 </header>
 
 <div class="wrap">
   <section>
-    <h2>Log in</h2>
+    <h2 data-i18n="login.title">Ingresar</h2>
     <form id="form">
-      <label for="login">Account name</label>
+      <label for="login" data-i18n="login.login">Nombre de cuenta</label>
       <input id="login" name="login" autocomplete="username" required>
 
-      <label for="password">Password</label>
+      <label for="password" data-i18n="login.password">Contraseña</label>
       <input id="password" name="password" type="password" autocomplete="current-password" required>
 
-      <button type="submit" id="submit">Log in</button>
+      <button type="submit" id="submit">Ingresar</button>
       <div class="msg" id="msg"></div>
     </form>
-    <p style="color:var(--muted);font-size:14px;margin-top:22px">
-      No account yet? <a href="/register">Create one</a>.
+    <p class="note">
+      <span data-i18n="login.none">¿Todavía no tenés cuenta?</span>
+      <a href="/register" data-i18n="login.none.link">Creá una</a>.
     </p>
   </section>
 </div>
 
+<script src="assets/i18n.js"></script>
 <script type="module">
 import { api, say, clear } from './assets/app.js';
 
 const form = document.querySelector('#form');
 const submit = document.querySelector('#submit');
 const msg = document.querySelector('#msg');
+
+const label = () => { submit.textContent = window.I18N.t('btn.login'); };
+label();
+document.addEventListener('l2c4:lang', label);
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();

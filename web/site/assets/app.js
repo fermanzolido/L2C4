@@ -23,49 +23,102 @@ async function api(path, options = {}) {
   return body;
 }
 
-const MESSAGES = {
-  invalid_login: 'The account name must be 4 to 14 characters, letters and numbers only.',
-  invalid_email: 'That email address does not look right.',
-  invalid_password: 'The password must be between 8 and 64 characters.',
-  login_taken: 'That account name is already taken.',
-  invalid_credentials: 'Wrong account name or password.',
-  wrong_current_password: 'That is not your current password.',
-  unauthenticated: 'Your session expired. Please log in again.',
-  unknown_plan: 'That plan is no longer available.',
-  internal_error: 'Something broke on our side. Try again in a moment.',
-};
-
-function say(element, text, kind = 'err') {
-  element.textContent = MESSAGES[text] ?? text;
+/**
+ * `key` is looked up in the string table, which returns the key itself when it does
+ * not know it -- so an error code the Worker grows tomorrow still reaches the reader
+ * instead of turning into a blank box.
+ */
+function say(element, key, kind = 'err') {
+  element.textContent = window.I18N.t(key);
+  element.dataset.key = key;
   element.className = `msg show ${kind}`;
 }
 
 function clear(element) {
   element.className = 'msg';
+  delete element.dataset.key;
+}
+
+/** Redraws a visible message in the language just chosen. */
+function repaintMessages() {
+  for (const element of document.querySelectorAll('.msg.show[data-key]')) {
+    element.textContent = window.I18N.t(element.dataset.key);
+  }
 }
 
 async function paintStatus(element) {
   if (!element) return;
+  const t = (key) => window.I18N.t(key);
+  const dot = element.querySelector('.dot');
+  const label = element.querySelector('.label');
+
+  const draw = (state, players) => {
+    // Remembered on the node so a language switch can redraw without asking the API again.
+    element.dataset.state = state;
+    element.dataset.players = players ?? '';
+    if (state === 'online') {
+      dot.className = 'dot on';
+      const word = players === 1 ? t('status.player') : t('status.players');
+      label.textContent = `${t('status.online')} — ${players} ${word}`;
+    } else if (state === 'offline') {
+      dot.className = 'dot off';
+      label.textContent = t('status.offline');
+    } else {
+      dot.className = 'dot';
+      label.textContent = t('status.unknown');
+    }
+  };
+
+  document.addEventListener('l2c4:lang', () => {
+    if (element.dataset.state) draw(element.dataset.state, Number(element.dataset.players));
+  });
+
   try {
     const status = await api('/api/status');
-    const dot = element.querySelector('.dot');
-    const label = element.querySelector('.label');
-    if (status.online) {
-      dot.className = 'dot on';
-      label.textContent = `Online — ${status.players} ${status.players === 1 ? 'player' : 'players'}`;
-    } else {
-      dot.className = 'dot off';
-      // A stale reading means the agent stopped reporting, which is not the same
-      // as the server being down. Saying so beats showing a confident zero.
-      label.textContent = status.stale ? 'Status unavailable' : 'Offline';
-    }
+    // A stale reading means the agent stopped reporting, which is not the same as
+    // the server being down. Saying so beats showing a confident zero.
+    if (status.online) draw('online', status.players);
+    else draw(status.stale ? 'unknown' : 'offline', 0);
   } catch {
-    element.querySelector('.label').textContent = 'Status unavailable';
+    draw('unknown', 0);
   }
 }
 
+/**
+ * The plans on the home page are read-only: buying needs a session, so the button is
+ * a link to the account page rather than a checkout the visitor cannot complete.
+ */
+async function paintPlans(container, fallback) {
+  if (!container) return;
+
+  let data;
+  try {
+    data = await api('/api/plans');
+  } catch {
+    // Prices are not worth an error box on a marketing page; the account page has them.
+    if (fallback) fallback.hidden = false;
+    return;
+  }
+
+  const draw = () => {
+    const t = (key) => window.I18N.t(key);
+    container.innerHTML = data.plans
+      .map(
+        (plan) => `<div class="plan">
+          <div class="days">${plan.months}<span>${plan.months === 1 ? t('plan.month') : t('plan.months')}</span></div>
+          <div class="price">${data.currency} ${plan.price.toLocaleString()}</div>
+          <a class="btn ghost" href="/account" style="display:block;margin-top:16px">${t('plan.signin')}</a>
+        </div>`
+      )
+      .join('');
+  };
+
+  draw();
+  document.addEventListener('l2c4:lang', draw);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-  paintStatus(document.querySelector('#status'));
+  document.addEventListener('l2c4:lang', repaintMessages);
 
   // Hosting has cleanUrls on, so the browser is at /register rather than at
   // /register.html. Comparing resolved paths works either way; comparing the href
@@ -75,4 +128,4 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-export { api, say, clear, paintStatus };
+export { api, say, clear, paintStatus, paintPlans };

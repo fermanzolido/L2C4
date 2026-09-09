@@ -1,77 +1,92 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Register — L2C4</title>
+<title>Registrarse — L2C4</title>
 <link rel="stylesheet" href="assets/style.css">
 </head>
-<body>
+<body data-title-key="title.register">
 
 <header>
   <div class="wrap">
-    <span class="brand">L2C4</span>
+    <a class="brand" href="/">L2C4</a>
     <nav>
-      <a href="/">Server</a>
-      <a href="/register">Register</a>
-      <a href="/login">Log in</a>
-      <a href="/account">My account</a>
+      <a href="/" data-i18n="nav.server">Servidor</a>
+      <a href="/register" data-i18n="nav.register">Registrarse</a>
+      <a href="/login" data-i18n="nav.login">Ingresar</a>
+      <a href="/account" data-i18n="nav.account">Mi cuenta</a>
     </nav>
+    <div class="lang" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang-option="es">ES</button>
+      <button type="button" data-lang-option="en">EN</button>
+    </div>
   </div>
 </header>
 
 <div class="wrap">
   <section>
-    <h2>Create an account</h2>
-    <p style="color:var(--muted);max-width:520px">
-      This is the account you will use in the game client. Accounts can only be created here.
+    <h2 data-i18n="register.title">Crear una cuenta</h2>
+    <p class="lead" data-i18n="register.lead">
+      Esta es la cuenta que vas a usar en el cliente del juego. Las cuentas se crean solo acá.
     </p>
 
     <form id="form">
-      <label for="login">Account name</label>
+      <label for="login" data-i18n="register.login">Nombre de cuenta</label>
       <input id="login" name="login" autocomplete="username" required
              minlength="4" maxlength="14" pattern="[a-zA-Z0-9]{4,14}">
-      <div class="hint">4 to 14 characters, letters and numbers only. This is what you type in the client.</div>
+      <div class="hint" data-i18n="register.login.hint">De 4 a 14 caracteres, solo letras y números. Esto es lo que escribís en el cliente.</div>
 
-      <label for="email">Email</label>
+      <label for="email" data-i18n="register.email">Correo</label>
       <input id="email" name="email" type="email" autocomplete="email" required>
-      <div class="hint">Only used to reach you about your account.</div>
+      <div class="hint" data-i18n="register.email.hint">Se usa solo para contactarte por tu cuenta.</div>
 
-      <label for="password">Password</label>
+      <label for="password" data-i18n="register.password">Contraseña</label>
       <input id="password" name="password" type="password" autocomplete="new-password" required
              minlength="8" maxlength="16">
-      <div class="hint">8 to 16 characters. The game client's login field stops at 16, so anything longer could be stored and then never typed there.</div>
+      <div class="hint" data-i18n="register.password.hint">De 8 a 16 caracteres. El campo del cliente se corta en 16, así que algo más largo se guardaría y después no se podría escribir ahí.</div>
 
-      <button type="submit" id="submit">Create account</button>
+      <button type="submit" id="submit">Crear cuenta</button>
       <div class="msg" id="msg"></div>
     </form>
+
+    <p class="note">
+      <span data-i18n="register.have">¿Ya tenés una?</span>
+      <a href="/login" data-i18n="register.have.link">Ingresá</a>.
+    </p>
   </section>
 </div>
 
+<script src="assets/i18n.js"></script>
 <script type="module">
 import { api, say, clear } from './assets/app.js';
 
 const form = document.querySelector('#form');
 const submit = document.querySelector('#submit');
 const msg = document.querySelector('#msg');
+const t = (key) => window.I18N.t(key);
+
+const label = () => { submit.textContent = t(submit.disabled ? 'btn.registering' : 'btn.register'); };
+label();
+document.addEventListener('l2c4:lang', label);
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   clear(msg);
   submit.disabled = true;
-  submit.textContent = 'Creating…';
+  label();
 
   try {
     const data = Object.fromEntries(new FormData(form));
     await api('/api/register', { method: 'POST', body: JSON.stringify(data) });
     // The account exists on the site immediately; the game account is written by
     // the agent a moment later, which the account page reports honestly.
-    say(msg, 'Account created. Setting up your game login…', 'ok');
+    say(msg, 'ok.registered', 'ok');
     setTimeout(() => { location.href = '/account'; }, 1200);
   } catch (error) {
     say(msg, error.code ?? 'internal_error');
     submit.disabled = false;
-    submit.textContent = 'Create account';
+    label();
   }
 });
 </script>

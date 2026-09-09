@@ -1,119 +1,481 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>L2C4 — Chronicle 4: Scions of Destiny</title>
+<meta name="description" content="Servidor de Lineage 2 Chronicle 4. Experiencia x1, sin items custom, sin rebalanceos. El unico cambio son las lineas enanas.">
 <link rel="stylesheet" href="assets/style.css">
 </head>
-<body>
+<body data-title-key="title.index">
 
 <header>
   <div class="wrap">
-    <span class="brand">L2C4</span>
+    <a class="brand" href="/">L2C4</a>
     <nav>
-      <a href="/">Server</a>
-      <a href="/register">Register</a>
-      <a href="/login">Log in</a>
-      <a href="/account">My account</a>
+      <a href="/" data-i18n="nav.server">Servidor</a>
+      <a href="/register" data-i18n="nav.register">Registrarse</a>
+      <a href="/login" data-i18n="nav.login">Ingresar</a>
+      <a href="/account" data-i18n="nav.account">Mi cuenta</a>
     </nav>
+    <div class="lang" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang-option="es">ES</button>
+      <button type="button" data-lang-option="en">EN</button>
+    </div>
   </div>
 </header>
 
 <div class="wrap">
 
   <div class="hero">
-    <h1>Chronicle 4: Scions of Destiny</h1>
-    <p>A retail-paced C4 server. Experience is x1, the grind is the point, and the rates around it are tuned as one curve rather than a pile of knobs.</p>
+    <p class="eyebrow" data-i18n="hero.eyebrow">Lineage 2 · Chronicle 4</p>
+    <h1>Scions of Destiny</h1>
+    <p data-i18n="hero.lead">
+      C4 como fue, no como lo recuerda una lista de features. Experiencia x1, cero items custom,
+      cero rebalanceo. La única mano que le metimos al juego son los enanos, y está explicada
+      abajo con nombre y apellido.
+    </p>
+
     <div class="status" id="status">
-      <span class="dot"></span><span class="label">Checking…</span>
+      <span class="dot"></span><span class="label" data-i18n="status.checking">Comprobando…</span>
+    </div>
+
+    <div class="actions">
+      <a class="btn" href="/register" data-i18n="hero.cta">Crear cuenta</a>
+      <a class="btn ghost" href="#jugar" data-i18n="hero.cta2">Cómo jugar</a>
+    </div>
+
+    <div class="facts">
+      <span data-i18n="facts.chronicle">Chronicle 4</span>
+      <span data-i18n="facts.xp">Experiencia x1</span>
+      <span data-i18n="facts.java">Java 25</span>
+      <span data-i18n="facts.p2w">Sin pay-to-win</span>
+      <span data-i18n="facts.lang">Cliente en español</span>
     </div>
   </div>
 
-  <section>
-    <h2>Rates</h2>
+  <div class="chips">
+    <a href="#esencia" data-i18n="chip.essence">La esencia</a>
+    <a href="#rates" data-i18n="chip.rates">Rates</a>
+    <a href="#enanos" data-i18n="chip.dwarves">Los enanos</a>
+    <a href="#caracteristicas" data-i18n="chip.features">Características</a>
+    <a href="#jugar" data-i18n="chip.howto">Cómo jugar</a>
+    <a href="#donacion" data-i18n="chip.donate">Donación</a>
+    <a href="#codigo" data-i18n="chip.code">El código</a>
+  </div>
+
+  <!-- ===================== ESENCIA ===================== -->
+  <section id="esencia">
+    <p class="eyebrow" data-i18n="essence.eyebrow">Qué es este servidor</p>
+    <h2 data-i18n="essence.title">C4, entero, sin agregados</h2>
+    <p class="lead" data-i18n="essence.lead">
+      La idea es sencilla: que un personaje de este servidor sea el mismo personaje que era en
+      Chronicle 4. Ninguna skill cambió de número, ninguna tabla de drop se tocó, ningún NPC tiene
+      stats inventados. Lo único que se movió son los rates —y son una sola curva, no una pila de
+      perillas sueltas— y las líneas enanas.
+    </p>
+
+    <div class="cols">
+      <div class="card yes">
+        <h3 data-i18n="essence.keep.title">LO QUE ESTÁ</h3>
+        <ul>
+          <li data-i18n="essence.keep.1">Olympiad y Héroes</li>
+          <li data-i18n="essence.keep.2">Seven Signs</li>
+          <li data-i18n="essence.keep.3">Asedios de castillo y clan halls</li>
+          <li data-i18n="essence.keep.4">Dimensional Rift</li>
+          <li data-i18n="essence.keep.5">Subclases y noblesse por quest</li>
+          <li data-i18n="essence.keep.6">Pesca, manor, carreras de monstruos</li>
+          <li data-i18n="essence.keep.7">Valakas, Antharas, Baium, Zaken</li>
+          <li data-i18n="essence.keep.8">Skill enchanting</li>
+        </ul>
+      </div>
+      <div class="card no">
+        <h3 data-i18n="essence.drop.title">LO QUE NO VAS A ENCONTRAR</h3>
+        <ul>
+          <li data-i18n="essence.drop.1">Items custom ni tienda de GM</li>
+          <li data-i18n="essence.drop.2">Stats, equipo o niveles por donación</li>
+          <li data-i18n="essence.drop.3">Sistema de facciones</li>
+          <li data-i18n="essence.drop.4">Fake players para inflar el online</li>
+          <li data-i18n="essence.drop.5">Auto-farm: el autoplay está apagado</li>
+          <li data-i18n="essence.drop.6">NPC de noblesse instantánea</li>
+          <li data-i18n="essence.drop.7">Transmog ni venta de buffs entre jugadores</li>
+          <li data-i18n="essence.drop.8">Punto de inicio custom: arrancás donde arranca tu raza</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== RATES ===================== -->
+  <section id="rates">
+    <p class="eyebrow" data-i18n="rates.eyebrow">Una curva, no perillas sueltas</p>
+    <h2 data-i18n="rates.title">Rates</h2>
     <div class="grid">
       <div class="card">
-        <h3>EXPERIENCE</h3>
+        <h3 data-i18n="rates.xp.head">EXPERIENCIA</h3>
         <div class="big">x1</div>
-        <p>Retail pace, including SP, party rates, quest experience and pets.</p>
+        <p data-i18n="rates.xp.body">Ritmo retail, incluidos SP, party, experiencia de quest y mascotas.</p>
       </div>
       <div class="card">
-        <h3>DROP</h3>
+        <h3 data-i18n="rates.drop.head">DROP</h3>
         <div class="big">x2</div>
-        <p>Chance x2, amount x1. Spoil matches it.</p>
+        <p data-i18n="rates.drop.body">Chance x2, cantidad x1. Spoil igual. Raid bosses también x2.</p>
       </div>
       <div class="card">
-        <h3>ADENA</h3>
+        <h3 data-i18n="rates.adena.head">ADENA</h3>
         <div class="big">x3</div>
-        <p>Quest adena x3 as well.</p>
+        <p data-i18n="rates.adena.body">La adena de quest también x3.</p>
       </div>
       <div class="card">
-        <h3>QUEST REWARDS</h3>
+        <h3 data-i18n="rates.quest.head">RECOMPENSAS DE QUEST</h3>
         <div class="big">x2</div>
-        <p>Potions, scrolls, recipes and materials included.</p>
+        <p data-i18n="rates.quest.body">Pociones, pergaminos, recetas y materiales incluidos.</p>
       </div>
     </div>
-    <p style="color:var(--muted);font-size:14px;margin-top:16px">
-      Why x1 experience with x2 drops: at x1 a character sits on each level about five times longer,
-      so x5 drops would mean five times the loot across five times the kills, and gear would run far
-      ahead of level — ruining exactly the farming that x1 exists to preserve.
+    <p class="note" data-i18n="rates.why">
+      Por qué x1 de experiencia con x2 de drop: en x1 un personaje pasa unas cinco veces más tiempo
+      en cada nivel, así que un x5 de drop daría cinco veces el botín repartido en cinco veces las
+      matanzas, y el equipo se adelantaría muy por delante del nivel — arruinando justamente el
+      farmeo que el x1 existe para conservar.
+    </p>
+  </section>
+
+  <!-- ===================== CONFIGURACIÓN ===================== -->
+  <section id="config">
+    <h2 data-i18n="config.title">El resto de la configuración</h2>
+    <div class="scroll">
+      <table>
+        <tr>
+          <th data-i18n="config.autoloot">Autoloot</th>
+          <td data-i18n="config.autoloot.v">Encendido para monstruos, apagado para raids</td>
+        </tr>
+        <tr>
+          <th data-i18n="config.death">Delevel y penalización por muerte</th>
+          <td data-i18n="config.death.v">Retail: se puede perder nivel y la death penalty funciona como siempre</td>
+        </tr>
+        <tr>
+          <th data-i18n="config.champ">Monstruos campeones</th>
+          <td data-i18n="config.champ.v">5% de frecuencia entre nivel 20 y 70, cinco veces la vida y cinco veces la experiencia — neutro por unidad de tiempo</td>
+        </tr>
+        <tr>
+          <th data-i18n="config.skills">Skills de clase</th>
+          <td data-i18n="config.skills.v">Se entregan solas al subir de nivel y al entrar</td>
+        </tr>
+        <tr>
+          <th data-i18n="config.chars">Personajes por cuenta</th>
+          <td data-i18n="config.chars.v">7</td>
+        </tr>
+        <tr>
+          <th data-i18n="config.sub">Subclases</th>
+          <td data-i18n="config.sub.v">1 por personaje, hasta nivel 80</td>
+        </tr>
+        <tr>
+          <th data-i18n="config.ip">Clientes por IP</th>
+          <td data-i18n="config.ip.v">1, o 2 con premium</td>
+        </tr>
+        <tr>
+          <th data-i18n="config.vit">Vitality</th>
+          <td data-i18n="config.vit.v">Apagada: es un sistema posterior a C4</td>
+        </tr>
+        <tr>
+          <th data-i18n="config.balance">Balance</th>
+          <td data-i18n="config.balance.v">Intacto. Ningún daño de skill, tabla de drop o stat de NPC fue rebalanceado. Números de C4.</td>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===================== ENANOS ===================== -->
+  <section id="enanos">
+    <p class="eyebrow" data-i18n="dwarf.eyebrow">El único cambio</p>
+    <h2 data-i18n="dwarf.title">Los enanos</h2>
+    <p class="lead" data-i18n="dwarf.lead">
+      En C4 el enano es un oficio antes que un personaje: spoilea, craftea, y para subir depende de
+      que alguien lo lleve. Acá sigue siendo el que craftea y spoilea, pero además puede farmear
+      solo. Es la única intervención de balance del servidor y está acotada a propósito: cada línea
+      enana sigue a una línea humana, tier por tier, y copia sus skills tal cual — mismos números,
+      mismo costo, ninguna skill nueva inventada.
+    </p>
+
+    <div class="scroll">
+      <table>
+        <tr>
+          <th data-i18n="dwarf.th.class">Clase enana</th>
+          <th data-i18n="dwarf.th.follows">Sigue a</th>
+          <th data-i18n="dwarf.th.entries" class="num">Entradas en el árbol</th>
+        </tr>
+        <tr><td>Scavenger</td><td>Rogue</td><td class="num">146</td></tr>
+        <tr><td>Artisan</td><td>Human Wizard</td><td class="num">176</td></tr>
+        <tr><td>Bounty Hunter</td><td>Treasure Hunter</td><td class="num">500</td></tr>
+        <tr><td>Warsmith</td><td>Sorcerer</td><td class="num">556</td></tr>
+      </table>
+    </div>
+
+    <div class="cols" style="margin-top:16px">
+      <div class="card yes">
+        <h3 data-i18n="dwarf.in.title">QUÉ SE COPIÓ</h3>
+        <ul>
+          <li data-i18n="dwarf.in.1">Masteries y pasivas</li>
+          <li data-i18n="dwarf.in.2">El daño: golpes de daga, nukes, AoE de farmeo</li>
+          <li data-i18n="dwarf.in.3">Self-buffs</li>
+          <li data-i18n="dwarf.in.4">Sustain: recuperación y absorción</li>
+        </ul>
+      </div>
+      <div class="card no">
+        <h3 data-i18n="dwarf.out.title">QUÉ QUEDÓ AFUERA</h3>
+        <ul>
+          <li data-i18n="dwarf.out.1">Control duro: Sleep, Sleeping Cloud, Slow, Curse Fear, Stunning Shot</li>
+          <li data-i18n="dwarf.out.2">Cancellation</li>
+          <li data-i18n="dwarf.out.3">Movilidad y escape: Dash, Ultimate Evasion</li>
+          <li data-i18n="dwarf.out.4">Las maldiciones apuntadas a jugadores</li>
+          <li data-i18n="dwarf.out.5">El arco: el enano es dagger, no un segundo Rogue</li>
+          <li data-i18n="dwarf.out.6">Toda la rama de invocador</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 class="sub-head" data-i18n="dwarf.rules.title">Las reglas de la injerencia</h3>
+    <div class="scroll">
+      <table>
+        <tr>
+          <th data-i18n="dwarf.rule.gate">Hay que promocionar</th>
+          <td data-i18n="dwarf.rule.gate.v">Nada se injerta en Dwarf Fighter. Ninguna de estas skills existe antes de la primera clase — la misma puerta que cruzan los humanos que las tienen. A los 40, la segunda clase continúa la línea que empezó la primera.</td>
+        </tr>
+        <tr>
+          <th data-i18n="dwarf.rule.chain">Cada cadena arranca en nivel 1</th>
+          <td data-i18n="dwarf.rule.chain.v">Los niveles bajos de Mortal Blow, Anti Magic, Ice Bolt, Vampiric Touch y Weapon Mastery pertenecen al Human Fighter y al Human Mystic, así que se copiaron también. Ninguna cadena arranca colgada en el nivel 10.</td>
+        </tr>
+        <tr>
+          <th data-i18n="dwarf.rule.pve">El corte es por PvE</th>
+          <td data-i18n="dwarf.rule.pve.v">Lo que quedó afuera es exactamente lo que hace fuertes a esas clases en PvP. El objetivo era un enano que pueda farmear, no un segundo Rogue ni un segundo Sorcerer.</td>
+        </tr>
+        <tr>
+          <th data-i18n="dwarf.rule.numbers">Ningún número tocado</th>
+          <td data-i18n="dwarf.rule.numbers.v">Las entradas se copiaron literalmente del árbol humano, hijos incluidos: mismo daño, mismo costo de SP, mismo reuso.</td>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===================== CARACTERÍSTICAS ===================== -->
+  <section id="caracteristicas">
+    <h2 data-i18n="features.title">Características</h2>
+    <div class="grid">
+      <div class="card">
+        <h3 data-i18n="features.buffer.head">BUFFER POR ESQUEMAS</h3>
+        <p data-i18n="features.buffer.body">Uno en cada una de las quince ciudades, al lado del gatekeeper. 43 buffs, una hora de duración, hasta 4 esquemas guardados por personaje. Gratis para todos hasta nivel 30; arriba de eso, solo cuentas premium.</p>
+      </div>
+      <div class="card">
+        <h3 data-i18n="features.buffer3.head">SIN BUFFS DE TERCERA CLASE</h3>
+        <p data-i18n="features.buffer3.body">Elemental, Divine y Arcane Protection, Siren's Dance y las canciones de Renewal, Meditation y Champion no las da el NPC. Eso sigue siendo de un Cardinal, un Eva's Saint, un Shillien Saint, un Hierophant, una Sword Muse o un Spectral Dancer.</p>
+      </div>
+      <div class="card">
+        <h3 data-i18n="features.offline.head">TIENDA OFFLINE</h3>
+        <p data-i18n-html="features.offline.body">Comercio y crafteo offline con <code>.offline</code>: cerrás el cliente y tu tienda queda parada hasta 3 días. Sobrevive a los reinicios del servidor.</p>
+      </div>
+      <div class="card">
+        <h3 data-i18n="features.potions.head">AUTO POCIONES</h3>
+        <p data-i18n="features.potions.body">CP, HP y MP automáticos al 70%, sin plugins ni programas de terceros. El autoplay, en cambio, está apagado: farmear lo farmeás vos.</p>
+      </div>
+      <div class="card">
+        <h3 data-i18n="features.spanish.head">JUEGO EN ESPAÑOL</h3>
+        <p data-i18n-html="features.spanish.body">Con <code>.lang es</code> el cliente pasa a español: gatekeepers, mercaderes, guardias, entrenadores, warehouses, village masters, los libros de ayuda y Seven Signs. También disponible en inglés y griego.</p>
+      </div>
+      <div class="card">
+        <h3 data-i18n="features.exp.head">FRENO DE EXPERIENCIA</h3>
+        <p data-i18n-html="features.exp.body"><code>.expoff</code> y <code>.expon</code> para quedarte en el nivel que quieras mientras farmeás o preparás un personaje.</p>
+      </div>
+      <div class="card">
+        <h3 data-i18n="features.dualbox.head">UN CLIENTE POR IP</h3>
+        <p data-i18n="features.dualbox.body">Dos con premium. Es un límite deliberado: en un servidor x1 la ventaja de las cajas múltiples se acumula durante meses.</p>
+      </div>
+      <div class="card">
+        <h3 data-i18n="features.pvp.head">ANUNCIOS DE PVP</h3>
+        <p data-i18n="features.pvp.body">Cada PvP y cada PK se anuncia al servidor. Sin recompensas por matar: la única consecuencia es la karma de siempre.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CÓMO JUGAR ===================== -->
+  <section id="jugar">
+    <p class="eyebrow" data-i18n="howto.eyebrow">Cuatro pasos</p>
+    <h2 data-i18n="howto.title">Cómo jugar</h2>
+
+    <ol class="steps">
+      <li>
+        <strong data-i18n="howto.1.head">Creá tu cuenta acá</strong>
+        <p data-i18n="howto.1.body">Es el único lugar donde se crean: el servidor no crea cuentas solo al entrar. Nombre de 4 a 14 caracteres, letras y números; contraseña de 8 a 16 — el campo del cliente C4 no acepta más de 16.</p>
+      </li>
+      <li>
+        <strong data-i18n="howto.2.head">Conseguí un cliente Chronicle 4</strong>
+        <p data-i18n="howto.2.body">Scions of Destiny. El servidor acepta las revisiones de protocolo 656, 660 y 746.</p>
+      </li>
+      <li>
+        <strong data-i18n="howto.3.head">Apuntá el cliente al servidor</strong>
+        <p data-i18n-html="howto.3.body">Abrí <code>system/l2.ini</code> y dejá la línea así:</p>
+        <p style="margin-top:8px"><code>ServerAddr=l2jsaked.com.ar</code></p>
+      </li>
+      <li>
+        <strong data-i18n="howto.4.head">Entrá</strong>
+        <p data-i18n="howto.4.body">Con el nombre de cuenta y la contraseña del paso 1. Tu cuenta de juego queda lista pocos segundos después de registrarte; la página de tu cuenta te lo confirma.</p>
+      </li>
+    </ol>
+
+    <h3 class="sub-head" data-i18n="howto.cmd.title">Comandos dentro del juego</h3>
+    <div class="scroll">
+      <table>
+        <tr><th><code>.premium</code></th><td data-i18n="howto.cmd.premium">Muestra tus rates reales y cuánto premium te queda</td></tr>
+        <tr><th><code>.lang es</code></th><td data-i18n-html="howto.cmd.lang">Cambia el idioma del cliente (<code>es</code>, <code>en</code>, <code>el</code>)</td></tr>
+        <tr><th><code>.offline</code></th><td data-i18n="howto.cmd.offline">Deja tu tienda o tu crafteo funcionando y cierra el cliente</td></tr>
+        <tr><th><code>.expoff</code> / <code>.expon</code></th><td data-i18n="howto.cmd.exp">Frena y reanuda la ganancia de experiencia</td></tr>
+        <tr><th><code>.menu</code></th><td data-i18n="howto.cmd.menu">Menú de personaje</td></tr>
+      </table>
+    </div>
+    <p class="note" data-i18n-html="howto.pass">
+      La contraseña se cambia solo desde <a href="/account">tu cuenta</a>. El comando
+      <code>.changepassword</code> está apagado a propósito: solo llega al juego, y te dejaría
+      adentro del servidor pero afuera del sitio.
+    </p>
+  </section>
+
+  <!-- ===================== DONACIÓN ===================== -->
+  <section id="donacion">
+    <p class="eyebrow" data-i18n="donate.eyebrow">Premium</p>
+    <h2 data-i18n="donate.title">Donación</h2>
+    <p class="lead" data-i18n="donate.lead">
+      La donación paga la máquina y la conexión donde corre el servidor. Lo que compra es ritmo, no
+      poder: no vende ni un item, ni un punto de stat, ni un nivel. Un personaje premium y uno que
+      nunca donó pelean con exactamente los mismos números.
+    </p>
+
+    <div class="plans" id="plans"></div>
+    <p class="note" id="plans-fallback" hidden data-i18n="donate.plans.fallback">
+      Los precios se muestran al entrar a tu cuenta.
+    </p>
+
+    <h3 class="sub-head" data-i18n="donate.table.title">Qué cambia con premium</h3>
+    <div class="scroll">
+      <table>
+        <tr>
+          <th data-i18n="donate.th.benefit">Beneficio</th>
+          <th class="num" data-i18n="donate.th.normal">Normal</th>
+          <th class="num" data-i18n="donate.th.premium">Premium</th>
+        </tr>
+        <tr><td data-i18n="donate.row.xp">Experiencia</td><td class="num">x1</td><td class="num">x1.5</td></tr>
+        <tr><td data-i18n="donate.row.sp">SP</td><td class="num">x1</td><td class="num">x2</td></tr>
+        <tr><td data-i18n="donate.row.drop">Cantidad de drop</td><td class="num">x1</td><td class="num">x2</td></tr>
+        <tr><td data-i18n="donate.row.spoil">Cantidad de spoil</td><td class="num">x1</td><td class="num">x2</td></tr>
+        <tr><td data-i18n="donate.row.adena">Adena</td><td class="num">x3</td><td class="num">x6</td></tr>
+        <tr><td data-i18n="donate.row.ip">Clientes por IP</td><td class="num">1</td><td class="num">2</td></tr>
+        <tr>
+          <td data-i18n="donate.row.buffer">Buffer por esquemas</td>
+          <td class="num" data-i18n="donate.row.buffer.n">hasta nivel 30</td>
+          <td class="num" data-i18n="donate.row.buffer.p">cualquier nivel</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="cols" style="margin-top:16px">
+      <div class="card">
+        <h3 data-i18n="donate.how.head">CÓMO FUNCIONA</h3>
+        <ul>
+          <li data-i18n="donate.how.1">Se paga con Mercado Pago desde tu cuenta</li>
+          <li data-i18n="donate.how.2">Se aplica a todos los personajes de la cuenta</li>
+          <li data-i18n="donate.how.3">Entra en menos de un minuto, sin reconectar</li>
+          <li data-i18n="donate.how.4">Si comprás de nuevo antes de que venza, se suma al tiempo que te queda</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 data-i18n="donate.limits.head">LO QUE NO ALCANZA</h3>
+        <ul>
+          <li data-i18n="donate.limits.1">No afecta a los demás miembros de tu party</li>
+          <li data-i18n="donate.limits.2">No se transfiere a otra cuenta</li>
+          <li data-i18n="donate.limits.3">No cambia el drop de raid bosses ni de hierbas</li>
+          <li data-i18n="donate.limits.4">No da items, equipo ni stats</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note" data-i18n-html="donate.note">
+      En el juego, <code>.premium</code> muestra siempre los números que estás recibiendo de verdad.
+    </p>
+  </section>
+
+  <!-- ===================== CÓDIGO ===================== -->
+  <section id="codigo">
+    <p class="eyebrow" data-i18n="code.eyebrow">Optimización y código</p>
+    <h2 data-i18n="code.title">Por qué esto no se rompe</h2>
+    <p class="lead" data-i18n-html="code.lead">
+      Casi todos los servidores te cuentan lo que agregaron. Este te puede decir lo que
+      <em>verificó</em>, y sobre cuántas cosas miró para decirlo. Cada número de acá es un conteo
+      sobre los datos y el código reales, no una estimación, y está en el historial de commits para
+      que lo revises.
+    </p>
+
+    <div class="scroll">
+      <table>
+        <tr>
+          <th data-i18n="code.th.area">Qué se midió</th>
+          <th class="num" data-i18n="code.th.result">Resultado</th>
+        </tr>
+        <tr><td data-i18n="code.r1">Archivos XML de datos que validan contra su esquema</td><td class="num">1.448 / 1.448</td></tr>
+        <tr><td data-i18n="code.r2">Ids de NPC definidos más de una vez</td><td class="num">0 de 5.784</td></tr>
+        <tr><td data-i18n="code.r3">Conexiones a la base sin cierre garantizado</td><td class="num">0 de 354</td></tr>
+        <tr><td data-i18n="code.r4">Camino de una entrada remota a un SQL sin parametrizar</td><td class="num" data-i18n="code.r4.v">ninguno</td></tr>
+        <tr><td data-i18n="code.r5">Puntos de spawn dentro de la grilla del mundo</td><td class="num">10.167 / 10.167</td></tr>
+        <tr><td data-i18n="code.r6">Diálogos de cambio de clase presentes para los NPC de C4</td><td class="num">222 / 222</td></tr>
+        <tr><td data-i18n="code.r7">Tareas periódicas protegidas contra una excepción</td><td class="num">69 / 69</td></tr>
+        <tr><td data-i18n="code.r8">Pruebas unitarias</td><td class="num">54</td></tr>
+        <tr><td data-i18n="code.r9">Scripts del datapack compilados en cada cambio</td><td class="num">785</td></tr>
+      </table>
+    </div>
+
+    <h3 class="sub-head" data-i18n="code.fixes.title">Qué significa eso para vos, jugando</h3>
+    <div class="grid">
+      <div class="card">
+        <h3 data-i18n="code.fix1.head">NO SE DUPLICAN ITEMS</h3>
+        <p data-i18n="code.fix1.body">Agregar items a un stack no tomaba el candado que destruirlos y transferirlos sí tomaban. Una prueba con 8 hilos y 2.000 depósitos cada uno perdía cerca de la mitad: 8.519 de 17.000 esperados. Corregido tomando los dos candados en orden de id.</p>
+      </div>
+      <div class="card">
+        <h3 data-i18n="code.fix2.head">NO SE REPITEN IDS DE OBJETO</h3>
+        <p data-i18n="code.fix2.body">Las cinco consultas que juntan los ids en uso se tragaban su propio error, así que una que no terminaba borraba en silencio los ids de una tabla entera y el servidor los volvía a repartir. Ahora el manager se niega a arrancar antes que adivinar.</p>
+      </div>
+      <div class="card">
+        <h3 data-i18n="code.fix3.head">LOS PERSONAJES NO PIERDEN DATOS</h3>
+        <p data-i18n="code.fix3.body">Las variables del personaje descartaban los cambios cuando la escritura fallaba, así que la memoria y la base se separaban sin que nadie se enterara.</p>
+      </div>
+      <div class="card">
+        <h3 data-i18n="code.fix4.head">LAS FALLAS SE VEN</h3>
+        <p data-i18n="code.fix4.body">Las excepciones de las tareas iban a stderr y nunca al log. Diez archivos y carpetas quedaban abiertos si algo salía mal, y seis hilos ignoraban su propia interrupción — uno de ellos podía dejar la JVM colgada.</p>
+      </div>
+    </div>
+
+    <p class="note" data-i18n-html="code.stack">
+      Corre sobre <a href="http://www.l2jmobius.org/" rel="noopener">L2J Mobius</a> compilado con
+      <strong>Java 25</strong>, con un vigilante de deadlocks cada 20 segundos. El código es
+      público: <a href="https://github.com/fermanzolido/L2C4" rel="noopener">github.com/fermanzolido/L2C4</a>.
     </p>
   </section>
 
   <section>
-    <h2>What is left at retail</h2>
-    <div class="scroll">
-      <table>
-        <tr><th>Autoloot</th><td>On for monsters, off for raids</td></tr>
-        <tr><th>Vitality</th><td>Retail</td></tr>
-        <tr><th>Delevel and death penalty</th><td>Retail</td></tr>
-        <tr><th>Champion monsters</th><td>5% frequency, five times the HP — roughly neutral per unit of time</td></tr>
-        <tr><th>Balance</th><td>Untouched. No skill damage, drop table or NPC stat was rebalanced. C4 numbers.</td></tr>
-      </table>
+    <div class="actions" style="margin-top:0">
+      <a class="btn" href="/register" data-i18n="hero.cta">Crear cuenta</a>
     </div>
-  </section>
-
-  <section>
-    <h2>The scheme buffer <span class="sub">one in each of the fifteen towns</span></h2>
-    <div class="scroll">
-      <table>
-        <tr><th>Free</th><td>For everyone up to level 30</td></tr>
-        <tr><th>Above 30</th><td>Premium accounts only — otherwise go find a Prophet or a Swordsinger</td></tr>
-        <tr><th>Buffs</th><td>43, each at the lowest level of its skill, one hour, applied globally</td></tr>
-        <tr><th>Not offered</th><td>The seven third-class buffs. Those stay something only a Cardinal, Eva's Saint, Shillien Saint, Hierophant, Sword Muse or Spectral Dancer can give you.</td></tr>
-      </table>
-    </div>
-  </section>
-
-  <section>
-    <h2>Premium</h2>
-    <div class="scroll">
-      <table>
-        <tr><th>Benefit</th><th class="num">Normal</th><th class="num">Premium</th></tr>
-        <tr><td>Experience</td><td class="num">x1</td><td class="num">x1.5</td></tr>
-        <tr><td>SP</td><td class="num">x1</td><td class="num">x2</td></tr>
-        <tr><td>Drop amount</td><td class="num">x1</td><td class="num">x2</td></tr>
-        <tr><td>Spoil amount</td><td class="num">x1</td><td class="num">x2</td></tr>
-        <tr><td>Adena</td><td class="num">x3</td><td class="num">x6</td></tr>
-        <tr><td>Clients per IP</td><td class="num">1</td><td class="num">2</td></tr>
-        <tr><td>Scheme buffer</td><td class="num">to level 30</td><td class="num">any level</td></tr>
-      </table>
-    </div>
-    <p style="color:var(--muted);font-size:14px;margin-top:14px">
-      Sold in <strong>1, 2 and 3 month</strong> terms. Premium applies to every character on the
-      account, does not transfer, and does not affect party members. Raid bosses and herbs are not
-      affected by premium rates. In game, <code>.premium</code> always shows the live numbers.
-    </p>
-    <p style="margin-top:18px"><a href="/register">Create an account</a> to get started.</p>
   </section>
 
   <footer>
-    Built on <a href="http://www.l2jmobius.org/" rel="noopener">L2J Mobius</a>. Not affiliated with NCSOFT.
+    <span data-i18n-html="footer.text">
+      Construido sobre <a href="http://www.l2jmobius.org/" rel="noopener">L2J Mobius</a>.
+      Sin afiliación con NCSOFT.
+    </span>
   </footer>
 
 </div>
 
-<script type="module" src="assets/app.js"></script>
+<script src="assets/i18n.js"></script>
+<script type="module">
+import { paintStatus, paintPlans } from './assets/app.js';
+
+paintStatus(document.querySelector('#status'));
+paintPlans(document.querySelector('#plans'), document.querySelector('#plans-fallback'));
+</script>
 </body>
 </html>
