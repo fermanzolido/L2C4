@@ -1,0 +1,3 @@
+# El servidor no arranca sin esta carpeta: log.cfg manda todos los handlers a
+# log/, y java.util.logging.FileHandler no crea el directorio, falla.
+# El zip de distribucion tiene que traerla ya hecha.
