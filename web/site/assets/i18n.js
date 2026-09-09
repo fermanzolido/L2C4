@@ -18,8 +18,8 @@
 
   /** English for every `data-i18n` / `data-i18n-html` node. Spanish is the HTML itself. */
   const EN = {
-    'title.index': 'L2C4 — Chronicle 4: Scions of Destiny',
-    'title.register': 'Register — L2C4',
+    'title.index': 'L2C4 — Lineage 2 Chronicle 4 x1 Server | Scions of Destiny',
+    'title.register': 'Create an account — L2C4, a Lineage 2 Chronicle 4 server',
     'title.login': 'Log in — L2C4',
     'title.account': 'My account — L2C4',
 
@@ -350,6 +350,9 @@
     'status.unknown': { es: 'Estado no disponible', en: 'Status unavailable' },
     'status.player': { es: 'jugador', en: 'player' },
     'status.players': { es: 'jugadores', en: 'players' },
+
+    // Joins a count to what it is out of: "0 de 5.784".
+    'stat.of': { es: 'de', en: 'of' },
 
     'plan.month': { es: 'mes', en: 'month' },
     'plan.months': { es: 'meses', en: 'months' },

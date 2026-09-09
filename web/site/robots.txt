@@ -1,0 +1,7 @@
+# The account page is per-visitor and behind a session; there is nothing there for
+# a crawler to index and the URL would only ever answer with a redirect to /login.
+User-agent: *
+Allow: /
+Disallow: /account
+
+Sitemap: https://l2jsaked.com.ar/sitemap.xml

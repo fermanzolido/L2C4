@@ -4,13 +4,56 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ingresar — L2C4</title>
+<meta name="description" content="Entrá a tu cuenta de L2C4 para comprar premium o cambiar tu contraseña.">
+<link rel="canonical" href="https://l2jsaked.com.ar/login">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#0a0b10">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="L2C4">
+<meta property="og:locale" content="es_AR">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:url" content="https://l2jsaked.com.ar/login">
+<meta property="og:title" content="L2C4 — Lineage 2 Chronicle 4, x1, sin customs">
+<meta property="og:description" content="Experiencia x1, drop x2, adena x3. Sin items custom, sin rebalanceo, sin pay-to-win. El único cambio son las líneas enanas.">
+<meta property="og:image" content="https://l2jsaked.com.ar/assets/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Escudo de L2C4: Scions of Destiny, experiencia x1, sin items custom">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="L2C4 — Lineage 2 Chronicle 4, x1, sin customs">
+<meta name="twitter:description" content="Experiencia x1, drop x2, adena x3. Sin items custom, sin rebalanceo, sin pay-to-win. El único cambio son las líneas enanas.">
+<meta name="twitter:image" content="https://l2jsaked.com.ar/assets/og.jpg">
+
+<link rel="icon" href="/assets/crest.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+
+<!-- The one external dependency: two faces from Google Fonts. Preconnected
+     because the stylesheet and the font files are two round trips, and
+     display=swap so the text is readable before either arrives. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Cinzel:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body data-title-key="title.login">
 
 <header>
   <div class="wrap">
-    <a class="brand" href="/">L2C4</a>
+    <a class="brand" href="/" aria-label="L2C4">
+      <svg viewBox="0 0 72 72" aria-hidden="true" focusable="false">
+        <defs><linearGradient id="crestHdr" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#f2e2b4"/><stop offset=".45" stop-color="#cdb67f"/><stop offset="1" stop-color="#8a7442"/>
+        </linearGradient></defs>
+        <path d="M36 5 L65 14.5 V37 C65 52 52.5 62.5 36 68 C19.5 62.5 7 52 7 37 V14.5 Z" fill="#cdb67f" fill-opacity=".08" stroke="url(#crestHdr)" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M24.5 53 V36 a11.5 11.5 0 0 1 23 0 V53" fill="none" stroke="url(#crestHdr)" stroke-width="2.8" stroke-linecap="round"/>
+        <g stroke="url(#crestHdr)" stroke-width="1.9" stroke-linecap="round" opacity=".85">
+          <path d="M30 53 V30.5"/><path d="M34 53 V27.8"/><path d="M38 53 V27.8"/><path d="M42 53 V30.5"/>
+        </g>
+      </svg>
+      <span>L2C4</span>
+    </a>
     <nav>
       <a href="/" data-i18n="nav.server">Servidor</a>
       <a href="/register" data-i18n="nav.register">Registrarse</a>
@@ -26,6 +69,17 @@
 
 <div class="wrap">
   <section>
+    <div class="auth">
+      <svg class="auth-mark" viewBox="0 0 72 72" aria-hidden="true" focusable="false">
+        <defs><linearGradient id="crestLog" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#f2e2b4"/><stop offset=".45" stop-color="#cdb67f"/><stop offset="1" stop-color="#8a7442"/>
+        </linearGradient></defs>
+        <path d="M36 5 L65 14.5 V37 C65 52 52.5 62.5 36 68 C19.5 62.5 7 52 7 37 V14.5 Z" fill="#cdb67f" fill-opacity=".08" stroke="url(#crestLog)" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M24.5 53 V36 a11.5 11.5 0 0 1 23 0 V53" fill="none" stroke="url(#crestLog)" stroke-width="2.8" stroke-linecap="round"/>
+        <g stroke="url(#crestLog)" stroke-width="1.9" stroke-linecap="round" opacity=".85">
+          <path d="M30 53 V30.5"/><path d="M34 53 V27.8"/><path d="M38 53 V27.8"/><path d="M42 53 V30.5"/>
+        </g>
+      </svg>
     <h2 data-i18n="login.title">Ingresar</h2>
     <form id="form">
       <label for="login" data-i18n="login.login">Nombre de cuenta</label>
@@ -41,10 +95,12 @@
       <span data-i18n="login.none">¿Todavía no tenés cuenta?</span>
       <a href="/register" data-i18n="login.none.link">Creá una</a>.
     </p>
+    </div>
   </section>
 </div>
 
 <script src="assets/i18n.js"></script>
+<script src="assets/effects.js"></script>
 <script type="module">
 import { api, say, clear } from './assets/app.js';
 

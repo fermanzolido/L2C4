@@ -1,0 +1,35 @@
+# Cloudflare Pages reads this at deploy time. Evaluated at the edge, so none of it
+# costs a Workers invocation.
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()
+  # Inline scripts are unavoidable here (the module blocks at the foot of each page),
+  # and a static host cannot mint a nonce -- so script-src admits inline but no
+  # external origin at all, which is what an injected <script src> would need.
+  # connect-src names the Worker because that is the only host the pages call.
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://api.l2jsaked.com.ar; form-action 'self'; base-uri 'self'; frame-ancestors 'none'
+  Cache-Control: public, max-age=600
+
+# Art changes only when it is redrawn, and then under a new deploy.
+/assets/og.jpg
+  Cache-Control: public, max-age=2592000
+/assets/crest.svg
+  Cache-Control: public, max-age=2592000
+/assets/favicon-32.png
+  Cache-Control: public, max-age=2592000
+/assets/apple-touch-icon.png
+  Cache-Control: public, max-age=2592000
+
+# The stylesheet and the scripts are not fingerprinted, so they stay short-lived:
+# a deploy has to reach a returning visitor on their next load, not in a year.
+/assets/style.css
+  Cache-Control: public, max-age=3600, must-revalidate
+/assets/app.js
+  Cache-Control: public, max-age=3600, must-revalidate
+/assets/i18n.js
+  Cache-Control: public, max-age=3600, must-revalidate
+/assets/effects.js
+  Cache-Control: public, max-age=3600, must-revalidate
