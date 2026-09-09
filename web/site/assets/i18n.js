@@ -209,6 +209,11 @@
     'howto.4.body':
       'With the account name and password from step 1. Your game account is ready a few seconds ' +
       'after you register; your account page confirms it.',
+    'howto.dl.title': 'Downloads',
+    'howto.dl.client': 'Chronicle 4 client',
+    'howto.dl.client.note': 'The full game, Scions of Destiny. Installed once.',
+    'howto.dl.patch': 'L2C4 patch',
+    'howto.dl.patch.note': 'The files that go over the client to play on this server.',
     'howto.cmd.title': 'In-game commands',
     'howto.cmd.premium': 'Shows the rates you are actually getting and how much premium is left',
     'howto.cmd.lang': 'Switches the client language (<code>es</code>, <code>en</code>, <code>el</code>)',
@@ -353,6 +358,9 @@
 
     // Joins a count to what it is out of: "0 de 5.784".
     'stat.of': { es: 'de', en: 'of' },
+
+    'dl.soon': { es: 'Próximamente', en: 'Coming soon' },
+    'dl.get': { es: 'Descargar', en: 'Download' },
 
     'plan.month': { es: 'mes', en: 'month' },
     'plan.months': { es: 'meses', en: 'months' },

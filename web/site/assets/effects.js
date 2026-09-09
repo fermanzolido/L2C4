@@ -126,6 +126,32 @@
     }, 2000);
   }
 
+  /* -------------------------------------------------------------- downloads */
+
+  /**
+   * A download is live only once someone pastes a URL into its `data-href`. Until
+   * then the card carries no `href` at all: a disabled-looking button that still
+   * navigates is worse than no button, and an empty href would reload the page.
+   */
+  function paintDownloads() {
+    for (const card of document.querySelectorAll('.dl')) {
+      const url = (card.dataset.href || '').trim();
+      const state = card.querySelector('.dl-state');
+      if (url) {
+        card.href = url;
+        card.removeAttribute('aria-disabled');
+        if (state) state.textContent = window.I18N?.t('dl.get') ?? 'Descargar';
+      } else {
+        card.removeAttribute('href');
+        card.setAttribute('aria-disabled', 'true');
+        if (state) state.textContent = window.I18N?.t('dl.soon') ?? 'Proximamente';
+      }
+    }
+  }
+
+  paintDownloads();
+  document.addEventListener('l2c4:lang', paintDownloads);
+
   /* ---------------------------------------------------------------- parallax */
 
   const crest = document.querySelector('.hero-crest');
