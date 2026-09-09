@@ -13,6 +13,18 @@
         <StopAtDurationEnd>false</StopAtDurationEnd>
       </Repetition>
     </LogonTrigger>
+    <!-- Segundo disparador con fecha pasada: sin el, la tarea queda registrada
+         pero inerte hasta el proximo inicio de sesion, porque el LogonTrigger
+         solo se evalua al loguearse. Con este arranca la repeticion ya mismo y
+         sobrevive a un reinicio. -->
+    <TimeTrigger>
+      <Enabled>true</Enabled>
+      <StartBoundary>2026-09-09T00:00:00</StartBoundary>
+      <Repetition>
+        <Interval>PT2M</Interval>
+        <StopAtDurationEnd>false</StopAtDurationEnd>
+      </Repetition>
+    </TimeTrigger>
   </Triggers>
   <Principals>
     <Principal id="Author">
