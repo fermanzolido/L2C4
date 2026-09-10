@@ -1,0 +1,22 @@
+<html><body>
+<font color="LEVEL">Solo podes ofertar en un clan hall a la vez.</font> Cuando se hace una oferta, el monto de adena ofertado se <font color="LEVEL">deposita</font> desde el warehouse del clan hacia la subasta. <font color="LEVEL">El 10% del monto ofertado es un impuesto de transaccion</font> y no se devuelve aunque la oferta se cancele.<br>
+<font color="LEVEL">La oferta</font> tiene que ser mayor a la oferta minima (o a la oferta anterior si estas reofertando) y el clan que haya ofrecido el monto mas alto al cierre de la subasta se queda con la subasta.<br>
+Actualmente hay <font color="aaccff">%PLEDGE_ADENA%</font> adena en el warehouse del clan. El monto minimo que se puede ofertar es <font color="aaccff">%AGIT_AUCTION_MINBID%</font> adena.<br>
+Cuanto queres ofertar?
+<table width=270 border=0>
+<tr>
+<td width=220 align=right><edit var=bidprice width=230 align=right type=number></td>
+<td width=40 align=right>adena</td>
+</tr>
+</table>
+<img src="L2UI.SquareBlank" width=270 height=10>
+<img src="L2UI.SquareWhite" width=270 height=1>
+<img src="L2UI.SquareBlank" width=270 height=5>
+<table width=270 border=0>
+<tr>
+<td width=110></td>
+<td width=80 align=center><button action="%AGIT_LINK_BACK%" value="Volver" width=75 height=21 back="L2UI_ch3.Btn1_normalOn" fore="L2UI_ch3.Btn1_normal"></td>
+<td width=80 align=center><button action="bypass -h npc_%objectId%_bid $bidprice" value="Aceptar" width=75 height=21 back="L2UI_ch3.Btn1_normalOn" fore="L2UI_ch3.Btn1_normal"></td>
+</tr>
+</table>
+</body></html>

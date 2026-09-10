@@ -1,0 +1,38 @@
+<html><body>
+<table width=270><tr>
+<td width=45><button value="Inicio" action="bypass admin_admin" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+<td width=180><center>Menu de Asedio</center></td>
+<td width=45><button value="Volver" action="bypass admin_siege" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+</tr></table><center>
+<br>Clan Hall: %clanhallName%<br1>
+Dueno del Clan Hall: %clanhallOwner%
+<br>
+<center>
+<edit var="box" width=120 height=15>
+</center>
+<br>
+<table><tr>
+<td><button value="Abrir Puertas" action="bypass -h admin_clanhallopendoors %clanhallId%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+<td><button value="Cerrar Puertas" action="bypass -h admin_clanhallclosedoors %clanhallId%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+</tr><tr>
+<td><button value="Dar Clan Hall" action="bypass -h admin_clanhallset %clanhallId%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+<td><button value="Quitar Clan Hall" action="bypass -h admin_clanhalldel %clanhallId%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+</tr><tr>
+<td><button value="Iniciar Asedio" action="bypass -h admin_chsiege_startSiege %clanhallId%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+<td><button value="Terminar Asedio" action="bypass -h admin_chsiege_endsSiege %clanhallId%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+</tr><tr>
+<td><button value="Agregar Atacante" action="bypass -h admin_chsiege_addAttacker %clanhallId% $box" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+<td><button value="Quitar Atacante" action="bypass -h admin_chsiege_removeAttacker %clanhallId% $box" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+</tr><tr>
+<td><button value="Listar Atacantes" action="bypass -h admin_chsiege_listAttackers %clanhallId%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+<td><button value="Vaciar Atacantes" action="bypass -h admin_chsiege_clearAttackers %clanhallId%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+</tr><tr>
+<td><button value="Fecha de Asedio" action="bypass -h admin_chsiege_setSiegeDate %clanhallId% $box" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+<td><button value="Ir aca" action="bypass -h admin_clanhallteleportself %clanhallId%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+</tr><tr>
+<td><button value="Adelantar Asedio" action="bypass -h admin_chsiege_forwardSiege %clanhallId%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+</tr>
+</table></center>
+<br><font color="FF0000">
+Nota:</font> Usa el casillero para escribir el nombre del clan a agregar/quitar (tambien lo podes hacer targeteando a un miembro del clan) o la fecha para fijar el asedio. La fecha debe tener este formato DD-MM-YYYY;HH:MM.
+</body></html>

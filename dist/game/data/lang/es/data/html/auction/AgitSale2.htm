@@ -1,0 +1,27 @@
+<html><body>
+El precio estandar de sistema para este clan hall es <font color="aaccff">%AGIT_LAST_PRICE%</font> adena y el ultimo precio de venta fue de <font color="aaccff">%AGIT_LAST_PRICE%</font> adena.<br>
+El monto que se recibe al finalizar la subasta es lo que queda despues de descontar el <font color="LEVEL">impuesto de transaccion (10%)</font> de la oferta ganadora. En cuanto queres fijar el precio estandar de la subasta (oferta minima)?
+<table width=270 border=0>
+<tr>
+<td width=220 align=right><edit var=minbid width=230 align=right type=number></td>
+<td width=40 align=right>adena</td>
+</tr>
+</table>
+Por cuantos dias queres que dure la subasta?
+<table width=270 border=0>
+<tr>
+<td width=270 align=right><combobox width=50 var=day list="7;3;1"></td>
+</tr>
+</table>
+Escribi una descripcion del clan hall. <multiedit var="comment" width=270>
+<img src="L2UI.SquareBlank" width=270 height=10>
+<img src="L2UI.SquareWhite" width=270 height=1>
+<img src="L2UI.SquareBlank" width=270 height=5>
+<table width=270 border=0>
+<tr>
+<td width=110></td>
+<td width=80 align=center><button action="%AGIT_LINK_BACK%" value="Volver" width=75 height=21 back="L2UI_ch3.Btn1_normalOn" fore="L2UI_ch3.Btn1_normal"></td>
+<td width=80 align=center><button action="bypass -h npc_%objectId%_auction $day $minbid" value="Vender" width=75 height=21 back="L2UI_ch3.Btn1_normalOn" fore="L2UI_ch3.Btn1_normal"></td>
+</tr>
+</table>
+</body></html>

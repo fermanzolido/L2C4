@@ -1,0 +1,53 @@
+<html>
+
+<body>
+    <center>
+        <table width=270>
+            <tr>
+                <td width=45><button value="Inicio" action="bypass -h admin_admin" width=45 height=15 back="sek.cbui94"
+                        fore="sek.cbui92"></td>
+                <td width=180>
+                    <center>
+                        <font color="LEVEL">Gestion de Donaciones</font>
+                    </center>
+                </td>
+                <td width=45><button value="Volver" action="bypass -h admin_admin" width=45 height=15 back="sek.cbui94"
+                        fore="sek.cbui92"></td>
+            </tr>
+        </table>
+        <br>
+        <table width=270>
+            <tr>
+                <td>Nombre de Jugador:</td>
+                <td>
+                    <edit var="name" width=120 height=15>
+                </td>
+            </tr>
+            <tr>
+                <td>ID de Item:</td>
+                <td>
+                    <edit var="id" width=120 height=15>
+                </td>
+            </tr>
+            <tr>
+                <td>Cantidad:</td>
+                <td>
+                    <edit var="amount" width=120 height=15>
+                </td>
+            </tr>
+            <tr>
+                <td>Encantamiento:</td>
+                <td>
+                    <edit var="enchant" width=120 height=15>
+                </td>
+            </tr>
+        </table>
+        <br>
+        <button value="Enviar Donacion" action="bypass -h admin_donate $name $id $amount $enchant" width=100 height=21
+            back="sek.cbui94" fore="sek.cbui92">
+            <br><br>
+            <font color="FIXME">Cuidado: las recompensas offline se guardan en la DB!</font>
+    </center>
+</body>
+
+</html>

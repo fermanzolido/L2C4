@@ -1,0 +1,82 @@
+<html><title>Panel de Juego</title><body>
+<center>
+<table width=270 border=0 bgcolor="444444">
+<tr>
+<td><button value="Inicio" action="bypass admin_admin" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Pj" action="bypass admin_admin6" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Juego" action="bypass admin_admin2" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="GM" action="bypass admin_admin7" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+</tr>
+</table><br>
+<table width=270>
+<tr>
+<td><font color="LEVEL">Casilla:</font></td>
+<td><edit var="qbox" width=120 height=12></td>
+<td><button value="Ayuda" action="bypass admin_html help/server_menu.htm" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+</tr>
+</table>
+<br>
+Relacionado a Clanes:<br1>
+<table width=240>
+<tr>
+<td><button value="Crear" action="bypass -h admin_pledge create $qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Info" action="bypass -h admin_pledge info" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Fijar Nivel" action="bypass -h admin_pledge setlevel $qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+</tr>
+<tr>
+<td><button value="Borrar" action="bypass -h admin_pledge dismiss $qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Reputacion" action="bypass -h admin_pledge rep $qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Lid. Pend." action="bypass -h admin_clan_show_pending" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+</tr>
+</table>
+<br>
+Relacionado a Guerra:<br1>
+<table width=240>
+<tr>
+<td width=65></td>
+<td><button value="Castillo / CH" action="bypass admin_siege" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td width=65></td>
+</tr>
+</table>
+<br>
+Siete Signos:<br1>
+<table width="240">
+<tr>
+<td><button value="Herrero" action="bypass -h admin_mammon_find 1" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Mercader" action="bypass -h admin_mammon_find 2" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Respawn" action="bypass -h admin_mammon_respawn" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+</tr>
+</table>
+<br>
+Manor:<br1>
+<table width="95">
+<tr>
+<td><button value="Info Manor" action="bypass admin_manor" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+</tr>
+</table>
+<br>
+Grand Boss:<br1>
+<table width="95">
+<tr>
+<td><button value="Info Grand Boss" action="bypass admin_grandboss" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+</tr>
+</table>
+<br>
+Olimpiada:<br1>
+<table width="95">
+<tr>
+<td><button value="Revisar Olimpiada" action="bypass -h admin_checkolympiad" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+<td><button value="Guardar Olimpiada" action="bypass -h admin_saveolymp" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+</tr>
+</table>
+<br>
+Heroes:<br1>
+<table width="190">
+<tr>
+<td><button value="Fijar Heroe" action="bypass -h admin_sethero" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+<td><button value="Dar No Reclam." action="bypass -h admin_givehero" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+</tr>
+</table>
+<br>
+</center>
+</body></html>

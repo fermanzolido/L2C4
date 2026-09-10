@@ -1,0 +1,55 @@
+<html><title>Panel de Informacion de Castigos</title><body>
+<center>
+<table width=270>
+<tr>
+<td width=45><button value="Inicio" action="bypass admin_admin" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+<td width=180><center>Jugador: %player_name%</center></td>
+<td width=45><button value="Volver" action="bypass admin_punishment" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+</tr>
+</table>
+<br>
+<br>
+<a action="bypass -h admin_punishment info %acc% ACCOUNT">Castigos para la cuenta: %acc%</a><br1>
+<a action="bypass -h admin_punishment info %char% CHARACTER">Castigos para el personaje: %char%</a><br1>
+<a action="bypass -h admin_punishment info %ip% IP">Castigos para la IP: %ip%</a><br1>
+<a action="bypass -h admin_punishment info %hwid% HWID">Castigos para el HWID: %hwid%</a><br1>
+<br>
+<table width=280 bgcolor="000000" cellspacing="0" cellpadding="6">
+	<tr>
+		<td>Tipo de Castigo:</td>
+		<td><combobox width=120 height=17 var="punishmentType" list="%punishments%"></td>
+	</tr>
+	<tr>
+		<td>Tiempo:</td>
+		<td><edit var="expiration" width="130" height="12" type="number"></td>
+	</tr>
+	<tr>
+		<td>Motivo:</td>
+		<td><multiedit var="reason" width=130 height=32></td>
+	</tr>
+	<tr>
+		<td>Cuenta:</td>
+		<td>%acc%</td>
+		<td><a action="bypass -h admin_punishment_add %acc% ACCOUNT $punishmentType $expiration $reason">Banear</a></td>
+	</tr>
+	<tr>
+		<td>Personaje:</td>
+		<td>%char%</td>
+		<td><a action="bypass -h admin_punishment_add %char% CHARACTER $punishmentType $expiration $reason">Banear</a></td>
+	</tr>
+	<tr>
+		<td>IP:</td>
+		<td>%ip%</td>
+		<td><a action="bypass -h admin_punishment_add %ip% IP $punishmentType $expiration $reason">Banear</a></td>
+	</tr>
+	<tr>
+		<td>HWID:</td>
+		<td>%hwid%</td>
+		<td><a action="bypass -h admin_punishment_add %hwid% HWID $punishmentType $expiration $reason">Banear</a></td>
+	</tr>
+</table>
+</center>
+<br>
+<font color="LEVEL">Para un ban permanente, usa 0 como tiempo.</font><br1>
+<font color="LEVEL">Ademas, el tiempo esta en minutos.</font>
+</html>

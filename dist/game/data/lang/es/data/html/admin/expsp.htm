@@ -1,0 +1,28 @@
+<html><body>
+<table width=260><tr>
+<td width=40><button value="Inicio" action="bypass admin_admin" width=40 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+<td width=180><center>Menu de Seleccion de Personajes</center></td>
+<td width=40><button value="Volver" action="bypass admin_character_info %name%" width=40 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+</tr></table>
+<br><br>
+<center>Editando <font color="LEVEL">%name%</font></center>
+<table width=270>
+<tr><td>Nivel: %level%</td></tr>
+<tr><td>Clase: %class%</td></tr>
+<tr><td>Exp: %xp%</td></tr>
+<tr><td>SP: %sp%</td></tr></table>
+<center><br>
+Nota: Completa AMBOS valores antes de guardar los cambios<br1>
+y dejalo en 0 si no hace falta cambiarlo.<br>
+<table width=270><tr>
+<td width=30>Exp:</td><td><edit var="exp_to_add" width=50></td>
+<td width=30>SP:</td><td><edit var="sp_to_add" width=50></td>
+<td><button value="Anadir" action="bypass -h admin_add_exp_sp $exp_to_add $sp_to_add" width=40 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+<td><button value="Quitar" action="bypass -h admin_remove_exp_sp $exp_to_add $sp_to_add" width=50 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+</tr></table>
+Fija el nuevo nivel del personaje con el cuadro de abajo:<br>
+<table width=270><tr>
+<td width=60>Nivel</td><td><edit var="lv" width=50></td>
+<td><button value="Fijar Nivel" action="bypass -h admin_set_level $lv" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+</tr></table>
+</center></body></html>

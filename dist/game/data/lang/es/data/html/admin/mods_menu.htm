@@ -1,0 +1,61 @@
+<html><title>Panel de Mods</title><body>
+<center>
+<table width=270><tr>
+<td width=45><button value="Inicio" action="bypass admin_admin" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+<td width=180><center>Menu de Mods</center></td>
+<td width=45><button value="Volver" action="bypass admin_admin4" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+</tr></table><br>
+<table width=240>
+<tr>
+<td>Casilla:</td>
+<td><edit var="qbox" width=120 height=12></td>
+<td><button value="Ayuda" action="bypass admin_html help/mods_menu.htm" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+</tr>
+</table>
+<br>
+<font color="LEVEL">MOD DE CASAMIENTO</font>
+<a action="bypass admin_html help/l2jmod/wedding.htm">Ayuda</a>
+<table width=240 border=0 bgcolor="000000">
+<tr>
+<td><button value="Activar" action="bypass -h admin_set_mod AllowWedding=true" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Tele" action="bypass -h admin_set_mod WeddingTeleport=$qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Precio T." action="bypass -h admin_set_mod WeddingTeleportPrice=$qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Tiempo T." action="bypass -h admin_set_mod WeddingTeleportDuration=$qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+</tr>
+<tr>
+<td><button value="Desactivar" action="bypass -h admin_set_mod AllowWedding=false" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Costo Boda" action="bypass -h admin_set_mod WeddingPrice=$qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Costo Div." action="bypass -h admin_set_mod WeddingDivorceCosts=$qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Cast.Eng" action="bypass -h admin_set_mod WeddingPunishInfidelity=$qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+</tr>
+<tr>
+<td><button value="RopaForm" action="bypass -h admin_set_mod WeddingFormalWear=$qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="MismoSexo" action="bypass -h admin_set_mod WeddingAllowSameSex=$qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+</tr>
+</table>
+<br>
+<font color="LEVEL">MOD DE MOBS CAMPEONES</font>
+<a action="bypass admin_html help/l2jmod/champions.htm">Ayuda</a>
+<table width=240 border=0 bgcolor="000000">
+<tr>
+<td><button value="Activar" action="bypass -h admin_set_mod ChampionEnable=true" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Frec." action="bypass -h admin_set_mod ChampionFrequency=$qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="NivMin" action="bypass -h admin_set_mod ChampionMinLevel=$qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="NivMax" action="bypass -h admin_set_mod ChampionMaxLevel=$qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+</tr>
+<tr>
+<td><button value="Desactivar" action="bypass -h admin_set_mod ChampionEnable=false" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="xHP" action="bypass -h admin_set_mod ChampionHp=$qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="RegenHP" action="bypass -h admin_set_mod ChampionHpRegen=$qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="xAtq" action="bypass -h admin_set_mod ChampionAtk=$qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+</tr>
+<tr>
+<td><button value="Recompensa" action="bypass -h admin_set_mod ChampionRewardItem=$qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="IdItem" action="bypass -h admin_set_mod ChampionRewardItemID=$qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="CantItem" action="bypass -h admin_set_mod ChampionRewardQty=$qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="VelAtq" action="bypass -h admin_set_mod ChampionSpdHp=$qbox" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+</tr>
+</table>
+<br>
+</center>
+</body></html>
