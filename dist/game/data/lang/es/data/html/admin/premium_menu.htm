@@ -1,0 +1,24 @@
+<html><title>Gestor de Servicio Premium</title><body>
+<center>
+<table width=270>
+<tr>
+<td width=45><button value="Inicio" action="bypass admin_admin" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+<td width=180><center>Gestor de Servicio Premium</center></td>
+<td width=45><button value="Volver" action="bypass admin_admin1" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+</tr>
+</table>
+<br>
+<font color="LEVEL">Ingresa el Nombre de Cuenta</font>
+<edit var="acc_name" width=100>
+<br>
+<br><button value="Agregar 1 mes" action="bypass -h admin_premium_add1 $acc_name" width=95 height=21 back="bigbutton_over" fore="bigbutton">
+<button value="Agregar 2 meses" action="bypass -h admin_premium_add2 $acc_name" width=95 height=21 back="bigbutton_over" fore="bigbutton">
+<button value="Agregar 3 meses" action="bypass -h admin_premium_add3 $acc_name" width=95 height=21 back="bigbutton_over" fore="bigbutton">
+<br>
+<button value="Ver Info" action="bypass -h admin_premium_info $acc_name" width=95 height=21 back="bigbutton_over" fore="bigbutton">
+<button value="Quitar" action="bypass -h admin_premium_remove $acc_name" width=95 height=21 back="bigbutton_over" fore="bigbutton">
+<br>
+<font color="FF0000">Los jugadores pueden usar el comando .premium<br1>
+para ver el estado de su cuenta.</font>
+</center>
+</body></html>

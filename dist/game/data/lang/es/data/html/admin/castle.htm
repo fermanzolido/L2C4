@@ -1,0 +1,42 @@
+<html><body>
+<table width=270><tr>
+<td width=45><button value="Inicio" action="bypass admin_admin" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+<td width=180><center>Menu de Asedio</center></td>
+<td width=45><button value="Volver" action="bypass admin_siege" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+</tr></table>
+<center>
+<br><br><font color="LEVEL">Castillo: %castleName%</font><br>
+<table width=270>
+<tr>
+<td width=140 align="center"><button value="Fijar Hora Asedio" action="bypass -h admin_setsiegetime %castleName%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+</tr>
+</table>
+<table width=270>
+<tr>
+<td width=135 align="center"><button value="Agregar Atacante" action="bypass -h admin_add_attacker %castleName%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+<td width=135 align="center"><button value="Agregar Defensor" action="bypass -h admin_add_defender %castleName%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+</tr><tr>
+<td width=135 align="center"><button value="Listar Clanes" action="bypass -h admin_list_siege_clans %castleName%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+<td width=135 align="center"><button value="Vaciar Lista" action="bypass -h admin_clear_siege_list %castleName%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+</tr>
+<tr>
+<td width=135 align="center"><button value="Mover Defensores" action="bypass -h admin_move_defenders %castleName%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+<td width=135 align="center"><button value="Spawnear Puertas" action="bypass -h admin_spawn_doors %castleName%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+</tr>
+<tr>
+<td width=90 align="center"><button value="Iniciar Asedio" action="bypass -h admin_startsiege %castleName%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+<td width=90 align="center"><button value="Terminar Asedio" action="bypass -h admin_endsiege %castleName%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+</tr>
+<tr>
+<td width=135 align="center"><button value="Dar Castillo" action="bypass -h admin_setcastle %castleName%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+<td width=135 align="center"><button value="Quitar Castillo" action="bypass -h admin_removecastle %castleName%" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td></tr>
+</tr>
+</table>
+<br>
+<table width=270>
+<tr><td width=60 align="center">NpcId:</td>
+<td align="center"><edit var="value" width=40></td>
+<td align="center"><button value="Agregar Guardia" action="bypass -h admin_add_guard %castleName% $value" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+</tr></table>
+</center>
+</body></html>

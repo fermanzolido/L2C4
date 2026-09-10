@@ -1,0 +1,60 @@
+<html><title>Gestor de Puntos PC (Admin)</title><body>
+<center>
+<table width=270 align=center>
+<tr>
+<td width=45><button value="Inicio" action="bypass admin_admin" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+<td width=180><center>Gestor de Puntos PC (Admin)</center></td>
+<td width=45><button value="Volver" action="bypass admin_admin6" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+</tr>
+</table>
+<br>
+<font color="LEVEL">Info del Objetivo</font><br1>
+	<table width="270" align=center border="0" bgcolor="000000">
+		<tr>
+			<td>Nombre de Jugador:</td>
+			<td><font color="00FF00">%targetName%</font></td>
+		</tr>
+		<tr>
+			<td>Puntos del Jugador:</td>
+			<td><font color="00FF00">%points%</font></td>
+		</tr>
+	</table>
+	<br>
+	<font color="LEVEL">Operaciones sobre el Objetivo</font><br1>
+	<table width=256 align=center border=0 bgcolor="000000">
+		<tr>
+			<td width=128 align=center>Operacion</td>
+			<td width=128 align=center><combobox width=120 height=17 var=ebox list=increase;decrease;set></td>
+		</tr>
+		<tr>
+			<td width=128 align=center>Valor</td>
+			<td width=128 align=center><edit var="val" width=120 type="number"></td>
+		</tr>
+	</table>
+	<table width="270" align=center border="0" bgcolor="000000">
+		<tr>
+			<td><center><br><button value="Aceptar" action="bypass -h admin_pccafepoints $ebox $val" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></center></td>
+		</tr>
+	</table>
+	<br>
+	<font color="LEVEL">Recompensar Mas Jugadores</font><br1>
+	<table width=256 align=center border=0 bgcolor="000000">
+		<tr>
+			<td width=128 align=center>Rango</td>
+			<td width=128 align=center><edit var="range" width=120 type="number"></td>
+		</tr>
+		<tr>
+			<td width=128 align=center>Valor</td>
+			<td width=128 align=center><edit var="val2" width=120 type="number"></td>
+		</tr>
+	</table>
+	<table width="257" align=center border="0" bgcolor="000000">
+		<tr>
+			<td><center><br><button value="Aceptar" action="bypass -h admin_pccafepoints rewardOnline $val2 $range" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></center></td>
+		</tr>
+		<tr>
+			<td><center>Nota: si dejas 'Rango' vacio o en 0,<br1>se recompensa a todos los jugadores conectados.</center></td>
+		</tr>
+	</table>
+</center>
+</body></html>

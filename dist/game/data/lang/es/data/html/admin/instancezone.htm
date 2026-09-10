@@ -1,0 +1,43 @@
+<html><title>Menu de Mantenimiento de Instancia</title><body>
+<center>
+<table width=270><tr>
+<td width=45><button value="Inicio" action="bypass admin_admin" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+<td width=180><center>Menu de Creacion de Instancia</center></td>
+<td width=45><button value="Volver" action="bypass admin_admin7" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+</tr></table><br>
+<table width=260>
+<tr>
+<td><button value="General" action="bypass admin_html instancezone.htm" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+<td><button value="Individual" action="bypass admin_html instancezone2.htm" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+<td><button value="IDs de Plantilla" action="bypass admin_html help/instancezone_list.htm" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+</tr>
+</table><br>
+Ejemplo de Creacion:<br1>
+Instancia: [ 1 ] - Plantilla: [ demo.xml ]<br>
+<table width=260>
+<tr>
+<td></td>
+<td>Instancia</td>
+<td>Plantilla XML</td>
+</tr>
+<tr>
+<td><button value="Crear" action="bypass -h admin_createinstance $instanceid_create $templateid" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+<td><edit var="instanceid_create" width=50></td>
+<td><edit var="templateid" width=80></td>
+</tr>
+<tr><td><br></td></tr>
+<tr>
+<td><button value="Destruir" action="bypass -h admin_destroyinstance $instanceid_destroy $templateid" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+<td><edit var="instanceid_destroy" width=50></td>
+</tr>
+<tr><td><br></td></tr>
+<tr>
+<td><button value="Fijar" action="bypass -h admin_setinstance $instanceid_set $templateid" width="95" height="21" back="bigbutton_over" fore="bigbutton"></td>
+<td><edit var="instanceid_set" width=50></td>
+</tr>
+</table>
+<br><br>
+<button value="Listar Instancias" action="bypass -h admin_listinstances" width="95" height="21" back="bigbutton_over" fore="bigbutton"><br><br>
+<font color="LEVEL">IDs => 300000: reservados para instancias dinamicas!</font>
+</center>
+</body></html>

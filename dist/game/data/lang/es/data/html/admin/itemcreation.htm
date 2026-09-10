@@ -1,0 +1,40 @@
+<html><title>Items</title><body>
+<table width=270>
+<tr>
+<td width=45><button value="Inicio" action="bypass admin_admin" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+<td width=180><center>Menu de Creacion de Items</center></td>
+<td width=45><button value="Volver" action="bypass admin_admin" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+</tr>
+</table><br>
+<table width=260><tr><td>Completa el numero de ID en item-id para crear el item que quieras, usa cantidad si necesitas mas de uno. <font color="LEVEL">Cuidado: no uses cantidad con items no apilables</font></td></tr></table><br>
+<center>
+<table width=270>
+<tr>
+<td>ID de Item:</td>
+<td>Cantidad:</td>
+<td></td>
+</tr>
+<tr>
+<td><edit var="itemid" width=50></td>
+<td><edit var="itemnum" width=70 type=number></td>
+<td><button value="Crear" action="bypass -h admin_create_item $itemid $itemnum" width=95 height=21 back="bigbutton_over" fore="bigbutton"></td>
+</tr>
+<tr><td></td><td></td><td><button value="Dar al Objetivo" action="bypass -h admin_give_item_target $itemid $itemnum" width=95 height=21 back="bigbutton_over" fore="bigbutton"></td></tr>
+<tr><td></td><td></td><td><button value="Dar a Todos" action="bypass -h admin_give_item_to_all $itemid $itemnum" width=95 height=21 back="bigbutton_over" fore="bigbutton"></td></tr>
+</table><br><br>
+<table width=270 cellpadding="4">
+<tr>
+<td>Tipo de Moneda:</td>
+<td><combobox width=95 height=17 var=ebox list=Adena;AncientAdena;FestivalAdena;BlueEva;GoldEinhasad;SilverShilen;BloodyPaagrio></td>
+</tr>
+<tr>
+<td>Cantidad:</td>
+<td><edit var="vbox" width=95 height=12 type=number></td>
+</tr>
+<tr>
+<td></td>
+<td><button value="Crear Moneda" action="bypass -h admin_create_coin $ebox $vbox" width=95 height=21 back="bigbutton_over" fore="bigbutton"></td>
+</tr>
+</table>
+</center>
+</body></html>

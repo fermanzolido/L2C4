@@ -1,0 +1,69 @@
+<html><body>
+<center>Informacion de los Clanes que Ofertan en la Subasta</center>
+<img src="L2UI.SquareWhite" width=270 height=1>
+<img src="L2UI.SquareBlank" width=1 height=3>
+<table width=280 border=0>
+<tr>
+<td width=14><font color="a2a0a2">Nombre del clan hall</font></td>
+<td width=140><font color="b09979">%AGIT_NAME%</font></td>
+</tr>
+<tr>
+<td><font color="a2a0a2">Clan dueno</font></td>
+<td><font color="b09979">%OWNER_PLEDGE_NAME%</font></td>
+</tr>
+<tr>
+<td><font color="a2a0a2">Lider del clan</font></td>
+<td><font color="b09979">%OWNER_PLEDGE_MASTER%</font></td>
+</tr>
+<tr>
+<td><font color="a2a0a2">Tamano del clan hall</font></td>
+<td><font color="b09979">%AGIT_SIZE% rating</font> (grado)</td>
+</tr>
+<tr>
+<td><font color="a2a0a2">Alquiler</font></td>
+<td><font color="b09979">%AGIT_LEASE%</font> adena<font color="LEVEL">/semana</font></td>
+</tr>
+<tr>
+<td><font color="a2a0a2">Ubicacion del clan hall</font></td>
+<td>%AGIT_LOCATION%</td>
+</tr>
+</table>
+<img src="L2UI.SquareGray" width=270 height=1>
+<img src="L2UI.SquareBlank" width=1 height=3>
+<table width=280 border=0>
+<tr>
+<td width=140><font color="a2a0a2">La subasta cierra el</font></td>
+<td width=140><font color="b09979">%AGIT_AUCTION_END%</font></td>
+</tr>
+<tr>
+<td><font color="a2a0a2">Tiempo restante</font></td>
+<td><font color="b09979">%AGIT_AUCTION_REMAIN%</font></td>
+</tr>
+<tr>
+<td><font color="a2a0a2">Oferta minima</font></td>
+<td><font color="b09979">%AGIT_AUCTION_MINBID%</font> adena</td>
+</tr>
+<tr>
+<td><font color="ccc0cc">Monto ofertado</font></td>
+<td><font color="aaccff">%AGIT_AUCTION_MYBID%</font> adena</td>
+</tr>
+</table>
+<table width=280 border=0 bgcolor=333333>
+<tr><td width=280>%AGIT_AUCTION_DESC%</td></tr>
+</table>
+<img src="L2UI.SquareBlank" width=270 height=10>
+<img src="L2UI.SquareWhite" width=270 height=1>
+<img src="L2UI.SquareBlank" width=270 height=5>
+<table width=270 border=0>
+<tr>
+<td width=110></td>
+<td width=80 align=center><button action="bypass -h npc_%objectId%_cancelBid" value="Cancelar" width=75 height=21 back="L2UI_ch3.Btn1_normalOn" fore="L2UI_ch3.Btn1_normal"></td>
+<td width=80 align=center><button action="bypass -h npc_%objectId%_bidlist" value="Ofertantes" width=75 height=21 back="L2UI_ch3.Btn1_normalOn" fore="L2UI_ch3.Btn1_normal"></td>
+</tr>
+<tr>
+<td width=110></td>
+<td width=80 align=center><button action="%AGIT_LINK_BACK%" value="Volver" width=75 height=21 back="L2UI_ch3.Btn1_normalOn" fore="L2UI_ch3.Btn1_normal"></td>
+<td width=80 align=center><button action="bypass -h npc_%objectId%_rebid" value="Reofertar" width=75 height=21 back="L2UI_ch3.Btn1_normalOn" fore="L2UI_ch3.Btn1_normal"></td>
+</tr>
+</table>
+</body></html>

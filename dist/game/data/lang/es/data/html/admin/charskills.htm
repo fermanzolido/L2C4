@@ -1,0 +1,48 @@
+<html><body>
+<table width=260>
+<tr>
+<td width=40><button value="Inicio" action="bypass admin_admin" width=40 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+<td width=180><center>Editor de Habilidades de Jugador/Clan</center></td>
+<td width=40><button value="Volver" action="bypass admin_character_info %name%" width=40 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+</tr></table>
+<br><br>
+<center>Editando <font color="LEVEL">%name%</font>
+<br>
+<table width=190>
+	<tr>
+		<td width=40>Clase:</td>
+		<td width=110><font color="LEVEL">%class%</font></td>
+		<td width=20>Niv:</td>
+		<td width=20><font color="LEVEL">%level%</font></td>
+	</tr>
+</table>
+<br>
+============ Jugador ============
+<br>
+<table width=190>
+<tr>
+	<td><button value="Agregar Hab." action="bypass admin_skill_list" width=95 height=21 back="bigbutton_over" fore="bigbutton"></td>
+	<td><button value="Quitar Hab." action="bypass -h admin_get_skills" width=95 height=21 back="bigbutton_over" fore="bigbutton"></td>
+</tr>
+<tr>
+	<td><button value="Borrar Hab." action="bypass admin_remove_skills 0" width=95 height=21 back="bigbutton_over" fore="bigbutton"></td>
+	<td><button value="Reiniciar Reuso" action="bypass admin_removereuse" width=95 height=21 back="bigbutton_over" fore="bigbutton"></td>
+</tr>
+<tr>
+	<td><button value="Dar Todas Hab." action="bypass -h admin_give_all_skills" width=95 height=21 back="bigbutton_over" fore="bigbutton"></td>
+	<td><button value="Devolver Hab." action="bypass -h admin_reset_skills" width=95 height=21 back="bigbutton_over" fore="bigbutton"></td>
+</tr>
+<tr>
+	<td><button value="Dar Todas Hab. FS" action="bypass -h admin_give_all_skills_fs" width=95 height=21 back="bigbutton_over" fore="bigbutton"></td>
+	<td><button value="Quitar Todas Hab." action="bypass -h admin_remove_all_skills" width=95 height=21 back="bigbutton_over" fore="bigbutton"></td>
+</tr>
+</table>
+<br>
+============ Clan ============
+<br>
+<table width=190>
+<tr>
+	<td><button value="Dar Hab. de Clan" action="bypass -h admin_give_clan_skills" width=95 height=21 back="bigbutton_over" fore="bigbutton"></td>
+	<td><button value="Dar Todas Hab. Clan" action="bypass -h admin_give_all_clan_skills" width=95 height=21 back="bigbutton_over" fore="bigbutton"></td>
+</tr>
+</table></center></body></html>

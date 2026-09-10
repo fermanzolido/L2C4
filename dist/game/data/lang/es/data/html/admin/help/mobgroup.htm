@@ -1,0 +1,36 @@
+<html><title>Menu de Control de Grupos de Monstruos</title><body>
+<center>
+<table width=260>
+<tr>
+<td width=40><button value="Inicio" action="bypass admin_admin" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+<td width=180><center><font color="LEVEL"><a action="bypass admin_help">Menu de Ayuda</a></font></center></td>
+<td width=40><button value="Volver" action="bypass admin_mobmenu" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+</tr>
+</table><br>
+</center>
+<font color="LEVEL">//mobgroup_create</font> [groupId] [npcId] [number]<br>
+Crea un grupo con [number] mobs del tipo [npcId], en el grupo [groupId].<br>
+Este comando no tiene efecto visual, y los miembros de este grupo tienen que ser spawneados para activarse.<br><br>
+<font color="LEVEL">//mobgroup_remove</font> [groupId]<br>
+Elimina/borra el grupo [groupId], y como consecuencia despawnea a todos los miembros del grupo que sigan vivos.<br><br>
+<font color="LEVEL">//mobgroup_spawn</font> [groupId] [locx] [locy] [locz]<br>
+Spawnea a los miembros del grupo [groupId]. Si no se especifica una ubicacion, el grupo va a aparecer alrededor del GM.<br>
+Por defecto, los mobs quedan inactivos, a la espera de mas comandos.<br>
+<font color="LEVEL">//mobgroup_unspawn</font> [groupId]<br>
+Despawnea a los miembros del grupo [groupId]. El grupo no se borra y se puede invocar de nuevo usando //mobgroup_spawn.<br>
+<font color="LEVEL">//mobgroup_list</font> ([groupId])<br>
+Lista todos los grupos de monstruos creados. Si se especifica [groupId], se muestra una lista de los miembros de ese grupo.<br>
+<img src="L2UI.SquareGray" width="200" height="1"><br>
+<font color="999999">Otros Comandos</font><br>
+<font color="LEVEL">//mobgroup_follow</font> [groupId] - El grupo [groupId] va a seguir al GM.<br>
+<font color="LEVEL">//mobgroup_return</font> [groupId] - El grupo [groupId] va a volver hacia el GM.<br>
+<font color="LEVEL">//mobgroup_teleport</font> [groupId] ([playerName]) - El grupo [groupId] va a ser teletransportado hacia el jugador especificado (o el GM si no se especifico ninguno) y lo va a seguir.<br>
+<font color="LEVEL">//mobgroup_attack</font> [groupId] - El grupo [groupId] va a atacar al objetivo actual del GM (si tiene alguno).<br>
+<font color="LEVEL">//mobgroup_rnd</font> [groupId] - El grupo [groupId] va a atacar objetivos elegidos al azar.<br>
+<font color="LEVEL">//mobgroup_attackgrp</font> [groupId1] [groupId2] - El grupo [groupId1] va a atacar a los miembros de [groupId2].<br>
+<font color="LEVEL">//mobgroup_casting</font> [groupId] - Los mobs del grupo [groupId] solo van a usar sus habilidades para atacar.<br>
+<font color="LEVEL">//mobgroup_nomove</font> [groupId] [on/off] - Activa o desactiva que los mobs del grupo [groupId] dejen de moverse. Interesante para usar con el modo de solo casteo.<br>
+<font color="LEVEL">//mobgroup_invul</font> [groupId] [on/off] - Activa o desactiva que los mobs del grupo [groupId] sean invulnerables.<br>
+<font color="LEVEL">//mobgroup_idle</font> [groupId] - Devuelve a los mobs del grupo [groupId] a un estado inactivo (de espera).<br>
+<font color="LEVEL">//mobgroup_kill</font> [groupId] - Mata a todos los mobs vivos del grupo [groupId].
+</body></html>

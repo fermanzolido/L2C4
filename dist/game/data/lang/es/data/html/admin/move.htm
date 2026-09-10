@@ -1,0 +1,45 @@
+<html><title>Menu de Teletransporte</title><body>
+<table width=270>
+<tr>
+<td width=45><button value="Inicio" action="bypass admin_admin" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+<td width=180><center>Menu de Teletransporte</center></td>
+<td width=45><button value="Volver" action="bypass admin_show_moves" width=45 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+</tr>
+</table><br>
+<center><table><tr>
+<td><button value="  " action="bypass -h admin_tele" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Norte" action="bypass -h admin_gonorth $offset" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Arriba" action="bypass -h admin_goup $offset" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td></tr><tr>
+<td><button value="Oeste" action="bypass -h admin_gowest $offset" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><edit var="offset" width=65></td>
+<td><button value="Este" action="bypass -h admin_goeast $offset" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td></tr><tr>
+<td><button value="  " action="bypass -h admin_tele" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Sur" action="bypass -h admin_gosouth $offset" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Abajo" action="bypass -h admin_godown $offset" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td></tr></table><br><br>
+<br><br>
+<table width=270><tr>
+<td>Mover:</td>
+<td><button value="Normal" action="bypass -h admin_teleto end" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Demoniaco" action="bypass -h admin_teleto r" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td></tr></table>
+<br><br>
+<table width=270><tr>
+<td>Velocidad GM:</td>
+<td><button value="1" action="bypass -h admin_superhaste 1" width=25 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+<td><button value="2" action="bypass -h admin_superhaste 2" width=25 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+<td><button value="3" action="bypass -h admin_superhaste 3" width=25 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+<td><button value="4" action="bypass -h admin_superhaste 4" width=25 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+<td><button value="OFF" action="bypass -h admin_superhaste 0" width=25 height=15 back="sek.cbui94" fore="sek.cbui92"></td>
+</tr></table><br><br>
+Mover a las Coordenadas dadas:<br1>
+<table width=270><tr>
+<td>X:</td><td><edit var="char_cord_x" width=50></td>
+<td>Y:</td><td><edit var="char_cord_y" width=50></td>
+<td>Z:</td><td><edit var="char_cord_z" width=50></td>
+</tr>
+</table><br>
+<table width=130><tr>
+<td><button value="Tele" action="bypass -h admin_move_to $char_cord_x $char_cord_y $char_cord_z" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+<td><button value="Caminar" action="bypass -h admin_walk $char_cord_x $char_cord_y $char_cord_z" width=65 height=21 back="L2UI_ch3.smallbutton2_over" fore="L2UI_ch3.smallbutton2"></td>
+</tr></table>
+</center>
+</body></html>
