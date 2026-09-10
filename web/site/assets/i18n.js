@@ -198,11 +198,12 @@
     'howto.1.head': 'Create your account here',
     'howto.1.body':
       'This is the only place accounts are made: the server does not create one for you at login. ' +
-      'A name of 4 to 14 characters, letters and numbers; a password of 8 to 16 — the C4 ' +
+      'A name of 4 to 14 characters, letters and numbers; a password of 8 to 16 — the Interlude ' +
       'client’s own field will not take more than 16.',
-    'howto.2.head': 'Get a Chronicle 4 client',
+    'howto.2.head': 'Get an Interlude client',
     'howto.2.body':
-      'Scions of Destiny. The server accepts protocol revisions 656, 660 and 746.',
+      'The server runs Chronicle 4 content (Scions of Destiny), but uses the Interlude client for ' +
+      'performance. Accepted protocol revisions: 656, 660 and 746.',
     'howto.3.head': 'Point the client at the server',
     'howto.3.body': 'Open <code>system/l2.ini</code> and leave the line like this:',
     'howto.4.head': 'Log in',
@@ -210,8 +211,8 @@
       'With the account name and password from step 1. Your game account is ready a few seconds ' +
       'after you register; your account page confirms it.',
     'howto.dl.title': 'Downloads',
-    'howto.dl.client': 'Chronicle 4 client',
-    'howto.dl.client.note': 'The full game, Scions of Destiny. Installed once.',
+    'howto.dl.client': 'Interlude client',
+    'howto.dl.client.note': 'The full client. Installed once.',
     'howto.dl.patch': 'L2C4 patch',
     'howto.dl.patch.note': 'The files that go over the client to play on this server.',
     'howto.cmd.title': 'In-game commands',
