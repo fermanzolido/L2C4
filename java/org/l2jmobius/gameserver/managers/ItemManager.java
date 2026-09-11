@@ -182,10 +182,17 @@ public class ItemManager
 			item.setOwnerId(0);
 			item.setItemLocation(ItemLocation.VOID);
 			item.setLastChange(Item.REMOVED);
-			
+
+			// Persist the deletion while _existsInDb still reflects reality. reset() (below)
+			// clears _existsInDb to prep the instance for pooling/reuse; if it ran first,
+			// updateDatabase() would see _existsInDb == false and skip the DELETE entirely,
+			// leaving the row in place so the "destroyed" item comes back on the next load
+			// from DB (e.g. a multisell exchange that reverts itself on relog).
+			item.updateDatabase();
+
 			World.getInstance().removeObject(item);
 			IdManager.getInstance().releaseId(item.getObjectId());
-			
+
 			item.reset();
 			ItemPool.getInstance().addItem(item);
 
